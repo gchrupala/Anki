@@ -1,10 +1,13 @@
 <!doctype html>
-<html lang="pl">
+<html lang="pl" translate="no">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MnożenieMax</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<!-- The app has its own languages: stop Chrome offering to translate it. Its
+     translation banner covers the top of the screen, including the parent button. -->
+<meta name="google" content="notranslate">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -638,6 +641,7 @@
         <button type="button" class="ghost-btn" id="reload-app" data-t="reloadButton">Reload from the server</button>
       </div>
       <p class="hint" id="reload-status" data-t="reloadHint" style="margin-top:0.6rem">Progress is kept.</p>
+      <p class="hint" id="last-error" hidden></p>
     </section>
 
     <section>
@@ -674,6 +678,19 @@
   const SETTINGS_LAYOUT = 2;
 
   const $ = (id) => document.getElementById(id);
+
+  // The last error in the page, shown in the parent panel to help find problems.
+  let lastError = '';
+  function noteError(e) {
+    lastError = String((e && (e.message || e.reason)) || e);
+    const el = $('last-error');
+    if (el) {
+      el.textContent = ((I18N.STRINGS[document.documentElement.lang] || I18N.STRINGS.en).lastError || 'Error:') + ' ' + lastError;
+      el.hidden = false;
+    }
+  }
+  window.addEventListener('error', (e) => noteError(e.error || e.message));
+  window.addEventListener('unhandledrejection', (e) => noteError(e.reason));
   const range = (n) => Array.from({ length: n }, (_, i) => i + 1);
   const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => '&#' + ch.charCodeAt(0) + ';');
 
@@ -732,7 +749,8 @@
   const today = () => SRS.dayIndex(now(), ROLLOVER);
   const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention });
   const lang = () => (I18N.STRINGS[state.settings.lang] ? state.settings.lang : I18N.DEFAULT);
-  const T = () => I18N.STRINGS[lang()];
+  // English fills in any text a language lacks, so a missing entry can't break the page.
+  const T = () => ({ ...I18N.STRINGS.en, ...I18N.STRINGS[lang()] });
 
   function daily() {
     if (!state.daily || state.daily.day !== today()) {
@@ -1144,9 +1162,15 @@
     $('update-section').hidden = inAndroidApp;
   }
 
+  // Open the panel first, so it opens even if filling it in fails: it is the
+  // only way to change the language or reload the app.
   $('open-settings').addEventListener('click', () => {
-    syncSettings();
-    dialog.showModal();
+    if (!dialog.open) dialog.showModal();
+    try {
+      syncSettings();
+    } catch (e) {
+      noteError(e);
+    }
   });
   $('close-settings').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => {
