@@ -85,7 +85,7 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     public void onBackPressed() {
         webView.evaluateJavascript(
-                "(function(){var d=document.querySelector('dialog[open]');if(d){d.close();return true}return false})()",
+                "window.closeParentPanel ? window.closeParentPanel() : false",
                 closed -> {
                     if (!"true".equals(closed)) MainActivity.super.onBackPressed();
                 });

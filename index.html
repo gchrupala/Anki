@@ -417,19 +417,36 @@
   .legend b { font-variant-numeric: tabular-nums; min-width: 2ch; display: inline-block; text-align: right; }
   .today { margin: 0; font-size: 0.85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
-  /* Settings dialog */
-  dialog {
-    width: min(34rem, calc(100% - 32px));
-    max-height: calc(100% - 32px);
-    padding: 0;
+  /* Parent panel: a plain overlay shown and hidden by the app (not <dialog>,
+     whose pop-up layer froze the page on the tablet when it did not show). */
+  .panel {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--scrim);
+    padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .sheet {
+    width: min(34rem, 100%);
+    padding: 1.4rem 1.4rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
     border: 1px solid var(--line);
     border-radius: 14px;
     background: var(--card);
     color: var(--ink);
     box-shadow: var(--shadow);
   }
-  dialog::backdrop { background: var(--scrim); }
-  .sheet { padding: 1.4rem 1.4rem 1.2rem; display: flex; flex-direction: column; gap: 1.3rem; }
+  .sheet:focus { outline: none; }
+  body.panel-open { overflow: hidden; }
   .sheet h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; }
   .sheet h3 {
     margin: 0 0 0.5rem;
@@ -556,12 +573,13 @@
         <li><span class="sw cell is-mature"></span><b id="n-mature">0</b> <span data-t="legendMature">mastered (3+ weeks)</span></li>
       </ul>
       <p class="today" id="today"></p>
+      <p class="today" id="page-error" hidden></p>
     </aside>
   </main>
 </div>
 
-<dialog id="settings" aria-labelledby="settings-title">
-  <div class="sheet">
+<div class="panel" id="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+  <div class="sheet" id="settings-sheet" tabindex="-1">
     <h2 id="settings-title" data-t="settingsTitle">For grown-ups</h2>
 
     <section>
@@ -654,7 +672,7 @@
       <button type="button" class="primary-btn" id="close-settings" data-t="close">Done</button>
     </div>
   </div>
-</dialog>
+</div>
 
 <script src="srs.js"></script>
 <script src="i18n.js"></script>
@@ -683,10 +701,13 @@
   let lastError = '';
   function noteError(e) {
     lastError = String((e && (e.message || e.reason)) || e);
-    const el = $('last-error');
-    if (el) {
-      el.textContent = ((I18N.STRINGS[document.documentElement.lang] || I18N.STRINGS.en).lastError || 'Error:') + ' ' + lastError;
-      el.hidden = false;
+    const label = (I18N.STRINGS[document.documentElement.lang] || I18N.STRINGS.en).lastError || 'Error:';
+    for (const id of ['last-error', 'page-error']) {
+      const el = $(id);
+      if (el) {
+        el.textContent = label + ' ' + lastError;
+        el.hidden = false;
+      }
     }
   }
   window.addEventListener('error', (e) => noteError(e.error || e.message));
@@ -1114,7 +1135,8 @@
 
   // ---------- settings ----------
 
-  const dialog = $('settings');
+  const panel = $('settings');
+  const panelOpen = () => !panel.hidden;
 
   function buildChips() {
     const fill = (wrap, numbers) => {
@@ -1164,19 +1186,39 @@
 
   // Open the panel first, so it opens even if filling it in fails: it is the
   // only way to change the language or reload the app.
-  $('open-settings').addEventListener('click', () => {
-    if (!dialog.open) dialog.showModal();
+  // Opening the panel adds a step to the page history, so Android's Back
+  // gesture closes the panel instead of leaving the app.
+  function openPanel() {
+    if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
+    panel.hidden = false;
+    document.body.classList.add('panel-open');
+    $('settings-sheet').focus({ preventScroll: true });
     try {
       syncSettings();
     } catch (e) {
       noteError(e);
     }
-  });
-  $('close-settings').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('close', () => {
+  }
+
+  function closePanel() {
+    if (!panelOpen()) return false;
+    panel.hidden = true;
+    document.body.classList.remove('panel-open');
     $('open-settings').blur();
     if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
     else render();
+    if (history.state && history.state.panel) history.back();
+    return true;
+  }
+  window.addEventListener('popstate', closePanel);
+  // The Android app's Back button calls this.
+  window.closeParentPanel = closePanel;
+
+  $('open-settings').addEventListener('click', openPanel);
+  $('close-settings').addEventListener('click', closePanel);
+  // A tap on the dimmed area around the panel closes it.
+  panel.addEventListener('click', (e) => {
+    if (e.target === panel) closePanel();
   });
 
   $('lang').addEventListener('change', (e) => {
@@ -1345,7 +1387,11 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (dialog.open || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (panelOpen()) {
+      if (e.key === 'Escape') closePanel();
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
     const t = e.target;
     if (t.closest && t.closest('input, textarea, select')) return;
     let key = null;
