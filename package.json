@@ -1,0 +1,9 @@
+{
+  "name": "times-table-cards",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser flash cards for the times tables, scheduled with Anki's SM-2 algorithm",
+  "scripts": {
+    "test": "node --test"
+  }
+}
