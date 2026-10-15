@@ -591,7 +591,7 @@
         <tr><td>Right</td><td>Good</td></tr>
         <tr><td>Right within 4 s</td><td>Easy, but only on a first showing or a review, not during the 1- and 10-minute steps</td></tr>
       </table>
-      <p style="margin-top:0.6rem">A new fact comes back after 1 and 10 minutes, then a few days later. Each time it is remembered the gap grows, faster for facts your child finds easy. New facts are introduced table by table, in a random order within each table.</p>
+      <p style="margin-top:0.6rem">A new fact comes back after 1 and 10 minutes, then a few days later. Each time it is remembered the gap grows, faster for facts your child finds easy. New facts from all the selected tables are introduced in a random order.</p>
     </section>
 
     <section>
@@ -631,8 +631,6 @@
 
   const DAY = 24 * 60 * SRS.MINUTE;
   const ROLLOVER = SRS.DEFAULTS.rolloverHour;
-  // Easier tables first, a common order in schools.
-  const TABLE_ORDER = [1, 2, 10, 5, 3, 4, 9, 6, 8, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
   const STORE_KEY = 'times-table-cards-v2';
   const MATURE_DAYS = 21; // Anki calls a card "mature" from 21 days
   const IDLE_SUBMIT_MS = 3000; // check a shorter answer after this pause
@@ -688,29 +686,24 @@
     return state.daily;
   }
 
-  // Each card gets a random number once, which fixes its place among the new
-  // cards of its table.
+  // Each card gets a random number once, which fixes its place in the order
+  // new cards are introduced.
   function card(a, b) {
     const id = a + 'x' + b;
     if (!state.cards[id]) state.cards[id] = { ...SRS.newCard(id), a, b, seed: Math.random() };
     return state.cards[id];
   }
 
-  // Facts in the selected tables, in the order new ones are introduced:
-  // table by table, in random order within a table.
+  // Facts in the selected tables, in the (random) order new ones are introduced.
   function activeCards() {
-    const size = state.settings.size;
-    const rank = new Map();
-    TABLE_ORDER.filter((t) => t <= size && state.settings.tables.includes(t)).forEach((t, i) => rank.set(t, i));
+    const { size, tables } = state.settings;
     const list = [];
     for (let a = 1; a <= size; a++) {
       for (let b = 1; b <= size; b++) {
-        const r = Math.min(rank.has(a) ? rank.get(a) : Infinity, rank.has(b) ? rank.get(b) : Infinity);
-        if (r !== Infinity) list.push({ c: card(a, b), r });
+        if (tables.includes(a) || tables.includes(b)) list.push(card(a, b));
       }
     }
-    list.sort((x, y) => x.r - y.r || x.c.seed - y.c.seed);
-    return list.map((x) => x.c);
+    return list.sort((x, y) => x.seed - y.seed);
   }
 
   function newLeft() {

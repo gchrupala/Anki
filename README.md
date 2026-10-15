@@ -41,7 +41,7 @@ After a wrong answer the app shows the right one, and the child types it to cont
 
 ### Order of cards
 
-- At most 10 new facts are introduced per day (adjustable). Tables are introduced in the order ×1, ×2, ×10, ×5, ×3, ×4, ×9, ×6, ×8, ×7, then ×11 and up. The facts within a table are introduced in a random order.
+- At most 10 new facts are introduced per day (adjustable). They are picked in a random order from all the selected tables, so easy facts such as 1 × 4 and harder ones such as 7 × 8 are mixed from the first day. To focus on particular tables, switch the others off in the "Grown-ups" panel.
 - Cards that are due in their learning steps come first. Otherwise the next card is drawn at random from today's reviews and new cards.
 - The card just answered and its twin (7 × 3 after 3 × 7) are not shown next unless nothing else is left.
 
