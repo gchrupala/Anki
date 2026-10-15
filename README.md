@@ -12,6 +12,21 @@ Run the scheduler tests with Node 18 or later:
 npm test
 ```
 
+## Installing on a tablet
+
+The app can be installed as a home-screen app (a "progressive web app"). It then opens full screen, without the browser bars, and works without internet after the first visit.
+
+This needs the files on an https web address, for example GitHub Pages (repository Settings → Pages → Deploy from a branch → `main`, `/ (root)`). GitHub Pages for a private repository needs a paid GitHub plan; Netlify and Cloudflare Pages can serve a private repository for free.
+
+Then, on the tablet:
+
+- **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
+- **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
+
+The home-screen name is "Tabliczka". Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+
+The offline copy is kept by `sw.js` (a service worker). It loads the app files from the network first, so a new version appears the next time the app is opened online; without internet it uses the stored copy. Opening `index.html` as a local file still works, but without the offline copy or installation.
+
 ## Languages
 
 The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Dla dorosłych" in Polish). The Polish version writes multiplication with a centred dot (7 · 8), as Polish schools do; the others use ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
@@ -78,5 +93,6 @@ The progress square shows each fact: not started, practising (in the learning st
 
 - `index.html`: the app (layout, styles and interface code).
 - `i18n.js`: the interface text in Polish, English, Dutch and Spanish.
+- `manifest.webmanifest`, `sw.js`, `icons/`: what makes the app installable and usable offline. `icons/icon.svg` is the source of the PNG icons.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
 - `tests/`: scheduler tests and the py-fsrs reference data.
