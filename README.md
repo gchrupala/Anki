@@ -4,6 +4,8 @@ A prototype browser app that teaches the multiplication tables with flash cards.
 
 ## Running it
 
+The app is published with GitHub Pages at https://grzegorz.chrupala.me/Anki/ (https://gchrupala.github.io/Anki/ redirects there).
+
 Open `index.html` in a browser. There is no build step and no server is needed.
 
 Run the scheduler tests with Node 18 or later:
