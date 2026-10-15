@@ -72,7 +72,7 @@ The interface is in Polish by default. English, Dutch and Spanish can be chosen 
 
 ## How it works
 
-Each fact, such as 7 × 8, is one card. 3 × 7 and 7 × 3 are separate cards. The tables go up to 12 × 12 by default (144 cards). They can be set to 10 × 10, 15 × 15 or 20 × 20.
+Each fact, such as 7 × 8, is one card. 3 × 7 and 7 × 3 are separate cards. The tables go up to 12 × 12 (or 10 × 10). On top of that, extra numbers can be chosen, by default 15, 20 and 25. Each extra number is practised only with the numbers 1 to 12: there is 15 × 7 and 7 × 15, but no 12 × 14 and no 15 × 20. With the defaults that makes 216 cards (144 + 3 × 24).
 
 The child types the answer on the on-screen keypad or the keyboard. The answer is checked as soon as it has as many digits as the right answer. A shorter answer is checked after 3 seconds without typing, or when the child presses OK. The app then picks one of the four Anki ratings on the child's behalf:
 
@@ -109,7 +109,7 @@ The settings panel ("Grown-ups" in English) lets you:
 
 - choose the language;
 
-- choose the size of the table and which tables to practise;
+- choose the size of the table (10 × 10 or 12 × 12), which tables to practise and which extra numbers to add (13 to 20, and 25);
 - change the number of new facts per day and the target recall;
 - move the app clock ahead by a day, to see how reviews come back;
 - copy the review log as CSV.

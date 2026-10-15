@@ -572,14 +572,18 @@
       <div class="chips" id="size-chips">
         <label class="chip"><input type="radio" name="size" id="size-10" value="10"><span class="size-label" data-n="10">10 × 10</span></label>
         <label class="chip"><input type="radio" name="size" id="size-12" value="12"><span class="size-label" data-n="12">12 × 12</span></label>
-        <label class="chip"><input type="radio" name="size" id="size-15" value="15"><span class="size-label" data-n="15">15 × 15</span></label>
-        <label class="chip"><input type="radio" name="size" id="size-20" value="20"><span class="size-label" data-n="20">20 × 20</span></label>
       </div>
     </section>
 
     <section>
       <h3 data-t="tablesTitle">Tables to practise</h3>
       <div class="chips" id="table-chips"></div>
+    </section>
+
+    <section>
+      <h3 data-t="extrasTitle">Extra numbers</h3>
+      <p class="hint" id="extras-hint"></p>
+      <div class="chips" id="extra-chips"></div>
     </section>
 
     <section class="fields">
@@ -653,6 +657,11 @@
   const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
   const PRAISE = { [SRS.EASY]: 'easy', [SRS.GOOD]: 'good', [SRS.HARD]: 'hard' };
 
+  // Extra numbers practised by default, each times 1 to 12 (not with each other).
+  const DEFAULT_EXTRAS = [15, 20, 25];
+  // Version of the settings layout; 2 added the extra numbers.
+  const SETTINGS_LAYOUT = 2;
+
   const $ = (id) => document.getElementById(id);
   const range = (n) => Array.from({ length: n }, (_, i) => i + 1);
   const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => '&#' + ch.charCodeAt(0) + ';');
@@ -662,7 +671,14 @@
   function defaultState() {
     return {
       cards: {},
-      settings: { size: 12, tables: range(12), newPerDay: 10, retention: 0.9, lang: I18N.DEFAULT },
+      settings: {
+        size: 12,
+        tables: range(12).concat(DEFAULT_EXTRAS),
+        newPerDay: 10,
+        retention: 0.9,
+        lang: I18N.DEFAULT,
+        layout: SETTINGS_LAYOUT,
+      },
       daily: null,
       clockOffset: 0,
       // One entry per answer: [time, card id, rating, state before, ms, typed answer].
@@ -676,6 +692,14 @@
       if (!raw) return null;
       const s = JSON.parse(raw);
       if (!s || !s.cards || !s.settings) return null;
+      if (!s.settings.layout) {
+        // Earlier versions had square tables up to 20 × 20. Keep the tables
+        // up to 12 and add the default extra numbers. Progress is kept.
+        const size = Math.min(12, s.settings.size || 12);
+        s.settings.tables = (s.settings.tables || []).filter((n) => n <= size).concat(DEFAULT_EXTRAS);
+        s.settings.size = size;
+        s.settings.layout = SETTINGS_LAYOUT;
+      }
       const d = defaultState();
       return { ...d, ...s, settings: { ...d.settings, ...s.settings } };
     } catch (e) {
@@ -714,13 +738,33 @@
     return state.cards[id];
   }
 
-  // Facts in the selected tables, in the (random) order new ones are introduced.
-  function activeCards() {
+  // Numbers that can be added on top of the 10 × 10 or 12 × 12 table.
+  function extraChoices() {
+    return range(20).filter((n) => n > state.settings.size).concat(25);
+  }
+
+  // The numbers along the edges of the progress square: 1 to size, then the
+  // chosen extra numbers.
+  function factors() {
+    const { tables } = state.settings;
+    return range(state.settings.size).concat(extraChoices().filter((n) => tables.includes(n)));
+  }
+
+  // A fact a × b takes part when one number is a chosen table or extra number
+  // and the other runs from 1 to size. So with tables up to 12 and the extra
+  // number 15 there is 15 × 7 and 7 × 15, but no 12 × 14 and no 15 × 20.
+  function isActive(a, b) {
     const { size, tables } = state.settings;
+    const chosen = (n) => tables.includes(n) && (n <= size || extraChoices().includes(n));
+    return (chosen(a) && b <= size) || (chosen(b) && a <= size);
+  }
+
+  // The facts that take part, in the (random) order new ones are introduced.
+  function activeCards() {
     const list = [];
-    for (let a = 1; a <= size; a++) {
-      for (let b = 1; b <= size; b++) {
-        if (tables.includes(a) || tables.includes(b)) list.push(card(a, b));
+    for (const a of factors()) {
+      for (const b of factors()) {
+        if (isActive(a, b)) list.push(card(a, b));
       }
     }
     return list.sort((x, y) => x.seed - y.seed);
@@ -886,8 +930,9 @@
 
   function buildSquare() {
     const size = state.settings.size;
+    const edge = factors();
     square.textContent = '';
-    square.style.setProperty('--cols', size + 1);
+    square.style.setProperty('--cols', edge.length + 1);
     cells = {};
     const add = (cls, text) => {
       const el = document.createElement('div');
@@ -897,10 +942,14 @@
       return el;
     };
     add('corner', T().op);
-    for (let b = 1; b <= size; b++) add('hd', b);
-    for (let a = 1; a <= size; a++) {
+    for (const b of edge) add('hd', b);
+    for (const a of edge) {
       add('hd', a);
-      for (let b = 1; b <= size; b++) cells[a + 'x' + b] = add('cell', '');
+      for (const b of edge) {
+        // Two extra numbers are not multiplied together: leave a gap.
+        if (a <= size || b <= size) cells[a + 'x' + b] = add('cell', '');
+        else add('gap', '');
+      }
     }
   }
 
@@ -912,27 +961,24 @@
 
   function renderSquare() {
     const t = T();
-    const size = state.settings.size;
     const active = new Set(activeCards().map((c) => c.id));
     const n = { new: 0, learning: 0, young: 0, mature: 0 };
-    for (let a = 1; a <= size; a++) {
-      for (let b = 1; b <= size; b++) {
-        const c = card(a, b);
-        const el = cells[c.id];
-        const s = stage(c);
-        const on = active.has(c.id);
-        if (on) n[s] += 1;
-        el.className = 'cell' +
-          (s === 'new' ? '' : ' is-' + s) +
-          (on ? '' : ' is-off') +
-          (c.id === currentId ? ' is-current' : '');
-        let tip;
-        if (!on) tip = t.tipOff;
-        else if (s === 'new') tip = t.tipNew;
-        else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
-        else tip = t.tipReview(whenText(c.due));
-        el.title = fact(a, b) + ': ' + tip;
-      }
+    for (const [id, el] of Object.entries(cells)) {
+      const [a, b] = id.split('x').map(Number);
+      const c = card(a, b);
+      const s = stage(c);
+      const on = active.has(c.id);
+      if (on) n[s] += 1;
+      el.className = 'cell' +
+        (s === 'new' ? '' : ' is-' + s) +
+        (on ? '' : ' is-off') +
+        (c.id === currentId ? ' is-current' : '');
+      let tip;
+      if (!on) tip = t.tipOff;
+      else if (s === 'new') tip = t.tipNew;
+      else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
+      else tip = t.tipReview(whenText(c.due));
+      el.title = fact(a, b) + ': ' + tip;
     }
     $('n-new').textContent = n.new;
     $('n-learning').textContent = n.learning;
@@ -1042,14 +1088,17 @@
   const dialog = $('settings');
 
   function buildChips() {
-    const wrap = $('table-chips');
-    wrap.textContent = '';
-    for (let n = 1; n <= state.settings.size; n++) {
-      const label = document.createElement('label');
-      label.className = 'chip';
-      label.innerHTML = '<input type="checkbox" id="table-' + n + '" value="' + n + '"><span>' + T().tableChip(n) + '</span>';
-      wrap.appendChild(label);
-    }
+    const fill = (wrap, numbers) => {
+      wrap.textContent = '';
+      for (const n of numbers) {
+        const label = document.createElement('label');
+        label.className = 'chip';
+        label.innerHTML = '<input type="checkbox" id="table-' + n + '" value="' + n + '"><span>' + T().tableChip(n) + '</span>';
+        wrap.appendChild(label);
+      }
+    };
+    fill($('table-chips'), range(state.settings.size));
+    fill($('extra-chips'), extraChoices());
   }
 
   function buildLanguageMenu() {
@@ -1067,7 +1116,8 @@
     const s = state.settings;
     $('lang').value = lang();
     $('size-' + s.size).checked = true;
-    for (let n = 1; n <= s.size; n++) $('table-' + n).checked = s.tables.includes(n);
+    for (const n of range(s.size).concat(extraChoices())) $('table-' + n).checked = s.tables.includes(n);
+    $('extras-hint').textContent = t.extrasHint(s.size);
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     const ahead = Math.round(state.clockOffset / DAY);
@@ -1099,26 +1149,34 @@
     render();
   });
 
+  // Going from 10 to 12 adds the tables of 11 and 12; going back removes them.
   $('size-chips').addEventListener('change', (e) => {
     const s = state.settings;
     const size = Number(e.target.value);
-    for (let n = s.size + 1; n <= size; n++) if (!s.tables.includes(n)) s.tables.push(n);
-    s.tables.sort((x, y) => x - y);
+    const set = new Set(s.tables);
+    for (let n = s.size + 1; n <= size; n++) set.add(n);
+    for (let n = size + 1; n <= s.size; n++) set.delete(n);
+    s.tables = [...set].sort((x, y) => x - y);
     s.size = size;
     save();
     buildChips();
     buildSquare();
+    renderSquare();
     syncSettings();
   });
 
-  $('table-chips').addEventListener('change', (e) => {
+  function toggleTable(e) {
     const n = Number(e.target.value);
     const set = new Set(state.settings.tables);
     if (e.target.checked) set.add(n);
     else set.delete(n);
     state.settings.tables = [...set].sort((x, y) => x - y);
     save();
-  });
+    buildSquare();
+    renderSquare();
+  }
+  $('table-chips').addEventListener('change', toggleTable);
+  $('extra-chips').addEventListener('change', toggleTable);
 
   $('new-per-day').addEventListener('change', (e) => {
     const v = Math.round(Number(e.target.value));
