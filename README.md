@@ -27,6 +27,43 @@ The home-screen name is "Tabliczka". Progress is stored on the tablet only, sepa
 
 The offline copy is kept by `sw.js` (a service worker). It loads the app files from the network first, so a new version appears the next time the app is opened online; without internet it uses the stored copy. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
+## Android app
+
+`android/` builds an Android app (an APK) that contains the web app. It runs without internet and does not depend on Chrome, so Google Family Link treats it like any other app: it can have its own daily time limit, or be marked "Always allowed".
+
+### Installing on a tablet with Family Link
+
+1. In the Family Link app on the parent's phone, open the child's profile, then the tablet under the signed-in devices, and turn on "Apps from unknown sources". The exact place of this setting differs between Family Link versions.
+2. Copy the APK to the tablet, for example through Google Drive, and open it there to install it.
+3. Turn "Apps from unknown sources" off again.
+4. In Family Link, set a limit for "Tabliczka" under the app limits.
+
+To update, install a newer APK over the old one. Progress is kept, but only if the new APK is signed with the same key as the old one. An APK signed with another key can only be installed after uninstalling the old app, which erases the progress.
+
+### Building the APK
+
+This needs JDK 17 or later and the Android SDK with platform 35 and build-tools 35, with `ANDROID_HOME` pointing to the SDK.
+
+```
+cd android
+./gradlew assembleRelease
+```
+
+The APK is written to `android/app/build/outputs/apk/release/app-release.apk`. Its version number is the number of commits in the repository, so each new commit gives a higher version.
+
+The signing key is not in the repository. To sign the APK, create `android/keystore.properties` (ignored by git):
+
+```
+storeFile=/path/to/tabliczka-release.jks
+storePassword=...
+keyAlias=tabliczka
+keyPassword=...
+```
+
+Without this file the APK is built unsigned, and Android will not install it.
+
+`MainActivity.java` shows the bundled files in Android's web view, under the address `https://appassets.androidplatform.net/`. Progress is saved in the app's own storage, separately from any browser.
+
 ## Languages
 
 The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Dla dorosłych" in Polish). The Polish version writes multiplication with a centred dot (7 · 8), as Polish schools do; the others use ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
@@ -93,6 +130,8 @@ The progress square shows each fact: not started, practising (in the learning st
 
 - `index.html`: the app (layout, styles and interface code).
 - `i18n.js`: the interface text in Polish, English, Dutch and Spanish.
-- `manifest.webmanifest`, `sw.js`, `icons/`: what makes the app installable and usable offline. `icons/icon.svg` is the source of the PNG icons.
+- `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
+- `fonts/`: the Grandstander and Lexend fonts with their licences, bundled so the app looks the same offline.
+- `android/`: the Android app.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
 - `tests/`: scheduler tests and the py-fsrs reference data.

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="paper">#1C2925</color>
+    <color name="pen">#93B5FF</color>
+    <bool name="light_bars">false</bool>
+</resources>

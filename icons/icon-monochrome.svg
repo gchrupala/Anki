@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Single-colour layer for Android themed icons: the card, with the rule and × cut out. -->
+  <defs>
+    <mask id="cut">
+      <rect width="512" height="512" fill="#fff"/>
+      <g transform="translate(256 256) scale(0.85) translate(-256 -256) rotate(-6 256 256)">
+        <line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="10"/>
+        <path d="M226 238 L286 298 M286 238 L226 298" stroke="#000" stroke-width="22" stroke-linecap="round"/>
+      </g>
+    </mask>
+  </defs>
+  <g mask="url(#cut)">
+    <g transform="translate(256 256) scale(0.85) translate(-256 -256) rotate(-6 256 256)">
+      <rect x="106" y="166" width="300" height="180" rx="14" fill="#000"/>
+    </g>
+  </g>
+</svg>

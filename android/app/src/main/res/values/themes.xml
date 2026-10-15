@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A light theme also tells the web view to use the page's light colours. -->
+    <style name="BaseTheme" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="AppTheme" parent="BaseTheme">
+        <item name="android:windowBackground">@color/paper</item>
+        <item name="android:statusBarColor">@color/paper</item>
+        <item name="android:windowLightStatusBar">@bool/light_bars</item>
+        <item name="android:colorAccent">@color/pen</item>
+    </style>
+</resources>

@@ -13,9 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Tabliczka">
 <meta name="theme-color" content="#f7f9fd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1c2925" media="(prefers-color-scheme: dark)">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;800&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   /* Layout: a 5×3 index card with its keypad on squared notebook paper, and the
      10×10 progress square beside it (stacked on phones). Dark theme: chalkboard. */
@@ -1255,8 +1253,10 @@
   }, 30 * 1000);
 
   // Offline copy and protected storage, when the app is served over http(s).
-  // Neither is available from a local file or inside the Claude preview.
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  // The offline copy is not available from a local file or inside the Claude
+  // preview, and not needed in the Android app, which carries its own files.
+  const inAndroidApp = location.hostname === 'appassets.androidplatform.net';
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !inAndroidApp) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
   if (navigator.storage && navigator.storage.persist) {

@@ -3,11 +3,11 @@
  *
  * App files are fetched from the network first, so updates show up as soon
  * as the tablet is online; the stored copy is used when the network is down
- * or slow. Fonts are stored on first use and then always served from storage.
+ * or slow.
  *
  * Change CACHE when the list of app files changes.
  */
-const CACHE = 'times-table-cards-v1';
+const CACHE = 'times-table-cards-v2';
 const APP_FILES = [
   './',
   './index.html',
@@ -17,6 +17,11 @@ const APP_FILES = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
+  './fonts/fonts.css',
+  './fonts/grandstander-latin.woff2',
+  './fonts/grandstander-latin-ext.woff2',
+  './fonts/lexend-latin.woff2',
+  './fonts/lexend-latin-ext.woff2',
 ];
 const NETWORK_TIMEOUT_MS = 4000;
 
@@ -39,11 +44,7 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
-  if (url.origin === self.location.origin) {
-    event.respondWith(networkFirst(request));
-  } else if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    event.respondWith(cacheFirst(request));
-  }
+  if (url.origin === self.location.origin) event.respondWith(networkFirst(request));
 });
 
 async function networkFirst(request) {
@@ -64,14 +65,4 @@ async function networkFirst(request) {
     (await cache.match(request, { ignoreSearch: true })) ||
     (request.mode === 'navigate' ? await cache.match('./index.html') : undefined);
   return stored || fromNetwork;
-}
-
-async function cacheFirst(request) {
-  const cache = await caches.open(CACHE);
-  const stored = await cache.match(request);
-  if (stored) return stored;
-  const response = await fetch(request);
-  // Stylesheets from another site come back "opaque" (no status), which is fine to store.
-  if (response.ok || response.type === 'opaque') cache.put(request, response.clone());
-  return response;
 }
