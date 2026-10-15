@@ -370,17 +370,17 @@
   .progress .sub { margin: 0; font-size: 0.85rem; color: var(--ink-soft); max-width: 40ch; }
   .square {
     display: grid;
-    grid-template-columns: repeat(11, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--cols, 13), minmax(0, 1fr));
     gap: 3px;
     width: 100%;
-    max-width: 26rem;
+    max-width: calc(var(--cols, 13) * 2.4rem);
   }
   .square > div {
     aspect-ratio: 1;
     display: grid;
     place-items: center;
     border-radius: 4px;
-    font-size: clamp(0.6rem, 2.4vw, 0.8rem);
+    font-size: clamp(0.55rem, 2.2vw, 0.8rem);
     font-variant-numeric: tabular-nums;
   }
   .square .hd { color: var(--ink-soft); font-weight: 600; }
@@ -445,8 +445,21 @@
   }
   .chip input:checked + span { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
   .chip input:focus-visible + span { outline: 3px solid var(--pen); outline-offset: 2px; }
-  .field { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; }
-  .field input {
+  .fields { display: flex; flex-direction: column; gap: 0.6rem; }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; max-width: 20rem; }
+  .hint { font-size: 0.8rem; color: var(--ink-soft); }
+  textarea {
+    width: 100%;
+    height: 8rem;
+    margin-top: 0.6rem;
+    padding: 0.5rem;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 0.75rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .field input, .field select {
     width: 5rem;
     padding: 0.4rem 0.5rem;
     border: 1.5px solid var(--line);
@@ -488,7 +501,7 @@
           <div class="question" aria-live="polite">
             <span id="qa">2</span><span class="op">×</span><span id="qb">3</span><span class="op">=</span><span class="slot empty" id="slot"></span>
           </div>
-          <p class="feedback" id="feedback" aria-live="polite">Type the answer and press OK.</p>
+          <p class="feedback" id="feedback" aria-live="polite">Type the answer.</p>
         </div>
       </div>
 
@@ -540,26 +553,54 @@
     <h2 id="settings-title">For grown-ups</h2>
 
     <section>
+      <h3>Times tables up to</h3>
+      <div class="chips" id="size-chips">
+        <label class="chip"><input type="radio" name="size" id="size-10" value="10"><span>10 × 10</span></label>
+        <label class="chip"><input type="radio" name="size" id="size-12" value="12"><span>12 × 12</span></label>
+        <label class="chip"><input type="radio" name="size" id="size-15" value="15"><span>15 × 15</span></label>
+        <label class="chip"><input type="radio" name="size" id="size-20" value="20"><span>20 × 20</span></label>
+      </div>
+    </section>
+
+    <section>
       <h3>Tables to practise</h3>
       <div class="chips" id="table-chips"></div>
     </section>
 
-    <section>
-      <h3>New facts</h3>
+    <section class="fields">
       <label class="field" for="new-per-day">New facts per day <input id="new-per-day" type="number" min="0" max="100" step="1"></label>
+      <label class="field" for="retention">Target recall
+        <select id="retention">
+          <option value="0.8">80%</option>
+          <option value="0.85">85%</option>
+          <option value="0.9">90%</option>
+          <option value="0.95">95%</option>
+        </select>
+      </label>
+      <p class="hint">Target recall is the chance of remembering a fact when it comes up for review. Higher means more reviews.</p>
     </section>
 
     <section>
       <h3>How the cards are scheduled</h3>
-      <p>Each fact is a flash card scheduled with Anki's classic algorithm (SM-2, Anki's default settings). Your child types the answer and the app presses the Anki button for them:</p>
+      <p>Each fact is a flash card scheduled with FSRS (version 6, default parameters), the algorithm Anki offers alongside its older SM-2. FSRS estimates how likely your child is to remember each fact, and brings it back when that chance falls to the target recall.</p>
+      <p>Your child types the answer. It is checked as soon as it has as many digits as the right answer, or after 3 seconds without typing. The app then picks the Anki rating:</p>
       <table class="rules">
-        <tr><th>Answer</th><th>Anki button</th></tr>
+        <tr><th>Answer</th><th>Anki rating</th></tr>
         <tr><td>Wrong</td><td>Again: the fact comes back in 1 minute, or 10 minutes if it had been learned before</td></tr>
         <tr><td>Right, slower than 10 s</td><td>Hard</td></tr>
         <tr><td>Right</td><td>Good</td></tr>
         <tr><td>Right within 4 s</td><td>Easy, but only on a first showing or a review, not during the 1- and 10-minute steps</td></tr>
       </table>
-      <p style="margin-top:0.6rem">A new fact comes back after 1 and 10 minutes, then the next day. After that, every right answer multiplies the gap by about 2.5.</p>
+      <p style="margin-top:0.6rem">A new fact comes back after 1 and 10 minutes, then a few days later. Each time it is remembered the gap grows, faster for facts your child finds easy. New facts are introduced table by table, in a random order within each table.</p>
+    </section>
+
+    <section>
+      <h3>Review log</h3>
+      <p id="log-status"></p>
+      <div class="row">
+        <button type="button" class="ghost-btn" id="copy-log">Copy as CSV</button>
+      </div>
+      <textarea id="log-text" readonly hidden aria-label="Review log as CSV"></textarea>
     </section>
 
     <section>
@@ -588,24 +629,28 @@
 (function () {
   'use strict';
 
-  const cfg = SRS.DEFAULTS;
   const DAY = 24 * 60 * SRS.MINUTE;
-  const MAX = 10;
+  const ROLLOVER = SRS.DEFAULTS.rolloverHour;
   // Easier tables first, a common order in schools.
-  const TABLE_ORDER = [1, 2, 10, 5, 3, 4, 9, 6, 8, 7];
-  const STORE_KEY = 'times-table-cards-v1';
+  const TABLE_ORDER = [1, 2, 10, 5, 3, 4, 9, 6, 8, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+  const STORE_KEY = 'times-table-cards-v2';
   const MATURE_DAYS = 21; // Anki calls a card "mature" from 21 days
+  const IDLE_SUBMIT_MS = 3000; // check a shorter answer after this pause
+  const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
 
   const $ = (id) => document.getElementById(id);
+  const range = (n) => Array.from({ length: n }, (_, i) => i + 1);
 
   // ---------- state ----------
 
   function defaultState() {
     return {
       cards: {},
-      settings: { tables: TABLE_ORDER.slice().sort((x, y) => x - y), newPerDay: 10 },
+      settings: { size: 12, tables: range(12), newPerDay: 10, retention: 0.9 },
       daily: null,
       clockOffset: 0,
+      // One entry per answer: [time, card id, rating, state before, ms, typed answer].
+      log: [],
     };
   }
 
@@ -614,7 +659,9 @@
       const raw = localStorage.getItem(STORE_KEY);
       if (!raw) return null;
       const s = JSON.parse(raw);
-      return s && s.cards && s.settings ? { ...defaultState(), ...s } : null;
+      if (!s || !s.cards || !s.settings) return null;
+      const d = defaultState();
+      return { ...d, ...s, settings: { ...d.settings, ...s.settings } };
     } catch (e) {
       return null;
     }
@@ -631,7 +678,8 @@
   let state = load() || defaultState();
 
   const now = () => Date.now() + state.clockOffset;
-  const today = () => SRS.dayIndex(now(), cfg.rolloverHour);
+  const today = () => SRS.dayIndex(now(), ROLLOVER);
+  const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention });
 
   function daily() {
     if (!state.daily || state.daily.day !== today()) {
@@ -640,29 +688,28 @@
     return state.daily;
   }
 
+  // Each card gets a random number once, which fixes its place among the new
+  // cards of its table.
   function card(a, b) {
     const id = a + 'x' + b;
-    if (!state.cards[id]) state.cards[id] = { ...SRS.newCard(id), a, b };
+    if (!state.cards[id]) state.cards[id] = { ...SRS.newCard(id), a, b, seed: Math.random() };
     return state.cards[id];
   }
 
   // Facts in the selected tables, in the order new ones are introduced:
-  // table by table, first t×1 … t×10, then 1×t … 10×t.
+  // table by table, in random order within a table.
   function activeCards() {
+    const size = state.settings.size;
     const rank = new Map();
-    TABLE_ORDER.filter((t) => state.settings.tables.includes(t)).forEach((t, i) => rank.set(t, i));
+    TABLE_ORDER.filter((t) => t <= size && state.settings.tables.includes(t)).forEach((t, i) => rank.set(t, i));
     const list = [];
-    for (let a = 1; a <= MAX; a++) {
-      for (let b = 1; b <= MAX; b++) {
-        const ra = rank.has(a) ? rank.get(a) : Infinity;
-        const rb = rank.has(b) ? rank.get(b) : Infinity;
-        if (ra === Infinity && rb === Infinity) continue;
-        const table = ra <= rb ? a : b;
-        const other = table === a ? b : a;
-        list.push({ c: card(a, b), key: [Math.min(ra, rb), table === a ? 0 : 1, other] });
+    for (let a = 1; a <= size; a++) {
+      for (let b = 1; b <= size; b++) {
+        const r = Math.min(rank.has(a) ? rank.get(a) : Infinity, rank.has(b) ? rank.get(b) : Infinity);
+        if (r !== Infinity) list.push({ c: card(a, b), r });
       }
     }
-    list.sort((x, y) => x.key[0] - y.key[0] || x.key[1] - y.key[1] || x.key[2] - y.key[2]);
+    list.sort((x, y) => x.r - y.r || x.c.seed - y.c.seed);
     return list.map((x) => x.c);
   }
 
@@ -672,7 +719,7 @@
   }
 
   function queues() {
-    return SRS.buildQueues(activeCards(), now(), newLeft(), cfg);
+    return SRS.buildQueues(activeCards(), now(), newLeft(), cfg());
   }
 
   // ---------- wording ----------
@@ -683,7 +730,7 @@
       const m = Math.max(1, Math.round(ms / SRS.MINUTE));
       return m === 1 ? 'in 1 minute' : 'in ' + m + ' minutes';
     }
-    const days = SRS.dayIndex(due, cfg.rolloverHour) - today();
+    const days = SRS.dayIndex(due, ROLLOVER) - today();
     if (days <= 0) return 'later today';
     if (days === 1) return 'tomorrow';
     if (days < 60) return 'in ' + days + ' days';
@@ -705,6 +752,7 @@
   let typed = '';
   let shownAt = 0;
   let advanceTimer = null;
+  let idleTimer = null;
   let feedbackHtml = '';
   let shown = null; // the card as it was when shown, for the card header
 
@@ -712,9 +760,17 @@
     return currentId ? state.cards[currentId] : null;
   }
 
+  // Avoid repeating the card just answered, or its twin (7 × 3 after 3 × 7).
+  function avoidList() {
+    if (!lastId) return [];
+    const [a, b] = lastId.split('x');
+    return [lastId, b + 'x' + a];
+  }
+
   function next() {
     clearTimeout(advanceTimer);
-    const c = SRS.pickNext(queues(), lastId);
+    clearTimeout(idleTimer);
+    const c = SRS.pickNext(queues(), avoidList());
     typed = '';
     if (!c) {
       currentId = null;
@@ -724,24 +780,24 @@
       shown = { type: c.type, reps: c.reps };
       mode = 'ask';
       shownAt = performance.now();
-      feedbackHtml = c.type === 'new' && c.reps === 0
-        ? 'A new one! Have a go.'
-        : 'Type the answer and press OK.';
+      feedbackHtml = c.reps === 0 ? 'A new one! Have a go.' : 'Type the answer.';
       flash('enter');
     }
     render();
   }
 
   function submit() {
+    clearTimeout(idleTimer);
     const c = current();
-    if (!c || typed === '') return;
+    if (mode !== 'ask' || !c || typed === '') return;
     const product = c.a * c.b;
     const right = Number(typed) === product;
-    const seconds = (performance.now() - shownAt) / 1000;
-    const grade = SRS.autoGrade(right, seconds, c.type, cfg);
+    const ms = performance.now() - shownAt;
+    const grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
     const wasNew = c.type === 'new';
-    const updated = SRS.answer(c, grade, now(), cfg);
+    const updated = SRS.answer(c, grade, now(), cfg());
     state.cards[c.id] = updated;
+    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), Number(typed)]);
 
     const d = daily();
     d.answered += 1;
@@ -799,9 +855,17 @@
       typed = typed.slice(0, -1);
     } else if (typed.length < 3) {
       typed += key;
-      if (mode === 'wrong') checkCopy();
     }
+    if (mode === 'wrong' && key !== 'del') checkCopy();
     renderCard();
+    if (mode !== 'ask') return;
+
+    // Check the answer once it has as many digits as the right one, or after
+    // a pause for a shorter answer.
+    const c = current();
+    clearTimeout(idleTimer);
+    if (typed.length >= String(c.a * c.b).length) submit();
+    else if (typed) idleTimer = setTimeout(submit, IDLE_SUBMIT_MS);
   }
 
   function flash(cls) {
@@ -814,9 +878,13 @@
   // ---------- rendering ----------
 
   const square = $('square');
-  const cells = {};
+  let cells = {};
 
   function buildSquare() {
+    const size = state.settings.size;
+    square.textContent = '';
+    square.style.setProperty('--cols', size + 1);
+    cells = {};
     const add = (cls, text) => {
       const el = document.createElement('div');
       el.className = cls;
@@ -825,10 +893,10 @@
       return el;
     };
     add('corner', '×');
-    for (let b = 1; b <= MAX; b++) add('hd', b);
-    for (let a = 1; a <= MAX; a++) {
+    for (let b = 1; b <= size; b++) add('hd', b);
+    for (let a = 1; a <= size; a++) {
       add('hd', a);
-      for (let b = 1; b <= MAX; b++) cells[a + 'x' + b] = add('cell', '');
+      for (let b = 1; b <= size; b++) cells[a + 'x' + b] = add('cell', '');
     }
   }
 
@@ -839,10 +907,11 @@
   }
 
   function renderSquare() {
+    const size = state.settings.size;
     const active = new Set(activeCards().map((c) => c.id));
     const n = { new: 0, learning: 0, young: 0, mature: 0 };
-    for (let a = 1; a <= MAX; a++) {
-      for (let b = 1; b <= MAX; b++) {
+    for (let a = 1; a <= size; a++) {
+      for (let b = 1; b <= size; b++) {
         const c = card(a, b);
         const el = cells[c.id];
         const s = stage(c);
@@ -911,7 +980,7 @@
       $('seen').textContent = shown.reps === 0 ? 'First time' : 'Seen ' + shown.reps + '×';
     }
     renderCard();
-    if (done) renderDone(q);
+    if (done) renderDone();
     renderSquare();
 
     const d = daily();
@@ -925,7 +994,7 @@
     pill.textContent = 'Test clock +' + ahead + (ahead === 1 ? ' day' : ' days');
   }
 
-  function renderDone(q) {
+  function renderDone() {
     const d = daily();
     $('done-date').textContent = new Date(now()).toLocaleDateString(undefined, { weekday: 'long' });
     $('done-stats').textContent = d.answered
@@ -935,7 +1004,7 @@
     const active = activeCards();
     const dues = active.filter((c) => c.type !== 'new').map((c) => c.due);
     const unseen = active.some((c) => c.type === 'new');
-    if (unseen) dues.push(SRS.dayStart(today() + 1, cfg.rolloverHour));
+    if (unseen) dues.push(SRS.dayStart(today() + 1, ROLLOVER));
     $('done-next').textContent = dues.length ? 'Next cards ' + whenText(Math.min(...dues)) + '.' : '';
     $('more-new').hidden = !unseen;
   }
@@ -946,30 +1015,31 @@
 
   function buildChips() {
     const wrap = $('table-chips');
-    for (let t = 1; t <= MAX; t++) {
+    wrap.textContent = '';
+    for (let t = 1; t <= state.settings.size; t++) {
       const label = document.createElement('label');
       label.className = 'chip';
       label.innerHTML = '<input type="checkbox" id="table-' + t + '" value="' + t + '"><span>×' + t + '</span>';
       wrap.appendChild(label);
     }
-    wrap.addEventListener('change', (e) => {
-      const t = Number(e.target.value);
-      const set = new Set(state.settings.tables);
-      if (e.target.checked) set.add(t);
-      else set.delete(t);
-      state.settings.tables = [...set].sort((x, y) => x - y);
-      save();
-    });
   }
 
   function syncSettings() {
-    for (let t = 1; t <= MAX; t++) $('table-' + t).checked = state.settings.tables.includes(t);
-    $('new-per-day').value = state.settings.newPerDay;
+    const s = state.settings;
+    $('size-' + s.size).checked = true;
+    for (let t = 1; t <= s.size; t++) $('table-' + t).checked = s.tables.includes(t);
+    $('new-per-day').value = s.newPerDay;
+    $('retention').value = String(s.retention);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead
       ? 'The app clock is ' + ahead + (ahead === 1 ? ' day' : ' days') + ' ahead of real time.'
       : 'Using the real clock. Jump ahead to see which facts come back on later days.';
     $('real-clock').hidden = ahead === 0;
+    const n = state.log.length;
+    $('log-status').textContent = n === 0
+      ? 'No answers recorded yet.'
+      : n + (n === 1 ? ' answer' : ' answers') + ' recorded. The CSV has the columns the FSRS optimizer reads, so it can be used to fit FSRS to your child.';
+    $('log-text').hidden = true;
   }
 
   $('open-settings').addEventListener('click', () => {
@@ -983,11 +1053,69 @@
     else render();
   });
 
+  $('size-chips').addEventListener('change', (e) => {
+    const s = state.settings;
+    const size = Number(e.target.value);
+    for (let t = s.size + 1; t <= size; t++) if (!s.tables.includes(t)) s.tables.push(t);
+    s.tables.sort((x, y) => x - y);
+    s.size = size;
+    save();
+    buildChips();
+    buildSquare();
+    syncSettings();
+  });
+
+  $('table-chips').addEventListener('change', (e) => {
+    const t = Number(e.target.value);
+    const set = new Set(state.settings.tables);
+    if (e.target.checked) set.add(t);
+    else set.delete(t);
+    state.settings.tables = [...set].sort((x, y) => x - y);
+    save();
+  });
+
   $('new-per-day').addEventListener('change', (e) => {
     const v = Math.round(Number(e.target.value));
     state.settings.newPerDay = Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : 10;
     e.target.value = state.settings.newPerDay;
     save();
+  });
+
+  $('retention').addEventListener('change', (e) => {
+    state.settings.retention = Number(e.target.value);
+    save();
+  });
+
+  // Columns as read by the FSRS optimizer: card_id, review_time (ms),
+  // review_rating (1-4), review_state (0 new, 1 learning, 2 review,
+  // 3 relearning), review_duration (ms). Extra columns are for people.
+  function logCsv() {
+    const rows = ['card_id,review_time,review_rating,review_state,review_duration,fact,typed'];
+    for (const [t, id, rating, st, ms, typedAnswer] of state.log) {
+      const [a, b] = id.split('x').map(Number);
+      rows.push([a * 100 + b, t, rating, st, ms, a + 'x' + b, typedAnswer].join(','));
+    }
+    return rows.join('\n') + '\n';
+  }
+
+  $('copy-log').addEventListener('click', () => {
+    const csv = logCsv();
+    const area = $('log-text');
+    const showText = () => {
+      area.value = csv;
+      area.hidden = false;
+      area.focus();
+      area.select();
+      $('log-status').textContent = 'Copying is blocked here. The log is selected below: copy it with your keyboard or the menu.';
+    };
+    try {
+      navigator.clipboard.writeText(csv).then(
+        () => { $('log-status').textContent = 'Copied ' + state.log.length + ' rows to the clipboard.'; },
+        showText
+      );
+    } catch (e) {
+      showText();
+    }
   });
 
   $('jump-day').addEventListener('click', () => {
@@ -1075,7 +1203,7 @@
 
   // Learning cards can fall due while the "done" card is showing.
   setInterval(() => {
-    if (mode === 'done' && SRS.pickNext(queues(), lastId)) next();
+    if (mode === 'done' && SRS.pickNext(queues(), avoidList())) next();
   }, 30 * 1000);
 
   buildSquare();

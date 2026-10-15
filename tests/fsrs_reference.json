@@ -1,0 +1,199 @@
+{
+ "source": "py-fsrs 6.3.2, default parameters, no fuzz",
+ "sequences": {
+  "good-path": [
+   {
+    "minutes": 0,
+    "rating": 3,
+    "state": "learning",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "dueMinutes": 10.0
+   },
+   {
+    "minutes": 10,
+    "rating": 3,
+    "state": "review",
+    "stability": 2.3065,
+    "difficulty": 2.111214235785395,
+    "dueMinutes": 2880.0
+   },
+   {
+    "minutes": 2940,
+    "rating": 3,
+    "state": "review",
+    "stability": 10.971048263078135,
+    "difficulty": 2.1043313908464483,
+    "dueMinutes": 15840.0
+   },
+   {
+    "minutes": 20220,
+    "rating": 3,
+    "state": "review",
+    "stability": 48.55964660808986,
+    "difficulty": 2.0974554287524403,
+    "dueMinutes": 70560.0
+   }
+  ],
+  "easy-first": [
+   {
+    "minutes": 0,
+    "rating": 4,
+    "state": "review",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "dueMinutes": 11520.0
+   },
+   {
+    "minutes": 11520,
+    "rating": 4,
+    "state": "review",
+    "stability": 65.62422616189994,
+    "difficulty": 1.0,
+    "dueMinutes": 95040.0
+   }
+  ],
+  "lapse": [
+   {
+    "minutes": 0,
+    "rating": 3,
+    "state": "learning",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "dueMinutes": 10.0
+   },
+   {
+    "minutes": 10,
+    "rating": 3,
+    "state": "review",
+    "stability": 2.3065,
+    "difficulty": 2.111214235785395,
+    "dueMinutes": 2880.0
+   },
+   {
+    "minutes": 2940,
+    "rating": 1,
+    "state": "relearning",
+    "stability": 0.6077016626638644,
+    "difficulty": 7.392238132342694,
+    "dueMinutes": 10.0
+   },
+   {
+    "minutes": 2950,
+    "rating": 3,
+    "state": "review",
+    "stability": 0.6597976257475758,
+    "difficulty": 7.38007426350719,
+    "dueMinutes": 1440.0
+   },
+   {
+    "minutes": 7320,
+    "rating": 2,
+    "state": "review",
+    "stability": 2.6732576395266276,
+    "difficulty": 8.24599957687359,
+    "dueMinutes": 4320.0
+   },
+   {
+    "minutes": 17400,
+    "rating": 3,
+    "state": "review",
+    "stability": 8.861943148559357,
+    "difficulty": 8.232981946593554,
+    "dueMinutes": 12960.0
+   }
+  ],
+  "struggle": [
+   {
+    "minutes": 0,
+    "rating": 1,
+    "state": "learning",
+    "stability": 0.212,
+    "difficulty": 6.4133,
+    "dueMinutes": 1.0
+   },
+   {
+    "minutes": 1,
+    "rating": 1,
+    "state": "learning",
+    "stability": 0.08335671711031604,
+    "difficulty": 8.806304468856837,
+    "dueMinutes": 1.0
+   },
+   {
+    "minutes": 2,
+    "rating": 2,
+    "state": "learning",
+    "stability": 0.08335671711031604,
+    "difficulty": 9.192797649512254,
+    "dueMinutes": 5.5
+   },
+   {
+    "minutes": 8,
+    "rating": 3,
+    "state": "learning",
+    "stability": 0.10314065007785231,
+    "difficulty": 9.17883322115958,
+    "dueMinutes": 10.0
+   },
+   {
+    "minutes": 18,
+    "rating": 3,
+    "state": "review",
+    "stability": 0.12584423732556518,
+    "difficulty": 9.164882757235258,
+    "dueMinutes": 1440.0
+   },
+   {
+    "minutes": 4380,
+    "rating": 1,
+    "state": "relearning",
+    "stability": 0.07780141545881572,
+    "difficulty": 9.710731010397318,
+    "dueMinutes": 10.0
+   },
+   {
+    "minutes": 4390,
+    "rating": 1,
+    "state": "relearning",
+    "stability": 0.03267669780856528,
+    "difficulty": 9.890147619443566,
+    "dueMinutes": 10.0
+   },
+   {
+    "minutes": 4400,
+    "rating": 3,
+    "state": "review",
+    "stability": 0.04300197917704521,
+    "difficulty": 9.875485841120959,
+    "dueMinutes": 1440.0
+   }
+  ],
+  "late": [
+   {
+    "minutes": 0,
+    "rating": 3,
+    "state": "learning",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "dueMinutes": 10.0
+   },
+   {
+    "minutes": 10,
+    "rating": 3,
+    "state": "review",
+    "stability": 2.3065,
+    "difficulty": 2.111214235785395,
+    "dueMinutes": 2880.0
+   },
+   {
+    "minutes": 43260,
+    "rating": 3,
+    "state": "review",
+    "stability": 37.447876615868,
+    "difficulty": 2.1043313908464483,
+    "dueMinutes": 53280.0
+   }
+  ]
+ }
+}

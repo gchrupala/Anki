@@ -1,89 +1,73 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const SRS = require('../srs.js');
+const reference = require('./fsrs_reference.json');
 
-const { AGAIN, HARD, GOOD, EASY, MINUTE, DEFAULTS: cfg } = SRS;
+const { AGAIN, HARD, GOOD, EASY, MINUTE } = SRS;
 const DAY = 24 * 60 * MINUTE;
+const noFuzz = { ...SRS.DEFAULTS, fuzz: false };
 
 // 15 Oct 2026, 10:00 local time.
 const NOW = new Date(2026, 9, 15, 10, 0).getTime();
 
-function reviewCard(interval, ease, due = NOW) {
-  return { ...SRS.newCard('7x8'), type: 'review', interval, ease, due };
+for (const [name, reviews] of Object.entries(reference.sequences)) {
+  test(`matches py-fsrs: ${name}`, () => {
+    let card = SRS.newCard('7x8');
+    for (const r of reviews) {
+      const now = NOW + r.minutes * MINUTE;
+      card = SRS.answer(card, r.rating, now, noFuzz);
+      const at = `${name} at ${r.minutes} min`;
+      assert.equal(card.type, r.state, at);
+      assert.ok(Math.abs(card.stability - r.stability) < 1e-9, `${at}: stability ${card.stability} vs ${r.stability}`);
+      assert.ok(Math.abs(card.difficulty - r.difficulty) < 1e-9, `${at}: difficulty ${card.difficulty} vs ${r.difficulty}`);
+      if (card.type === 'review') {
+        assert.equal(card.interval, r.dueMinutes / 1440, at);
+        assert.equal(SRS.dayIndex(card.due, 4) - SRS.dayIndex(now, 4), card.interval, at);
+      } else {
+        assert.equal(card.due - now, r.dueMinutes * MINUTE, at);
+      }
+    }
+  });
 }
 
-test('a new card goes through the learning steps and graduates to one day', () => {
-  let c = SRS.answer(SRS.newCard('7x8'), GOOD, NOW);
-  assert.equal(c.type, 'learning');
-  assert.equal(c.due - NOW, 10 * MINUTE);
-  assert.equal(c.ease, 2.5);
-
-  c = SRS.answer(c, GOOD, NOW + 10 * MINUTE);
-  assert.equal(c.type, 'review');
-  assert.equal(c.interval, 1);
-  assert.equal(c.due, new Date(2026, 9, 16, 4).getTime());
+test('retrievability is 90% after `stability` days', () => {
+  assert.ok(Math.abs(SRS.retrievability(12, 12) - 0.9) < 1e-12);
+  assert.ok(SRS.retrievability(24, 12) < 0.9);
 });
 
-test('Again restarts the steps, Hard on the first step averages the first two', () => {
-  const again = SRS.answer(SRS.newCard('a'), AGAIN, NOW);
-  assert.equal(again.due - NOW, 1 * MINUTE);
-  const hard = SRS.answer(SRS.newCard('a'), HARD, NOW);
-  assert.equal(hard.due - NOW, 5.5 * MINUTE);
+test('a higher target retention gives shorter intervals', () => {
+  const at90 = SRS.nextInterval(30, noFuzz);
+  const at95 = SRS.nextInterval(30, { ...noFuzz, desiredRetention: 0.95 });
+  assert.equal(at90, 30);
+  assert.ok(at95 < at90);
 });
 
-test('Easy on a new card graduates straight to the easy interval', () => {
-  const c = SRS.answer(SRS.newCard('a'), EASY, NOW);
-  assert.equal(c.type, 'review');
-  assert.equal(c.interval, 4);
+test('fuzz keeps intervals within a few percent', () => {
+  const card = { ...SRS.newCard('a'), type: 'review', stability: 40, difficulty: 5, last: NOW - 40 * DAY, due: NOW };
+  const plain = SRS.answer(card, GOOD, NOW, noFuzz).interval;
+  const low = SRS.answer(card, GOOD, NOW, SRS.DEFAULTS, () => 0).interval;
+  const high = SRS.answer(card, GOOD, NOW, SRS.DEFAULTS, () => 0.999).interval;
+  assert.ok(low < plain && plain < high, `${low} < ${plain} < ${high}`);
+  assert.ok(high - low <= Math.ceil(plain * 0.15), `${low}..${high}`);
 });
 
-test('review intervals grow by the ease factor', () => {
-  let c = SRS.answer(reviewCard(1, 2.5), GOOD, NOW);
-  assert.equal(c.interval, 3);
-  c = SRS.answer(reviewCard(3, 2.5), GOOD, NOW);
-  assert.equal(c.interval, 8);
-  assert.equal(c.ease, 2.5);
-});
-
-test('Hard and Easy change the ease factor', () => {
-  const hard = SRS.answer(reviewCard(10, 2.5), HARD, NOW);
-  assert.equal(hard.interval, 12);
-  assert.equal(hard.ease, 2.35);
-  const easy = SRS.answer(reviewCard(10, 2.5), EASY, NOW);
-  assert.equal(easy.interval, 33);
-  assert.equal(easy.ease, 2.65);
-});
-
-test('a late review gets credit for the extra days', () => {
-  const c = SRS.answer(reviewCard(10, 2.5, NOW - 4 * DAY), GOOD, NOW);
-  assert.equal(c.interval, 30);
-});
-
-test('forgetting a review card lowers ease and starts relearning', () => {
-  let c = SRS.answer(reviewCard(20, 2.5), AGAIN, NOW);
+test('forgetting a review card counts a lapse and starts relearning', () => {
+  const card = { ...SRS.newCard('a'), type: 'review', stability: 20, difficulty: 5, last: NOW - 20 * DAY, due: NOW };
+  const c = SRS.answer(card, AGAIN, NOW, noFuzz);
   assert.equal(c.type, 'relearning');
   assert.equal(c.lapses, 1);
-  assert.equal(c.ease, 2.3);
-  assert.equal(c.interval, 1);
   assert.equal(c.due - NOW, 10 * MINUTE);
-
-  c = SRS.answer(c, GOOD, NOW + 10 * MINUTE);
-  assert.equal(c.type, 'review');
-  assert.equal(c.interval, 1);
-});
-
-test('ease never drops below the minimum', () => {
-  const c = SRS.answer(reviewCard(5, 1.35), AGAIN, NOW);
-  assert.equal(c.ease, 1.3);
+  assert.ok(c.stability < 20);
 });
 
 test('answer does not change the card it is given', () => {
   const before = SRS.newCard('a');
   SRS.answer(before, GOOD, NOW);
   assert.equal(before.type, 'new');
+  assert.equal(before.stability, null);
 });
 
-test('typed answers map to Anki buttons', () => {
+test('typed answers map to Anki ratings', () => {
   assert.equal(SRS.autoGrade(false, 2, 'review'), AGAIN);
   assert.equal(SRS.autoGrade(true, 15, 'review'), HARD);
   assert.equal(SRS.autoGrade(true, 6, 'review'), GOOD);
@@ -99,13 +83,22 @@ test('the day starts at 4 am', () => {
   assert.equal(SRS.dayStart(SRS.dayIndex(NOW, 4), 4), early);
 });
 
-test('due learning cards come first, but not the card just answered', () => {
+test('due learning cards come first, but not an avoided card', () => {
   const learning = { ...SRS.newCard('l'), type: 'learning', due: NOW - MINUTE };
-  const review = reviewCard(3, 2.5, NOW - DAY);
+  const review = { ...SRS.newCard('r'), type: 'review', due: NOW - DAY };
   const fresh = SRS.newCard('n');
   const q = SRS.buildQueues([learning, review, fresh], NOW, 10);
-  assert.equal(SRS.pickNext(q, null).id, 'l');
-  assert.notEqual(SRS.pickNext(q, 'l').id, 'l');
+  assert.equal(SRS.pickNext(q, []).id, 'l');
+  assert.notEqual(SRS.pickNext(q, ['l']).id, 'l');
+});
+
+test('reviews and new cards are drawn at random', () => {
+  const cards = ['a', 'b', 'c', 'd'].map(SRS.newCard);
+  const q = SRS.buildQueues(cards, NOW, 10);
+  assert.equal(SRS.pickNext(q, [], () => 0).id, 'a');
+  assert.equal(SRS.pickNext(q, [], () => 0.99).id, 'd');
+  assert.equal(SRS.pickNext(q, ['a'], () => 0).id, 'b');
+  assert.equal(SRS.pickNext(q, ['a', 'b', 'c', 'd'], () => 0).id, 'a');
 });
 
 test('the daily limit caps new cards', () => {
@@ -118,8 +111,7 @@ test('learning cards are shown early when nothing else is left', () => {
   const soon = { ...SRS.newCard('s'), type: 'learning', due: NOW + 5 * MINUTE };
   const later = { ...SRS.newCard('t'), type: 'learning', due: NOW + 30 * MINUTE };
   const q = SRS.buildQueues([soon, later], NOW, 10);
-  assert.equal(SRS.pickNext(q, null).id, 's');
-  assert.equal(SRS.pickNext(q, 's').id, 's');
-  const none = SRS.buildQueues([later], NOW, 10);
-  assert.equal(SRS.pickNext(none, null), null);
+  assert.equal(SRS.pickNext(q, []).id, 's');
+  assert.equal(SRS.pickNext(q, ['s']).id, 's');
+  assert.equal(SRS.pickNext(SRS.buildQueues([later], NOW, 10), []), null);
 });
