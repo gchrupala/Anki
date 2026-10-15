@@ -3,7 +3,9 @@
  *
  * App files are fetched from the network first, so updates show up as soon
  * as the tablet is online; the stored copy is used when the network is down
- * or slow.
+ * or slow. Each launch asks the server whether the files changed, rather than
+ * trusting the browser's own copy (which GitHub Pages lets it keep for 10
+ * minutes).
  *
  * Change CACHE when the list of app files changes.
  */
@@ -49,7 +51,10 @@ self.addEventListener('fetch', (event) => {
 
 async function networkFirst(request) {
   const cache = await caches.open(CACHE);
-  const fromNetwork = fetch(request).then((response) => {
+  // "no-cache" makes the browser check with the server (a short "not modified"
+  // answer when nothing changed). The request is rebuilt from its URL, because
+  // a page navigation request cannot be copied with new options.
+  const fromNetwork = fetch(new Request(request.url, { cache: 'no-cache' })).then((response) => {
     if (response.ok) cache.put(request, response.clone());
     return response;
   });

@@ -27,7 +27,7 @@ Then, on the tablet:
 
 The home-screen name is "Tabliczka". Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
-The offline copy is kept by `sw.js` (a service worker). It loads the app files from the network first, so a new version appears the next time the app is opened online; without internet it uses the stored copy. Opening `index.html` as a local file still works, but without the offline copy or installation.
+The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
 ## Android app
 
