@@ -68,7 +68,7 @@ Without this file the APK is built unsigned, and Android will not install it.
 
 ## Languages
 
-The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Dla dorosłych" in Polish). The Polish version writes multiplication with a centred dot (7 · 8), as Polish schools do; the others use ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
+The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Dla dorosłych" in Polish). All languages write multiplication with ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
 
 ## How it works
 

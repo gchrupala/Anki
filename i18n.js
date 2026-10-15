@@ -19,7 +19,7 @@
   const STRINGS = {
     pl: {
       name: 'Polski',
-      op: '·', // Polish schools write multiplication with a centred dot
+      op: '×',
       appName: 'Tabliczka mnożenia',
       countsAria: 'Karty na dziś',
       countNew: (n) => pl(n, { one: 'nowa', few: 'nowe', many: 'nowych', other: 'nowej' }),
@@ -50,7 +50,7 @@
       laterToday: 'później dzisiaj',
       progressAria: 'Postępy',
       progressTitle: 'Twoja tabliczka mnożenia',
-      progressSub: 'Każde pole to jeden przykład: wiersz · kolumna. Pola wypełniają się, gdy przykład trafia do pamięci długotrwałej.',
+      progressSub: 'Każde pole to jeden przykład: wiersz × kolumna. Pola wypełniają się, gdy przykład trafia do pamięci długotrwałej.',
       squareAria: 'Postęp dla każdego przykładu',
       legendNew: 'nierozpoczęte',
       legendLearning: 'w nauce',
