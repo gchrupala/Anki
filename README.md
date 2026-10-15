@@ -12,6 +12,10 @@ Run the scheduler tests with Node 18 or later:
 npm test
 ```
 
+## Languages
+
+The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Dla dorosłych" in Polish). The Polish version writes multiplication with a centred dot (7 · 8), as Polish schools do; the others use ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
+
 ## How it works
 
 Each fact, such as 7 × 8, is one card. 3 × 7 and 7 × 3 are separate cards. The tables go up to 12 × 12 by default (144 cards). They can be set to 10 × 10, 15 × 15 or 20 × 20.
@@ -41,13 +45,15 @@ After a wrong answer the app shows the right one, and the child types it to cont
 
 ### Order of cards
 
-- At most 10 new facts are introduced per day (adjustable). They are picked in a random order from all the selected tables, so easy facts such as 1 × 4 and harder ones such as 7 × 8 are mixed from the first day. To focus on particular tables, switch the others off in the "Grown-ups" panel.
+- At most 10 new facts are introduced per day (adjustable). They are picked in a random order from all the selected tables, so easy facts such as 1 × 4 and harder ones such as 7 × 8 are mixed from the first day. To focus on particular tables, switch the others off in the settings panel.
 - Cards that are due in their learning steps come first. Otherwise the next card is drawn at random from today's reviews and new cards.
 - The card just answered and its twin (7 × 3 after 3 × 7) are not shown next unless nothing else is left.
 
 ### Settings and review log
 
-The "Grown-ups" panel lets you:
+The settings panel ("Grown-ups" in English) lets you:
+
+- choose the language;
 
 - choose the size of the table and which tables to practise;
 - change the number of new facts per day and the target recall;
@@ -71,5 +77,6 @@ The progress square shows each fact: not started, practising (in the learning st
 ## Files
 
 - `index.html`: the app (layout, styles and interface code).
+- `i18n.js`: the interface text in Polish, English, Dutch and Spanish.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
 - `tests/`: scheduler tests and the py-fsrs reference data.

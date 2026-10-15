@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -218,7 +218,8 @@
     text-transform: uppercase;
     color: var(--ink-soft);
   }
-  .tag { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .card-head > span { white-space: nowrap; }
+  .tag { display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; }
   .tag::before {
     content: "";
     width: 0.6rem;
@@ -469,6 +470,7 @@
     font: inherit;
     font-variant-numeric: tabular-nums;
   }
+  .field #lang { width: auto; }
   .rules { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
   .rules th, .rules td { text-align: left; padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
   .rules th { font-weight: 600; color: var(--ink-soft); }
@@ -480,42 +482,42 @@
 <body>
 <div class="app">
   <header class="top">
-    <h1 class="brand">Times Table Cards</h1>
-    <div class="counts" aria-label="Cards left today">
-      <span class="count new"><b id="count-new">0</b>new</span>
-      <span class="count learn"><b id="count-learn">0</b>practising</span>
-      <span class="count review"><b id="count-review">0</b>to review</span>
+    <h1 class="brand" data-t="appName">Times Table Cards</h1>
+    <div class="counts" data-t-aria="countsAria">
+      <span class="count new"><b id="count-new">0</b><span id="label-new">new</span></span>
+      <span class="count learn"><b id="count-learn">0</b><span id="label-learn">practising</span></span>
+      <span class="count review"><b id="count-review">0</b><span id="label-review">to review</span></span>
     </div>
     <span class="pill" id="clock-pill" hidden></span>
-    <button type="button" class="ghost-btn" id="open-settings">Grown-ups</button>
+    <button type="button" class="ghost-btn" id="open-settings" data-t="grownUps">Grown-ups</button>
   </header>
 
   <main class="layout">
-    <section class="study" aria-label="Practice">
+    <section class="study" data-t-aria="practiceAria">
       <div class="card" id="card">
         <div class="card-head">
-          <span class="tag new" id="tag">New fact</span>
+          <span class="tag new" id="tag"></span>
           <span id="seen"></span>
         </div>
         <div class="card-body" id="card-body">
           <div class="question" aria-live="polite">
-            <span id="qa">2</span><span class="op">×</span><span id="qb">3</span><span class="op">=</span><span class="slot empty" id="slot"></span>
+            <span id="qa">2</span><span class="op" data-t="op">×</span><span id="qb">3</span><span class="op">=</span><span class="slot empty" id="slot"></span>
           </div>
-          <p class="feedback" id="feedback" aria-live="polite">Type the answer.</p>
+          <p class="feedback" id="feedback" aria-live="polite"></p>
         </div>
       </div>
 
       <div class="card" id="done" hidden>
-        <div class="card-head"><span>Finished</span><span id="done-date"></span></div>
+        <div class="card-head"><span data-t="finished">Finished</span><span id="done-date"></span></div>
         <div class="card-body done-body">
-          <h2 class="done-title">All done for today!</h2>
+          <h2 class="done-title" data-t="doneTitle">All done for today!</h2>
           <p id="done-stats"></p>
           <p id="done-next"></p>
-          <button type="button" class="primary-btn" id="more-new" hidden>Learn 5 more new facts</button>
+          <button type="button" class="primary-btn" id="more-new" data-t="moreNew" hidden>Learn 5 more new facts</button>
         </div>
       </div>
 
-      <div class="keypad" id="keypad" aria-label="Number keys">
+      <div class="keypad" id="keypad" data-t-aria="keypadAria">
         <button type="button" class="key" data-key="1" tabindex="-1">1</button>
         <button type="button" class="key" data-key="2" tabindex="-1">2</button>
         <button type="button" class="key" data-key="3" tabindex="-1">3</button>
@@ -525,7 +527,7 @@
         <button type="button" class="key" data-key="7" tabindex="-1">7</button>
         <button type="button" class="key" data-key="8" tabindex="-1">8</button>
         <button type="button" class="key" data-key="9" tabindex="-1">9</button>
-        <button type="button" class="key" data-key="del" tabindex="-1" aria-label="Delete">
+        <button type="button" class="key" data-key="del" tabindex="-1" data-t-aria="deleteAria">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M17 9l-6 6M11 9l6 6"/></svg>
         </button>
         <button type="button" class="key" data-key="0" tabindex="-1">0</button>
@@ -533,15 +535,15 @@
       </div>
     </section>
 
-    <aside class="progress" aria-label="Progress">
-      <h2>Your times table</h2>
-      <p class="sub">Each square is one fact. Row × column. Squares fill in as facts move into long-term memory.</p>
-      <div class="square" id="square" role="img" aria-label="Progress on each multiplication fact"></div>
+    <aside class="progress" data-t-aria="progressAria">
+      <h2 data-t="progressTitle">Your times table</h2>
+      <p class="sub" data-t="progressSub">Each square is one fact: row × column. Squares fill in as facts move into long-term memory.</p>
+      <div class="square" id="square" role="img" data-t-aria="squareAria"></div>
       <ul class="legend">
-        <li><span class="sw cell"></span><b id="n-new">0</b> not started</li>
-        <li><span class="sw cell is-learning"></span><b id="n-learning">0</b> practising</li>
-        <li><span class="sw cell is-young"></span><b id="n-young">0</b> learned</li>
-        <li><span class="sw cell is-mature"></span><b id="n-mature">0</b> mastered (3+ weeks)</li>
+        <li><span class="sw cell"></span><b id="n-new">0</b> <span data-t="legendNew">not started</span></li>
+        <li><span class="sw cell is-learning"></span><b id="n-learning">0</b> <span data-t="legendLearning">practising</span></li>
+        <li><span class="sw cell is-young"></span><b id="n-young">0</b> <span data-t="legendYoung">learned</span></li>
+        <li><span class="sw cell is-mature"></span><b id="n-mature">0</b> <span data-t="legendMature">mastered (3+ weeks)</span></li>
       </ul>
       <p class="today" id="today"></p>
     </aside>
@@ -550,26 +552,32 @@
 
 <dialog id="settings" aria-labelledby="settings-title">
   <div class="sheet">
-    <h2 id="settings-title">For grown-ups</h2>
+    <h2 id="settings-title" data-t="settingsTitle">For grown-ups</h2>
 
     <section>
-      <h3>Times tables up to</h3>
+      <label class="field" for="lang"><span data-t="language">Language</span>
+        <select id="lang"></select>
+      </label>
+    </section>
+
+    <section>
+      <h3 data-t="sizeTitle">Times tables up to</h3>
       <div class="chips" id="size-chips">
-        <label class="chip"><input type="radio" name="size" id="size-10" value="10"><span>10 × 10</span></label>
-        <label class="chip"><input type="radio" name="size" id="size-12" value="12"><span>12 × 12</span></label>
-        <label class="chip"><input type="radio" name="size" id="size-15" value="15"><span>15 × 15</span></label>
-        <label class="chip"><input type="radio" name="size" id="size-20" value="20"><span>20 × 20</span></label>
+        <label class="chip"><input type="radio" name="size" id="size-10" value="10"><span class="size-label" data-n="10">10 × 10</span></label>
+        <label class="chip"><input type="radio" name="size" id="size-12" value="12"><span class="size-label" data-n="12">12 × 12</span></label>
+        <label class="chip"><input type="radio" name="size" id="size-15" value="15"><span class="size-label" data-n="15">15 × 15</span></label>
+        <label class="chip"><input type="radio" name="size" id="size-20" value="20"><span class="size-label" data-n="20">20 × 20</span></label>
       </div>
     </section>
 
     <section>
-      <h3>Tables to practise</h3>
+      <h3 data-t="tablesTitle">Tables to practise</h3>
       <div class="chips" id="table-chips"></div>
     </section>
 
     <section class="fields">
-      <label class="field" for="new-per-day">New facts per day <input id="new-per-day" type="number" min="0" max="100" step="1"></label>
-      <label class="field" for="retention">Target recall
+      <label class="field" for="new-per-day"><span data-t="newPerDay">New facts per day</span> <input id="new-per-day" type="number" min="0" max="100" step="1"></label>
+      <label class="field" for="retention"><span data-t="retention">Target recall</span>
         <select id="retention">
           <option value="0.8">80%</option>
           <option value="0.85">85%</option>
@@ -577,54 +585,55 @@
           <option value="0.95">95%</option>
         </select>
       </label>
-      <p class="hint">Target recall is the chance of remembering a fact when it comes up for review. Higher means more reviews.</p>
+      <p class="hint" data-t="retentionHint"></p>
     </section>
 
     <section>
-      <h3>How the cards are scheduled</h3>
-      <p>Each fact is a flash card scheduled with FSRS (version 6, default parameters), the algorithm Anki offers alongside its older SM-2. FSRS estimates how likely your child is to remember each fact, and brings it back when that chance falls to the target recall.</p>
-      <p>Your child types the answer. It is checked as soon as it has as many digits as the right answer, or after 3 seconds without typing. The app then picks the Anki rating:</p>
+      <h3 data-t="howTitle">How the cards are scheduled</h3>
+      <p data-t="howP1"></p>
+      <p data-t="howP2"></p>
       <table class="rules">
-        <tr><th>Answer</th><th>Anki rating</th></tr>
-        <tr><td>Wrong</td><td>Again: the fact comes back in 1 minute, or 10 minutes if it had been learned before</td></tr>
-        <tr><td>Right, slower than 10 s</td><td>Hard</td></tr>
-        <tr><td>Right</td><td>Good</td></tr>
-        <tr><td>Right within 4 s</td><td>Easy, but only on a first showing or a review, not during the 1- and 10-minute steps</td></tr>
+        <tr><th data-t="ruleAnswer">Answer</th><th data-t="ruleRating">Anki rating</th></tr>
+        <tr><td data-t="ruleWrong">Wrong</td><td data-t="ruleWrongRating"></td></tr>
+        <tr><td data-t="ruleSlow">Right, slower than 10 s</td><td>Hard</td></tr>
+        <tr><td data-t="ruleRight">Right</td><td>Good</td></tr>
+        <tr><td data-t="ruleFast">Right within 4 s</td><td data-t="ruleFastRating"></td></tr>
       </table>
-      <p style="margin-top:0.6rem">A new fact comes back after 1 and 10 minutes, then a few days later. Each time it is remembered the gap grows, faster for facts your child finds easy. New facts from all the selected tables are introduced in a random order.</p>
+      <p style="margin-top:0.6rem" data-t="howP3"></p>
     </section>
 
     <section>
-      <h3>Review log</h3>
+      <h3 data-t="logTitle">Review log</h3>
       <p id="log-status"></p>
       <div class="row">
-        <button type="button" class="ghost-btn" id="copy-log">Copy as CSV</button>
+        <button type="button" class="ghost-btn" id="copy-log" data-t="copyLog">Copy as CSV</button>
       </div>
-      <textarea id="log-text" readonly hidden aria-label="Review log as CSV"></textarea>
+      <textarea id="log-text" readonly hidden data-t-aria="logAria"></textarea>
     </section>
 
     <section>
-      <h3>Testing</h3>
-      <p id="clock-status">Using the real clock.</p>
+      <h3 data-t="testingTitle">Testing</h3>
+      <p id="clock-status"></p>
       <div class="row">
-        <button type="button" class="ghost-btn" id="jump-day">Jump ahead one day</button>
-        <button type="button" class="ghost-btn" id="real-clock">Back to real time</button>
+        <button type="button" class="ghost-btn" id="jump-day" data-t="jumpDay">Jump ahead one day</button>
+        <button type="button" class="ghost-btn" id="real-clock" data-t="realClock">Back to real time</button>
       </div>
     </section>
 
     <section>
-      <h3>Progress</h3>
-      <p>Progress is saved in this browser only.</p>
-      <button type="button" class="ghost-btn danger" id="reset">Erase all progress</button>
+      <h3 data-t="progressSection">Progress</h3>
+      <p data-t="savedHere">Progress is saved in this browser only.</p>
+      <button type="button" class="ghost-btn danger" id="reset" data-t="erase">Erase all progress</button>
     </section>
 
     <div class="sheet-foot">
-      <button type="button" class="primary-btn" id="close-settings">Done</button>
+      <button type="button" class="primary-btn" id="close-settings" data-t="close">Done</button>
     </div>
   </div>
 </dialog>
 
 <script src="srs.js"></script>
+<script src="i18n.js"></script>
 <script>
 (function () {
   'use strict';
@@ -635,16 +644,18 @@
   const MATURE_DAYS = 21; // Anki calls a card "mature" from 21 days
   const IDLE_SUBMIT_MS = 3000; // check a shorter answer after this pause
   const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
+  const PRAISE = { [SRS.EASY]: 'easy', [SRS.GOOD]: 'good', [SRS.HARD]: 'hard' };
 
   const $ = (id) => document.getElementById(id);
   const range = (n) => Array.from({ length: n }, (_, i) => i + 1);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => '&#' + ch.charCodeAt(0) + ';');
 
   // ---------- state ----------
 
   function defaultState() {
     return {
       cards: {},
-      settings: { size: 12, tables: range(12), newPerDay: 10, retention: 0.9 },
+      settings: { size: 12, tables: range(12), newPerDay: 10, retention: 0.9, lang: I18N.DEFAULT },
       daily: null,
       clockOffset: 0,
       // One entry per answer: [time, card id, rating, state before, ms, typed answer].
@@ -678,6 +689,8 @@
   const now = () => Date.now() + state.clockOffset;
   const today = () => SRS.dayIndex(now(), ROLLOVER);
   const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention });
+  const lang = () => (I18N.STRINGS[state.settings.lang] ? state.settings.lang : I18N.DEFAULT);
+  const T = () => I18N.STRINGS[lang()];
 
   function daily() {
     if (!state.daily || state.daily.day !== today()) {
@@ -717,25 +730,18 @@
 
   // ---------- wording ----------
 
+  // "in 5 minutes", "tomorrow", "in 3 days" in the chosen language.
   function whenText(due) {
+    const rtf = new Intl.RelativeTimeFormat(lang(), { numeric: 'auto' });
     const ms = due - now();
-    if (ms < 60 * SRS.MINUTE) {
-      const m = Math.max(1, Math.round(ms / SRS.MINUTE));
-      return m === 1 ? 'in 1 minute' : 'in ' + m + ' minutes';
-    }
+    if (ms < 60 * SRS.MINUTE) return rtf.format(Math.max(1, Math.round(ms / SRS.MINUTE)), 'minute');
     const days = SRS.dayIndex(due, ROLLOVER) - today();
-    if (days <= 0) return 'later today';
-    if (days === 1) return 'tomorrow';
-    if (days < 60) return 'in ' + days + ' days';
-    return 'in about ' + Math.round(days / 30) + ' months';
+    if (days <= 0) return T().laterToday;
+    if (days < 60) return rtf.format(days, 'day');
+    return rtf.format(Math.round(days / 30), 'month');
   }
 
-  const TAGS = {
-    new: 'New fact',
-    learning: 'Practising',
-    relearning: 'Practising again',
-    review: 'Review',
-  };
+  const fact = (a, b) => a + ' ' + T().op + ' ' + b;
 
   // ---------- study flow ----------
 
@@ -746,7 +752,8 @@
   let shownAt = 0;
   let advanceTimer = null;
   let idleTimer = null;
-  let feedbackHtml = '';
+  // Builds the feedback line, so that it follows a change of language.
+  let feedback = () => '';
   let shown = null; // the card as it was when shown, for the card header
 
   function current() {
@@ -773,7 +780,8 @@
       shown = { type: c.type, reps: c.reps };
       mode = 'ask';
       shownAt = performance.now();
-      feedbackHtml = c.reps === 0 ? 'A new one! Have a go.' : 'Type the answer.';
+      const first = c.reps === 0;
+      feedback = () => (first ? T().newOne : T().typeAnswer);
       flash('enter');
     }
     render();
@@ -784,13 +792,14 @@
     const c = current();
     if (mode !== 'ask' || !c || typed === '') return;
     const product = c.a * c.b;
-    const right = Number(typed) === product;
+    const answer = typed;
+    const right = Number(answer) === product;
     const ms = performance.now() - shownAt;
     const grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
     const wasNew = c.type === 'new';
     const updated = SRS.answer(c, grade, now(), cfg());
     state.cards[c.id] = updated;
-    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), Number(typed)]);
+    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), Number(answer)]);
 
     const d = daily();
     d.answered += 1;
@@ -801,17 +810,12 @@
 
     if (right) {
       mode = 'right';
-      const praise = {
-        [SRS.EASY]: 'Fast and right!',
-        [SRS.GOOD]: 'Yes, that’s right!',
-        [SRS.HARD]: 'Right! That one took a while.',
-      }[grade];
-      feedbackHtml = '<strong>' + praise + '</strong><br>You’ll see it again ' + whenText(updated.due) + '.';
+      feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due)));
       advanceTimer = setTimeout(next, 1400);
     } else {
       mode = 'wrong';
-      feedbackHtml = '<strong>Not quite.</strong> You wrote ' + typed + '. ' +
-        c.a + ' × ' + c.b + ' = ' + product + '.<br>Type ' + product + ' to go on.';
+      feedback = () => '<strong>' + esc(T().notQuite) + '</strong> ' + esc(T().youWrote(answer)) + ' ' +
+        esc(fact(c.a, c.b) + ' = ' + product) + '.<br>' + esc(T().typeToGoOn(product));
       typed = '';
       flash('shake');
     }
@@ -824,7 +828,7 @@
     const answer = String(c.a * c.b);
     if (typed === answer) {
       mode = 'right';
-      feedbackHtml = '<strong>That’s it.</strong><br>It will come back ' + whenText(c.due) + '.';
+      feedback = () => '<strong>' + esc(T().thatsIt) + '</strong><br>' + esc(T().comesBack(whenText(c.due)));
       advanceTimer = setTimeout(next, 900);
     } else if (typed.length >= answer.length || !answer.startsWith(typed)) {
       typed = '';
@@ -885,7 +889,7 @@
       square.appendChild(el);
       return el;
     };
-    add('corner', '×');
+    add('corner', T().op);
     for (let b = 1; b <= size; b++) add('hd', b);
     for (let a = 1; a <= size; a++) {
       add('hd', a);
@@ -900,6 +904,7 @@
   }
 
   function renderSquare() {
+    const t = T();
     const size = state.settings.size;
     const active = new Set(activeCards().map((c) => c.id));
     const n = { new: 0, learning: 0, young: 0, mature: 0 };
@@ -914,12 +919,12 @@
           (s === 'new' ? '' : ' is-' + s) +
           (on ? '' : ' is-off') +
           (c.id === currentId ? ' is-current' : '');
-        let tip = a + ' × ' + b + ': ';
-        if (!on) tip += 'table switched off';
-        else if (s === 'new') tip += 'not started';
-        else if (s === 'learning') tip += 'practising, back ' + whenText(c.due);
-        else tip += 'next review ' + whenText(c.due);
-        el.title = tip;
+        let tip;
+        if (!on) tip = t.tipOff;
+        else if (s === 'new') tip = t.tipNew;
+        else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
+        else tip = t.tipReview(whenText(c.due));
+        el.title = fact(a, b) + ': ' + tip;
       }
     }
     $('n-new').textContent = n.new;
@@ -952,14 +957,23 @@
       slot.textContent = typed;
     }
     slot.classList.toggle('empty', mode === 'ask' && typed === '');
-    $('feedback').innerHTML = feedbackHtml;
+    $('feedback').innerHTML = feedback();
   }
 
   function render() {
+    const t = T();
     const q = queues();
-    $('count-new').textContent = q.fresh.length;
-    $('count-learn').textContent = q.learningNow.length + q.learningAhead.length + q.learningLater.length;
-    $('count-review').textContent = q.review.length;
+    const counts = {
+      new: q.fresh.length,
+      learn: q.learningNow.length + q.learningAhead.length + q.learningLater.length,
+      review: q.review.length,
+    };
+    $('count-new').textContent = counts.new;
+    $('count-learn').textContent = counts.learn;
+    $('count-review').textContent = counts.review;
+    $('label-new').textContent = t.countNew(counts.new);
+    $('label-learn').textContent = t.countLearn(counts.learn);
+    $('label-review').textContent = t.countReview(counts.review);
 
     const done = mode === 'done';
     $('card').hidden = done;
@@ -969,37 +983,51 @@
     if (shown && !done) {
       const tag = $('tag');
       tag.className = 'tag ' + shown.type;
-      tag.textContent = TAGS[shown.type];
-      $('seen').textContent = shown.reps === 0 ? 'First time' : 'Seen ' + shown.reps + '×';
+      tag.textContent = t.tags[shown.type];
+      $('seen').textContent = shown.reps === 0 ? t.firstTime : t.seen(shown.reps);
     }
     renderCard();
     if (done) renderDone();
     renderSquare();
 
     const d = daily();
-    $('today').textContent = d.answered
-      ? 'Today: ' + d.answered + ' answered, ' + d.right + ' right.'
-      : 'Nothing answered yet today.';
+    $('today').textContent = d.answered ? t.today(d.answered, d.right) : t.nothingToday;
 
     const pill = $('clock-pill');
     const ahead = Math.round(state.clockOffset / DAY);
     pill.hidden = ahead === 0;
-    pill.textContent = 'Test clock +' + ahead + (ahead === 1 ? ' day' : ' days');
+    pill.textContent = t.testClock(ahead);
   }
 
   function renderDone() {
+    const t = T();
     const d = daily();
-    $('done-date').textContent = new Date(now()).toLocaleDateString(undefined, { weekday: 'long' });
-    $('done-stats').textContent = d.answered
-      ? 'You answered ' + d.answered + (d.answered === 1 ? ' card' : ' cards') + ' and got ' + d.right + ' right.'
-      : 'There is nothing to practise right now.';
+    $('done-date').textContent = new Date(now()).toLocaleDateString(lang(), { weekday: 'long' });
+    $('done-stats').textContent = d.answered ? t.doneStats(d.answered, d.right) : t.nothingNow;
 
     const active = activeCards();
     const dues = active.filter((c) => c.type !== 'new').map((c) => c.due);
     const unseen = active.some((c) => c.type === 'new');
     if (unseen) dues.push(SRS.dayStart(today() + 1, ROLLOVER));
-    $('done-next').textContent = dues.length ? 'Next cards ' + whenText(Math.min(...dues)) + '.' : '';
+    $('done-next').textContent = dues.length ? t.nextCards(whenText(Math.min(...dues))) : '';
     $('more-new').hidden = !unseen;
+  }
+
+  // ---------- language ----------
+
+  function applyLanguage() {
+    const t = T();
+    document.documentElement.lang = lang();
+    document.title = t.appName;
+    document.querySelectorAll('[data-t]').forEach((el) => {
+      el.textContent = t[el.dataset.t];
+    });
+    document.querySelectorAll('[data-t-aria]').forEach((el) => {
+      el.setAttribute('aria-label', t[el.dataset.tAria]);
+    });
+    document.querySelectorAll('.size-label').forEach((el) => {
+      el.textContent = fact(el.dataset.n, el.dataset.n);
+    });
   }
 
   // ---------- settings ----------
@@ -1009,29 +1037,37 @@
   function buildChips() {
     const wrap = $('table-chips');
     wrap.textContent = '';
-    for (let t = 1; t <= state.settings.size; t++) {
+    for (let n = 1; n <= state.settings.size; n++) {
       const label = document.createElement('label');
       label.className = 'chip';
-      label.innerHTML = '<input type="checkbox" id="table-' + t + '" value="' + t + '"><span>×' + t + '</span>';
+      label.innerHTML = '<input type="checkbox" id="table-' + n + '" value="' + n + '"><span>' + T().tableChip(n) + '</span>';
       wrap.appendChild(label);
     }
   }
 
+  function buildLanguageMenu() {
+    const select = $('lang');
+    for (const code of I18N.LANGS) {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = I18N.STRINGS[code].name;
+      select.appendChild(opt);
+    }
+  }
+
   function syncSettings() {
+    const t = T();
     const s = state.settings;
+    $('lang').value = lang();
     $('size-' + s.size).checked = true;
-    for (let t = 1; t <= s.size; t++) $('table-' + t).checked = s.tables.includes(t);
+    for (let n = 1; n <= s.size; n++) $('table-' + n).checked = s.tables.includes(n);
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     const ahead = Math.round(state.clockOffset / DAY);
-    $('clock-status').textContent = ahead
-      ? 'The app clock is ' + ahead + (ahead === 1 ? ' day' : ' days') + ' ahead of real time.'
-      : 'Using the real clock. Jump ahead to see which facts come back on later days.';
+    $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
     $('real-clock').hidden = ahead === 0;
     const n = state.log.length;
-    $('log-status').textContent = n === 0
-      ? 'No answers recorded yet.'
-      : n + (n === 1 ? ' answer' : ' answers') + ' recorded. The CSV has the columns the FSRS optimizer reads, so it can be used to fit FSRS to your child.';
+    $('log-status').textContent = n === 0 ? t.logNone : t.logCount(n);
     $('log-text').hidden = true;
   }
 
@@ -1046,10 +1082,20 @@
     else render();
   });
 
+  $('lang').addEventListener('change', (e) => {
+    state.settings.lang = e.target.value;
+    save();
+    applyLanguage();
+    buildChips();
+    buildSquare();
+    syncSettings();
+    render();
+  });
+
   $('size-chips').addEventListener('change', (e) => {
     const s = state.settings;
     const size = Number(e.target.value);
-    for (let t = s.size + 1; t <= size; t++) if (!s.tables.includes(t)) s.tables.push(t);
+    for (let n = s.size + 1; n <= size; n++) if (!s.tables.includes(n)) s.tables.push(n);
     s.tables.sort((x, y) => x - y);
     s.size = size;
     save();
@@ -1059,10 +1105,10 @@
   });
 
   $('table-chips').addEventListener('change', (e) => {
-    const t = Number(e.target.value);
+    const n = Number(e.target.value);
     const set = new Set(state.settings.tables);
-    if (e.target.checked) set.add(t);
-    else set.delete(t);
+    if (e.target.checked) set.add(n);
+    else set.delete(n);
     state.settings.tables = [...set].sort((x, y) => x - y);
     save();
   });
@@ -1099,11 +1145,11 @@
       area.hidden = false;
       area.focus();
       area.select();
-      $('log-status').textContent = 'Copying is blocked here. The log is selected below: copy it with your keyboard or the menu.';
+      $('log-status').textContent = T().copyBlocked;
     };
     try {
       navigator.clipboard.writeText(csv).then(
-        () => { $('log-status').textContent = 'Copied ' + state.log.length + ' rows to the clipboard.'; },
+        () => { $('log-status').textContent = T().copied(state.log.length); },
         showText
       );
     } catch (e) {
@@ -1130,16 +1176,16 @@
     const btn = e.currentTarget;
     if (!btn.dataset.armed) {
       btn.dataset.armed = '1';
-      btn.textContent = 'Tap again to erase everything';
+      btn.textContent = T().eraseConfirm;
       resetTimer = setTimeout(() => {
         delete btn.dataset.armed;
-        btn.textContent = 'Erase all progress';
+        btn.textContent = T().erase;
       }, 4000);
       return;
     }
     clearTimeout(resetTimer);
     delete btn.dataset.armed;
-    btn.textContent = 'Progress erased';
+    btn.textContent = T().erased;
     state = { ...defaultState(), settings: state.settings };
     lastId = null;
     save();
@@ -1199,6 +1245,8 @@
     if (mode === 'done' && SRS.pickNext(queues(), avoidList())) next();
   }, 30 * 1000);
 
+  buildLanguageMenu();
+  applyLanguage();
   buildSquare();
   buildChips();
   next();
