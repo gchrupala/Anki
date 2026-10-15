@@ -1,6 +1,6 @@
 {
-  "name": "Tabliczka mnożenia",
-  "short_name": "Tabliczka",
+  "name": "MnożenieMax",
+  "short_name": "MnożenieMax",
   "description": "Fiszki z tabliczką mnożenia, z powtórkami planowanymi przez FSRS.",
   "lang": "pl",
   "id": "./",

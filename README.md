@@ -1,4 +1,4 @@
-# Times Table Cards
+# MnożenieMax
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
@@ -25,7 +25,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "Tabliczka". Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+The home-screen name is "MnożenieMax". Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -38,7 +38,7 @@ The offline copy is kept by `sw.js` (a service worker). On every launch it asks 
 1. In the Family Link app on the parent's phone, open the child's profile, then the tablet under the signed-in devices, and turn on "Apps from unknown sources". The exact place of this setting differs between Family Link versions.
 2. Copy the APK to the tablet, for example through Google Drive, and open it there to install it.
 3. Turn "Apps from unknown sources" off again.
-4. In Family Link, set a limit for "Tabliczka" under the app limits.
+4. In Family Link, set a limit for "MnożenieMax" under the app limits.
 
 To update, install a newer APK over the old one. Progress is kept, but only if the new APK is signed with the same key as the old one. An APK signed with another key can only be installed after uninstalling the old app, which erases the progress.
 

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Times Table Cards</title>
+<title>MnożenieMax</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Tabliczka">
+<meta name="apple-mobile-web-app-title" content="MnożenieMax">
 <meta name="theme-color" content="#f7f9fd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1c2925" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -489,7 +489,7 @@
 <body>
 <div class="app">
   <header class="top">
-    <h1 class="brand" data-t="appName">Times Table Cards</h1>
+    <h1 class="brand" data-t="appName">MnożenieMax</h1>
     <div class="counts" data-t-aria="countsAria">
       <span class="count new"><b id="count-new">0</b><span id="label-new">new</span></span>
       <span class="count learn"><b id="count-learn">0</b><span id="label-learn">practising</span></span>
@@ -631,6 +631,15 @@
       </div>
     </section>
 
+    <section id="update-section">
+      <h3 data-t="updateTitle">Update</h3>
+      <p id="app-version"></p>
+      <div class="row">
+        <button type="button" class="ghost-btn" id="reload-app" data-t="reloadButton">Reload from the server</button>
+      </div>
+      <p class="hint" id="reload-status" data-t="reloadHint" style="margin-top:0.6rem">Progress is kept.</p>
+    </section>
+
     <section>
       <h3 data-t="progressSection">Progress</h3>
       <p data-t="savedHere">Progress is saved in this browser only.</p>
@@ -655,6 +664,8 @@
   const MATURE_DAYS = 21; // Anki calls a card "mature" from 21 days
   const IDLE_SUBMIT_MS = 3000; // check a shorter answer after this pause
   const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
+  // The Android app serves its own copy of these files under this address.
+  const inAndroidApp = location.hostname === 'appassets.androidplatform.net';
   const PRAISE = { [SRS.EASY]: 'easy', [SRS.GOOD]: 'good', [SRS.HARD]: 'hard' };
 
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
@@ -1126,6 +1137,11 @@
     const n = state.log.length;
     $('log-status').textContent = n === 0 ? t.logNone : t.logCount(n);
     $('log-text').hidden = true;
+    // The date GitHub Pages published the files, from the page's Last-Modified header.
+    const published = new Date(document.lastModified);
+    $('app-version').textContent = isNaN(published) ? '' :
+      t.versionFrom(published.toLocaleString(lang(), { dateStyle: 'medium', timeStyle: 'short' }));
+    $('update-section').hidden = inAndroidApp;
   }
 
   $('open-settings').addEventListener('click', () => {
@@ -1258,6 +1274,33 @@
     next();
   });
 
+  // Fetches the newest version: first a newer offline worker (sw.js), if there
+  // is one, then the page itself, which the worker always checks with the server.
+  $('reload-app').addEventListener('click', async () => {
+    if (navigator.onLine === false) {
+      $('reload-status').textContent = T().reloadOffline;
+      return;
+    }
+    $('reload-app').disabled = true;
+    $('reload-status').textContent = T().reloading;
+    try {
+      const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+      if (reg) {
+        await reg.update();
+        if (reg.installing || reg.waiting) {
+          // Wait (at most 10 seconds) until the new worker takes over.
+          await new Promise((resolve) => {
+            navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true });
+            setTimeout(resolve, 10000);
+          });
+        }
+      }
+    } catch (e) {
+      /* reload anyway */
+    }
+    location.reload();
+  });
+
   // ---------- input ----------
 
   const keypad = $('keypad');
@@ -1313,7 +1356,6 @@
   // Offline copy and protected storage, when the app is served over http(s).
   // The offline copy is not available from a local file or inside the Claude
   // preview, and not needed in the Android app, which carries its own files.
-  const inAndroidApp = location.hostname === 'appassets.androidplatform.net';
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !inAndroidApp) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
