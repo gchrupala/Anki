@@ -915,21 +915,22 @@
   // relearning earns nothing), and coins never change the schedule.
   // Level 1: learned (left the first-day steps); 2: next review a week or
   // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js in step.
-  const LEVEL_COINS = [0, 1, 2, 5];
+  const LEVEL_COINS = [0, 2, 5, 10];
+  const OLD_LEVEL_COINS = [0, 1, 2, 5]; // before settings layout 6
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
-  const DAY_BONUS = 3; // for finishing all of the day's cards
+  const DAY_BONUS = 10; // for finishing all of the day's cards
   // Trophies in the shop, cheapest first: name, price in coins, then the
   // colours highlight, middle, shadow, outline. The price range is also
   // named in the coin rules text in i18n.js.
   const TROPHY_METALS = [
-    ['bronze', 200, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
-    ['silver', 300, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
-    ['gold', 500, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
-    ['platinum', 650, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
-    ['diamond', 800, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
-    ['ruby', 1000, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
-    ['emerald', 1200, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
-    ['sapphire', 1500, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+    ['bronze', 50, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['silver', 100, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['gold', 150, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['platinum', 250, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
+    ['diamond', 350, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
+    ['ruby', 500, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
+    ['emerald', 650, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
+    ['sapphire', 800, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
   ];
   const metal = (name) => TROPHY_METALS.find((m) => m[0] === name) || TROPHY_METALS[0];
   const CELEBRATION_MS = 4000; // confetti time
@@ -949,8 +950,9 @@
   const DEFAULT_EXTRAS = [15, 20, 25];
   // Version of the settings layout; 2 added the extra numbers, 3 made the
   // language follow the device unless one is chosen, 4 lowered the default
-  // time to answer from 20 to 10 seconds, 5 added coins.
-  const SETTINGS_LAYOUT = 5;
+  // time to answer from 20 to 10 seconds, 5 added coins, 6 raised the coin
+  // rewards (and lowered the shop prices).
+  const SETTINGS_LAYOUT = 6;
 
   const $ = (id) => document.getElementById(id);
 
@@ -1012,6 +1014,12 @@
       }
       if (layout < 3) s.settings.lang = 'auto';
       if (layout < 4 && (s.settings.answerTime === undefined || s.settings.answerTime === 20)) s.settings.answerTime = 10;
+      if (layout === 5) {
+        // Coins were raised: pay the difference for levels already reached.
+        for (const c of Object.values(s.cards)) {
+          for (let l = 1; l <= (c.reward || 0); l++) s.coins += LEVEL_COINS[l] - OLD_LEVEL_COINS[l];
+        }
+      }
       if (layout < 5) {
         // Facts learned before coins existed count from the start.
         s.coins = 0;

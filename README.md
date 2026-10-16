@@ -103,10 +103,10 @@ Coins reward what the child remembers, not the number of cards done. In spaced r
 
 | When | Coins |
 | --- | --- |
-| A new fact is learned (it leaves the first-day steps) | 1 |
-| The gap before its next review reaches a week | 2 |
-| The fact is mastered (a gap of 21 days or more) | 5 |
-| All of the day's cards are done (once a day) | 3 |
+| A new fact is learned (it leaves the first-day steps) | 2 |
+| The gap before its next review reaches a week | 5 |
+| The fact is mastered (a gap of 21 days or more) | 10 |
+| All of the day's cards are done (once a day) | 10 |
 
 Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
 
@@ -114,16 +114,16 @@ Coins are spent in the shop ("Sklep" in the header) on trophies of the child's c
 
 | Trophy | Coins |
 | --- | --- |
-| Bronze | 200 |
-| Silver | 300 |
-| Gold | 500 |
-| Platinum | 650 |
-| Diamond | 800 |
-| Ruby | 1000 |
-| Emerald | 1200 |
-| Sapphire | 1500 |
+| Bronze | 50 |
+| Silver | 100 |
+| Gold | 150 |
+| Platinum | 250 |
+| Diamond | 350 |
+| Ruby | 500 |
+| Emerald | 650 |
+| Sapphire | 800 |
 
-Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the trophy and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the trophy is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of trophies and the latest one bought. The shop lists all trophies bought, and the settings show the coins collected and spent. Prices and materials are set in `TROPHY_METALS` in `index.html`.
+Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the trophy and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the trophy is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of trophies and the latest one bought. The shop lists all trophies bought, and the settings show the coins collected and spent. Prices and materials are set in `TROPHY_METALS` in `index.html`, the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each trophy as soon as possible, bronze comes on day 1, gold on day 5, diamond on day 13 and sapphire on day 29.
 
 ### Order of cards
 
