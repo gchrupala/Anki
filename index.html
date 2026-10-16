@@ -626,6 +626,17 @@
         </select>
       </label>
       <p class="hint" data-t="retentionHint"></p>
+      <label class="field" for="answer-time"><span data-t="answerTime">Time to answer</span>
+        <select id="answer-time">
+          <option value="10">10 s</option>
+          <option value="15">15 s</option>
+          <option value="20">20 s</option>
+          <option value="30">30 s</option>
+          <option value="60">60 s</option>
+          <option value="0">-</option>
+        </select>
+      </label>
+      <p class="hint" data-t="answerTimeHint"></p>
     </section>
 
     <section>
@@ -734,6 +745,7 @@
         tables: range(12).concat(DEFAULT_EXTRAS),
         newPerDay: 10,
         retention: 0.9,
+        answerTime: 20, // seconds without typing before a fact counts as not known; 0 = no limit
         lang: 'auto', // the device language; or a code such as 'nl'
         layout: SETTINGS_LAYOUT,
       },
@@ -877,6 +889,7 @@
   let shownAt = 0;
   let advanceTimer = null;
   let idleTimer = null;
+  let giveUpTimer = null;
   // Builds the feedback line, so that it follows a change of language.
   let feedback = () => '';
   let shown = null; // the card as it was when shown, for the card header
@@ -892,9 +905,31 @@
     return [lastId, b + 'x' + a];
   }
 
+  // Starts the time limit while nothing is typed. It does not run while the
+  // settings panel is open or the app is in the background.
+  function armGiveUp() {
+    clearTimeout(giveUpTimer);
+    const seconds = state.settings.answerTime;
+    if (mode === 'ask' && typed === '' && seconds > 0 && !panelOpen() && document.visibilityState !== 'hidden') {
+      giveUpTimer = setTimeout(() => submit(true), seconds * 1000);
+    }
+  }
+
+  // Stops both timers, and restarts them from now when the card is still open.
+  function pauseTimers() {
+    clearTimeout(idleTimer);
+    clearTimeout(giveUpTimer);
+  }
+  function resumeTimers() {
+    if (mode !== 'ask') return;
+    shownAt = performance.now();
+    if (typed) idleTimer = setTimeout(submit, IDLE_SUBMIT_MS);
+    else armGiveUp();
+  }
+
   function next() {
     clearTimeout(advanceTimer);
-    clearTimeout(idleTimer);
+    pauseTimers();
     const c = SRS.pickNext(queues(), avoidList());
     typed = '';
     if (!c) {
@@ -910,21 +945,24 @@
       flash('enter');
     }
     render();
+    armGiveUp();
   }
 
-  function submit() {
-    clearTimeout(idleTimer);
+  // timedOut: nothing was typed within the time limit, so the fact counts as
+  // not known (Again), like a wrong answer.
+  function submit(timedOut = false) {
+    pauseTimers();
     const c = current();
-    if (mode !== 'ask' || !c || typed === '') return;
+    if (mode !== 'ask' || !c || (typed === '' && !timedOut)) return;
     const product = c.a * c.b;
     const answer = typed;
-    const right = Number(answer) === product;
+    const right = !timedOut && Number(answer) === product;
     const ms = performance.now() - shownAt;
     const grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
     const wasNew = c.type === 'new';
     const updated = SRS.answer(c, grade, now(), cfg());
     state.cards[c.id] = updated;
-    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), Number(answer)]);
+    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), timedOut ? null : Number(answer)]);
 
     const d = daily();
     d.answered += 1;
@@ -939,8 +977,10 @@
       advanceTimer = setTimeout(next, 1400);
     } else {
       mode = 'wrong';
-      feedback = () => '<strong>' + esc(T().notQuite) + '</strong> ' + esc(T().youWrote(answer)) + ' ' +
-        esc(ltr(fact(c.a, c.b) + ' = ' + num(product))) + '.<br>' + esc(T().typeToGoOn(product));
+      const sum = esc(ltr(fact(c.a, c.b) + ' = ' + num(product))) + '.<br>' + esc(T().typeToGoOn(product));
+      feedback = timedOut
+        ? () => '<strong>' + esc(T().timeUp) + '</strong> ' + sum
+        : () => '<strong>' + esc(T().notQuite) + '</strong> ' + esc(T().youWrote(answer)) + ' ' + sum;
       typed = '';
       flash('shake');
     }
@@ -985,9 +1025,10 @@
     // Check the answer once it has as many digits as the right one, or after
     // a pause for a shorter answer.
     const c = current();
-    clearTimeout(idleTimer);
+    pauseTimers();
     if (typed.length >= String(c.a * c.b).length) submit();
     else if (typed) idleTimer = setTimeout(submit, IDLE_SUBMIT_MS);
+    else armGiveUp(); // everything deleted: the time limit starts again
   }
 
   function flash(cls) {
@@ -1152,6 +1193,10 @@
     });
     const percent = new Intl.NumberFormat(lang(), { style: 'percent' });
     for (const opt of $('retention').options) opt.textContent = percent.format(Number(opt.value));
+    const seconds = new Intl.NumberFormat(lang(), { style: 'unit', unit: 'second', unitDisplay: 'short' });
+    for (const opt of $('answer-time').options) {
+      opt.textContent = opt.value === '0' ? t.noLimit : seconds.format(Number(opt.value));
+    }
     document.querySelectorAll('[data-t]').forEach((el) => {
       el.textContent = t[el.dataset.t];
     });
@@ -1206,6 +1251,7 @@
     $('extras-hint').textContent = t.extrasHint(s.size);
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
+    $('answer-time').value = String(s.answerTime);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
     $('real-clock').hidden = ahead === 0;
@@ -1224,6 +1270,7 @@
   // Opening the panel adds a step to the page history, so Android's Back
   // gesture closes the panel instead of leaving the app.
   function openPanel() {
+    pauseTimers();
     if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
     panel.hidden = false;
     document.body.classList.add('panel-open');
@@ -1241,7 +1288,10 @@
     document.body.classList.remove('panel-open');
     $('open-settings').blur();
     if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
-    else render();
+    else {
+      render();
+      resumeTimers();
+    }
     if (history.state && history.state.panel) history.back();
     return true;
   }
@@ -1311,6 +1361,11 @@
 
   $('retention').addEventListener('change', (e) => {
     state.settings.retention = Number(e.target.value);
+    save();
+  });
+
+  $('answer-time').addEventListener('change', (e) => {
+    state.settings.answerTime = Number(e.target.value);
     save();
   });
 
@@ -1454,10 +1509,12 @@
     }
   });
 
-  // Don't count time spent in another tab as thinking time.
+  // Time in another app or tab counts neither as thinking time nor against
+  // the time limit.
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'visible') return;
-    if (mode === 'ask') shownAt = performance.now();
+    if (document.visibilityState !== 'visible') return pauseTimers();
+    if (panelOpen()) return;
+    if (mode === 'ask') resumeTimers();
     if (mode === 'done') next();
   });
 
