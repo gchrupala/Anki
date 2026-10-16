@@ -110,7 +110,20 @@ Coins reward what the child remembers, not the number of cards done. In spaced r
 
 Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
 
-Every 200 coins bring a trophy, in a new material each time: bronze, silver, gold, platinum, diamond, ruby, emerald and sapphire, then the list starts again. The header shows the latest trophy, and the settings show them all. Winning one shows the trophy and lets confetti fall from the top of the screen for 4 seconds; the card stays on screen meanwhile. The trophy count appears next to the coins, and the settings show how many coins are left until the next one. With reduced motion switched on in the device settings, the trophy is shown without confetti.
+Coins are spent in the shop ("Sklep" in the header) on trophies of the child's choice. Prices rise with the material:
+
+| Trophy | Coins |
+| --- | --- |
+| Bronze | 200 |
+| Silver | 300 |
+| Gold | 500 |
+| Platinum | 650 |
+| Diamond | 800 |
+| Ruby | 1000 |
+| Emerald | 1200 |
+| Sapphire | 1500 |
+
+Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the trophy and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the trophy is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of trophies and the latest one bought. The shop lists all trophies bought, and the settings show the coins collected and spent. Prices and materials are set in `TROPHY_METALS` in `index.html`.
 
 ### Order of cards
 

@@ -238,7 +238,7 @@
   @media (prefers-reduced-motion: reduce) {
     .coins.bump, .coins.bump .coin-icon, .coins.bump .spark, .coin-plus, .coin-icon .glint { animation: none; }
   }
-  /* Trophies: one for every TROPHY_COINS coins, celebrated with confetti */
+  /* Trophies, bought in the shop and celebrated with confetti */
   .trophies {
     display: inline-flex;
     align-items: center;
@@ -255,8 +255,29 @@
   }
   .trophy-icon { width: 1.7rem; height: 1.7rem; flex: none; filter: drop-shadow(0 1px 1px rgb(60 40 20 / 0.35)); }
   #trophy-slot { display: inline-flex; }
-  .trophy-shelf { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+  .trophy-shelf { display: flex; flex-wrap: wrap; gap: 0.35rem; }
   .trophy-shelf .trophy-icon { width: 2.4rem; height: 2.4rem; }
+  /* Shop */
+  .shop-balance { display: flex; align-items: center; gap: 0.2rem; margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--coin-ink); }
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.75rem; }
+  .shop-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.9rem 0.6rem 0.8rem;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    background: var(--paper);
+    text-align: center;
+  }
+  .shop-item .trophy-icon { width: 3.6rem; height: 3.6rem; }
+  .shop-item .name { font-size: 0.9rem; font-weight: 600; }
+  .shop-item .price { display: inline-flex; align-items: center; font-weight: 700; color: var(--coin-ink); font-variant-numeric: tabular-nums; }
+  .shop-item .primary-btn { min-height: 2.4rem; padding: 0.4rem 0.9rem; font-size: 0.9rem; }
+  .shop-item .primary-btn[data-armed] { background: var(--good); }
+  .shop-item .missing { min-height: 2.4rem; display: flex; align-items: center; font-size: 0.8rem; color: var(--ink-soft); }
+  .shop-item.too-dear .trophy-icon { opacity: 0.55; }
   .trophy-icon .glint { animation: glint 4.5s ease-in-out infinite 1.5s; }
   .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
   .trophy-banner {
@@ -678,6 +699,10 @@
       <span id="trophy-slot"></span>
       <b id="trophy-total">0</b>
     </span>
+    <button type="button" class="ghost-btn settings-btn" id="open-shop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg>
+      <span data-t="shopButton">Shop</span>
+    </button>
     <span class="pill" id="clock-pill" hidden></span>
     <button type="button" class="ghost-btn settings-btn" id="open-settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -834,7 +859,6 @@
       <h3 data-t="coinsTitle">Coins</h3>
       <p data-t="coinsRules"></p>
       <p id="coins-total"></p>
-      <div class="trophy-shelf" id="trophy-shelf"></div>
     </section>
 
     <section id="update-section">
@@ -859,6 +883,22 @@
   </div>
 </div>
 
+<div class="panel" id="shop" role="dialog" aria-modal="true" aria-labelledby="shop-title" hidden>
+  <div class="sheet" id="shop-sheet" tabindex="-1">
+    <h2 id="shop-title" data-t="shopTitle">Shop</h2>
+    <p class="shop-balance" id="shop-balance"></p>
+    <p class="hint" data-t="shopHint"></p>
+    <div class="shop-grid" id="shop-grid"></div>
+    <section>
+      <h3 data-t="yourTrophies">Your trophies</h3>
+      <div class="trophy-shelf" id="trophy-shelf"></div>
+    </section>
+    <div class="sheet-foot">
+      <button type="button" class="primary-btn" id="close-shop" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+
 <script src="srs.js"></script>
 <script src="i18n.js"></script>
 <script>
@@ -878,21 +918,20 @@
   const LEVEL_COINS = [0, 1, 2, 5];
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
   const DAY_BONUS = 3; // for finishing all of the day's cards
-  const TROPHY_COINS = 200; // a trophy for every 200 coins
-  // Trophy materials in the order they are won; after the last one the list
-  // starts again. Colours: highlight, middle, shadow, outline.
+  // Trophies in the shop, cheapest first: name, price in coins, then the
+  // colours highlight, middle, shadow, outline. The price range is also
+  // named in the coin rules text in i18n.js.
   const TROPHY_METALS = [
-    ['bronze', '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
-    ['silver', '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
-    ['gold', '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
-    ['platinum', '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
-    ['diamond', '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
-    ['ruby', '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
-    ['emerald', '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
-    ['sapphire', '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+    ['bronze', 200, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['silver', 300, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['gold', 500, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['platinum', 650, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
+    ['diamond', 800, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
+    ['ruby', 1000, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
+    ['emerald', 1200, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
+    ['sapphire', 1500, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
   ];
-  // The material of trophy number k (1 = the first trophy).
-  const metalOf = (k) => TROPHY_METALS[(k - 1) % TROPHY_METALS.length];
+  const metal = (name) => TROPHY_METALS.find((m) => m[0] === name) || TROPHY_METALS[0];
   const CELEBRATION_MS = 4000; // confetti time
   function rewardLevel(c) {
     if (c.type === 'new' || c.type === 'learning') return 0;
@@ -949,7 +988,8 @@
       },
       daily: null,
       coins: 0,
-      trophies: 0,
+      spent: 0, // coins spent in the shop; coins minus spent can still be spent
+      trophies: [], // bought in the shop: { metal, at }
       clockOffset: 0,
       // One entry per answer: [time, card id, rating, state before, ms, typed answer].
       log: [],
@@ -982,8 +1022,9 @@
       }
       s.settings.layout = SETTINGS_LAYOUT;
       const d = defaultState();
-      // Trophies already earned count without a celebration.
-      if (s.trophies === undefined) s.trophies = Math.floor((s.coins || 0) / TROPHY_COINS);
+      // Trophies are bought in the shop; the short-lived automatic ones are dropped.
+      if (!Array.isArray(s.trophies)) s.trophies = [];
+      if (typeof s.spent !== 'number') s.spent = 0;
       return { ...d, ...s, settings: { ...d.settings, ...s.settings } };
     } catch (e) {
       return null;
@@ -1164,13 +1205,10 @@
     void plus.offsetWidth;
     plus.textContent = '+' + num(n);
     plus.hidden = false;
-    // A trophy for every TROPHY_COINS coins. Returns true when one is won.
-    const trophies = Math.floor(state.coins / TROPHY_COINS);
-    if (trophies <= (state.trophies || 0)) return false;
-    state.trophies = trophies;
-    celebrate();
-    return true;
   }
+
+  // Coins that can still be spent in the shop.
+  const balance = () => (state.coins || 0) - (state.spent || 0);
 
   // A gradient pair for each trophy material, next to the coin's gradients.
   function makeTrophyGradients() {
@@ -1188,15 +1226,15 @@
       }
       defs.appendChild(g);
     };
-    for (const [name, hi, mid, lo, deep] of TROPHY_METALS) {
+    for (const [name, , hi, mid, lo, deep] of TROPHY_METALS) {
       gradient('linearGradient', 'rim-' + name, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
       gradient('radialGradient', 'face-' + name, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
     }
   }
 
-  // Trophy number k, drawn in its material.
-  function trophyIcon(k) {
-    const [name, hi, , lo, deep] = metalOf(k);
+  // A trophy drawn in the given material.
+  function trophyIcon(name) {
+    const [, , hi, , lo, deep] = metal(name);
     return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
       '<path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" stroke="' + lo + '" stroke-width="2.4" stroke-linecap="round"/>' +
       '<rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#rim-' + name + ')" stroke="' + deep + '" stroke-width="0.8"/>' +
@@ -1207,16 +1245,16 @@
       '</svg>';
   }
 
-  // Shows the new trophy and lets confetti fall from the top of the screen.
-  function celebrate() {
+  // Shows the trophy just bought and lets confetti fall from the top of the screen.
+  function celebrate(name) {
     const t = T();
-    const [metal, , mid] = metalOf(state.trophies);
+    const [, price, , mid] = metal(name);
     const banner = document.createElement('div');
     banner.className = 'trophy-banner';
     banner.style.setProperty('--metal', mid); // frame and glow in the trophy's colour
     banner.setAttribute('role', 'status');
-    banner.innerHTML = trophyIcon(state.trophies) +
-      '<strong>' + esc(t.trophyTitle(metal)) + '</strong><span>' + esc(t.trophyFor(TROPHY_COINS)) + '</span>';
+    banner.innerHTML = trophyIcon(name) +
+      '<strong>' + esc(t.trophyTitle(name)) + '</strong><span>' + esc(t.trophyFor(price)) + '</span>';
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) confetti(CELEBRATION_MS);
@@ -1336,7 +1374,7 @@
     if (wasNew) d.newSeen += 1;
     lastId = c.id;
     const reward = right ? payRewards(updated) : { coins: 0 };
-    const trophy = reward.coins ? addCoins(reward.coins) : false;
+    if (reward.coins) addCoins(reward.coins);
     save();
 
     if (right) {
@@ -1345,7 +1383,7 @@
         ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
         : '');
       feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
-      advanceTimer = setTimeout(next, trophy ? CELEBRATION_MS + 200 : reward.coins ? 2200 : 1400);
+      advanceTimer = setTimeout(next, reward.coins ? 2200 : 1400);
     } else {
       mode = 'wrong';
       const sum = esc(ltr(fact(c.a, c.b) + ' = ' + num(product))) + '.<br>' + esc(T().typeToGoOn(product));
@@ -1507,16 +1545,20 @@
       learn: q.learningNow.length + q.learningAhead.length + q.learningLater.length,
       review: q.review.length,
     };
-    $('coin-total').textContent = num(state.coins || 0);
-    $('trophies').hidden = !state.trophies;
-    $('trophy-total').textContent = num(state.trophies || 0);
+    $('coin-total').textContent = num(balance());
+    $('coins').setAttribute('aria-label', t.coinsAria(balance()));
+    // The trophy count, with the latest trophy bought; redrawn only when it
+    // changes, so its shine keeps running.
+    const owned = state.trophies.length;
+    $('trophies').hidden = owned === 0;
+    $('trophy-total').textContent = num(owned);
+    $('trophies').setAttribute('aria-label', t.trophiesAria(owned));
     const slot = $('trophy-slot');
-    if (state.trophies && slot.dataset.k !== String(state.trophies)) {
-      slot.dataset.k = String(state.trophies);
-      slot.innerHTML = trophyIcon(state.trophies);
+    const latest = owned ? owned + state.trophies[owned - 1].metal : '';
+    if (slot.dataset.k !== latest) {
+      slot.dataset.k = latest;
+      slot.innerHTML = owned ? trophyIcon(state.trophies[owned - 1].metal) : '';
     }
-    $('trophies').setAttribute('aria-label', t.trophiesAria(state.trophies || 0));
-    $('coins').setAttribute('aria-label', t.coinsAria(state.coins || 0));
     $('count-new').textContent = num(counts.new);
     $('count-learn').textContent = num(counts.learn);
     $('count-review').textContent = num(counts.review);
@@ -1592,8 +1634,8 @@
 
   // ---------- settings ----------
 
-  const panel = $('settings');
-  const panelOpen = () => !panel.hidden;
+  const panels = [$('settings'), $('shop')];
+  const panelOpen = () => panels.some((p) => !p.hidden);
 
   function buildChips() {
     const fill = (wrap, numbers) => {
@@ -1634,13 +1676,7 @@
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
-    let shelf = '';
-    for (let k = 1; k <= (state.trophies || 0); k++) {
-      shelf += '<span title="' + esc(t.trophyName(metalOf(k)[0])) + '">' + trophyIcon(k) + '</span>';
-    }
-    $('trophy-shelf').innerHTML = shelf;
-    $('coins-total').textContent = t.coinsTotal(state.coins || 0) + ' ' +
-      t.trophiesStatus(state.trophies || 0, TROPHY_COINS - ((state.coins || 0) % TROPHY_COINS));
+    $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
     $('real-clock').hidden = ahead === 0;
@@ -1658,14 +1694,16 @@
   // only way to change the language or reload the app.
   // Opening the panel adds a step to the page history, so Android's Back
   // gesture closes the panel instead of leaving the app.
-  function openPanel() {
+  // which: 'settings' or 'shop'.
+  function openPanel(which) {
     pauseTimers();
     if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
-    panel.hidden = false;
+    for (const p of panels) p.hidden = p.id !== which;
     document.body.classList.add('panel-open');
-    $('settings-sheet').focus({ preventScroll: true });
+    $(which + '-sheet').focus({ preventScroll: true });
     try {
-      syncSettings();
+      if (which === 'settings') syncSettings();
+      else renderShop();
     } catch (e) {
       noteError(e);
     }
@@ -1673,9 +1711,10 @@
 
   function closePanel() {
     if (!panelOpen()) return false;
-    panel.hidden = true;
+    for (const p of panels) p.hidden = true;
     document.body.classList.remove('panel-open');
     $('open-settings').blur();
+    $('open-shop').blur();
     if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
     else {
       render();
@@ -1688,11 +1727,61 @@
   // The Android app's Back button calls this.
   window.closeParentPanel = closePanel;
 
-  $('open-settings').addEventListener('click', openPanel);
+  $('open-settings').addEventListener('click', () => openPanel('settings'));
+  $('open-shop').addEventListener('click', () => openPanel('shop'));
   $('close-settings').addEventListener('click', closePanel);
-  // A tap on the dimmed area around the panel closes it.
-  panel.addEventListener('click', (e) => {
-    if (e.target === panel) closePanel();
+  $('close-shop').addEventListener('click', closePanel);
+  // A tap on the dimmed area around a panel closes it.
+  for (const p of panels) {
+    p.addEventListener('click', (e) => {
+      if (e.target === p) closePanel();
+    });
+  }
+
+  // ---------- shop ----------
+
+  function renderShop() {
+    const t = T();
+    const have = balance();
+    $('shop-balance').innerHTML = coinIcon() + esc(t.shopBalance(have));
+    $('shop-grid').innerHTML = TROPHY_METALS.map(([name, price]) => {
+      const short = price - have;
+      return '<div class="shop-item' + (short > 0 ? ' too-dear' : '') + '">' + trophyIcon(name) +
+        '<span class="name">' + esc(t.trophyName(name)) + '</span>' +
+        '<span class="price">' + coinIcon() + esc(num(price)) + '</span>' +
+        (short > 0
+          ? '<span class="missing">' + esc(t.missingCoins(short)) + '</span>'
+          : '<button type="button" class="primary-btn" data-metal="' + name + '">' + esc(t.buy) + '</button>') +
+        '</div>';
+    }).join('');
+    $('trophy-shelf').innerHTML = state.trophies.length
+      ? state.trophies.map((tr) => '<span title="' + esc(t.trophyName(tr.metal)) + '">' + trophyIcon(tr.metal) + '</span>').join('')
+      : '<p class="hint">' + esc(t.noTrophies) + '</p>';
+  }
+
+  // Buying takes two taps, so a mis-tap does not spend her coins.
+  let confirmTimer = null;
+  $('shop-grid').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-metal]');
+    if (!btn) return;
+    const name = btn.dataset.metal;
+    const price = metal(name)[1];
+    if (balance() < price) return;
+    clearTimeout(confirmTimer);
+    if (!btn.dataset.armed) {
+      renderShop(); // undo any other button waiting for confirmation
+      const again = $('shop-grid').querySelector('button[data-metal="' + name + '"]');
+      again.dataset.armed = '1';
+      again.textContent = T().buyConfirm(num(price));
+      confirmTimer = setTimeout(renderShop, 4000);
+      return;
+    }
+    state.spent = (state.spent || 0) + price;
+    state.trophies.push({ metal: name, at: now() });
+    save();
+    renderShop();
+    render();
+    celebrate(name);
   });
 
   function languageChanged() {
