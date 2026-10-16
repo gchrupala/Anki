@@ -97,6 +97,19 @@ After a wrong answer the app shows the right one, and the child types it to cont
 - Intervals get a small random shift ("fuzz"), as in Anki, so cards learned together don't keep coming back together.
 - As in Anki, a day starts at 4 am and elapsed time is counted in calendar days. When only learning cards are left, they are shown up to 20 minutes early.
 
+### Coins
+
+Coins reward what the child remembers, not the number of cards done. In spaced repetition a well-known fact comes back rarely, so coins per answer would reward forgetting. Instead:
+
+| When | Coins |
+| --- | --- |
+| A new fact is learned (it leaves the first-day steps) | 1 |
+| The gap before its next review reaches a week | 2 |
+| The fact is mastered (a gap of 21 days or more) | 5 |
+| All of the day's cards are done (once a day) | 3 |
+
+Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
+
 ### Order of cards
 
 - At most 10 new facts are introduced per day (adjustable). They are picked in a random order from all the selected tables, so easy facts such as 1 × 4 and harder ones such as 7 × 8 are mixed from the first day. To focus on particular tables, switch the others off in the settings panel.
