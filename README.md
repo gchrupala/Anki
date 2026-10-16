@@ -68,7 +68,7 @@ Without this file the APK is built unsigned, and Android will not install it.
 
 ## Languages
 
-The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Ustawienia", behind the gear button). All languages write multiplication with ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
+The interface follows the device language when it is Polish, English, Dutch or Spanish, and is in Polish otherwise. A fixed language can be chosen in the settings panel ("Ustawienia", behind the gear button); the first entry in the menu goes back to the device language. All languages write multiplication with ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
 
 ## How it works
 

@@ -64,6 +64,7 @@
       tipReview: (when) => 'następna powtórka ' + when,
       settingsTitle: 'Ustawienia',
       language: 'Język',
+      deviceLanguage: 'Jak w systemie',
       sizeTitle: 'Tabliczka do',
       tablesTitle: 'Mnożenie przez',
       extrasTitle: 'Dodatkowe liczby',
@@ -158,6 +159,7 @@
       tipReview: (when) => 'next review ' + when,
       settingsTitle: 'Settings',
       language: 'Language',
+      deviceLanguage: 'Same as the device',
       sizeTitle: 'Times tables up to',
       tablesTitle: 'Tables to practise',
       extrasTitle: 'Extra numbers',
@@ -252,6 +254,7 @@
       tipReview: (when) => 'volgende herhaling ' + when,
       settingsTitle: 'Instellingen',
       language: 'Taal',
+      deviceLanguage: 'Zoals het apparaat',
       sizeTitle: 'Tafels tot en met',
       tablesTitle: 'Tafels om te oefenen',
       extrasTitle: 'Extra getallen',
@@ -346,6 +349,7 @@
       tipReview: (when) => 'próximo repaso ' + when,
       settingsTitle: 'Ajustes',
       language: 'Idioma',
+      deviceLanguage: 'Como el dispositivo',
       sizeTitle: 'Tablas hasta',
       tablesTitle: 'Tablas para practicar',
       extrasTitle: 'Números adicionales',
@@ -394,5 +398,6 @@
     },
   };
 
+  // DEFAULT is used when the device language is none of these.
   root.I18N = { STRINGS, LANGS: ['pl', 'en', 'nl', 'es'], DEFAULT: 'pl' };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
