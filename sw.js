@@ -9,7 +9,7 @@
  *
  * Change CACHE when the list of app files changes.
  */
-const CACHE = 'times-table-cards-v2';
+const CACHE = 'times-table-cards-v3';
 const APP_FILES = [
   './',
   './index.html',
@@ -24,6 +24,7 @@ const APP_FILES = [
   './fonts/grandstander-latin-ext.woff2',
   './fonts/lexend-latin.woff2',
   './fonts/lexend-latin-ext.woff2',
+  './fonts/vazirmatn-arabic.woff2',
 ];
 const NETWORK_TIMEOUT_MS = 4000;
 

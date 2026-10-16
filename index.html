@@ -44,8 +44,8 @@
     --scrim: rgb(29 39 66 / 0.35);
     --shadow: 0 1px 0 rgb(29 39 66 / 0.05), 0 14px 28px -16px rgb(29 39 66 / 0.45);
 
-    --font-display: "Grandstander", "Trebuchet MS", system-ui, sans-serif;
-    --font-body: "Lexend", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-display: "Grandstander", "Vazirmatn", "Trebuchet MS", system-ui, sans-serif;
+    --font-body: "Lexend", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -150,7 +150,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem 1.1rem;
-    margin-right: auto;
+    margin-inline-end: auto;
     font-size: 0.85rem;
     color: var(--ink-soft);
   }
@@ -158,7 +158,7 @@
     font-size: 1.15rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    margin-right: 0.2rem;
+    margin-inline-end: 0.2rem;
   }
   .count.new b { color: var(--pen); }
   .count.learn b { color: var(--learn); }
@@ -258,6 +258,9 @@
     );
     cursor: default;
   }
+  /* Sums, the keypad and the progress square run left to right in every
+     language, as in Persian maths too. */
+  .question, .keypad, .square { direction: ltr; }
   .question {
     display: flex;
     align-items: baseline;
@@ -416,7 +419,7 @@
   }
   .legend li { display: flex; align-items: center; gap: 0.5rem; }
   .legend .sw { width: 0.95rem; height: 0.95rem; border-radius: 3px; flex: none; }
-  .legend b { font-variant-numeric: tabular-nums; min-width: 2ch; display: inline-block; text-align: right; }
+  .legend b { font-variant-numeric: tabular-nums; min-width: 2ch; display: inline-block; text-align: end; }
   .today { margin: 0; font-size: 0.85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
   /* Parent panel: a plain overlay shown and hidden by the app (not <dialog>,
@@ -501,7 +504,7 @@
   }
   .field #lang { width: auto; }
   .rules { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  .rules th, .rules td { text-align: left; padding: 0.35rem 0.5rem 0.35rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .rules th, .rules td { text-align: start; padding-block: 0.35rem; padding-inline: 0 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
   .rules th { font-weight: 600; color: var(--ink-soft); }
   .row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
   .danger { border-color: var(--bad); color: var(--bad); }
@@ -859,7 +862,11 @@
     return rtf.format(Math.round(days / 30), 'month');
   }
 
-  const fact = (a, b) => a + ' ' + T().op + ' ' + b;
+  // Numbers in the language's digits (Persian ۰–۹, otherwise 0–9).
+  const num = (x) => (T().digits ? T().digits(x) : String(x));
+  // Keeps a sum such as "7 × 8 = 56" left to right inside right-to-left text.
+  const ltr = (text) => (T().dir === 'rtl' ? '\u2066' + text + '\u2069' : text);
+  const fact = (a, b) => ltr(num(a) + ' ' + T().op + ' ' + num(b));
 
   // ---------- study flow ----------
 
@@ -933,7 +940,7 @@
     } else {
       mode = 'wrong';
       feedback = () => '<strong>' + esc(T().notQuite) + '</strong> ' + esc(T().youWrote(answer)) + ' ' +
-        esc(fact(c.a, c.b) + ' = ' + product) + '.<br>' + esc(T().typeToGoOn(product));
+        esc(ltr(fact(c.a, c.b) + ' = ' + num(product))) + '.<br>' + esc(T().typeToGoOn(product));
       typed = '';
       flash('shake');
     }
@@ -1009,9 +1016,9 @@
       return el;
     };
     add('corner', T().op);
-    for (const b of edge) add('hd', b);
+    for (const b of edge) add('hd', num(b));
     for (const a of edge) {
-      add('hd', a);
+      add('hd', num(a));
       for (const b of edge) {
         // Two extra numbers are not multiplied together: leave a gap.
         if (a <= size || b <= size) cells[a + 'x' + b] = add('cell', '');
@@ -1047,10 +1054,10 @@
       else tip = t.tipReview(whenText(c.due));
       el.title = fact(a, b) + ': ' + tip;
     }
-    $('n-new').textContent = n.new;
-    $('n-learning').textContent = n.learning;
-    $('n-young').textContent = n.young;
-    $('n-mature').textContent = n.mature;
+    $('n-new').textContent = num(n.new);
+    $('n-learning').textContent = num(n.learning);
+    $('n-young').textContent = num(n.young);
+    $('n-mature').textContent = num(n.mature);
   }
 
   function renderCard() {
@@ -1059,22 +1066,22 @@
     el.classList.toggle('is-right', mode === 'right');
     el.classList.toggle('is-wrong', mode === 'wrong');
     if (!c) return;
-    $('qa').textContent = c.a;
-    $('qb').textContent = c.b;
+    $('qa').textContent = num(c.a);
+    $('qb').textContent = num(c.b);
 
     const slot = $('slot');
     slot.textContent = '';
     if (mode === 'wrong') {
       const answer = String(c.a * c.b);
-      slot.append(typed);
+      slot.append(num(typed));
       const ghost = document.createElement('span');
       ghost.className = 'ghost';
-      ghost.textContent = answer.slice(typed.length);
+      ghost.textContent = num(answer.slice(typed.length));
       slot.append(ghost);
     } else if (mode === 'right' && typed === '') {
-      slot.textContent = c.a * c.b;
+      slot.textContent = num(c.a * c.b);
     } else {
-      slot.textContent = typed;
+      slot.textContent = num(typed);
     }
     slot.classList.toggle('empty', mode === 'ask' && typed === '');
     $('feedback').innerHTML = feedback();
@@ -1088,9 +1095,9 @@
       learn: q.learningNow.length + q.learningAhead.length + q.learningLater.length,
       review: q.review.length,
     };
-    $('count-new').textContent = counts.new;
-    $('count-learn').textContent = counts.learn;
-    $('count-review').textContent = counts.review;
+    $('count-new').textContent = num(counts.new);
+    $('count-learn').textContent = num(counts.learn);
+    $('count-review').textContent = num(counts.review);
     $('label-new').textContent = t.countNew(counts.new);
     $('label-learn').textContent = t.countLearn(counts.learn);
     $('label-review').textContent = t.countReview(counts.review);
@@ -1138,7 +1145,13 @@
   function applyLanguage() {
     const t = T();
     document.documentElement.lang = lang();
+    document.documentElement.dir = t.dir || 'ltr';
     document.title = t.appName;
+    document.querySelectorAll('#keypad [data-key]').forEach((el) => {
+      if (/^[0-9]$/.test(el.dataset.key)) el.textContent = num(el.dataset.key);
+    });
+    const percent = new Intl.NumberFormat(lang(), { style: 'percent' });
+    for (const opt of $('retention').options) opt.textContent = percent.format(Number(opt.value));
     document.querySelectorAll('[data-t]').forEach((el) => {
       el.textContent = t[el.dataset.t];
     });
@@ -1424,7 +1437,8 @@
     const t = e.target;
     if (t.closest && t.closest('input, textarea, select')) return;
     let key = null;
-    if (/^[0-9]$/.test(e.key)) key = e.key;
+    const digit = e.key.length === 1 ? '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩0123456789'.indexOf(e.key) % 10 : -1;
+    if (digit >= 0) key = String(digit);
     else if (e.key === 'Backspace') key = 'del';
     else if (e.key === 'Enter') {
       if (t.closest && t.closest('button') && !t.closest('#keypad')) return;

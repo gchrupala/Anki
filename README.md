@@ -68,7 +68,7 @@ Without this file the APK is built unsigned, and Android will not install it.
 
 ## Languages
 
-The interface follows the device language when it is Polish, English, Dutch or Spanish, and is in Polish otherwise. A fixed language can be chosen in the settings panel ("Ustawienia", behind the gear button); the first entry in the menu goes back to the device language. All languages write multiplication with ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
+The interface follows the device language when it is Polish, English, Dutch, Spanish or Persian, and is in Polish otherwise. A fixed language can be chosen in the settings panel ("Ustawienia", behind the gear button); the first entry in the menu goes back to the device language. All languages write multiplication with ×. Persian is shown right to left, with Persian digits (۷ × ۸ = ۵۶); sums, the keypad and the progress square stay left to right, as in Persian maths. A keyboard may type Persian, Arabic or Western digits. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
 
 ## How it works
 
@@ -131,9 +131,9 @@ The progress square shows each fact: not started, practising (in the learning st
 ## Files
 
 - `index.html`: the app (layout, styles and interface code).
-- `i18n.js`: the interface text in Polish, English, Dutch and Spanish.
+- `i18n.js`: the interface text in Polish, English, Dutch, Spanish and Persian.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
-- `fonts/`: the Grandstander and Lexend fonts with their licences, bundled so the app looks the same offline.
+- `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `android/`: the Android app.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
 - `tests/`: scheduler tests and the py-fsrs reference data.
