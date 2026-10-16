@@ -68,7 +68,7 @@ Without this file the APK is built unsigned, and Android will not install it.
 
 ## Languages
 
-The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Dla dorosłych" in Polish). All languages write multiplication with ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
+The interface is in Polish by default. English, Dutch and Spanish can be chosen in the settings panel ("Ustawienia", behind the gear button). All languages write multiplication with ×. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
 
 ## How it works
 
@@ -105,7 +105,7 @@ After a wrong answer the app shows the right one, and the child types it to cont
 
 ### Settings and review log
 
-The settings panel ("Grown-ups" in English) lets you:
+The settings panel (the gear button, "Ustawienia" in Polish) lets you:
 
 - choose the language;
 
