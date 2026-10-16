@@ -110,6 +110,8 @@ Coins reward what the child remembers, not the number of cards done. In spaced r
 
 Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
 
+Every 200 coins bring a trophy. Winning one shows the trophy and lets confetti fall from the top of the screen for 4 seconds; the card stays on screen meanwhile. The trophy count appears next to the coins, and the settings show how many coins are left until the next one. With reduced motion switched on in the device settings, the trophy is shown without confetti.
+
 ### Order of cards
 
 - At most 10 new facts are introduced per day (adjustable). They are picked in a random order from all the selected tables, so easy facts such as 1 × 4 and harder ones such as 7 × 8 are mixed from the first day. To focus on particular tables, switch the others off in the settings panel.

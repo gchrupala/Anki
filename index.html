@@ -238,6 +238,59 @@
   @media (prefers-reduced-motion: reduce) {
     .coins.bump, .coins.bump .coin-icon, .coins.bump .spark, .coin-plus, .coin-icon .glint { animation: none; }
   }
+  /* Trophies: one for every TROPHY_COINS coins, celebrated with confetti */
+  .trophies {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: var(--coin-soft);
+    color: var(--coin-ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--coin-edge) 35%, transparent);
+  }
+  .trophy-icon { width: 1.7rem; height: 1.7rem; flex: none; filter: drop-shadow(0 1px 1px rgb(120 70 0 / 0.35)); }
+  .trophy-icon .glint { animation: glint 4.5s ease-in-out infinite 1.5s; }
+  .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+  .trophy-banner {
+    position: fixed;
+    top: max(14vh, env(safe-area-inset-top, 0px));
+    left: 50%;
+    z-index: 31;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1.1rem 2rem 1.2rem;
+    border-radius: 18px;
+    border: 2px solid var(--gold);
+    background: var(--card);
+    box-shadow: var(--shadow), 0 0 40px color-mix(in srgb, var(--gold) 45%, transparent);
+    text-align: center;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: trophy-in 4s ease-out forwards;
+  }
+  .trophy-banner .trophy-icon { width: 5rem; height: 5rem; }
+  .trophy-banner strong { font-family: var(--font-display); font-size: 1.6rem; color: var(--ink); }
+  .trophy-banner span { color: var(--coin-ink); font-weight: 600; }
+  @keyframes trophy-in {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+    10% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+    16% { transform: translateX(-50%) scale(1); }
+    85% { opacity: 1; transform: translateX(-50%) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .trophy-banner { animation: none; }
+    .trophy-icon .glint { animation: none; }
+  }
   .pill {
     font-size: 0.75rem;
     font-weight: 600;
@@ -601,6 +654,7 @@
       <stop offset="1" style="stop-color: var(--gold-lo)"/>
     </radialGradient>
     <clipPath id="coin-clip"><circle cx="16" cy="16" r="15"/></clipPath>
+    <clipPath id="trophy-clip"><path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z"/></clipPath>
   </defs>
 </svg>
 <div class="app">
@@ -616,6 +670,10 @@
       <b id="coin-total">0</b>
       <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
       <span class="coin-plus" id="coin-plus" hidden></span>
+    </span>
+    <span class="trophies" id="trophies" role="img" hidden>
+      <svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" style="stroke: var(--gold-lo)" stroke-width="2.4" stroke-linecap="round"/><rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#coin-rim)" style="stroke: var(--gold-deep)" stroke-width="0.8"/><path d="M14.3 19.5h3.4l.9 5.5h-5.2z" fill="url(#coin-rim)"/><path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z" fill="url(#coin-face)" style="stroke: var(--gold-deep)" stroke-width="0.9"/><path d="M16 7.4l1.2 2.5 2.7.4-2 1.9.5 2.7-2.4-1.3-2.4 1.3.5-2.7-2-1.9 2.7-.4z" style="fill: var(--gold-hi); stroke: var(--gold-deep)" stroke-width="0.5"/><g clip-path="url(#trophy-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g></svg>
+      <b id="trophy-total">0</b>
     </span>
     <span class="pill" id="clock-pill" hidden></span>
     <button type="button" class="ghost-btn settings-btn" id="open-settings">
@@ -816,6 +874,8 @@
   const LEVEL_COINS = [0, 1, 2, 5];
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
   const DAY_BONUS = 3; // for finishing all of the day's cards
+  const TROPHY_COINS = 200; // a trophy for every 200 coins
+  const CELEBRATION_MS = 4000; // confetti time
   function rewardLevel(c) {
     if (c.type === 'new' || c.type === 'learning') return 0;
     if (c.interval >= MATURE_DAYS) return 3;
@@ -871,6 +931,7 @@
       },
       daily: null,
       coins: 0,
+      trophies: 0,
       clockOffset: 0,
       // One entry per answer: [time, card id, rating, state before, ms, typed answer].
       log: [],
@@ -903,6 +964,8 @@
       }
       s.settings.layout = SETTINGS_LAYOUT;
       const d = defaultState();
+      // Trophies already earned count without a celebration.
+      if (s.trophies === undefined) s.trophies = Math.floor((s.coins || 0) / TROPHY_COINS);
       return { ...d, ...s, settings: { ...d.settings, ...s.settings } };
     } catch (e) {
       return null;
@@ -1083,6 +1146,90 @@
     void plus.offsetWidth;
     plus.textContent = '+' + num(n);
     plus.hidden = false;
+    // A trophy for every TROPHY_COINS coins. Returns true when one is won.
+    const trophies = Math.floor(state.coins / TROPHY_COINS);
+    if (trophies <= (state.trophies || 0)) return false;
+    state.trophies = trophies;
+    celebrate();
+    return true;
+  }
+
+  // Shows the new trophy and lets confetti fall from the top of the screen.
+  function celebrate() {
+    const t = T();
+    const banner = document.createElement('div');
+    banner.className = 'trophy-banner';
+    banner.setAttribute('role', 'status');
+    banner.innerHTML = $('trophies').querySelector('.trophy-icon').outerHTML +
+      '<strong>' + esc(t.trophyTitle) + '</strong><span>' + esc(t.trophyFor(TROPHY_COINS)) + '</span>';
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), CELEBRATION_MS);
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) confetti(CELEBRATION_MS);
+  }
+
+  function confetti(ms) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const css = getComputedStyle(document.documentElement);
+    const colors = ['--gold', '--gold-hi', '--pen', '--learn', '--good', '--card-margin'].map((v) => css.getPropertyValue(v).trim());
+    const pieces = [];
+    const spawn = (count) => {
+      for (let i = 0; i < count; i++) {
+        pieces.push({
+          x: Math.random() * innerWidth,
+          y: -20 - Math.random() * 60,
+          w: 6 + Math.random() * 6,
+          h: 10 + Math.random() * 8,
+          vx: (Math.random() - 0.5) * 80,
+          vy: 160 + Math.random() * 200,
+          angle: Math.random() * Math.PI * 2,
+          spin: (Math.random() - 0.5) * 12,
+          flip: Math.random() * Math.PI * 2,
+          sway: Math.random() * Math.PI * 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        });
+      }
+    };
+    const start = performance.now();
+    let last = start;
+    spawn(90);
+    const frame = (now) => {
+      const elapsed = now - start;
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      // New pieces keep coming until shortly before the end, so the last
+      // ones are still falling when the confetti fades out.
+      if (elapsed < ms - 1500) spawn(Math.round(160 * dt));
+      if (canvas.width !== Math.round(innerWidth * ratio)) {
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      ctx.globalAlpha = elapsed > ms - 600 ? Math.max(0, (ms - elapsed) / 600) : 1;
+      for (const p of pieces) {
+        p.vy += 60 * dt;
+        p.x += (p.vx + Math.sin(p.sway + elapsed / 280) * 50) * dt;
+        p.y += p.vy * dt;
+        p.angle += p.spin * dt;
+        p.flip += 8 * dt;
+        if (p.y > innerHeight + 30) continue;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.scale(1, Math.cos(p.flip)); // turning over as it falls
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (elapsed < ms) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
   }
 
   function next() {
@@ -1134,7 +1281,7 @@
     if (wasNew) d.newSeen += 1;
     lastId = c.id;
     const reward = right ? payRewards(updated) : { coins: 0 };
-    if (reward.coins) addCoins(reward.coins);
+    const trophy = reward.coins ? addCoins(reward.coins) : false;
     save();
 
     if (right) {
@@ -1143,7 +1290,7 @@
         ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
         : '');
       feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
-      advanceTimer = setTimeout(next, reward.coins ? 2200 : 1400);
+      advanceTimer = setTimeout(next, trophy ? CELEBRATION_MS + 200 : reward.coins ? 2200 : 1400);
     } else {
       mode = 'wrong';
       const sum = esc(ltr(fact(c.a, c.b) + ' = ' + num(product))) + '.<br>' + esc(T().typeToGoOn(product));
@@ -1306,6 +1453,9 @@
       review: q.review.length,
     };
     $('coin-total').textContent = num(state.coins || 0);
+    $('trophies').hidden = !state.trophies;
+    $('trophy-total').textContent = num(state.trophies || 0);
+    $('trophies').setAttribute('aria-label', t.trophiesAria(state.trophies || 0));
     $('coins').setAttribute('aria-label', t.coinsAria(state.coins || 0));
     $('count-new').textContent = num(counts.new);
     $('count-learn').textContent = num(counts.learn);
@@ -1424,7 +1574,8 @@
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
-    $('coins-total').textContent = t.coinsTotal(state.coins || 0);
+    $('coins-total').textContent = t.coinsTotal(state.coins || 0) + ' ' +
+      t.trophiesStatus(state.trophies || 0, TROPHY_COINS - ((state.coins || 0) % TROPHY_COINS));
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
     $('real-clock').hidden = ahead === 0;
