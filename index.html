@@ -712,8 +712,9 @@
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
   // Version of the settings layout; 2 added the extra numbers, 3 made the
-  // language follow the device unless one is chosen.
-  const SETTINGS_LAYOUT = 3;
+  // language follow the device unless one is chosen, 4 lowered the default
+  // time to answer from 20 to 10 seconds.
+  const SETTINGS_LAYOUT = 4;
 
   const $ = (id) => document.getElementById(id);
 
@@ -745,7 +746,7 @@
         tables: range(12).concat(DEFAULT_EXTRAS),
         newPerDay: 10,
         retention: 0.9,
-        answerTime: 20, // seconds without typing before a fact counts as not known; 0 = no limit
+        answerTime: 10, // seconds without typing before a fact counts as not known; 0 = no limit
         lang: 'auto', // the device language; or a code such as 'nl'
         layout: SETTINGS_LAYOUT,
       },
@@ -771,6 +772,7 @@
         s.settings.size = size;
       }
       if (layout < 3) s.settings.lang = 'auto';
+      if (layout < 4 && (s.settings.answerTime === undefined || s.settings.answerTime === 20)) s.settings.answerTime = 10;
       s.settings.layout = SETTINGS_LAYOUT;
       const d = defaultState();
       return { ...d, ...s, settings: { ...d.settings, ...s.settings } };

@@ -74,7 +74,7 @@ The interface follows the device language when it is Polish, English, Dutch, Spa
 
 Each fact, such as 7 × 8, is one card. 3 × 7 and 7 × 3 are separate cards. The tables go up to 12 × 12 (or 10 × 10). On top of that, extra numbers can be chosen, by default 15, 20 and 25. Each extra number is practised only with the numbers 1 to 12: there is 15 × 7 and 7 × 15, but no 12 × 14 and no 15 × 20. With the defaults that makes 216 cards (144 + 3 × 24).
 
-The child types the answer on the on-screen keypad or the keyboard. The answer is checked as soon as it has as many digits as the right answer. A shorter answer is checked after 3 seconds without typing, or when the child presses OK. If nothing is typed within the time limit (20 seconds by default; 10 to 60 seconds or no limit in the settings), the fact counts as not known: the app shows the answer, as after a wrong answer. The limit pauses while the settings panel is open or the app is in the background. The app then picks one of the four Anki ratings on the child's behalf:
+The child types the answer on the on-screen keypad or the keyboard. The answer is checked as soon as it has as many digits as the right answer. A shorter answer is checked after 3 seconds without typing, or when the child presses OK. If nothing is typed within the time limit (10 seconds by default; 10 to 60 seconds or no limit in the settings), the fact counts as not known: the app shows the answer, as after a wrong answer. The limit pauses while the settings panel is open or the app is in the background. The app then picks one of the four Anki ratings on the child's behalf:
 
 | Answer | Anki rating |
 | --- | --- |
