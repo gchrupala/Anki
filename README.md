@@ -110,7 +110,7 @@ Coins reward what the child remembers, not the number of cards done. In spaced r
 
 Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
 
-Every 200 coins bring a trophy. Winning one shows the trophy and lets confetti fall from the top of the screen for 4 seconds; the card stays on screen meanwhile. The trophy count appears next to the coins, and the settings show how many coins are left until the next one. With reduced motion switched on in the device settings, the trophy is shown without confetti.
+Every 200 coins bring a trophy, in a new material each time: bronze, silver, gold, platinum, diamond, ruby, emerald and sapphire, then the list starts again. The header shows the latest trophy, and the settings show them all. Winning one shows the trophy and lets confetti fall from the top of the screen for 4 seconds; the card stays on screen meanwhile. The trophy count appears next to the coins, and the settings show how many coins are left until the next one. With reduced motion switched on in the device settings, the trophy is shown without confetti.
 
 ### Order of cards
 

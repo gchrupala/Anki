@@ -253,7 +253,10 @@
     font-variant-numeric: tabular-nums;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--coin-edge) 35%, transparent);
   }
-  .trophy-icon { width: 1.7rem; height: 1.7rem; flex: none; filter: drop-shadow(0 1px 1px rgb(120 70 0 / 0.35)); }
+  .trophy-icon { width: 1.7rem; height: 1.7rem; flex: none; filter: drop-shadow(0 1px 1px rgb(60 40 20 / 0.35)); }
+  #trophy-slot { display: inline-flex; }
+  .trophy-shelf { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+  .trophy-shelf .trophy-icon { width: 2.4rem; height: 2.4rem; }
   .trophy-icon .glint { animation: glint 4.5s ease-in-out infinite 1.5s; }
   .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
   .trophy-banner {
@@ -269,9 +272,9 @@
     gap: 0.3rem;
     padding: 1.1rem 2rem 1.2rem;
     border-radius: 18px;
-    border: 2px solid var(--gold);
+    border: 2px solid var(--metal, var(--gold));
     background: var(--card);
-    box-shadow: var(--shadow), 0 0 40px color-mix(in srgb, var(--gold) 45%, transparent);
+    box-shadow: var(--shadow), 0 0 40px color-mix(in srgb, var(--metal, var(--gold)) 45%, transparent);
     text-align: center;
     pointer-events: none;
     transform: translateX(-50%);
@@ -641,7 +644,7 @@
 </head>
 <body>
 <!-- Gold gradients shared by every coin on the page -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<svg id="shine-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <linearGradient id="coin-rim" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" style="stop-color: var(--gold-hi)"/>
@@ -672,7 +675,7 @@
       <span class="coin-plus" id="coin-plus" hidden></span>
     </span>
     <span class="trophies" id="trophies" role="img" hidden>
-      <svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" style="stroke: var(--gold-lo)" stroke-width="2.4" stroke-linecap="round"/><rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#coin-rim)" style="stroke: var(--gold-deep)" stroke-width="0.8"/><path d="M14.3 19.5h3.4l.9 5.5h-5.2z" fill="url(#coin-rim)"/><path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z" fill="url(#coin-face)" style="stroke: var(--gold-deep)" stroke-width="0.9"/><path d="M16 7.4l1.2 2.5 2.7.4-2 1.9.5 2.7-2.4-1.3-2.4 1.3.5-2.7-2-1.9 2.7-.4z" style="fill: var(--gold-hi); stroke: var(--gold-deep)" stroke-width="0.5"/><g clip-path="url(#trophy-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g></svg>
+      <span id="trophy-slot"></span>
       <b id="trophy-total">0</b>
     </span>
     <span class="pill" id="clock-pill" hidden></span>
@@ -831,6 +834,7 @@
       <h3 data-t="coinsTitle">Coins</h3>
       <p data-t="coinsRules"></p>
       <p id="coins-total"></p>
+      <div class="trophy-shelf" id="trophy-shelf"></div>
     </section>
 
     <section id="update-section">
@@ -875,6 +879,20 @@
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
   const DAY_BONUS = 3; // for finishing all of the day's cards
   const TROPHY_COINS = 200; // a trophy for every 200 coins
+  // Trophy materials in the order they are won; after the last one the list
+  // starts again. Colours: highlight, middle, shadow, outline.
+  const TROPHY_METALS = [
+    ['bronze', '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['silver', '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['gold', '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['platinum', '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
+    ['diamond', '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
+    ['ruby', '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
+    ['emerald', '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
+    ['sapphire', '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+  ];
+  // The material of trophy number k (1 = the first trophy).
+  const metalOf = (k) => TROPHY_METALS[(k - 1) % TROPHY_METALS.length];
   const CELEBRATION_MS = 4000; // confetti time
   function rewardLevel(c) {
     if (c.type === 'new' || c.type === 'learning') return 0;
@@ -1154,14 +1172,51 @@
     return true;
   }
 
+  // A gradient pair for each trophy material, next to the coin's gradients.
+  function makeTrophyGradients() {
+    const NS = 'http://www.w3.org/2000/svg';
+    const defs = $('shine-defs').querySelector('defs');
+    const gradient = (kind, id, attrs, stops) => {
+      const g = document.createElementNS(NS, kind);
+      g.id = id;
+      for (const [k, v] of Object.entries(attrs)) g.setAttribute(k, v);
+      for (const [offset, color] of stops) {
+        const stop = document.createElementNS(NS, 'stop');
+        stop.setAttribute('offset', offset);
+        stop.setAttribute('stop-color', color);
+        g.appendChild(stop);
+      }
+      defs.appendChild(g);
+    };
+    for (const [name, hi, mid, lo, deep] of TROPHY_METALS) {
+      gradient('linearGradient', 'rim-' + name, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
+      gradient('radialGradient', 'face-' + name, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
+    }
+  }
+
+  // Trophy number k, drawn in its material.
+  function trophyIcon(k) {
+    const [name, hi, , lo, deep] = metalOf(k);
+    return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
+      '<path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" stroke="' + lo + '" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#rim-' + name + ')" stroke="' + deep + '" stroke-width="0.8"/>' +
+      '<path d="M14.3 19.5h3.4l.9 5.5h-5.2z" fill="url(#rim-' + name + ')"/>' +
+      '<path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z" fill="url(#face-' + name + ')" stroke="' + deep + '" stroke-width="0.9"/>' +
+      '<path d="M16 7.4l1.2 2.5 2.7.4-2 1.9.5 2.7-2.4-1.3-2.4 1.3.5-2.7-2-1.9 2.7-.4z" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+      '<g clip-path="url(#trophy-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g>' +
+      '</svg>';
+  }
+
   // Shows the new trophy and lets confetti fall from the top of the screen.
   function celebrate() {
     const t = T();
+    const [metal, , mid] = metalOf(state.trophies);
     const banner = document.createElement('div');
     banner.className = 'trophy-banner';
+    banner.style.setProperty('--metal', mid); // frame and glow in the trophy's colour
     banner.setAttribute('role', 'status');
-    banner.innerHTML = $('trophies').querySelector('.trophy-icon').outerHTML +
-      '<strong>' + esc(t.trophyTitle) + '</strong><span>' + esc(t.trophyFor(TROPHY_COINS)) + '</span>';
+    banner.innerHTML = trophyIcon(state.trophies) +
+      '<strong>' + esc(t.trophyTitle(metal)) + '</strong><span>' + esc(t.trophyFor(TROPHY_COINS)) + '</span>';
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) confetti(CELEBRATION_MS);
@@ -1455,6 +1510,11 @@
     $('coin-total').textContent = num(state.coins || 0);
     $('trophies').hidden = !state.trophies;
     $('trophy-total').textContent = num(state.trophies || 0);
+    const slot = $('trophy-slot');
+    if (state.trophies && slot.dataset.k !== String(state.trophies)) {
+      slot.dataset.k = String(state.trophies);
+      slot.innerHTML = trophyIcon(state.trophies);
+    }
     $('trophies').setAttribute('aria-label', t.trophiesAria(state.trophies || 0));
     $('coins').setAttribute('aria-label', t.coinsAria(state.coins || 0));
     $('count-new').textContent = num(counts.new);
@@ -1574,6 +1634,11 @@
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
+    let shelf = '';
+    for (let k = 1; k <= (state.trophies || 0); k++) {
+      shelf += '<span title="' + esc(t.trophyName(metalOf(k)[0])) + '">' + trophyIcon(k) + '</span>';
+    }
+    $('trophy-shelf').innerHTML = shelf;
     $('coins-total').textContent = t.coinsTotal(state.coins || 0) + ' ' +
       t.trophiesStatus(state.trophies || 0, TROPHY_COINS - ((state.coins || 0) % TROPHY_COINS));
     const ahead = Math.round(state.clockOffset / DAY);
@@ -1857,6 +1922,7 @@
     navigator.storage.persist().catch(() => {});
   }
 
+  makeTrophyGradients();
   buildLanguageMenu();
   applyLanguage();
   buildSquare();
