@@ -158,6 +158,8 @@ The app name at the top of the screen is a button. It shows the icons of both ap
 
 The app that was open last opens on the next start. The address can also name the app: `#mnozenie` or `#stolice` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
 
+The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
+
 Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star. The language is shared.
 
 ### Cards

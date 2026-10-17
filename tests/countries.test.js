@@ -60,5 +60,7 @@ test('every language has the text of the app menu', () => {
     for (const key of ['appsAria', 'appsIntro', 'appsHint', 'appDone', 'appOpen']) assert.ok(t[key], `${lang} ${key}`);
     assert.ok(t.appWhat.times && t.appWhat.capitals, `${lang} appWhat`);
     assert.equal(typeof t.goTo, 'function', `${lang} goTo`);
+    for (const key of ['shareAria', 'shareText', 'shareCopied']) assert.ok(t[key], `${lang} ${key}`);
+    assert.equal(typeof t.shareLink, 'function', `${lang} shareLink`);
   }
 });

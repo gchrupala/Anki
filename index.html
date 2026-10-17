@@ -401,6 +401,27 @@
   .ghost-btn:hover { border-color: var(--pen); }
   .settings-btn { display: inline-flex; align-items: center; gap: 0.4rem; }
   .settings-btn svg { width: 1.15rem; height: 1.15rem; flex: none; }
+  .icon-btn { display: inline-grid; place-items: center; width: 2.35rem; height: 2.35rem; padding: 0; }
+  .icon-btn svg { width: 1.15rem; height: 1.15rem; }
+  /* A short message at the bottom of the screen, e.g. "Link copied" */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    max-width: calc(100% - 32px);
+    padding: 0.6rem 1.1rem;
+    border-radius: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+    box-shadow: var(--shadow);
+    transform: translateX(-50%);
+    animation: toast 3.5s ease-out forwards;
+  }
+  @keyframes toast { 0% { opacity: 0; } 8%, 85% { opacity: 1; } 100% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .toast { animation: none; } }
 
   /* Main layout */
   .layout {
@@ -877,6 +898,9 @@
     <button type="button" class="ghost-btn settings-btn" id="open-settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span data-t="settingsButton">Settings</span>
+    </button>
+    <button type="button" class="ghost-btn icon-btn" id="share-app" data-t-aria="shareAria">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
     </button>
   </header>
 
@@ -2950,6 +2974,46 @@
       /* reload anyway */
     }
     location.reload();
+  });
+
+  // ---------- sharing ----------
+
+  // The address of the app, without the name of an app (#stolice) after it.
+  // The Android app has its own address, so it shares the public one.
+  const PUBLIC_URL = 'https://grzegorz.chrupala.me/Anki/';
+  const shareUrl = () => (/^https?:$/.test(location.protocol) && !inAndroidApp ? location.origin + location.pathname : PUBLIC_URL);
+
+  function toast(text) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.setAttribute('role', 'status');
+    el.textContent = text;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  // Opens the device's share menu with the address of the app. Where there
+  // is none, copies the address, or else shows it. The time limit of an open
+  // card is paused while the share menu is open.
+  $('share-app').addEventListener('click', async () => {
+    const t = T();
+    const url = shareUrl();
+    pauseTimers();
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'MaxApki', text: t.shareText, url }).catch(() => {}); // closed without sharing
+      } else {
+        try {
+          await navigator.clipboard.writeText(url);
+          toast(t.shareCopied);
+        } catch (e) {
+          toast(t.shareLink(url));
+        }
+      }
+    } finally {
+      $('share-app').blur();
+      if (!panelOpen()) resumeTimers();
+    }
   });
 
   // ---------- input ----------
