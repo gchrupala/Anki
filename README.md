@@ -2,7 +2,7 @@
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds two sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, and [ChemiaMax](#chemiamax), which teaches the formulas of common chemical compounds. The three apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all three.
+The same page also holds two sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, and [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds. The three apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all three.
 
 ## Running it
 
@@ -211,13 +211,13 @@ The names are in `countries.js`. Country names come from the Unicode CLDR data t
 
 ## ChemiaMax
 
-ChemiaMax teaches the formulas of common chemical compounds. It runs in the same page as the other apps and has the same options.
+ChemiaMax teaches the formulas of elements and common chemical compounds. It runs in the same page as the other apps and has the same options.
 
-- Each compound is one card: 53 compounds a child meets at home, in nature and in school chemistry, from water, table salt and carbon dioxide to caffeine and vitamin C. The card shows the name, as in school chemistry ("Tlenek węgla(IV)" in Polish), with the everyday name below it if there is one ("dwutlenek węgla"). The child picks the formula from four, written with small numbers (H₂O).
-- The wrong answers are formulas of other compounds, drawn from the six most like the right one: those with the most of its elements and the fewest others. So carbon monoxide often gets CO₂ as a wrong answer, and nitrogen dioxide N₂O or HNO₃.
+- Each card is an element or a compound: 28 elements and 53 compounds a child meets at home, in nature and in school chemistry, from oxygen, iron and gold to water, table salt, caffeine and vitamin C. Elements are written as they occur: gases such as oxygen as molecules (O₂, N₂, Cl₂), noble gases and metals as single atoms (He, Fe, Au), and sulfur, carbon and phosphorus by their symbol. The card shows the name, as in school chemistry ("Tlenek węgla(IV)" in Polish), with the everyday name below it if there is one ("dwutlenek węgla"). The child picks the formula from four, written with small numbers (H₂O).
+- One wrong answer is always the formula most like the right one, and two more come from the next five most like it. For a compound, alike means the most of its elements and the fewest others: carbon monoxide always gets CO₂, and nitrogen dioxide N₂O and maybe HNO₃. For an element, it means another form of the same element or a symbol with the same first letter: oxygen always gets O₃, iron F₂, silver Au, Ar or Al.
 - As in StoliceMax, a right answer the first time is never Easy. Easy needs a right answer within 6 seconds. The default time limit is 20 seconds, and 5 new compounds a day, because formulas are harder to learn than capitals.
-- The settings choose the groups of compounds: oxides, acids, bases, salts and organic compounds. All are on by default. The progress view has a square with the formula of each compound, by group.
-- The review log uses the number of the compound in `chemistry.js` as `card_id`, and has the formula and the formula picked.
+- The settings choose the groups: elements, oxides, acids, bases, salts and organic compounds. All are on by default; the elements, added later, were switched on for progress saved before them. The progress view has a square with each formula, by group.
+- The review log uses the number of the element or compound in `chemistry.js` as `card_id`, and has the formula and the formula picked.
 
 The shop sells laboratory glassware with coloured liquid that bubbles and glitters:
 
@@ -238,7 +238,7 @@ The shop sells laboratory glassware with coloured liquid that bubbles and glitte
 
 Buying one sets off an explosion for 4 seconds: a flash, a shock wave, a fireball, sparks and drops of the liquid flying out, smoke, and the page shakes. With reduced motion switched on in the device settings, only the glassware is shown. The glassware and its prices are set in `GLASSWARE` in `index.html`, the drawings in `GLASS_ART`, the names in `i18n-chemistry.js`.
 
-The compounds and their names in the five languages are in `chemistry.js`. No two compounds share a formula; glucose is there, fructose (also C₆H₁₂O₆) is not. Some everyday names stand for a close relative: gypsum is CaSO₄ with water in it, and the Persian کات کبود is copper sulfate with water.
+The elements and compounds and their names in the five languages are in `chemistry.js`. No two share a formula; glucose is there, fructose (also C₆H₁₂O₆) is not. Some everyday names stand for a close relative: gypsum is CaSO₄ with water in it, and the Persian کات کبود is copper sulfate with water.
 
 ## How the page holds several apps
 
@@ -248,7 +248,7 @@ The compounds and their names in the five languages are in `chemistry.js`. No tw
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
 
-`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per compound, formulas made of element symbols, names in every language, at least four compounds per group, and the ChemiaMax text.
+`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text.
 
 ## Limitations
 

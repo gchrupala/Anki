@@ -1,6 +1,6 @@
 /*
- * The compounds of ChemiaMax: common compounds a child meets at home, in
- * nature and in school chemistry. Each row: number, group, formula, then
+ * The substances of ChemiaMax: elements and common compounds a child meets
+ * at home, in nature and in school chemistry. Each row: number, group, formula, then
  * [name, everyday name or ''] in Polish, English, Dutch, Spanish and Persian
  * (the order of LANGS). Polish names follow Polish school chemistry, e.g.
  * "tlenek węgla(IV)" with "dwutlenek węgla" as the everyday name.
@@ -9,7 +9,10 @@
  * are added or moved. No two rows may share a formula (glucose and fructose,
  * for example, are both C6H12O6, so only glucose is here).
  *
- * Groups: OX oxides, AC acids, BA bases, SA salts, ORG organic compounds.
+ * Groups: EL elements, OX oxides, AC acids, BA bases, SA salts, ORG organic
+ * compounds. Elements are written as they occur: gases such as oxygen as
+ * molecules (O2), noble gases and metals as single atoms (He, Fe), and
+ * sulfur, carbon and phosphorus by their symbol (S, C, P).
  */
 (function (root) {
   'use strict';
@@ -69,6 +72,34 @@
     [51, 'ORG', 'C6H8O6', ['Kwas askorbinowy', 'witamina C'], ['Ascorbic acid', 'vitamin C'], ['Ascorbinezuur', 'vitamine C'], ['Ácido ascórbico', 'vitamina C'], ['اسکوربیک اسید', 'ویتامین ث']],
     [52, 'ORG', 'C8H10N4O2', ['Kofeina', ''], ['Caffeine', ''], ['Cafeïne', ''], ['Cafeína', ''], ['کافئین', '']],
     [53, 'ORG', 'CO(NH2)2', ['Mocznik', ''], ['Urea', ''], ['Ureum', ''], ['Urea', ''], ['اوره', '']],
+    [54, 'EL', 'H2', ['Wodór', ''], ['Hydrogen', ''], ['Waterstof', ''], ['Hidrógeno', ''], ['هیدروژن', '']],
+    [55, 'EL', 'O2', ['Tlen', ''], ['Oxygen', ''], ['Zuurstof', ''], ['Oxígeno', ''], ['اکسیژن', '']],
+    [56, 'EL', 'N2', ['Azot', ''], ['Nitrogen', ''], ['Stikstof', ''], ['Nitrógeno', ''], ['نیتروژن', '']],
+    [57, 'EL', 'Cl2', ['Chlor', ''], ['Chlorine', ''], ['Chloor', ''], ['Cloro', ''], ['کلر', '']],
+    [58, 'EL', 'F2', ['Fluor', ''], ['Fluorine', ''], ['Fluor', ''], ['Flúor', ''], ['فلوئور', '']],
+    [59, 'EL', 'O3', ['Ozon', ''], ['Ozone', ''], ['Ozon', ''], ['Ozono', ''], ['ازون', '']],
+    [60, 'EL', 'He', ['Hel', ''], ['Helium', ''], ['Helium', ''], ['Helio', ''], ['هلیم', '']],
+    [61, 'EL', 'Ne', ['Neon', ''], ['Neon', ''], ['Neon', ''], ['Neón', ''], ['نئون', '']],
+    [62, 'EL', 'Ar', ['Argon', ''], ['Argon', ''], ['Argon', ''], ['Argón', ''], ['آرگون', '']],
+    [63, 'EL', 'Br2', ['Brom', ''], ['Bromine', ''], ['Broom', ''], ['Bromo', ''], ['برم', '']],
+    [64, 'EL', 'I2', ['Jod', ''], ['Iodine', ''], ['Jood', ''], ['Yodo', ''], ['ید', '']],
+    [65, 'EL', 'S', ['Siarka', ''], ['Sulfur', ''], ['Zwavel', ''], ['Azufre', ''], ['گوگرد', '']],
+    [66, 'EL', 'C', ['Węgiel', 'diament, grafit'], ['Carbon', 'diamond, graphite'], ['Koolstof', 'diamant, grafiet'], ['Carbono', 'diamante, grafito'], ['کربن', 'الماس، گرافیت']],
+    [67, 'EL', 'P', ['Fosfor', ''], ['Phosphorus', ''], ['Fosfor', ''], ['Fósforo', ''], ['فسفر', '']],
+    [68, 'EL', 'Si', ['Krzem', ''], ['Silicon', ''], ['Silicium', ''], ['Silicio', ''], ['سیلیسیم', '']],
+    [69, 'EL', 'Fe', ['Żelazo', ''], ['Iron', ''], ['IJzer', ''], ['Hierro', ''], ['آهن', '']],
+    [70, 'EL', 'Cu', ['Miedź', ''], ['Copper', ''], ['Koper', ''], ['Cobre', ''], ['مس', '']],
+    [71, 'EL', 'Au', ['Złoto', ''], ['Gold', ''], ['Goud', ''], ['Oro', ''], ['طلا', '']],
+    [72, 'EL', 'Ag', ['Srebro', ''], ['Silver', ''], ['Zilver', ''], ['Plata', ''], ['نقره', '']],
+    [73, 'EL', 'Al', ['Glin', 'aluminium'], ['Aluminium', ''], ['Aluminium', ''], ['Aluminio', ''], ['آلومینیم', '']],
+    [74, 'EL', 'Zn', ['Cynk', ''], ['Zinc', ''], ['Zink', ''], ['Zinc', ''], ['روی', '']],
+    [75, 'EL', 'Hg', ['Rtęć', ''], ['Mercury', ''], ['Kwik', ''], ['Mercurio', ''], ['جیوه', '']],
+    [76, 'EL', 'Pb', ['Ołów', ''], ['Lead', ''], ['Lood', ''], ['Plomo', ''], ['سرب', '']],
+    [77, 'EL', 'Sn', ['Cyna', ''], ['Tin', ''], ['Tin', ''], ['Estaño', ''], ['قلع', '']],
+    [78, 'EL', 'Na', ['Sód', ''], ['Sodium', ''], ['Natrium', ''], ['Sodio', ''], ['سدیم', '']],
+    [79, 'EL', 'K', ['Potas', ''], ['Potassium', ''], ['Kalium', ''], ['Potasio', ''], ['پتاسیم', '']],
+    [80, 'EL', 'Ca', ['Wapń', ''], ['Calcium', ''], ['Calcium', ''], ['Calcio', ''], ['کلسیم', '']],
+    [81, 'EL', 'Mg', ['Magnez', ''], ['Magnesium', ''], ['Magnesium', ''], ['Magnesio', ''], ['منیزیم', '']],
   ];
 
   root.COMPOUNDS = ROWS.map(([number, group, formula, ...names]) => ({
@@ -78,5 +109,5 @@
     name: Object.fromEntries(LANGS.map((l, i) => [l, names[i][0]])),
     nick: Object.fromEntries(LANGS.map((l, i) => [l, names[i][1]])),
   }));
-  root.COMPOUND_GROUPS = ['OX', 'AC', 'BA', 'SA', 'ORG'];
+  root.COMPOUND_GROUPS = ['EL', 'OX', 'AC', 'BA', 'SA', 'ORG'];
 })(typeof globalThis !== 'undefined' ? globalThis : this);

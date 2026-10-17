@@ -1315,7 +1315,8 @@
       name: 'ChemiaMax',
       hash: 'chemia',
       storeKey: 'chemistry-cards-v1',
-      layout: 1,
+      // Version of the settings layout; 2 added the elements.
+      layout: 2,
       // Formulas take a moment longer to read than names: Easy within 6 seconds.
       fastSeconds: 6,
       settings: () => ({ groups: COMPOUND_GROUPS.slice(), newPerDay: 5, retention: 0.9, answerTime: 20 }),
@@ -1412,6 +1413,10 @@
       const s = JSON.parse(raw);
       if (!s || !s.cards || !s.settings) return null;
       if (isTimes()) upgradeTimes(s);
+      if (app.id === 'chemistry' && (s.settings.layout || 1) < 2) {
+        // The elements came after the compounds: practise them too.
+        s.settings.groups = COMPOUND_GROUPS.filter((g) => g === 'EL' || (s.settings.groups || []).includes(g));
+      }
       s.settings.layout = app.layout;
       const d = defaultState();
       if (!Array.isArray(s.trophies)) s.trophies = [];
@@ -1557,14 +1562,21 @@
       groups: COMPOUND_GROUPS,
       ids: COMPOUNDS.map((c) => c.formula),
       group: (formula) => BY_FORMULA[formula].group,
-      // The right formula and three wrong ones from the six formulas most like
-      // it: those with the most of its elements and the fewest others, such
-      // as CO and CO2, H2O and H2O2, or NO2, N2O and HNO3.
+      // The right formula, the formula most like it, and two more from the
+      // next five most like it. For a compound: those with the most of its elements and the fewest
+      // others, such as CO and CO2, H2O and H2O2, or NO2, N2O and HNO3. For an
+      // element: other elements, first of all another form of the same one
+      // (O2 and O3) or a symbol with the same first letter (Fe and F2, Ag and Au).
       options: (formula) => {
         const mine = elements(formula);
-        const alike = (other) => [...elements(other)].reduce((sum, e) => sum + (mine.has(e) ? 2 : -1), 0);
+        const isElement = (f) => BY_FORMULA[f].group === 'EL';
+        const alike = isElement(formula)
+          ? (other) => (isElement(other)
+            ? 1 + ([...elements(other)].some((e) => mine.has(e)) ? 3 : 0) + (other[0] === formula[0] ? 2 : 0)
+            : [...elements(other)].some((e) => mine.has(e)) ? 1 : 0)
+          : (other) => [...elements(other)].reduce((sum, e) => sum + (mine.has(e) ? 2 : -1), 0);
         const others = shuffle(COMPOUNDS.map((c) => c.formula).filter((f) => f !== formula)).sort((x, y) => alike(y) - alike(x));
-        return shuffle(shuffle(others.slice(0, 6)).slice(0, 3).concat(formula));
+        return shuffle([formula, others[0], ...shuffle(others.slice(1, 6)).slice(0, 2)]);
       },
       answer: (formula) => formulaHtml(formula),
       tile: (formula) => formulaHtml(formula),

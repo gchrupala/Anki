@@ -6,8 +6,9 @@ require('../chemistry.js');
 
 const { COMPOUNDS, COMPOUND_GROUPS, I18N } = globalThis;
 
-test('each compound has its own formula and number', () => {
-  assert.ok(COMPOUNDS.length >= 40);
+test('each element and compound has its own formula and number', () => {
+  assert.ok(COMPOUNDS.length >= 70);
+  assert.ok(COMPOUNDS.filter((c) => c.group === 'EL').length >= 20);
   assert.equal(new Set(COMPOUNDS.map((c) => c.formula)).size, COMPOUNDS.length);
   assert.equal(new Set(COMPOUNDS.map((c) => c.number)).size, COMPOUNDS.length);
 });
@@ -18,12 +19,16 @@ test('formulas are made of element symbols, numbers and brackets', () => {
   }
 });
 
-test('every compound has a name in every language', () => {
+test('every element and compound has a name in every language, no two the same', () => {
   for (const c of COMPOUNDS) {
     for (const lang of I18N.LANGS) {
       assert.ok(c.name[lang], `${c.formula} name ${lang}`);
       assert.equal(typeof c.nick[lang], 'string', `${c.formula} everyday name ${lang}`);
     }
+  }
+  for (const lang of I18N.LANGS) {
+    const names = COMPOUNDS.map((c) => c.name[lang]);
+    assert.equal(new Set(names).size, names.length, lang);
   }
 });
 
