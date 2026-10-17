@@ -1,0 +1,1907 @@
+<!doctype html>
+<html lang="pl" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StoliceMax</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- The app has its own languages: stop Chrome offering to translate it. Its
+     translation banner covers the top of the screen, including the parent button. -->
+<meta name="google" content="notranslate">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StoliceMax">
+<meta name="theme-color" content="#f7f9fd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c2925" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  /* StoliceMax: the layout and look of MnożenieMax (../index.html). A 5×3 index
+     card with four answers below it on squared notebook paper, and the flags of
+     the countries beside it (stacked on phones). Dark theme: chalkboard. */
+  :root {
+    --paper: #f7f9fd;
+    --grid: #e1e8f3;
+    --ink: #1d2742;
+    --ink-soft: #5b6680;
+    --pen: #2a4fc2;
+    --pen-ink: #ffffff;
+    --card: #ffffff;
+    --card-rule: #dbe5f4;
+    --card-margin: #e2645a;
+    --line: #c6d1e3;
+    --key: #ffffff;
+    --key-edge: #b7c3d9;
+    --highlight: #ffe56b;
+    --good: #1b8752;
+    --bad: #c63d32;
+    --learn: #d0621f;
+    --learn-soft: #fbe6d8;
+    --young: #addfc0;
+    --mature: #1b8752;
+    --off: #e8ecf3;
+    --gold-hi: #fff6c4;
+    --gold: #ffc928;
+    --gold-lo: #e09a00;
+    --gold-deep: #9c6200;
+    --coin: #f5b800;
+    --coin-edge: #c78a00;
+    --coin-soft: #fff3cc;
+    --coin-ink: #8a5a00;
+    --scrim: rgb(29 39 66 / 0.35);
+    --shadow: 0 1px 0 rgb(29 39 66 / 0.05), 0 14px 28px -16px rgb(29 39 66 / 0.45);
+
+    --font-display: "Grandstander", "Vazirmatn", "Trebuchet MS", system-ui, sans-serif;
+    --font-body: "Lexend", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1c2925;
+      --grid: #23322d;
+      --ink: #edf2ec;
+      --ink-soft: #a9b8b0;
+      --pen: #93b5ff;
+      --pen-ink: #13201c;
+      --card: #24332e;
+      --card-rule: #2f413b;
+      --card-margin: #e88a80;
+      --line: #3c5049;
+      --key: #2a3b35;
+      --key-edge: #121c19;
+      --highlight: rgb(243 214 94 / 0.32);
+      --good: #72d49c;
+      --bad: #ff8e80;
+      --learn: #f2a565;
+      --learn-soft: #4a3828;
+      --young: #3d7154;
+      --mature: #7ad8a2;
+      --off: #212e2a;
+      --coin: #f6c945;
+      --coin-edge: #b8860b;
+      --coin-soft: #3f3818;
+      --coin-ink: #f6d36b;
+      --scrim: rgb(0 0 0 / 0.55);
+      --shadow: 0 14px 28px -16px rgb(0 0 0 / 0.7);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1c2925;
+    --grid: #23322d;
+    --ink: #edf2ec;
+    --ink-soft: #a9b8b0;
+    --pen: #93b5ff;
+    --pen-ink: #13201c;
+    --card: #24332e;
+    --card-rule: #2f413b;
+    --card-margin: #e88a80;
+    --line: #3c5049;
+    --key: #2a3b35;
+    --key-edge: #121c19;
+    --highlight: rgb(243 214 94 / 0.32);
+    --good: #72d49c;
+    --bad: #ff8e80;
+    --learn: #f2a565;
+    --learn-soft: #4a3828;
+    --young: #3d7154;
+    --mature: #7ad8a2;
+    --off: #212e2a;
+    --coin: #f6c945;
+    --coin-edge: #b8860b;
+    --coin-soft: #3f3818;
+    --coin-ink: #f6d36b;
+    --scrim: rgb(0 0 0 / 0.55);
+    --shadow: 0 14px 28px -16px rgb(0 0 0 / 0.7);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .app {
+    max-width: 66rem;
+    margin-inline: auto;
+    /* the safe-area insets keep content clear of the status bar and home indicator when installed */
+    padding-block: calc(1.25rem + env(safe-area-inset-top, 0px)) calc(2.5rem + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  button { font: inherit; color: inherit; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; }
+
+  /* Header */
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+  }
+  .brand {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.7rem;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+  }
+  .counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.1rem;
+    margin-inline-end: auto;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .count b {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-inline-end: 0.2rem;
+  }
+  .count.new b { color: var(--pen); }
+  .count.learn b { color: var(--learn); }
+  .count.review b { color: var(--good); }
+  /* Coins: a gold coin with a raised rim and an embossed star, a beam of light
+     that passes over it now and then, and sparkles when coins are earned. */
+  .coins {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: var(--coin-soft);
+    color: var(--coin-ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--coin-edge) 35%, transparent);
+  }
+  .coin-icon { width: 1.7rem; height: 1.7rem; flex: none; overflow: visible; filter: drop-shadow(0 1px 1px rgb(120 70 0 / 0.35)); }
+  .coin-icon.small { width: 1.15em; height: 1.15em; vertical-align: -0.2em; margin-inline-end: 0.25em; }
+  .coin-icon .glint { animation: glint 4.5s ease-in-out infinite; }
+  .coin-note .coin-icon .glint, #done-coins .coin-icon .glint { animation-delay: 0.6s; }
+  @keyframes glint {
+    0%, 62% { transform: translateX(-26px); }
+    82%, 100% { transform: translateX(26px); }
+  }
+  .spark {
+    position: absolute;
+    width: 0.7rem;
+    height: 0.7rem;
+    background: var(--gold-hi);
+    clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+    opacity: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 0 2px var(--gold));
+  }
+  .spark.s1 { top: -0.35rem; inset-inline-start: 0.05rem; }
+  .spark.s2 { bottom: -0.25rem; inset-inline-start: 1.5rem; width: 0.5rem; height: 0.5rem; }
+  .spark.s3 { top: -0.1rem; inset-inline-start: 1.75rem; width: 0.45rem; height: 0.45rem; }
+  .coins.bump { animation: bump 0.55s ease-out; }
+  .coins.bump .spark { animation: twinkle 0.9s ease-out; }
+  .coins.bump .spark.s2 { animation-delay: 0.12s; }
+  .coins.bump .spark.s3 { animation-delay: 0.22s; }
+  .coins.bump .coin-icon { animation: spin 0.6s ease-out; }
+  .coin-plus {
+    position: absolute;
+    inset-inline-end: 0.1rem;
+    top: -0.3rem;
+    font-size: 0.9rem;
+    pointer-events: none;
+    animation: float-up 1.3s ease-out forwards;
+  }
+  .coin-note { color: var(--coin-ink); font-weight: 600; }
+  @keyframes bump { 40% { transform: scale(1.15); } }
+  @keyframes spin { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
+  @keyframes twinkle { 0% { opacity: 0; transform: scale(0.2) rotate(0); } 40% { opacity: 1; transform: scale(1.2) rotate(45deg); } 100% { opacity: 0; transform: scale(0.4) rotate(90deg); } }
+  @keyframes float-up { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-1.5rem); } }
+  @media (prefers-reduced-motion: reduce) {
+    .coins.bump, .coins.bump .coin-icon, .coins.bump .spark, .coin-plus, .coin-icon .glint { animation: none; }
+  }
+  /* Trophies, bought in the shop and celebrated with confetti */
+  .trophies {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: var(--coin-soft);
+    color: var(--coin-ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--coin-edge) 35%, transparent);
+  }
+  .trophy-icon { width: 1.7rem; height: 1.7rem; flex: none; filter: drop-shadow(0 1px 1px rgb(60 40 20 / 0.35)); }
+  #trophy-slot { display: inline-flex; }
+  .trophy-shelf { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .trophy-shelf .trophy-icon { width: 2.4rem; height: 2.4rem; }
+  /* Shop */
+  .shop-balance { display: flex; align-items: center; gap: 0.2rem; margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--coin-ink); }
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.75rem; }
+  .shop-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.9rem 0.6rem 0.8rem;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    background: var(--paper);
+    text-align: center;
+  }
+  .shop-item .trophy-icon { width: 3.6rem; height: 3.6rem; }
+  .shop-item .name { font-size: 0.9rem; font-weight: 600; }
+  .shop-item .price { display: inline-flex; align-items: center; font-weight: 700; color: var(--coin-ink); font-variant-numeric: tabular-nums; }
+  .shop-item .primary-btn { min-height: 2.4rem; padding: 0.4rem 0.9rem; font-size: 0.9rem; }
+  .shop-item .primary-btn[data-armed] { background: var(--good); }
+  .shop-item .missing { min-height: 2.4rem; display: flex; align-items: center; font-size: 0.8rem; color: var(--ink-soft); }
+  .shop-item.too-dear .trophy-icon { opacity: 0.55; }
+  .trophy-icon .glint { animation: glint 4.5s ease-in-out infinite 1.5s; }
+  .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+  .trophy-banner {
+    position: fixed;
+    top: max(14vh, env(safe-area-inset-top, 0px));
+    left: 50%;
+    z-index: 31;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1.1rem 2rem 1.2rem;
+    border-radius: 18px;
+    border: 2px solid var(--metal, var(--gold));
+    background: var(--card);
+    box-shadow: var(--shadow), 0 0 40px color-mix(in srgb, var(--metal, var(--gold)) 45%, transparent);
+    text-align: center;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: trophy-in 4s ease-out forwards;
+  }
+  .trophy-banner .trophy-icon { width: 5rem; height: 5rem; }
+  .trophy-banner strong { font-family: var(--font-display); font-size: 1.6rem; color: var(--ink); }
+  .trophy-banner span { color: var(--coin-ink); font-weight: 600; }
+  @keyframes trophy-in {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+    10% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+    16% { transform: translateX(-50%) scale(1); }
+    85% { opacity: 1; transform: translateX(-50%) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .trophy-banner { animation: none; }
+    .trophy-icon .glint { animation: none; }
+  }
+  .pill {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--learn-soft);
+    color: var(--learn);
+  }
+  .ghost-btn {
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    border-radius: 999px;
+    padding: 0.4rem 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .ghost-btn:hover { border-color: var(--pen); }
+  .settings-btn { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .settings-btn svg { width: 1.15rem; height: 1.15rem; flex: none; }
+
+  /* Main layout */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (min-width: 840px) {
+    .layout { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 3rem; }
+  }
+
+  .study {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+
+  /* The index card */
+  .card {
+    container-type: inline-size;
+    aspect-ratio: 5 / 3;
+    max-width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    overflow: clip; /* not "hidden": that would stop the card growing to fit its text */
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 1.1rem 0.55rem;
+    border-bottom: 2px solid var(--card-margin);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .card-head > span { white-space: nowrap; }
+  .tag { display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; }
+  .tag::before {
+    content: "";
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .tag.new { color: var(--pen); }
+  .tag.learning, .tag.relearning { color: var(--learn); }
+  .tag.review { color: var(--good); }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 1.1rem 1.2rem;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(2rem - 1px),
+      var(--card-rule) calc(2rem - 1px),
+      var(--card-rule) 2rem
+    );
+    cursor: default;
+  }
+  /* The country: its flag and its name */
+  .question {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    text-align: center;
+  }
+  .flag { font-size: clamp(2.6rem, 14cqi, 5rem); line-height: 1; }
+  .country {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 7.5cqi, 3rem);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .feedback {
+    margin: 0;
+    min-height: 3em;
+    max-width: 34ch;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    text-wrap: balance;
+  }
+  .feedback strong { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.01em; }
+  .card.is-right .feedback strong { color: var(--good); }
+  .card.is-wrong .feedback strong { color: var(--bad); }
+  .card.shake .question { animation: shake 0.35s; }
+  .card.enter .question { animation: rise 0.25s ease-out; }
+
+  @keyframes shake {
+    20% { transform: translateX(-0.12em); }
+    40% { transform: translateX(0.1em); }
+    60% { transform: translateX(-0.06em); }
+    80% { transform: translateX(0.04em); }
+  }
+  @keyframes rise { from { transform: translateY(0.25em); opacity: 0.2; } }
+  @media (prefers-reduced-motion: reduce) {
+    .card.shake .question, .card.enter .question { animation: none; }
+  }
+
+  /* Done card */
+  .done-body { gap: 0.8rem; text-align: center; }
+  .done-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 7cqi, 2.6rem);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .done-body p { margin: 0; color: var(--ink-soft); }
+
+  /* The four answers */
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    width: 100%;
+    max-width: 32rem;
+    margin-inline: auto;
+  }
+  .choice {
+    min-height: 3.6rem;
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid var(--key-edge);
+    border-radius: 14px;
+    background: var(--key);
+    box-shadow: 0 3px 0 var(--key-edge);
+    font-size: clamp(1rem, 4.2vw, 1.15rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+    hyphens: auto;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .choice:active, .choice.pressed { transform: translateY(2px); box-shadow: 0 1px 0 var(--key-edge); }
+  .choice.is-right { background: var(--good); border-color: var(--good); color: var(--pen-ink); box-shadow: 0 3px 0 color-mix(in srgb, var(--good) 55%, #000); }
+  .choice.is-wrong { border-color: var(--bad); color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--key)); }
+  .choices.answered .choice:not(.is-right):not(.is-wrong) { opacity: 0.45; }
+
+  .primary-btn {
+    border: none;
+    border-radius: 999px;
+    background: var(--pen);
+    color: var(--pen-ink);
+    padding: 0.65rem 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Progress */
+  .progress { min-width: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+  .progress h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.3rem;
+  }
+  .progress .sub { margin: 0; font-size: 0.85rem; color: var(--ink-soft); max-width: 40ch; }
+  /* One square per country, with its flag, grouped by continent */
+  .map { display: flex; flex-direction: column; gap: 1rem; }
+  .continent h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin: 0 0 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .continent .tally { color: var(--ink-soft); font-weight: 500; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .continent.is-off h3 { color: var(--ink-soft); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.15rem, 1fr)); gap: 3px; }
+  .tiles > div {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+  .cell { background: var(--card); border: 1.5px solid var(--line); }
+  .cell.is-learning { background: var(--learn-soft); border-color: var(--learn); }
+  .cell.is-young { background: var(--young); border-color: var(--young); }
+  .cell.is-mature { background: var(--mature); border-color: var(--mature); }
+  .cell.is-off { background: var(--off); border-color: var(--off); opacity: 0.6; }
+  .cell.is-current { outline: 2.5px solid var(--pen); outline-offset: 1px; }
+  /* A flag shows in colour once its capital has been seen. */
+  .tiles .cell:not(.is-learning):not(.is-young):not(.is-mature) { filter: grayscale(1); }
+  .tiles .cell:not(.is-learning):not(.is-young):not(.is-mature):not(.is-current) { opacity: 0.6; }
+  .tiles .cell.is-off { opacity: 0.25; }
+
+  .legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    gap: 0.35rem 1.4rem;
+    font-size: 0.85rem;
+  }
+  .legend li { display: flex; align-items: center; gap: 0.5rem; }
+  .legend .sw { width: 0.95rem; height: 0.95rem; border-radius: 3px; flex: none; }
+  .legend b { font-variant-numeric: tabular-nums; min-width: 2ch; display: inline-block; text-align: end; }
+  .today { margin: 0; font-size: 0.85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  /* Parent panel: a plain overlay shown and hidden by the app (not <dialog>,
+     whose pop-up layer froze the page on the tablet when it did not show). */
+  .panel {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--scrim);
+    padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .sheet {
+    width: min(34rem, 100%);
+    padding: 1.4rem 1.4rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+  .sheet:focus { outline: none; }
+  body.panel-open { overflow: hidden; }
+  .sheet h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; }
+  .sheet h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .sheet p { margin: 0 0 0.5rem; font-size: 0.9rem; max-width: 60ch; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .chip span {
+    display: grid;
+    place-items: center;
+    min-width: 2.6rem;
+    height: 2.4rem;
+    padding-inline: 0.6rem;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .chip input:checked + span { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
+  .chip input:focus-visible + span { outline: 3px solid var(--pen); outline-offset: 2px; }
+  .fields { display: flex; flex-direction: column; gap: 0.6rem; }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; max-width: 20rem; }
+  .hint { font-size: 0.8rem; color: var(--ink-soft); }
+  textarea {
+    width: 100%;
+    height: 8rem;
+    margin-top: 0.6rem;
+    padding: 0.5rem;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 0.75rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .field input, .field select {
+    width: 5rem;
+    padding: 0.4rem 0.5rem;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+  }
+  .field #lang { width: auto; }
+  .rules { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .rules th, .rules td { text-align: start; padding-block: 0.35rem; padding-inline: 0 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .rules th { font-weight: 600; color: var(--ink-soft); }
+  .row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+  .danger { border-color: var(--bad); color: var(--bad); }
+  .sheet-foot { display: flex; justify-content: flex-end; }
+</style>
+</head>
+<body>
+<!-- Gold gradients shared by every coin on the page -->
+<svg id="shine-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="coin-rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" style="stop-color: var(--gold-hi)"/>
+      <stop offset="0.45" style="stop-color: var(--gold)"/>
+      <stop offset="1" style="stop-color: var(--gold-deep)"/>
+    </linearGradient>
+    <radialGradient id="coin-face" cx="0.35" cy="0.3" r="0.85">
+      <stop offset="0" style="stop-color: var(--gold-hi)"/>
+      <stop offset="0.5" style="stop-color: var(--gold)"/>
+      <stop offset="1" style="stop-color: var(--gold-lo)"/>
+    </radialGradient>
+    <clipPath id="coin-clip"><circle cx="16" cy="16" r="15"/></clipPath>
+    <clipPath id="trophy-clip"><path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z"/></clipPath>
+  </defs>
+</svg>
+<div class="app">
+  <header class="top">
+    <h1 class="brand" data-t="appName">StoliceMax</h1>
+    <div class="counts" data-t-aria="countsAria">
+      <span class="count new"><b id="count-new">0</b><span id="label-new">new</span></span>
+      <span class="count learn"><b id="count-learn">0</b><span id="label-learn">practising</span></span>
+      <span class="count review"><b id="count-review">0</b><span id="label-review">to review</span></span>
+    </div>
+    <span class="coins" id="coins" role="img">
+      <svg class="coin-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="url(#coin-rim)"/><circle cx="16" cy="16" r="12" fill="url(#coin-face)"/><circle cx="16" cy="16" r="12" fill="none" style="stroke: var(--gold-deep)" stroke-opacity="0.45" stroke-width="0.8"/><path d="M16.0 9.0 L17.8 13.9 L23.0 14.1 L18.9 17.4 L20.3 22.4 L16.0 19.5 L11.7 22.4 L13.1 17.4 L9.0 14.1 L14.2 13.9z" style="fill: var(--gold-hi)"/><path d="M15.6 8.6 L17.4 13.5 L22.6 13.7 L18.5 17.0 L19.9 22.0 L15.6 19.1 L11.3 22.0 L12.7 17.0 L8.6 13.7 L13.8 13.5z" style="fill: var(--gold-deep)" fill-opacity="0.85"/><g clip-path="url(#coin-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g></svg>
+      <b id="coin-total">0</b>
+      <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
+      <span class="coin-plus" id="coin-plus" hidden></span>
+    </span>
+    <span class="trophies" id="trophies" role="img" hidden>
+      <span id="trophy-slot"></span>
+      <b id="trophy-total">0</b>
+    </span>
+    <button type="button" class="ghost-btn settings-btn" id="open-shop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg>
+      <span data-t="shopButton">Shop</span>
+    </button>
+    <span class="pill" id="clock-pill" hidden></span>
+    <button type="button" class="ghost-btn settings-btn" id="open-settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span data-t="settingsButton">Settings</span>
+    </button>
+  </header>
+
+  <main class="layout">
+    <section class="study" data-t-aria="practiceAria">
+      <div class="card" id="card">
+        <div class="card-head">
+          <span class="tag new" id="tag"></span>
+          <span id="seen"></span>
+        </div>
+        <div class="card-body" id="card-body">
+          <div class="question" aria-live="polite">
+            <span class="flag" id="flag" aria-hidden="true"></span>
+            <span class="country" id="country"></span>
+          </div>
+          <p class="feedback" id="feedback" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="card" id="done" hidden>
+        <div class="card-head"><span data-t="finished">Finished</span><span id="done-date"></span></div>
+        <div class="card-body done-body">
+          <h2 class="done-title" data-t="doneTitle">All done for today!</h2>
+          <p id="done-stats"></p>
+          <p id="done-coins" class="coin-note"></p>
+          <p id="done-next"></p>
+          <button type="button" class="primary-btn" id="more-new" data-t="moreNew" hidden>Learn 5 more new countries</button>
+        </div>
+      </div>
+
+      <div class="choices" id="choices" data-t-aria="choicesAria">
+        <button type="button" class="choice" data-i="0"></button>
+        <button type="button" class="choice" data-i="1"></button>
+        <button type="button" class="choice" data-i="2"></button>
+        <button type="button" class="choice" data-i="3"></button>
+      </div>
+    </section>
+
+    <aside class="progress" data-t-aria="progressAria">
+      <h2 data-t="progressTitle">Your capitals</h2>
+      <p class="sub" data-t="progressSub">Each square is one country. Squares fill in as capitals move into long-term memory.</p>
+      <div class="map" id="map" role="img" data-t-aria="squareAria"></div>
+      <ul class="legend">
+        <li><span class="sw cell"></span><b id="n-new">0</b> <span data-t="legendNew">not started</span></li>
+        <li><span class="sw cell is-learning"></span><b id="n-learning">0</b> <span data-t="legendLearning">practising</span></li>
+        <li><span class="sw cell is-young"></span><b id="n-young">0</b> <span data-t="legendYoung">learned</span></li>
+        <li><span class="sw cell is-mature"></span><b id="n-mature">0</b> <span data-t="legendMature">mastered (3+ weeks)</span></li>
+      </ul>
+      <p class="today" id="today"></p>
+      <p class="today" id="page-error" hidden></p>
+    </aside>
+  </main>
+</div>
+
+<div class="panel" id="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+  <div class="sheet" id="settings-sheet" tabindex="-1">
+    <h2 id="settings-title" data-t="settingsTitle">Settings</h2>
+
+    <section>
+      <label class="field" for="lang"><span data-t="language">Language</span>
+        <select id="lang"></select>
+      </label>
+    </section>
+
+    <section>
+      <h3 data-t="continentsTitle">Continents</h3>
+      <div class="chips" id="continent-chips"></div>
+      <p class="hint" data-t="continentsHint" style="margin-top:0.5rem"></p>
+    </section>
+
+    <section class="fields">
+      <label class="field" for="new-per-day"><span data-t="newPerDay">New countries per day</span> <input id="new-per-day" type="number" min="0" max="100" step="1"></label>
+      <label class="field" for="retention"><span data-t="retention">Target recall</span>
+        <select id="retention">
+          <option value="0.8">80%</option>
+          <option value="0.85">85%</option>
+          <option value="0.9">90%</option>
+          <option value="0.95">95%</option>
+        </select>
+      </label>
+      <p class="hint" data-t="retentionHint"></p>
+      <label class="field" for="answer-time"><span data-t="answerTime">Time to answer</span>
+        <select id="answer-time">
+          <option value="10">10 s</option>
+          <option value="15">15 s</option>
+          <option value="20">20 s</option>
+          <option value="30">30 s</option>
+          <option value="60">60 s</option>
+          <option value="0">-</option>
+        </select>
+      </label>
+      <p class="hint" data-t="answerTimeHint"></p>
+    </section>
+
+    <section>
+      <h3 data-t="howTitle">How the cards are scheduled</h3>
+      <p data-t="howP1"></p>
+      <p data-t="howP2"></p>
+      <table class="rules">
+        <tr><th data-t="ruleAnswer">Answer</th><th data-t="ruleRating">Anki rating</th></tr>
+        <tr><td data-t="ruleWrong">Wrong</td><td data-t="ruleWrongRating"></td></tr>
+        <tr><td data-t="ruleSlow">Right, slower than 10 s</td><td>Hard</td></tr>
+        <tr><td data-t="ruleRight">Right</td><td>Good</td></tr>
+        <tr><td data-t="ruleFast">Right within 5 s</td><td data-t="ruleFastRating"></td></tr>
+      </table>
+      <p style="margin-top:0.6rem" data-t="howP3"></p>
+    </section>
+
+    <section>
+      <h3 data-t="logTitle">Review log</h3>
+      <p id="log-status"></p>
+      <div class="row">
+        <button type="button" class="ghost-btn" id="copy-log" data-t="copyLog">Copy as CSV</button>
+      </div>
+      <textarea id="log-text" readonly hidden data-t-aria="logAria"></textarea>
+    </section>
+
+    <section>
+      <h3 data-t="testingTitle">Testing</h3>
+      <p id="clock-status"></p>
+      <div class="row">
+        <button type="button" class="ghost-btn" id="jump-day" data-t="jumpDay">Jump ahead one day</button>
+        <button type="button" class="ghost-btn" id="real-clock" data-t="realClock">Back to real time</button>
+      </div>
+    </section>
+
+    <section>
+      <h3 data-t="coinsTitle">Coins</h3>
+      <p data-t="coinsRules"></p>
+      <p id="coins-total"></p>
+    </section>
+
+    <section id="update-section">
+      <h3 data-t="updateTitle">Update</h3>
+      <p id="app-version"></p>
+      <div class="row">
+        <button type="button" class="ghost-btn" id="reload-app" data-t="reloadButton">Reload from the server</button>
+      </div>
+      <p class="hint" id="reload-status" data-t="reloadHint" style="margin-top:0.6rem">Progress is kept.</p>
+      <p class="hint" id="last-error" hidden></p>
+    </section>
+
+    <section>
+      <h3 data-t="progressSection">Progress</h3>
+      <p data-t="savedHere">Progress is saved in this browser only.</p>
+      <button type="button" class="ghost-btn danger" id="reset" data-t="erase">Erase all progress</button>
+    </section>
+
+    <div class="sheet-foot">
+      <button type="button" class="primary-btn" id="close-settings" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="shop" role="dialog" aria-modal="true" aria-labelledby="shop-title" hidden>
+  <div class="sheet" id="shop-sheet" tabindex="-1">
+    <h2 id="shop-title" data-t="shopTitle">Shop</h2>
+    <p class="shop-balance" id="shop-balance"></p>
+    <p class="hint" data-t="shopHint"></p>
+    <div class="shop-grid" id="shop-grid"></div>
+    <section>
+      <h3 data-t="yourTrophies">Your trophies</h3>
+      <div class="trophy-shelf" id="trophy-shelf"></div>
+    </section>
+    <div class="sheet-foot">
+      <button type="button" class="primary-btn" id="close-shop" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="../srs.js"></script>
+<script src="../i18n.js"></script>
+<script src="i18n-stolice.js"></script>
+<script src="countries.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const DAY = 24 * 60 * SRS.MINUTE;
+  const ROLLOVER = SRS.DEFAULTS.rolloverHour;
+  // MnożenieMax keeps its progress under another key on the same site, so the
+  // two apps have separate cards and coins.
+  const STORE_KEY = 'capitals-cards-v1';
+  const MATURE_DAYS = 21; // Anki calls a card "mature" from 21 days
+  // Coins reward what is remembered, never the number of answers: in spaced
+  // repetition a well-known fact comes back rarely, so coins per answer would
+  // reward forgetting. Each fact pays each level once (so forgetting and
+  // relearning earns nothing), and coins never change the schedule.
+  // Level 1: learned (left the first-day steps); 2: next review a week or
+  // more away; 3: mastered (MATURE_DAYS). Keep the rules text in
+  // i18n-stolice.js in step.
+  const LEVEL_COINS = [0, 2, 5, 10];
+  const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
+  const DAY_BONUS = 10; // for finishing all of the day's cards
+  // Trophies in the shop, cheapest first: name, price in coins, then the
+  // colours highlight, middle, shadow, outline. The price range is also
+  // named in the coin rules text in i18n-stolice.js.
+  const TROPHY_METALS = [
+    ['bronze', 50, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['silver', 100, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['gold', 150, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['platinum', 250, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
+    ['diamond', 350, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
+    ['ruby', 500, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
+    ['emerald', 650, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
+    ['sapphire', 800, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+  ];
+  const metal = (name) => TROPHY_METALS.find((m) => m[0] === name) || TROPHY_METALS[0];
+  const CELEBRATION_MS = 4000; // confetti time
+  function rewardLevel(c) {
+    if (c.type === 'new' || c.type === 'learning') return 0;
+    if (c.interval >= MATURE_DAYS) return 3;
+    if (c.interval >= 7) return 2;
+    return 1;
+  }
+  // A right answer within this many seconds counts as Easy. Reading four
+  // names takes longer than typing a short number, so this is one second more
+  // than in MnożenieMax.
+  const FAST_SECONDS = 5;
+  const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
+  // The Android app serves its own copy of these files under this address.
+  const inAndroidApp = location.hostname === 'appassets.androidplatform.net';
+  const PRAISE = { [SRS.EASY]: 'easy', [SRS.GOOD]: 'good', [SRS.HARD]: 'hard' };
+
+  const DEFAULT_CONTINENTS = ['EU'];
+  // Version of the settings layout, for changes to saved settings later on.
+  const SETTINGS_LAYOUT = 1;
+  const BY_ISO = Object.fromEntries(COUNTRIES.map((c) => [c.iso, c]));
+
+  const $ = (id) => document.getElementById(id);
+
+  // The last error in the page, shown in the parent panel to help find problems.
+  let lastError = '';
+  function noteError(e) {
+    lastError = String((e && (e.message || e.reason)) || e);
+    const label = (I18N.STRINGS[document.documentElement.lang] || I18N.STRINGS.en).lastError || 'Error:';
+    for (const id of ['last-error', 'page-error']) {
+      const el = $(id);
+      if (el) {
+        el.textContent = label + ' ' + lastError;
+        el.hidden = false;
+      }
+    }
+  }
+  window.addEventListener('error', (e) => noteError(e.error || e.message));
+  window.addEventListener('unhandledrejection', (e) => noteError(e.reason));
+  const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => '&#' + ch.charCodeAt(0) + ';');
+
+  // ---------- state ----------
+
+  function defaultState() {
+    return {
+      cards: {},
+      settings: {
+        continents: DEFAULT_CONTINENTS,
+        newPerDay: 10,
+        retention: 0.9,
+        answerTime: 15, // seconds without an answer before a country counts as not known; 0 = no limit
+        lang: 'auto', // the device language; or a code such as 'nl'
+        layout: SETTINGS_LAYOUT,
+      },
+      daily: null,
+      coins: 0,
+      spent: 0, // coins spent in the shop; coins minus spent can still be spent
+      trophies: [], // bought in the shop: { metal, at }
+      clockOffset: 0,
+      // One entry per answer: [time, ISO code, rating, state before, ms, ISO code picked].
+      log: [],
+    };
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s || !s.cards || !s.settings) return null;
+      s.settings.layout = SETTINGS_LAYOUT;
+      const d = defaultState();
+      if (!Array.isArray(s.trophies)) s.trophies = [];
+      if (typeof s.spent !== 'number') s.spent = 0;
+      return { ...d, ...s, settings: { ...d.settings, ...s.settings } };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    } catch (e) {
+      /* storage unavailable: progress lasts for this visit only */
+    }
+  }
+
+  let state = load() || defaultState();
+
+  const now = () => Date.now() + state.clockOffset;
+  const today = () => SRS.dayIndex(now(), ROLLOVER);
+  const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention, fastSeconds: FAST_SECONDS });
+  // The first device language the app has, e.g. 'nl' for nl-BE; Polish if none.
+  function deviceLang() {
+    const wanted = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (const tag of wanted) {
+      const code = String(tag).toLowerCase().split('-')[0];
+      if (I18N.STRINGS[code]) return code;
+    }
+    return I18N.DEFAULT;
+  }
+  const lang = () => (I18N.STRINGS[state.settings.lang] ? state.settings.lang : deviceLang());
+  // English fills in any text a language lacks, so a missing entry can't break the page.
+  const T = () => ({ ...I18N.STRINGS.en, ...I18N.STRINGS[lang()] });
+
+  function daily() {
+    if (!state.daily || state.daily.day !== today()) {
+      state.daily = { day: today(), newSeen: 0, extraNew: 0, answered: 0, right: 0 };
+    }
+    return state.daily;
+  }
+
+  // One card per country, with its ISO code as id. Each card gets a random
+  // number once, which fixes its place in the order new cards are introduced.
+  function card(iso) {
+    if (!state.cards[iso]) state.cards[iso] = { ...SRS.newCard(iso), seed: Math.random() };
+    return state.cards[iso];
+  }
+
+  // The countries of the chosen continents, in the (random) order new ones are introduced.
+  function activeCards() {
+    const on = new Set(state.settings.continents);
+    return COUNTRIES.filter((c) => on.has(c.continent)).map((c) => card(c.iso)).sort((x, y) => x.seed - y.seed);
+  }
+
+  function newLeft() {
+    const d = daily();
+    return state.settings.newPerDay + d.extraNew - d.newSeen;
+  }
+
+  function queues() {
+    return SRS.buildQueues(activeCards(), now(), newLeft(), cfg());
+  }
+
+  // ---------- wording ----------
+
+  // "in 5 minutes", "tomorrow", "in 3 days" in the chosen language.
+  function whenText(due) {
+    const rtf = new Intl.RelativeTimeFormat(lang(), { numeric: 'auto' });
+    const ms = due - now();
+    if (ms < 60 * SRS.MINUTE) return rtf.format(Math.max(1, Math.round(ms / SRS.MINUTE)), 'minute');
+    const days = SRS.dayIndex(due, ROLLOVER) - today();
+    if (days <= 0) return T().laterToday;
+    if (days < 60) return rtf.format(days, 'day');
+    return rtf.format(Math.round(days / 30), 'month');
+  }
+
+  // Numbers in the language's digits (Persian ۰–۹, otherwise 0–9).
+  const num = (x) => (T().digits ? T().digits(x) : String(x));
+  const countryName = (iso) => BY_ISO[iso].name[lang()];
+  const capitalName = (iso) => BY_ISO[iso].capital[lang()];
+  // The flag emoji: the two letters of the code as regional indicator symbols.
+  const flag = (iso) => String.fromCodePoint(...[...iso].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65));
+
+  // ---------- study flow ----------
+
+  let currentId = null;
+  let lastId = null;
+  let mode = 'ask'; // ask | right | wrong | done
+  let options = []; // ISO codes of the countries whose capitals are the four answers
+  let picked = null; // the wrong answer picked
+  let shownAt = 0;
+  let advanceTimer = null;
+  let giveUpTimer = null;
+  // Builds the feedback line, so that it follows a change of language.
+  let feedback = () => '';
+  let shown = null; // the card as it was when shown, for the card header
+
+  function current() {
+    return currentId ? state.cards[currentId] : null;
+  }
+
+  // Avoid repeating the card just answered.
+  function avoidList() {
+    return lastId ? [lastId] : [];
+  }
+
+  // The right capital and three others from the same continent, in a random order.
+  function makeOptions(iso) {
+    const shuffle = (list) => {
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+      return list;
+    };
+    const others = COUNTRIES.filter((c) => c.continent === BY_ISO[iso].continent && c.iso !== iso).map((c) => c.iso);
+    return shuffle(shuffle(others).slice(0, 3).concat(iso));
+  }
+
+  // Starts the time limit. It does not run while the settings panel is open
+  // or the app is in the background.
+  function armGiveUp() {
+    clearTimeout(giveUpTimer);
+    const seconds = state.settings.answerTime;
+    if (mode === 'ask' && seconds > 0 && !panelOpen() && document.visibilityState !== 'hidden') {
+      giveUpTimer = setTimeout(() => submit(null), seconds * 1000);
+    }
+  }
+
+  // Stops the time limit, and restarts it from now when the card is still open.
+  function pauseTimers() {
+    clearTimeout(giveUpTimer);
+  }
+  function resumeTimers() {
+    if (mode !== 'ask') return;
+    shownAt = performance.now();
+    armGiveUp();
+  }
+
+  // A small copy of the header coin, for text lines.
+  const coinIcon = () => $('coins').querySelector('.coin-icon').outerHTML.replace('class="coin-icon"', 'class="coin-icon small"');
+
+  // Pays the levels a card has newly reached. Returns { coins, level }.
+  function payRewards(card) {
+    const level = rewardLevel(card);
+    const before = card.reward || 0;
+    let coins = 0;
+    for (let l = before + 1; l <= level; l++) coins += LEVEL_COINS[l];
+    if (level > before) card.reward = level;
+    return { coins, level };
+  }
+
+  function addCoins(n) {
+    state.coins = (state.coins || 0) + n;
+    const d = daily();
+    d.coins = (d.coins || 0) + n;
+    const chip = $('coins');
+    chip.classList.remove('bump');
+    void chip.offsetWidth; // restart the animation
+    chip.classList.add('bump');
+    const plus = $('coin-plus');
+    plus.hidden = true;
+    void plus.offsetWidth;
+    plus.textContent = '+' + num(n);
+    plus.hidden = false;
+  }
+
+  // Coins that can still be spent in the shop.
+  const balance = () => (state.coins || 0) - (state.spent || 0);
+
+  // A gradient pair for each trophy material, next to the coin's gradients.
+  function makeTrophyGradients() {
+    const NS = 'http://www.w3.org/2000/svg';
+    const defs = $('shine-defs').querySelector('defs');
+    const gradient = (kind, id, attrs, stops) => {
+      const g = document.createElementNS(NS, kind);
+      g.id = id;
+      for (const [k, v] of Object.entries(attrs)) g.setAttribute(k, v);
+      for (const [offset, color] of stops) {
+        const stop = document.createElementNS(NS, 'stop');
+        stop.setAttribute('offset', offset);
+        stop.setAttribute('stop-color', color);
+        g.appendChild(stop);
+      }
+      defs.appendChild(g);
+    };
+    for (const [name, , hi, mid, lo, deep] of TROPHY_METALS) {
+      gradient('linearGradient', 'rim-' + name, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
+      gradient('radialGradient', 'face-' + name, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
+    }
+  }
+
+  // A trophy drawn in the given material.
+  function trophyIcon(name) {
+    const [, , hi, , lo, deep] = metal(name);
+    return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
+      '<path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" stroke="' + lo + '" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#rim-' + name + ')" stroke="' + deep + '" stroke-width="0.8"/>' +
+      '<path d="M14.3 19.5h3.4l.9 5.5h-5.2z" fill="url(#rim-' + name + ')"/>' +
+      '<path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z" fill="url(#face-' + name + ')" stroke="' + deep + '" stroke-width="0.9"/>' +
+      '<path d="M16 7.4l1.2 2.5 2.7.4-2 1.9.5 2.7-2.4-1.3-2.4 1.3.5-2.7-2-1.9 2.7-.4z" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+      '<g clip-path="url(#trophy-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g>' +
+      '</svg>';
+  }
+
+  // Shows the trophy just bought and lets confetti fall from the top of the screen.
+  function celebrate(name) {
+    const t = T();
+    const [, price, , mid] = metal(name);
+    const banner = document.createElement('div');
+    banner.className = 'trophy-banner';
+    banner.style.setProperty('--metal', mid); // frame and glow in the trophy's colour
+    banner.setAttribute('role', 'status');
+    banner.innerHTML = trophyIcon(name) +
+      '<strong>' + esc(t.trophyTitle(name)) + '</strong><span>' + esc(t.trophyFor(price)) + '</span>';
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), CELEBRATION_MS);
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) confetti(CELEBRATION_MS);
+  }
+
+  function confetti(ms) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const css = getComputedStyle(document.documentElement);
+    const colors = ['--gold', '--gold-hi', '--pen', '--learn', '--good', '--card-margin'].map((v) => css.getPropertyValue(v).trim());
+    const pieces = [];
+    const spawn = (count) => {
+      for (let i = 0; i < count; i++) {
+        pieces.push({
+          x: Math.random() * innerWidth,
+          y: -20 - Math.random() * 60,
+          w: 6 + Math.random() * 6,
+          h: 10 + Math.random() * 8,
+          vx: (Math.random() - 0.5) * 80,
+          vy: 160 + Math.random() * 200,
+          angle: Math.random() * Math.PI * 2,
+          spin: (Math.random() - 0.5) * 12,
+          flip: Math.random() * Math.PI * 2,
+          sway: Math.random() * Math.PI * 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        });
+      }
+    };
+    const start = performance.now();
+    let last = start;
+    spawn(90);
+    const frame = (now) => {
+      const elapsed = now - start;
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      // New pieces keep coming until shortly before the end, so the last
+      // ones are still falling when the confetti fades out.
+      if (elapsed < ms - 1500) spawn(Math.round(160 * dt));
+      if (canvas.width !== Math.round(innerWidth * ratio)) {
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      ctx.globalAlpha = elapsed > ms - 600 ? Math.max(0, (ms - elapsed) / 600) : 1;
+      for (const p of pieces) {
+        p.vy += 60 * dt;
+        p.x += (p.vx + Math.sin(p.sway + elapsed / 280) * 50) * dt;
+        p.y += p.vy * dt;
+        p.angle += p.spin * dt;
+        p.flip += 8 * dt;
+        if (p.y > innerHeight + 30) continue;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.scale(1, Math.cos(p.flip)); // turning over as it falls
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (elapsed < ms) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  }
+
+  function next() {
+    clearTimeout(advanceTimer);
+    pauseTimers();
+    const c = SRS.pickNext(queues(), avoidList());
+    picked = null;
+    if (!c) {
+      currentId = null;
+      mode = 'done';
+      const d = daily();
+      if (d.answered > 0 && !d.bonus) {
+        d.bonus = DAY_BONUS;
+        addCoins(DAY_BONUS);
+        save();
+      }
+    } else {
+      currentId = c.id;
+      shown = { type: c.type, reps: c.reps };
+      mode = 'ask';
+      options = makeOptions(c.id);
+      shownAt = performance.now();
+      const first = c.reps === 0;
+      feedback = () => (first ? T().newOne : T().pickAnswer);
+      flash('enter');
+    }
+    render();
+    armGiveUp();
+  }
+
+  // choice: the ISO code of the country whose capital was picked, or null
+  // when nothing was picked within the time limit, so the country counts as
+  // not known (Again), like a wrong answer.
+  function submit(choice) {
+    pauseTimers();
+    const c = current();
+    if (mode !== 'ask' || !c) return;
+    const timedOut = choice === null;
+    const right = choice === c.id;
+    const ms = performance.now() - shownAt;
+    let grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
+    // With four answers to choose from, a right answer the first time may be
+    // a guess: it is never Easy, so the country goes through the learning steps.
+    if (c.type === 'new' && grade === SRS.EASY) grade = SRS.GOOD;
+    const wasNew = c.type === 'new';
+    const updated = SRS.answer(c, grade, now(), cfg());
+    state.cards[c.id] = updated;
+    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), choice]);
+
+    const d = daily();
+    d.answered += 1;
+    if (right) d.right += 1;
+    if (wasNew) d.newSeen += 1;
+    lastId = c.id;
+    const reward = right ? payRewards(updated) : { coins: 0 };
+    if (reward.coins) addCoins(reward.coins);
+    save();
+
+    if (right) {
+      mode = 'right';
+      const coinNote = () => (reward.coins
+        ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
+        : '');
+      feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
+      advanceTimer = setTimeout(next, reward.coins ? 2200 : 1400);
+    } else {
+      mode = 'wrong';
+      picked = choice;
+      const answer = () => esc(T().rightIs(capitalName(c.id))) + '<br>' + esc(T().tapToGoOn);
+      feedback = timedOut
+        ? () => '<strong>' + esc(T().timeUp) + '</strong> ' + answer()
+        : () => '<strong>' + esc(T().notQuite) + '</strong> ' + answer();
+      flash('shake');
+    }
+    render();
+  }
+
+  // i: the answer tapped (0 to 3). After a wrong answer the child taps the
+  // right one to move on; after a right one any tap moves on.
+  function choose(i) {
+    if (mode === 'done' || !options[i]) return;
+    if (mode === 'right') return next();
+    if (mode === 'ask') return submit(options[i]);
+    const c = current();
+    if (options[i] === c.id) {
+      mode = 'right';
+      feedback = () => '<strong>' + esc(T().thatsIt) + '</strong><br>' + esc(T().comesBack(whenText(c.due)));
+      advanceTimer = setTimeout(next, 900);
+      renderCard();
+    } else {
+      flash('shake');
+    }
+  }
+
+  function flash(cls) {
+    const el = $('card');
+    el.classList.remove('enter', 'shake');
+    void el.offsetWidth; // restart the animation
+    el.classList.add(cls);
+  }
+
+  // ---------- rendering ----------
+
+  const map = $('map');
+  let cells = {};
+  let sections = {};
+
+  // A section per continent, with a square per country.
+  function buildMap() {
+    map.textContent = '';
+    cells = {};
+    sections = {};
+    for (const continent of CONTINENTS) {
+      const section = document.createElement('section');
+      section.className = 'continent';
+      const head = document.createElement('h3');
+      const name = document.createElement('span');
+      name.textContent = T().continents[continent];
+      const tally = document.createElement('span');
+      tally.className = 'tally';
+      head.append(name, tally);
+      const tiles = document.createElement('div');
+      tiles.className = 'tiles';
+      for (const c of COUNTRIES) {
+        if (c.continent !== continent) continue;
+        const el = document.createElement('div');
+        el.className = 'cell';
+        el.textContent = flag(c.iso);
+        tiles.appendChild(el);
+        cells[c.iso] = el;
+      }
+      section.append(head, tiles);
+      map.appendChild(section);
+      sections[continent] = { section, tally };
+    }
+  }
+
+  function stage(c) {
+    if (c.type === 'new') return 'new';
+    if (SRS.isLearning(c)) return 'learning';
+    return c.interval >= MATURE_DAYS ? 'mature' : 'young';
+  }
+
+  function renderMap() {
+    const t = T();
+    const active = new Set(activeCards().map((c) => c.id));
+    const n = { new: 0, learning: 0, young: 0, mature: 0 };
+    const learned = {};
+    for (const [id, el] of Object.entries(cells)) {
+      const c = card(id);
+      const s = stage(c);
+      const continent = BY_ISO[id].continent;
+      learned[continent] = (learned[continent] || 0) + (s === 'young' || s === 'mature' ? 1 : 0);
+      const on = active.has(c.id);
+      if (on) n[s] += 1;
+      el.className = 'cell' +
+        (s === 'new' ? '' : ' is-' + s) +
+        (on ? '' : ' is-off') +
+        (c.id === currentId ? ' is-current' : '');
+      let tip;
+      if (!on) tip = t.tipOff;
+      else if (s === 'new') tip = t.tipNew;
+      else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
+      else tip = t.tipReview(whenText(c.due));
+      el.title = countryName(id) + ': ' + tip;
+    }
+    // Countries learned out of all the countries of each continent.
+    for (const continent of CONTINENTS) {
+      const { section, tally } = sections[continent];
+      const total = COUNTRIES.filter((c) => c.continent === continent).length;
+      tally.textContent = num(learned[continent] || 0) + ' / ' + num(total);
+      section.classList.toggle('is-off', !state.settings.continents.includes(continent));
+    }
+    $('n-new').textContent = num(n.new);
+    $('n-learning').textContent = num(n.learning);
+    $('n-young').textContent = num(n.young);
+    $('n-mature').textContent = num(n.mature);
+  }
+
+  function renderCard() {
+    const c = current();
+    const el = $('card');
+    el.classList.toggle('is-right', mode === 'right');
+    el.classList.toggle('is-wrong', mode === 'wrong');
+    if (!c) return;
+    $('flag').textContent = flag(c.id);
+    $('country').textContent = countryName(c.id);
+    // Once answered, the right capital turns green and a wrong pick is marked.
+    $('choices').classList.toggle('answered', mode !== 'ask');
+    $('choices').querySelectorAll('.choice').forEach((btn, i) => {
+      const iso = options[i];
+      btn.textContent = iso ? capitalName(iso) : '';
+      btn.classList.toggle('is-right', mode !== 'ask' && iso === c.id);
+      btn.classList.toggle('is-wrong', mode === 'wrong' && iso === picked);
+    });
+    $('feedback').innerHTML = feedback();
+  }
+
+  function render() {
+    const t = T();
+    const q = queues();
+    const counts = {
+      new: q.fresh.length,
+      learn: q.learningNow.length + q.learningAhead.length + q.learningLater.length,
+      review: q.review.length,
+    };
+    $('coin-total').textContent = num(balance());
+    $('coins').setAttribute('aria-label', t.coinsAria(balance()));
+    // The trophy count, with the latest trophy bought; redrawn only when it
+    // changes, so its shine keeps running.
+    const owned = state.trophies.length;
+    $('trophies').hidden = owned === 0;
+    $('trophy-total').textContent = num(owned);
+    $('trophies').setAttribute('aria-label', t.trophiesAria(owned));
+    const slot = $('trophy-slot');
+    const latest = owned ? owned + state.trophies[owned - 1].metal : '';
+    if (slot.dataset.k !== latest) {
+      slot.dataset.k = latest;
+      slot.innerHTML = owned ? trophyIcon(state.trophies[owned - 1].metal) : '';
+    }
+    $('count-new').textContent = num(counts.new);
+    $('count-learn').textContent = num(counts.learn);
+    $('count-review').textContent = num(counts.review);
+    $('label-new').textContent = t.countNew(counts.new);
+    $('label-learn').textContent = t.countLearn(counts.learn);
+    $('label-review').textContent = t.countReview(counts.review);
+
+    const done = mode === 'done';
+    $('card').hidden = done;
+    $('choices').hidden = done;
+    $('done').hidden = !done;
+
+    if (shown && !done) {
+      const tag = $('tag');
+      tag.className = 'tag ' + shown.type;
+      tag.textContent = t.tags[shown.type];
+      $('seen').textContent = shown.reps === 0 ? t.firstTime : t.seen(shown.reps);
+    }
+    renderCard();
+    if (done) renderDone();
+    renderMap();
+
+    const d = daily();
+    $('today').textContent = d.answered ? t.today(d.answered, d.right) : t.nothingToday;
+
+    const pill = $('clock-pill');
+    const ahead = Math.round(state.clockOffset / DAY);
+    pill.hidden = ahead === 0;
+    pill.textContent = t.testClock(ahead);
+  }
+
+  function renderDone() {
+    const t = T();
+    const d = daily();
+    $('done-date').textContent = new Date(now()).toLocaleDateString(lang(), { weekday: 'long' });
+    $('done-stats').textContent = d.answered ? t.doneStats(d.answered, d.right) : t.nothingNow;
+    $('done-coins').innerHTML = d.coins ? coinIcon() + esc(t.coinsToday(d.coins, d.bonus || 0)) : '';
+
+    const active = activeCards();
+    const dues = active.filter((c) => c.type !== 'new').map((c) => c.due);
+    const unseen = active.some((c) => c.type === 'new');
+    if (unseen) dues.push(SRS.dayStart(today() + 1, ROLLOVER));
+    $('done-next').textContent = dues.length ? t.nextCards(whenText(Math.min(...dues))) : '';
+    $('more-new').hidden = !unseen;
+  }
+
+  // ---------- language ----------
+
+  function applyLanguage() {
+    const t = T();
+    document.documentElement.lang = lang();
+    document.documentElement.dir = t.dir || 'ltr';
+    document.title = t.appName;
+    const percent = new Intl.NumberFormat(lang(), { style: 'percent' });
+    for (const opt of $('retention').options) opt.textContent = percent.format(Number(opt.value));
+    const seconds = new Intl.NumberFormat(lang(), { style: 'unit', unit: 'second', unitDisplay: 'short' });
+    for (const opt of $('answer-time').options) {
+      opt.textContent = opt.value === '0' ? t.noLimit : seconds.format(Number(opt.value));
+    }
+    document.querySelectorAll('[data-t]').forEach((el) => {
+      el.textContent = t[el.dataset.t];
+    });
+    document.querySelectorAll('[data-t-aria]').forEach((el) => {
+      el.setAttribute('aria-label', t[el.dataset.tAria]);
+    });
+  }
+
+  // ---------- settings ----------
+
+  const panels = [$('settings'), $('shop')];
+  const panelOpen = () => panels.some((p) => !p.hidden);
+
+  function buildChips() {
+    const wrap = $('continent-chips');
+    wrap.textContent = '';
+    for (const continent of CONTINENTS) {
+      const label = document.createElement('label');
+      label.className = 'chip';
+      label.innerHTML = '<input type="checkbox" id="continent-' + continent + '" value="' + continent + '"><span>' + esc(T().continents[continent]) + '</span>';
+      wrap.appendChild(label);
+    }
+  }
+
+  function buildLanguageMenu() {
+    const select = $('lang');
+    const auto = document.createElement('option');
+    auto.value = 'auto';
+    auto.id = 'lang-auto';
+    select.appendChild(auto);
+    for (const code of I18N.LANGS) {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = I18N.STRINGS[code].name;
+      select.appendChild(opt);
+    }
+  }
+
+  function syncSettings() {
+    const t = T();
+    const s = state.settings;
+    $('lang').value = I18N.STRINGS[s.lang] ? s.lang : 'auto';
+    $('lang-auto').textContent = t.deviceLanguage + ' (' + I18N.STRINGS[deviceLang()].name + ')';
+    for (const continent of CONTINENTS) $('continent-' + continent).checked = s.continents.includes(continent);
+    $('new-per-day').value = s.newPerDay;
+    $('retention').value = String(s.retention);
+    $('answer-time').value = String(s.answerTime);
+    $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
+    const ahead = Math.round(state.clockOffset / DAY);
+    $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
+    $('real-clock').hidden = ahead === 0;
+    const n = state.log.length;
+    $('log-status').textContent = n === 0 ? t.logNone : t.logCount(n);
+    $('log-text').hidden = true;
+    // The date GitHub Pages published the files, from the page's Last-Modified header.
+    const published = new Date(document.lastModified);
+    $('app-version').textContent = isNaN(published) ? '' :
+      t.versionFrom(published.toLocaleString(lang(), { dateStyle: 'medium', timeStyle: 'short' }));
+    $('update-section').hidden = inAndroidApp;
+  }
+
+  // Open the panel first, so it opens even if filling it in fails: it is the
+  // only way to change the language or reload the app.
+  // Opening the panel adds a step to the page history, so Android's Back
+  // gesture closes the panel instead of leaving the app.
+  // which: 'settings' or 'shop'.
+  function openPanel(which) {
+    pauseTimers();
+    if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
+    for (const p of panels) p.hidden = p.id !== which;
+    document.body.classList.add('panel-open');
+    $(which + '-sheet').focus({ preventScroll: true });
+    try {
+      if (which === 'settings') syncSettings();
+      else renderShop();
+    } catch (e) {
+      noteError(e);
+    }
+  }
+
+  function closePanel() {
+    if (!panelOpen()) return false;
+    for (const p of panels) p.hidden = true;
+    document.body.classList.remove('panel-open');
+    $('open-settings').blur();
+    $('open-shop').blur();
+    if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
+    else {
+      render();
+      resumeTimers();
+    }
+    if (history.state && history.state.panel) history.back();
+    return true;
+  }
+  window.addEventListener('popstate', closePanel);
+  // The Android app's Back button calls this.
+  window.closeParentPanel = closePanel;
+
+  $('open-settings').addEventListener('click', () => openPanel('settings'));
+  $('open-shop').addEventListener('click', () => openPanel('shop'));
+  $('close-settings').addEventListener('click', closePanel);
+  $('close-shop').addEventListener('click', closePanel);
+  // A tap on the dimmed area around a panel closes it.
+  for (const p of panels) {
+    p.addEventListener('click', (e) => {
+      if (e.target === p) closePanel();
+    });
+  }
+
+  // ---------- shop ----------
+
+  function renderShop() {
+    const t = T();
+    const have = balance();
+    $('shop-balance').innerHTML = coinIcon() + esc(t.shopBalance(have));
+    $('shop-grid').innerHTML = TROPHY_METALS.map(([name, price]) => {
+      const short = price - have;
+      return '<div class="shop-item' + (short > 0 ? ' too-dear' : '') + '">' + trophyIcon(name) +
+        '<span class="name">' + esc(t.trophyName(name)) + '</span>' +
+        '<span class="price">' + coinIcon() + esc(num(price)) + '</span>' +
+        (short > 0
+          ? '<span class="missing">' + esc(t.missingCoins(short)) + '</span>'
+          : '<button type="button" class="primary-btn" data-metal="' + name + '">' + esc(t.buy) + '</button>') +
+        '</div>';
+    }).join('');
+    $('trophy-shelf').innerHTML = state.trophies.length
+      ? state.trophies.map((tr) => '<span title="' + esc(t.trophyName(tr.metal)) + '">' + trophyIcon(tr.metal) + '</span>').join('')
+      : '<p class="hint">' + esc(t.noTrophies) + '</p>';
+  }
+
+  // Buying takes two taps, so a mis-tap does not spend her coins.
+  let confirmTimer = null;
+  $('shop-grid').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-metal]');
+    if (!btn) return;
+    const name = btn.dataset.metal;
+    const price = metal(name)[1];
+    if (balance() < price) return;
+    clearTimeout(confirmTimer);
+    if (!btn.dataset.armed) {
+      renderShop(); // undo any other button waiting for confirmation
+      const again = $('shop-grid').querySelector('button[data-metal="' + name + '"]');
+      again.dataset.armed = '1';
+      again.textContent = T().buyConfirm(num(price));
+      confirmTimer = setTimeout(renderShop, 4000);
+      return;
+    }
+    state.spent = (state.spent || 0) + price;
+    state.trophies.push({ metal: name, at: now() });
+    save();
+    renderShop();
+    render();
+    celebrate(name);
+  });
+
+  function languageChanged() {
+    applyLanguage();
+    buildChips();
+    buildMap();
+    syncSettings();
+    render();
+  }
+  $('lang').addEventListener('change', (e) => {
+    state.settings.lang = e.target.value;
+    save();
+    languageChanged();
+  });
+  // Follow a change of the device language while the app is open.
+  window.addEventListener('languagechange', () => {
+    if (!I18N.STRINGS[state.settings.lang]) languageChanged();
+  });
+
+  $('continent-chips').addEventListener('change', () => {
+    state.settings.continents = CONTINENTS.filter((continent) => $('continent-' + continent).checked);
+    save();
+    renderMap();
+  });
+
+  $('new-per-day').addEventListener('change', (e) => {
+    const v = Math.round(Number(e.target.value));
+    state.settings.newPerDay = Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : 10;
+    e.target.value = state.settings.newPerDay;
+    save();
+  });
+
+  $('retention').addEventListener('change', (e) => {
+    state.settings.retention = Number(e.target.value);
+    save();
+  });
+
+  $('answer-time').addEventListener('change', (e) => {
+    state.settings.answerTime = Number(e.target.value);
+    save();
+  });
+
+  // Columns as read by the FSRS optimizer: card_id, review_time (ms),
+  // review_rating (1-4), review_state (0 new, 1 learning, 2 review,
+  // 3 relearning), review_duration (ms). The optimizer wants a number as
+  // card_id: the letters of the ISO code as numbers 1 to 26, so FR is 618.
+  // Extra columns are for people: the country and the country whose capital
+  // was picked, both as ISO codes (empty when the time ran out).
+  function logCsv() {
+    const rows = ['card_id,review_time,review_rating,review_state,review_duration,country,picked'];
+    for (const [t, id, rating, st, ms, choice] of state.log) {
+      const number = (id.charCodeAt(0) - 64) * 100 + (id.charCodeAt(1) - 64);
+      rows.push([number, t, rating, st, ms, id, choice || ''].join(','));
+    }
+    return rows.join('\n') + '\n';
+  }
+
+  $('copy-log').addEventListener('click', () => {
+    const csv = logCsv();
+    const area = $('log-text');
+    const showText = () => {
+      area.value = csv;
+      area.hidden = false;
+      area.focus();
+      area.select();
+      $('log-status').textContent = T().copyBlocked;
+    };
+    try {
+      navigator.clipboard.writeText(csv).then(
+        () => { $('log-status').textContent = T().copied(state.log.length); },
+        showText
+      );
+    } catch (e) {
+      showText();
+    }
+  });
+
+  $('jump-day').addEventListener('click', () => {
+    state.clockOffset += DAY;
+    save();
+    syncSettings();
+    if (mode === 'done') next();
+    else render();
+  });
+  $('real-clock').addEventListener('click', () => {
+    state.clockOffset = 0;
+    save();
+    syncSettings();
+    render();
+  });
+
+  let resetTimer = null;
+  $('reset').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    if (!btn.dataset.armed) {
+      btn.dataset.armed = '1';
+      btn.textContent = T().eraseConfirm;
+      resetTimer = setTimeout(() => {
+        delete btn.dataset.armed;
+        btn.textContent = T().erase;
+      }, 4000);
+      return;
+    }
+    clearTimeout(resetTimer);
+    delete btn.dataset.armed;
+    btn.textContent = T().erased;
+    state = { ...defaultState(), settings: state.settings };
+    lastId = null;
+    save();
+    syncSettings();
+    next();
+  });
+
+  // Fetches the newest version: first a newer offline worker (sw.js), if there
+  // is one, then the page itself, which the worker always checks with the server.
+  $('reload-app').addEventListener('click', async () => {
+    if (navigator.onLine === false) {
+      $('reload-status').textContent = T().reloadOffline;
+      return;
+    }
+    $('reload-app').disabled = true;
+    $('reload-status').textContent = T().reloading;
+    try {
+      const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+      if (reg) {
+        await reg.update();
+        if (reg.installing || reg.waiting) {
+          // Wait (at most 10 seconds) until the new worker takes over.
+          await new Promise((resolve) => {
+            navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true });
+            setTimeout(resolve, 10000);
+          });
+        }
+      }
+    } catch (e) {
+      /* reload anyway */
+    }
+    location.reload();
+  });
+
+  // ---------- input ----------
+
+  const choices = $('choices');
+  choices.addEventListener('mousedown', (e) => e.preventDefault());
+  choices.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-i]');
+    if (btn) choose(Number(btn.dataset.i));
+  });
+
+  $('card-body').addEventListener('click', () => {
+    if (mode === 'right') next();
+  });
+
+  $('more-new').addEventListener('click', () => {
+    daily().extraNew += 5;
+    save();
+    next();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (panelOpen()) {
+      if (e.key === 'Escape') closePanel();
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target;
+    if (t.closest && t.closest('input, textarea, select, button')) return;
+    // Keys 1 to 4 pick an answer, in reading order; Enter or space moves on.
+    const digit = e.key.length === 1 ? '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩0123456789'.indexOf(e.key) % 10 : -1;
+    if (digit >= 1 && digit <= 4) {
+      e.preventDefault();
+      choose(digit - 1);
+      const btn = choices.querySelector('[data-i="' + (digit - 1) + '"]');
+      btn.classList.add('pressed');
+      setTimeout(() => btn.classList.remove('pressed'), 120);
+    } else if ((e.key === 'Enter' || e.key === ' ') && mode === 'right') {
+      e.preventDefault();
+      next();
+    }
+  });
+
+  // Time in another app or tab counts neither as thinking time nor against
+  // the time limit.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return pauseTimers();
+    if (panelOpen()) return;
+    if (mode === 'ask') resumeTimers();
+    if (mode === 'done') next();
+  });
+
+  // Learning cards can fall due while the "done" card is showing.
+  setInterval(() => {
+    if (mode === 'done' && SRS.pickNext(queues(), avoidList())) next();
+  }, 30 * 1000);
+
+  // Offline copy and protected storage, when the app is served over http(s).
+  // The offline copy is not available from a local file or inside the Claude
+  // preview, and not needed in the Android app, which carries its own files.
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !inAndroidApp) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+
+  makeTrophyGradients();
+  buildLanguageMenu();
+  applyLanguage();
+  buildMap();
+  buildChips();
+  next();
+})();
+</script>
+</body>
+</html>

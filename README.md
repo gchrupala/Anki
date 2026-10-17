@@ -2,6 +2,8 @@
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
+The repository also holds [StoliceMax](#stolicemax), a sister app with the same options that teaches the capitals of countries.
+
 ## Running it
 
 The app is published with GitHub Pages at https://grzegorz.chrupala.me/Anki/ (https://gchrupala.github.io/Anki/ redirects there).
@@ -146,9 +148,31 @@ The log has one row per answer. Its first five columns (`card_id`, `review_time`
 
 The progress square shows each fact: not started, practising (in the learning steps), learned, or mastered (interval of 21 days or more, which Anki calls "mature").
 
+## StoliceMax
+
+`stolice/` holds a sister app that teaches the capitals of countries, at https://grzegorz.chrupala.me/Anki/stolice/. It works like MnożenieMax: the same scheduling, time limit, coins and shop, languages, settings, review log, updates and offline use. It is installed separately, with its own icon (a globe instead of ×), and keeps its own progress and coins.
+
+- Each country is one card: the 193 members of the United Nations and the Vatican. The card shows the flag and the name of the country, and the child picks the capital from four capitals of the same continent, shown in a random order. After a wrong answer, or when the time is up, the right capital turns green and the child taps it to continue.
+- The ratings follow the table above, with two differences. A right answer the first time a country is shown is never Easy, because with four answers it may be a guess; the country goes through the learning steps. Easy needs a right answer within 5 seconds instead of 4, because reading four names takes longer than typing a number. The default time limit is 15 seconds.
+- The settings choose the continents; Europe is on by default. The continents follow Polish schools: Russia and Cyprus are in Europe, Turkey in Asia, and North America includes Central America and the Caribbean.
+- The progress view has a square with the flag of each country, grouped by continent, with the number of capitals learned on each continent. A flag shows in colour once its country has been answered.
+- The review log has a column for the country and one for the country whose capital was picked, both as ISO codes. The `card_id` the FSRS optimizer needs is the ISO code with its letters as numbers (FR is 618).
+
+The names are in `stolice/countries.js`. Country names come from the Unicode CLDR data that browsers use for `Intl.DisplayNames`, capitals and their names from Wikidata. Both were checked and some were corrected by hand. Some choices to be aware of:
+
+- Where a country has more than one capital, the app uses the one Wikidata lists first: Pretoria (South Africa), Sucre (Bolivia), Porto-Novo (Benin), Yamoussoukro (Côte d’Ivoire), Dodoma (Tanzania), Gitega (Burundi), Mbabane (Eswatini) and Sri Jayawardenepura Kotte (Sri Lanka). The others never appear as answers.
+- Equatorial Guinea has Ciudad de la Paz, which replaced Malabo in January 2026 according to Wikidata. Older school books give Malabo.
+- Israel has Jerusalem, as in Wikidata. Many countries do not recognise it as the capital.
+
+`stolice/index.html` started as a copy of `index.html`, with the sums, keypad and progress square replaced. A change to what the two apps share (coins, shop, settings panel, styles) has to be made in both files. StoliceMax loads `srs.js`, `i18n.js` and the fonts from MnożenieMax; `stolice/i18n-stolice.js` replaces the text that is about multiplication. `stolice/sw.js` keeps the offline copy of StoliceMax, including those shared files. The two service workers store their copies on the same site, so each removes only its own old copies.
+
+The address of StoliceMax (`/Anki/stolice/`) lies inside the address of MnożenieMax (`/Anki/`). On a device where MnożenieMax is installed, Chrome on Android may treat StoliceMax as part of it and not offer to install it. This has not been tested on a tablet. If it happens, StoliceMax needs an address of its own outside `/Anki/`, for example a separate repository published with GitHub Pages.
+
 ## Tests
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
+
+`tests/countries.test.js` checks the StoliceMax data: 194 countries, each with a country and capital name in every language, at least four countries per continent, and no two capitals with the same name on one continent.
 
 ## Limitations
 
@@ -164,4 +188,5 @@ The progress square shows each fact: not started, practising (in the learning st
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `android/`: the Android app.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
-- `tests/`: scheduler tests and the py-fsrs reference data.
+- `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax data.
+- `stolice/`: StoliceMax, with its own page, text, country data, manifest, service worker and icons.

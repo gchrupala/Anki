@@ -7,9 +7,12 @@
  * trusting the browser's own copy (which GitHub Pages lets it keep for 10
  * minutes).
  *
- * Change CACHE when the list of app files changes.
+ * StoliceMax (stolice/sw.js) stores its copy on the same site, so each app
+ * removes only its own old copies. Change CACHE when the list of app files
+ * changes.
  */
 const CACHE = 'times-table-cards-v3';
+const CACHE_PREFIX = 'times-table-cards-';
 const APP_FILES = [
   './',
   './index.html',
@@ -38,7 +41,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
