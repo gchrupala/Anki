@@ -2282,9 +2282,9 @@
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // A souvenir gets fireworks, with less confetti so the bursts show.
-      if (!isTimes()) fireworks(CELEBRATION_MS);
-      confetti(CELEBRATION_MS, isTimes() ? 1 : 0.35);
+      // A trophy gets confetti, a souvenir fireworks.
+      if (isTimes()) confetti(CELEBRATION_MS);
+      else fireworks(CELEBRATION_MS);
     }
   }
 
@@ -2416,8 +2416,7 @@
     requestAnimationFrame(frame);
   }
 
-  // density: 1 for the full amount of confetti, less for fewer pieces.
-  function confetti(ms, density = 1) {
+  function confetti(ms) {
     const canvas = document.createElement('canvas');
     canvas.className = 'confetti';
     canvas.setAttribute('aria-hidden', 'true');
@@ -2446,14 +2445,14 @@
     };
     const start = performance.now();
     let last = start;
-    spawn(Math.round(90 * density));
+    spawn(90);
     const frame = (now) => {
       const elapsed = now - start;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       // New pieces keep coming until shortly before the end, so the last
       // ones are still falling when the confetti fades out.
-      if (elapsed < ms - 1500 && Math.random() < density) spawn(Math.round(160 * dt));
+      if (elapsed < ms - 1500) spawn(Math.round(160 * dt));
       if (canvas.width !== Math.round(innerWidth * ratio)) {
         canvas.width = Math.round(innerWidth * ratio);
         canvas.height = Math.round(innerHeight * ratio);
