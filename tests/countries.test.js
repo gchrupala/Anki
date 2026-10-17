@@ -43,13 +43,13 @@ test('every language has the StoliceMax text', () => {
   for (const lang of I18N.LANGS) {
     const t = I18N.CAPITALS[lang];
     assert.equal(t.appName, 'StoliceMax');
-    for (const key of ['typeAnswer', 'newOne', 'choicesAria', 'continentsTitle', 'continentsHint', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
+    for (const key of ['typeAnswer', 'newOne', 'choicesAria', 'groupsTitle', 'groupsHint', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
       assert.ok(t[key], `${lang} ${key}`);
     }
     for (const key of ['rightIs', 'typeToGoOn', 'trophyName', 'trophyTitle', 'trophiesAria']) {
       assert.equal(typeof t[key], 'function', `${lang} ${key}`);
     }
-    for (const continent of CONTINENTS) assert.ok(t.continents[continent], `${lang} ${continent}`);
+    for (const continent of CONTINENTS) assert.ok(t.groups[continent], `${lang} ${continent}`);
     for (const id of souvenirs) assert.ok(t.trophyName(id), `${lang} ${id}`);
   }
 });
@@ -58,7 +58,8 @@ test('every language has the text of the app menu', () => {
   for (const lang of I18N.LANGS) {
     const t = I18N.STRINGS[lang];
     for (const key of ['appsAria', 'appsIntro', 'appsHint', 'appDone', 'appOpen']) assert.ok(t[key], `${lang} ${key}`);
-    assert.ok(t.appWhat.times && t.appWhat.capitals, `${lang} appWhat`);
+    assert.ok(t.appWhat.times && t.appWhat.capitals && t.appWhat.chemistry, `${lang} appWhat`);
+    assert.ok(t.appNew, `${lang} appNew`);
     assert.equal(typeof t.goTo, 'function', `${lang} goTo`);
     for (const key of ['shareAria', 'shareText', 'shareCopied']) assert.ok(t[key], `${lang} ${key}`);
     assert.equal(typeof t.shareLink, 'function', `${lang} shareLink`);

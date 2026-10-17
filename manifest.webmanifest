@@ -1,7 +1,7 @@
 {
   "name": "MaxApki",
   "short_name": "MaxApki",
-  "description": "Rodzina aplikacji z fiszkami: tabliczka mnożenia (MnożenieMax) i stolice państw (StoliceMax), z powtórkami planowanymi przez FSRS.",
+  "description": "Rodzina aplikacji z fiszkami: tabliczka mnożenia (MnożenieMax), stolice państw (StoliceMax) i wzory chemiczne (ChemiaMax), z powtórkami planowanymi przez FSRS.",
   "lang": "pl",
   "id": "./",
   "start_url": "./",

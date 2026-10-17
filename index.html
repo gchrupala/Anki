@@ -18,8 +18,8 @@
 <meta name="theme-color" content="#1c2925" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-  /* MaxApki, a family of two apps in one page: MnożenieMax (times tables) and
-     StoliceMax (capitals).
+  /* MaxApki, a family of apps in one page: MnożenieMax (times tables),
+     StoliceMax (capitals) and ChemiaMax (chemical formulas).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -122,7 +122,9 @@
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   /* Parts of the page that belong to one app only */
-  body[data-app="times"] [data-app="capitals"], body[data-app="capitals"] [data-app="times"] { display: none !important; }
+  body[data-app="times"] [data-app]:not([data-app~="times"]),
+  body[data-app="capitals"] [data-app]:not([data-app~="capitals"]),
+  body[data-app="chemistry"] [data-app]:not([data-app~="chemistry"]) { display: none !important; }
 
   body {
     margin: 0;
@@ -183,10 +185,11 @@
   .brand .chev { width: 1.2rem; height: 1.2rem; flex: none; color: var(--ink-soft); }
   .app-icon { display: block; flex: none; }
   .app-icon svg { display: block; width: 100%; height: 100%; }
-  .app-icons { position: relative; width: 3.2rem; height: 2.4rem; flex: none; }
+  .app-icons { position: relative; width: 3.9rem; height: 2.4rem; flex: none; }
   .app-icons .app-icon { position: absolute; width: 2rem; height: 2rem; filter: drop-shadow(0 1px 1px rgb(29 39 66 / 0.3)); }
   .app-icons .app-icon:last-child { inset-inline-start: 0; bottom: 0; }
-  .app-icons .app-icon.behind { inset-inline-end: 0; top: 0; width: 1.8rem; height: 1.8rem; transform: rotate(12deg); }
+  .app-icons .app-icon.behind { inset-inline-start: 1rem; top: 0.1rem; width: 1.8rem; height: 1.8rem; transform: rotate(10deg); }
+  .app-icons .app-icon.behind.far { inset-inline-start: 2.05rem; top: 0; transform: rotate(20deg); }
   /* Menu of apps */
   .app-list { display: grid; gap: 0.75rem; }
   .app-tile {
@@ -206,6 +209,7 @@
   .app-tile .app-icon { grid-row: span 3; width: 4rem; height: 4rem; filter: drop-shadow(0 2px 2px rgb(29 39 66 / 0.25)); }
   .app-tile .app-name { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; line-height: 1.15; }
   .app-tile .app-here { font-family: var(--font-body); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pen); margin-inline-start: 0.4rem; }
+  .app-tile .app-new { font-family: var(--font-body); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: var(--learn); border-radius: 999px; padding: 0.1rem 0.5rem; margin-inline-start: 0.4rem; vertical-align: 0.2em; }
   .app-tile .app-what { font-weight: 600; }
   .app-tile .app-due { font-size: 0.85rem; color: var(--ink-soft); }
   .go-other { display: inline-flex; align-items: center; gap: 0.5rem; padding-block: 0.35rem; padding-inline: 0.4rem 0.95rem; }
@@ -331,16 +335,26 @@
   .trophy-icon .glint { animation: glint 4.5s ease-in-out infinite 1.5s; }
   /* Souvenirs glitter: the two layers of dots shimmer in turn and stars twinkle.
      In the header they stay still, so they don't distract from the cards. */
-  .souvenir .glitter { opacity: 0.5; animation: glitter 1.4s ease-in-out infinite alternate; }
-  .souvenir .glitter.b { animation-delay: -0.7s; }
-  .souvenir .sparkle { opacity: 0; transform-box: fill-box; transform-origin: center; animation: sparkle 2.4s ease-in-out infinite; }
+  .shiny .glitter { opacity: 0.5; animation: glitter 1.4s ease-in-out infinite alternate; }
+  .shiny .glitter.b { animation-delay: -0.7s; }
+  .shiny .sparkle { opacity: 0; transform-box: fill-box; transform-origin: center; animation: sparkle 2.4s ease-in-out infinite; }
+  /* ChemiaMax: bubbles rise in the liquid, and a burner flame flickers. */
+  .shiny .bubble { opacity: 0; animation: bubble 2.4s ease-in infinite; }
+  @keyframes bubble {
+    0% { opacity: 0; transform: translateY(1px); }
+    20% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(-6px); }
+  }
+  .shiny .flame { transform-box: fill-box; transform-origin: 50% 100%; animation: flame 0.45s ease-in-out infinite alternate; }
+  @keyframes flame { from { transform: scale(0.9, 0.85); } to { transform: scale(1.05, 1.1); } }
   @keyframes glitter { from { opacity: 0.1; } to { opacity: 0.9; } }
   @keyframes sparkle {
     0%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
     50% { opacity: 1; transform: scale(1) rotate(45deg); }
   }
-  .trophies .souvenir .glitter { animation: none; }
-  .trophies .souvenir .sparkle { animation: none; opacity: 0.85; transform: scale(0.8); }
+  .trophies .shiny .glitter, .trophies .shiny .flame { animation: none; }
+  .trophies .shiny .sparkle { animation: none; opacity: 0.85; transform: scale(0.8); }
+  .trophies .shiny .bubble { animation: none; opacity: 0.7; }
   .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
   .trophy-banner {
     position: fixed;
@@ -376,8 +390,9 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .trophy-banner { animation: none; }
-    .trophy-icon .glint, .souvenir .glitter, .souvenir .sparkle { animation: none; }
-    .souvenir .sparkle { opacity: 0.85; transform: none; }
+    .trophy-icon .glint, .shiny .glitter, .shiny .sparkle, .shiny .bubble, .shiny .flame { animation: none; }
+    .shiny .sparkle { opacity: 0.85; transform: none; }
+    .shiny .bubble { opacity: 0.7; }
   }
   .pill {
     font-size: 0.75rem;
@@ -573,6 +588,12 @@
     text-align: center;
   }
   .flag { font-size: clamp(2.6rem, 14cqi, 5rem); line-height: 1; }
+  .nick { color: var(--ink-soft); font-size: clamp(0.95rem, 4cqi, 1.3rem); font-weight: 600; }
+  .nick:empty { display: none; }
+  /* ChemiaMax: a formula such as H₂O, left to right in every language */
+  .formula { direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+  .formula sub { font-size: 0.68em; line-height: 0; vertical-align: -0.3em; }
+  .choice .formula { font-size: 1.3em; }
   .country {
     font-family: var(--font-display);
     font-weight: 800;
@@ -701,9 +722,10 @@
   .cell.is-mature { background: var(--mature); border-color: var(--mature); }
   .cell.is-off { background: var(--off); border-color: var(--off); opacity: 0.6; }
   .cell.is-current { outline: 2.5px solid var(--pen); outline-offset: 1px; }
-  /* StoliceMax: one square per country, with its flag, grouped by continent */
+  /* StoliceMax and ChemiaMax: one square per card, with a flag or formula,
+     grouped by continent or group of compounds */
   .map { display: flex; flex-direction: column; gap: 1rem; }
-  .continent h3 {
+  .tile-group h3 {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
@@ -712,8 +734,8 @@
     font-size: 0.9rem;
     font-weight: 600;
   }
-  .continent .tally { color: var(--ink-soft); font-weight: 500; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
-  .continent.is-off h3 { color: var(--ink-soft); }
+  .tile-group .tally { color: var(--ink-soft); font-weight: 500; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .tile-group.is-off h3 { color: var(--ink-soft); }
   .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.15rem, 1fr)); gap: 3px; }
   .tiles > div {
     aspect-ratio: 1;
@@ -727,6 +749,17 @@
   .tiles .cell:not(.is-learning):not(.is-young):not(.is-mature) { filter: grayscale(1); }
   .tiles .cell:not(.is-learning):not(.is-young):not(.is-mature):not(.is-current) { opacity: 0.6; }
   .tiles .cell.is-off { opacity: 0.25; }
+  .tiles.formulas { grid-template-columns: repeat(auto-fill, minmax(4.6rem, 1fr)); }
+  .tiles.formulas > div { aspect-ratio: auto; height: 2.2rem; font-size: 0.8rem; font-weight: 600; }
+  .tiles.formulas .cell.is-mature { color: var(--pen-ink); }
+  /* ChemiaMax: the page shakes when something explodes. */
+  .boom { animation: boom 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+  @keyframes boom {
+    10%, 90% { transform: translate(-2px, 1px); }
+    20%, 80% { transform: translate(5px, -3px); }
+    30%, 50%, 70% { transform: translate(-8px, 4px); }
+    40%, 60% { transform: translate(8px, -4px); }
+  }
 
   .legend {
     list-style: none;
@@ -870,7 +903,7 @@
   <header class="top">
     <h1 class="brand-title">
       <button type="button" class="brand" id="open-apps" aria-haspopup="dialog">
-        <span class="app-icons" aria-hidden="true"><span class="app-icon behind" id="brand-other"></span><span class="app-icon" id="brand-icon"></span></span>
+        <span class="app-icons" aria-hidden="true"><span class="app-icon behind far" id="brand-other2"></span><span class="app-icon behind" id="brand-other"></span><span class="app-icon" id="brand-icon"></span></span>
         <span id="brand-name">MnożenieMax</span>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
@@ -919,6 +952,10 @@
             <span class="flag" id="flag" aria-hidden="true"></span>
             <span class="country" id="country"></span>
           </div>
+          <div class="place" data-app="chemistry" aria-live="polite">
+            <span class="country" id="compound"></span>
+            <span class="nick" id="nick"></span>
+          </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
         </div>
       </div>
@@ -952,7 +989,7 @@
         <button type="button" class="key ok" data-key="ok" tabindex="-1">OK</button>
       </div>
 
-      <div class="choices" id="choices" data-app="capitals" data-t-aria="choicesAria">
+      <div class="choices" id="choices" data-app="capitals chemistry" data-t-aria="choicesAria">
         <button type="button" class="choice" data-i="0"></button>
         <button type="button" class="choice" data-i="1"></button>
         <button type="button" class="choice" data-i="2"></button>
@@ -964,7 +1001,7 @@
       <h2 data-t="progressTitle">Your times table</h2>
       <p class="sub" data-t="progressSub">Each square is one fact: row × column. Squares fill in as facts move into long-term memory.</p>
       <div class="square" id="square" role="img" data-app="times" data-t-aria="squareAria"></div>
-      <div class="map" id="map" role="img" data-app="capitals" data-t-aria="squareAria"></div>
+      <div class="map" id="map" role="img" data-app="capitals chemistry" data-t-aria="squareAria"></div>
       <ul class="legend">
         <li><span class="sw cell"></span><b id="n-new">0</b> <span data-t="legendNew">not started</span></li>
         <li><span class="sw cell is-learning"></span><b id="n-learning">0</b> <span data-t="legendLearning">practising</span></li>
@@ -1006,10 +1043,10 @@
       <div class="chips" id="extra-chips"></div>
     </section>
 
-    <section data-app="capitals">
-      <h3 data-t="continentsTitle">Continents</h3>
-      <div class="chips" id="continent-chips"></div>
-      <p class="hint" data-t="continentsHint" style="margin-top:0.5rem"></p>
+    <section data-app="capitals chemistry">
+      <h3 data-t="groupsTitle">Groups</h3>
+      <div class="chips" id="group-chips"></div>
+      <p class="hint" data-t="groupsHint" style="margin-top:0.5rem"></p>
     </section>
 
     <section class="fields">
@@ -1126,7 +1163,9 @@
 <script src="srs.js"></script>
 <script src="i18n.js"></script>
 <script src="i18n-capitals.js"></script>
+<script src="i18n-chemistry.js"></script>
 <script src="countries.js"></script>
+<script src="chemistry.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1139,8 +1178,8 @@
   // reward forgetting. Each card pays each level once (so forgetting and
   // relearning earns nothing), and coins never change the schedule.
   // Level 1: learned (left the first-day steps); 2: next review a week or
-  // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js and
-  // i18n-capitals.js in step.
+  // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js,
+  // i18n-capitals.js and i18n-chemistry.js in step.
   const LEVEL_COINS = [0, 2, 5, 10];
   const OLD_LEVEL_COINS = [0, 1, 2, 5]; // MnożenieMax before settings layout 6
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
@@ -1178,7 +1217,7 @@
   const range = (n) => Array.from({ length: n }, (_, i) => i + 1);
   const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => '&#' + ch.charCodeAt(0) + ';');
 
-  // ---------- the two apps ----------
+  // ---------- the apps ----------
 
   // Rewards in the shops, cheapest first: id, price, then the colours
   // highlight, middle, shadow, outline. The price range is also named in the
@@ -1217,12 +1256,27 @@
     ['mosque', 700, 'AE', '#ffffff', '#f3f5f8', '#c3cad4', '#5a6574'],
     ['pyramids', 750, 'EG', '#fff4c4', '#f2c85c', '#c08b27', '#6d4a0f'],
     ['forbidden', 800, 'CN', '#ffd0c4', '#d93a2b', '#9c1d15', '#560c07'],
-].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
+  ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
+  // ChemiaMax: laboratory glassware, the colours being those of the liquid.
+  const GLASSWARE = [
+    ['tubeblue', 50, '#d9f1ff', '#3a9be8', '#1c5fb0', '#0d2f66'],
+    ['tubegreen', 75, '#e3ffd9', '#3fc45a', '#1f8a35', '#0b4a19'],
+    ['conical', 100, '#ffe0f0', '#ff6fb5', '#d43a86', '#6e1645'],
+    ['retortpurple', 150, '#f1e3ff', '#9b5de5', '#6a2fb5', '#35145e'],
+    ['roundflask', 200, '#ffe9d1', '#ff9a3c', '#d9661a', '#6e300a'],
+    ['rack', 250, '#ffe6c7', '#c8925a', '#8a5a2b', '#4a2c10'],
+    ['beaker', 300, '#fffbd1', '#ffd43b', '#e0a800', '#6e5000'],
+    ['retortflame', 400, '#ffd6d6', '#ff4d4d', '#c41f1f', '#5e0a0a'],
+    ['volumetric', 500, '#d6fff8', '#2ec4b6', '#1a8a80', '#0a4a44'],
+    ['separatory', 600, '#e8f0ff', '#7b8cff', '#4a56c4', '#1e2566'],
+    ['retortgold', 700, '#fff6c4', '#ffc928', '#e09a00', '#7a5200'],
+    ['rainbow', 800, '#fbe3ff', '#c36bff', '#8a2be2', '#3d0f66'],
+  ].map(([id, price, ...colors]) => ({ id, price, colors }));
 
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
 
-  // Both apps of the MaxApki family run in this page; it is installed as one
+  // The apps of the MaxApki family run in this page; it is installed as one
   // app, MaxApki. Each app has its own progress, coins and rewards,
   // saved under its own key; the app that is open and the language are
   // shared, under PREFS_KEY.
@@ -1252,18 +1306,34 @@
       // right answer counts as Easy within 5 seconds instead of 4.
       fastSeconds: 5,
       settings: () => ({ continents: ['EU'], newPerDay: 10, retention: 0.9, answerTime: 15 }),
+      groupKey: 'continents', // the setting with the continents to practise
       rewards: SOUVENIRS,
       strings: (l) => I18N.CAPITALS[l] || {},
+    },
+    chemistry: {
+      id: 'chemistry',
+      name: 'ChemiaMax',
+      hash: 'chemia',
+      storeKey: 'chemistry-cards-v1',
+      layout: 1,
+      // Formulas take a moment longer to read than names: Easy within 6 seconds.
+      fastSeconds: 6,
+      settings: () => ({ groups: COMPOUND_GROUPS.slice(), newPerDay: 5, retention: 0.9, answerTime: 20 }),
+      groupKey: 'groups', // the setting with the groups of compounds to practise
+      rewards: GLASSWARE,
+      strings: (l) => I18N.CHEMISTRY[l] || {},
     },
   };
   // The home-screen icons of the apps, for the app menu.
   const APP_ICONS = {
     times: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#2a4fc2"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#1b3a99"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M226 238 L286 298 M286 238 L226 298" stroke="#1d2742" stroke-width="22" stroke-linecap="round"/></g></svg>',
+    chemistry: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#7b3fc4"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#4f2386"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M219 290H293l17 26a8 8 0 0 1-7 12H209a8 8 0 0 1-7-12z" fill="#5fd38d"/><circle cx="245" cy="306" r="7" fill="#fff" fill-opacity="0.8"/><circle cx="266" cy="296" r="5" fill="#fff" fill-opacity="0.8"/><path d="M240 222h32v36l38 58a8 8 0 0 1-7 12H209a8 8 0 0 1-7-12l38-58z" fill="none" stroke="#1d2742" stroke-width="10" stroke-linejoin="round"/><path d="M230 222h52" stroke="#1d2742" stroke-width="10" stroke-linecap="round"/></g></svg>',
     capitals: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#12806c"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#0b5a4c"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><circle cx="256" cy="277" r="52" fill="#d6ecff"/><g fill="none" stroke="#1d2742" stroke-width="9" stroke-linecap="round"><ellipse cx="256" cy="277" rx="22" ry="52"/><line x1="204" y1="277" x2="308" y2="277"/><line x1="214" y1="251" x2="298" y2="251"/><line x1="214" y1="303" x2="298" y2="303"/><circle cx="256" cy="277" r="52" stroke-width="11"/></g></g></svg>',
   };
   // The sign embossed on the coins of each app.
   const EMBLEMS = {
     times: '<path d="M12.3 12.8l7.4 7.4M19.7 12.8l-7.4 7.4" style="stroke: var(--gold-hi)" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12l8 8M20 12l-8 8" style="stroke: var(--gold-deep)" stroke-width="2.6" stroke-linecap="round"/>',
+    chemistry: '<path d="M14.6 8.9h3.6v4.2l4.4 7.2a1 1 0 0 1-.9 1.5H11.1a1 1 0 0 1-.9-1.5l4.4-7.2z" style="fill: var(--gold-hi)"/><path d="M14.2 8.5h3.6v4.2l4.4 7.2a1 1 0 0 1-.9 1.5H10.7a1 1 0 0 1-.9-1.5l4.4-7.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     capitals: '<path d="M16 9l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5L9 14.1l5.2-.2z" style="fill: var(--gold-hi)"/><path d="M15.6 8.6l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5-4.1-3.3 5.2-.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
   };
 
@@ -1271,7 +1341,14 @@
   function loadPrefs() {
     try {
       const p = JSON.parse(localStorage.getItem(PREFS_KEY));
-      if (p && APPS[p.app]) return p;
+      if (p && APPS[p.app]) {
+        // Saved when there were two apps: the menu was seen with two, and both
+        // had been there to open.
+        if (p.appsSeen === undefined) p.appsSeen = p.seenApps ? 2 : 0;
+        if (!Array.isArray(p.opened)) p.opened = ['times', 'capitals'];
+        delete p.seenApps;
+        return p;
+      }
     } catch (e) {
       /* none saved */
     }
@@ -1282,7 +1359,9 @@
     } catch (e) {
       /* none saved */
     }
-    return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', seenApps: false };
+    // appsSeen: how many apps there were when the menu of apps was last
+    // closed; opened: the apps opened at least once (others are marked new).
+    return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', appsSeen: 0, opened: Object.keys(APPS) };
   }
   function savePrefs() {
     try {
@@ -1302,7 +1381,10 @@
   }
   if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
   let app = APPS[prefs.app];
+  if (!prefs.opened.includes(app.id)) prefs.opened.push(app.id);
   const isTimes = () => app.id === 'times';
+  // The menu of apps has not been seen since the newest app was added.
+  const appsUnseen = () => prefs.appsSeen < Object.keys(APPS).length;
   const otherApps = () => Object.values(APPS).filter((a) => a.id !== app.id);
 
   // ---------- state ----------
@@ -1432,14 +1514,71 @@
     return (chosen(a) && b <= size) || (chosen(b) && a <= size);
   }
 
-  // ---------- StoliceMax: the countries ----------
+  // ---------- StoliceMax and ChemiaMax: picking one of four answers ----------
 
   const BY_ISO = Object.fromEntries(COUNTRIES.map((c) => [c.iso, c]));
+  const BY_FORMULA = Object.fromEntries(COMPOUNDS.map((c) => [c.formula, c]));
+  const shuffle = (list) => {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  };
+  // ChemiaMax: the elements in a formula, and the formula with its numbers set low (H₂O).
+  const elements = (formula) => new Set(formula.match(/[A-Z][a-z]?/g));
+  const formulaHtml = (formula) => '<span class="formula">' + esc(formula).replace(/(\d+)/g, '<sub>$1</sub>') + '</span>';
 
-  // One card per country, with its ISO code as id.
-  function countryCard(iso) {
-    if (!state.cards[iso]) state.cards[iso] = { ...SRS.newCard(iso), seed: Math.random() };
-    return state.cards[iso];
+  // What differs between the two apps. A card id is the ISO code of a
+  // country or the formula of a compound.
+  //   groups: the continents or groups of compounds, each can be switched off
+  //   ids: all cards, and group(id) the group of one
+  //   options(id): the right answer and three wrong ones, in a random order
+  //   answer(id): an answer as HTML; tile(id): its progress square as HTML
+  //   label(id): its name; number(id): its card_id in the review log
+  const CHOICE = {
+    capitals: {
+      groups: CONTINENTS,
+      ids: COUNTRIES.map((c) => c.iso),
+      group: (iso) => BY_ISO[iso].continent,
+      // The right capital and three others from the same continent.
+      options: (iso) => {
+        const others = COUNTRIES.filter((c) => c.continent === BY_ISO[iso].continent && c.iso !== iso).map((c) => c.iso);
+        return shuffle(shuffle(others).slice(0, 3).concat(iso));
+      },
+      answer: (iso) => esc(capitalName(iso)),
+      tile: (iso) => flag(iso),
+      label: (iso) => countryName(iso),
+      // The letters of the ISO code as numbers 1 to 26, so FR is 618.
+      number: (iso) => (iso.charCodeAt(0) - 64) * 100 + (iso.charCodeAt(1) - 64),
+      logColumns: 'country,picked',
+    },
+    chemistry: {
+      groups: COMPOUND_GROUPS,
+      ids: COMPOUNDS.map((c) => c.formula),
+      group: (formula) => BY_FORMULA[formula].group,
+      // The right formula and three wrong ones from the six formulas most like
+      // it: those with the most of its elements and the fewest others, such
+      // as CO and CO2, H2O and H2O2, or NO2, N2O and HNO3.
+      options: (formula) => {
+        const mine = elements(formula);
+        const alike = (other) => [...elements(other)].reduce((sum, e) => sum + (mine.has(e) ? 2 : -1), 0);
+        const others = shuffle(COMPOUNDS.map((c) => c.formula).filter((f) => f !== formula)).sort((x, y) => alike(y) - alike(x));
+        return shuffle(shuffle(others.slice(0, 6)).slice(0, 3).concat(formula));
+      },
+      answer: (formula) => formulaHtml(formula),
+      tile: (formula) => formulaHtml(formula),
+      label: (formula) => BY_FORMULA[formula].name[lang()],
+      number: (formula) => BY_FORMULA[formula].number,
+      logColumns: 'compound,picked',
+    },
+  };
+  const choice = () => CHOICE[app.id];
+
+  // One card per country or compound.
+  function choiceCard(id) {
+    if (!state.cards[id]) state.cards[id] = { ...SRS.newCard(id), seed: Math.random() };
+    return state.cards[id];
   }
 
   // The cards that take part, in the (random) order new ones are introduced.
@@ -1452,9 +1591,9 @@
         }
       }
     } else {
-      const on = new Set(state.settings.continents);
-      for (const c of COUNTRIES) {
-        if (on.has(c.continent)) list.push(countryCard(c.iso));
+      const on = new Set(state.settings[app.groupKey]);
+      for (const id of choice().ids) {
+        if (on.has(choice().group(id))) list.push(choiceCard(id));
       }
     }
     return list.sort((x, y) => x.seed - y.seed);
@@ -1523,8 +1662,8 @@
   let lastId = null;
   let mode = 'ask'; // ask | right | wrong | done
   let typed = ''; // MnożenieMax: the digits typed
-  let options = []; // StoliceMax: ISO codes of the countries whose capitals are the four answers
-  let picked = null; // StoliceMax: the wrong answer picked
+  let options = []; // StoliceMax and ChemiaMax: the cards whose answers are the four choices
+  let picked = null; // StoliceMax and ChemiaMax: the wrong answer picked
   let shownAt = 0;
   let advanceTimer = null;
   let idleTimer = null;
@@ -1543,20 +1682,6 @@
     if (!isTimes()) return [lastId];
     const [a, b] = lastId.split('x');
     return [lastId, b + 'x' + a];
-  }
-
-  // StoliceMax: the right capital and three others from the same continent,
-  // in a random order.
-  function makeOptions(iso) {
-    const shuffle = (list) => {
-      for (let i = list.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [list[i], list[j]] = [list[j], list[i]];
-      }
-      return list;
-    };
-    const others = COUNTRIES.filter((c) => c.continent === BY_ISO[iso].continent && c.iso !== iso).map((c) => c.iso);
-    return shuffle(shuffle(others).slice(0, 3).concat(iso));
   }
 
   // Starts the time limit while nothing is typed. It does not run while a
@@ -1632,7 +1757,7 @@
       currentId = c.id;
       shown = { type: c.type, reps: c.reps };
       mode = 'ask';
-      if (!isTimes()) options = makeOptions(c.id);
+      if (!isTimes()) options = choice().options(c.id);
       shownAt = performance.now();
       const first = c.reps === 0;
       feedback = () => (first ? T().newOne : T().typeAnswer);
@@ -1642,8 +1767,8 @@
     armGiveUp();
   }
 
-  // value: the answer (MnożenieMax: the number typed; StoliceMax: the ISO code
-  // of the country whose capital was picked), or null when nothing was given
+  // value: the answer (MnożenieMax: the number typed; StoliceMax and ChemiaMax:
+  // the id of the card whose answer was picked), or null when nothing was given
   // within the time limit, so the card counts as not known (Again), like a
   // wrong answer.
   function submit(value) {
@@ -1654,8 +1779,8 @@
     const right = !timedOut && value === (isTimes() ? c.a * c.b : c.id);
     const ms = performance.now() - shownAt;
     let grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
-    // StoliceMax: with four answers to choose from, a right answer the first
-    // time may be a guess. It is never Easy, so the country goes through the
+    // StoliceMax and ChemiaMax: with four answers to choose from, a right
+    // answer the first time may be a guess. It is never Easy, so the country goes through the
     // learning steps.
     if (!isTimes() && c.type === 'new' && grade === SRS.EASY) grade = SRS.GOOD;
     const wasNew = c.type === 'new';
@@ -1688,7 +1813,7 @@
         typed = '';
       } else {
         picked = value;
-        answer = () => esc(T().rightIs(capitalName(c.id))) + '<br>' + esc(T().typeToGoOn());
+        answer = () => esc(T().rightIs('\u0001')).replace('\u0001', choice().answer(c.id)) + '<br>' + esc(T().typeToGoOn());
       }
       feedback = timedOut
         ? () => '<strong>' + esc(T().timeUp) + '</strong> ' + answer()
@@ -1749,7 +1874,7 @@
     else armGiveUp(); // everything deleted: the time limit starts again
   }
 
-  // StoliceMax: i is the answer tapped (0 to 3). After a wrong answer the
+  // StoliceMax and ChemiaMax: i is the answer tapped (0 to 3). After a wrong answer the
   // child taps the right one to move on; after a right one any tap moves on.
   function choose(i) {
     if (mode === 'done' || !options[i]) return;
@@ -1802,7 +1927,8 @@
     }
   }
 
-  // StoliceMax: a section per continent, with a square per country.
+  // StoliceMax and ChemiaMax: a section per continent or group of compounds,
+  // with a square per card.
   const map = $('map');
   let tiles = {};
   let sections = {};
@@ -1811,28 +1937,28 @@
     map.textContent = '';
     tiles = {};
     sections = {};
-    for (const continent of CONTINENTS) {
+    for (const group of choice().groups) {
       const section = document.createElement('section');
-      section.className = 'continent';
+      section.className = 'tile-group';
       const head = document.createElement('h3');
       const name = document.createElement('span');
-      name.textContent = T().continents[continent];
+      name.textContent = T().groups[group];
       const tally = document.createElement('span');
       tally.className = 'tally';
       head.append(name, tally);
       const grid = document.createElement('div');
-      grid.className = 'tiles';
-      for (const c of COUNTRIES) {
-        if (c.continent !== continent) continue;
+      grid.className = 'tiles' + (app.id === 'chemistry' ? ' formulas' : '');
+      for (const id of choice().ids) {
+        if (choice().group(id) !== group) continue;
         const el = document.createElement('div');
         el.className = 'cell';
-        el.textContent = flag(c.iso);
+        el.innerHTML = choice().tile(id);
         grid.appendChild(el);
-        tiles[c.iso] = el;
+        tiles[id] = el;
       }
       section.append(head, grid);
       map.appendChild(section);
-      sections[continent] = { section, tally };
+      sections[group] = { section, tally };
     }
   }
 
@@ -1861,15 +1987,15 @@
         c = factCard(a, b);
         label = fact(a, b);
       } else {
-        c = countryCard(id);
-        label = countryName(id);
+        c = choiceCard(id);
+        label = choice().label(id);
       }
       const s = stage(c);
       const on = active.has(c.id);
       if (on) n[s] += 1;
       if (!isTimes() && (s === 'young' || s === 'mature')) {
-        const continent = BY_ISO[id].continent;
-        learned[continent] = (learned[continent] || 0) + 1;
+        const group = choice().group(id);
+        learned[group] = (learned[group] || 0) + 1;
       }
       el.className = 'cell' +
         (s === 'new' ? '' : ' is-' + s) +
@@ -1883,12 +2009,12 @@
       el.title = label + ': ' + tip;
     }
     if (!isTimes()) {
-      // Countries learned out of all the countries of each continent.
-      for (const continent of CONTINENTS) {
-        const { section, tally } = sections[continent];
-        const total = COUNTRIES.filter((c) => c.continent === continent).length;
-        tally.textContent = num(learned[continent] || 0) + ' / ' + num(total);
-        section.classList.toggle('is-off', !state.settings.continents.includes(continent));
+      // Cards learned out of all the cards of each continent or group.
+      for (const group of choice().groups) {
+        const { section, tally } = sections[group];
+        const total = choice().ids.filter((id) => choice().group(id) === group).length;
+        tally.textContent = num(learned[group] || 0) + ' / ' + num(total);
+        section.classList.toggle('is-off', !state.settings[app.groupKey].includes(group));
       }
     }
     $('n-new').textContent = num(n.new);
@@ -1922,15 +2048,20 @@
       }
       slot.classList.toggle('empty', mode === 'ask' && typed === '');
     } else {
-      $('flag').textContent = flag(c.id);
-      $('country').textContent = countryName(c.id);
-      // Once answered, the right capital turns green and a wrong pick is marked.
+      if (app.id === 'capitals') {
+        $('flag').textContent = flag(c.id);
+        $('country').textContent = countryName(c.id);
+      } else {
+        $('compound').textContent = BY_FORMULA[c.id].name[lang()];
+        $('nick').textContent = BY_FORMULA[c.id].nick[lang()];
+      }
+      // Once answered, the right answer turns green and a wrong pick is marked.
       $('choices').classList.toggle('answered', mode !== 'ask');
       $('choices').querySelectorAll('.choice').forEach((btn, i) => {
-        const iso = options[i];
-        btn.textContent = iso ? capitalName(iso) : '';
-        btn.classList.toggle('is-right', mode !== 'ask' && iso === c.id);
-        btn.classList.toggle('is-wrong', mode === 'wrong' && iso === picked);
+        const id = options[i];
+        btn.innerHTML = id ? choice().answer(id) : '';
+        btn.classList.toggle('is-right', mode !== 'ask' && id === c.id);
+        btn.classList.toggle('is-wrong', mode === 'wrong' && id === picked);
       });
     }
     $('feedback').innerHTML = feedback();
@@ -2016,7 +2147,8 @@
   const reward = (id) => app.rewards.find((r) => r.id === id) || app.rewards[0];
 
   // A gradient pair for each reward, next to the coin's gradients, and the
-  // outline of each souvenir for its beam of light.
+  // outlines of the souvenirs and glassware for their beam of light, glitter
+  // and bubbles.
   function makeRewardGradients() {
     const NS = 'http://www.w3.org/2000/svg';
     const defs = $('shine-defs').querySelector('defs');
@@ -2032,15 +2164,22 @@
       }
       defs.appendChild(g);
     };
-    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS)) {
+    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE)) {
       gradient('linearGradient', 'rim-' + id, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
       gradient('radialGradient', 'face-' + id, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
     }
-    for (const { id } of SOUVENIRS) {
+    // within: the id of another outline that cuts this one.
+    const clipPath = (id, shape, within) => {
       const clip = document.createElementNS(NS, 'clipPath');
-      clip.id = 'clip-' + id;
-      clip.innerHTML = SOUVENIR_ART[id].shape;
+      clip.id = id;
+      clip.innerHTML = shape;
+      if (within) clip.setAttribute('clip-path', 'url(#' + within + ')');
       defs.appendChild(clip);
+    };
+    for (const { id } of SOUVENIRS) clipPath('clip-' + id, SOUVENIR_ART[id].shape);
+    for (const { id } of GLASSWARE) {
+      clipPath('clip-' + id, GLASS_ART[id].shape);
+      clipPath('liq-' + id, GLASS_ART[id].liquid, GLASS_ART[id].liquidIn && 'clip-' + id);
     }
   }
 
@@ -2314,7 +2453,7 @@
     const { colors } = SOUVENIRS.find((r) => r.id === id) || SOUVENIRS[0];
     const art = SOUVENIR_ART[id];
     const rim = 'url(#rim-' + id + ')';
-    return '<svg class="trophy-icon souvenir" viewBox="0 0 32 32" aria-hidden="true">' +
+    return '<svg class="trophy-icon shiny" viewBox="0 0 32 32" aria-hidden="true">' +
       '<rect x="3" y="27" width="26" height="3" rx="1.2" fill="' + rim + '" stroke="' + colors[3] + '" stroke-width="0.7"/>' +
       art.art('url(#face-' + id + ')', rim, colors) +
       // Glitter: two layers of tiny dots that shimmer in turn.
@@ -2324,7 +2463,191 @@
       '</svg>';
   }
 
-  const rewardIcon = (id) => (isTimes() ? trophyIcon(id) : souvenirIcon(id));
+  // ChemiaMax: laboratory glassware with coloured liquid that bubbles and
+  // glitters. "shape" is the outline of the glass (for the beam of light),
+  // "liquid" the outline of the liquid (for the glitter and bubbles; with
+  // "liquidIn" it is cut to the glass), "art" draws it, "bubbles" are
+  // [x, y, size] and "sparkles" the twinkling stars, as for the souvenirs.
+  const GLASS_FILL = 'fill="#e8f6ff" fill-opacity="0.5"';
+  const GLASS_LINE = 'fill="none" stroke="#6f8ba6" stroke-width="0.8" stroke-linejoin="round"';
+  const METAL = 'stroke="#7a8794" stroke-linecap="round" fill="none"';
+  const CORK = 'fill="#c08a52" stroke="#6b4423" stroke-width="0.4"';
+  const glassBack = (d) => '<path d="' + d + '" ' + GLASS_FILL + '/>';
+  const glassEdge = (d) => '<path d="' + d + '" ' + GLASS_LINE + '/>';
+  const shine = (d) => '<path d="' + d + '" stroke="#fff" stroke-width="0.8" stroke-linecap="round" stroke-opacity="0.85" fill="none"/>';
+  // A glass tube bent as d, open inside.
+  const neck = (d) => '<path d="' + d + '" stroke="#6f8ba6" stroke-width="3.2" stroke-linecap="round" fill="none"/>' +
+    '<path d="' + d + '" stroke="#eef8ff" stroke-width="1.8" stroke-linecap="round" fill="none"/>';
+  // A test tube: open at the top, round at the bottom.
+  const tube = (x, top, bottom, w) => 'M' + x + ' ' + top + 'h' + w + 'V' + (bottom - w / 2) + 'a' + (w / 2) + ' ' + (w / 2) + ' 0 0 1 -' + w + ' 0z';
+  // A point turned by deg degrees around (cx, cy), for the tilted test tube.
+  const turn = ([x, y, ...rest], deg, cx, cy) => {
+    const a = (deg * Math.PI) / 180;
+    return [cx + (x - cx) * Math.cos(a) - (y - cy) * Math.sin(a), cy + (x - cx) * Math.sin(a) + (y - cy) * Math.cos(a), ...rest];
+  };
+  const TILT = 'rotate(-22 16 15)';
+  const ROUND = 'M14.3 3.6h3.4v8.1A7.5 7.5 0 1 1 14.3 11.7z';
+  const CONICAL = 'M14 4.5h4v8l7.5 12.2a1.6 1.6 0 0 1-1.4 2.3H7.9a1.6 1.6 0 0 1-1.4-2.3L14 12.5z';
+  const BEAKER = 'M8.5 5.5h15v19a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2z';
+  const VOLUMETRIC = 'M15 3.5h2v11.2c5.2 1 8.4 4.4 8.4 7.6 0 2.8-2.2 4.7-5 4.7h-8.8c-2.8 0-5-1.9-5-4.7 0-3.2 3.2-6.6 8.4-7.6z';
+  const FUNNEL = 'M13.6 2.5h4.8v3.2c3 1.2 4.6 4.6 4.6 8.3 0 3.8-3.4 6.4-5.8 8.2V25h-2.4v-2.8C12.4 20.4 9 17.8 9 14c0-3.7 1.6-7.1 4.6-8.3z';
+  const RACK = [[8.5, 11, '#ff5a5a'], [14, 15.5, '#ffd43b'], [19.5, 9.5, '#3a9be8']];
+  const RAINBOW = [[9, '#ff5a5a'], [13.2, '#ff9a3c'], [16.2, '#ffd43b'], [19.2, '#3fc45a'], [22.2, '#3a9be8'], [24.4, '#9b5de5']];
+  // A round-bottomed vessel: the glass and its liquid below the given level.
+  const bulb = (cx, cy, r, f, level) => '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" ' + GLASS_FILL + '/>' +
+    '<path d="' + bulbLiquid(cx, cy, r, level) + '" fill="' + f + '"/>' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" ' + GLASS_LINE + '/>' +
+    shine('M' + (cx - r * 0.62) + ' ' + (cy - r * 0.55) + 'Q' + (cx - r * 0.35) + ' ' + (cy - r * 0.85) + ' ' + (cx - r * 0.05) + ' ' + (cy - r * 0.9));
+  // The liquid in a round-bottomed vessel, from the given level down.
+  const bulbLiquid = (cx, cy, r, level) => {
+    const inner = r - 0.5;
+    const half = Math.sqrt(inner ** 2 - (level - cy) ** 2);
+    return 'M' + (cx - half).toFixed(2) + ' ' + level + 'H' + (cx + half).toFixed(2) + 'A' + inner + ' ' + inner + ' 0 1 1 ' + (cx - half).toFixed(2) + ' ' + level + 'z';
+  };
+  const GLASS_ART = {
+    tubeblue: {
+      shape: '<path d="' + tube(13.5, 3, 25, 5) + '"/>',
+      liquid: '<path d="' + tube(14, 12, 24.5, 4) + '"/>',
+      bubbles: [[16, 21.5, 0.7], [15.2, 18, 0.55], [16.8, 15, 0.6]],
+      sparkles: [[20.8, 3.6, 1.5], [10.5, 8, 1.4], [22.5, 22, 1.3]],
+      art: (f) => '<path d="M8.5 27V15.5M23.5 27V15.5" stroke="#8a6a4a" stroke-width="1.4" stroke-linecap="round"/>' +
+        glassBack(tube(13.5, 3, 25, 5)) + '<path d="' + tube(14, 12, 24.5, 4) + '" fill="' + f + '"/>' + glassEdge(tube(13.5, 3, 25, 5)) +
+        '<path d="M12.8 3h6.4v1.3h-6.4z" ' + GLASS_FILL + ' stroke="#6f8ba6" stroke-width="0.6"/>' + shine('M14.6 5.5v14') +
+        '<path d="M7.5 15.5h17" stroke="#8a6a4a" stroke-width="1.6" stroke-linecap="round"/>',
+    },
+    tubegreen: {
+      shape: '<path transform="' + TILT + '" d="' + tube(13.5, 4, 24.5, 5) + '"/>',
+      liquid: '<path transform="' + TILT + '" d="' + tube(14, 13, 24, 4) + '"/>',
+      bubbles: [[16, 21.5, 0.7], [15.2, 18.5, 0.55], [16.8, 16, 0.55]].map((p) => turn(p, -22, 16, 15)),
+      sparkles: [[6.5, 6, 1.5], [29, 20, 1.3], [9.5, 21.5, 1.4]],
+      art: (f) => '<path d="M26 27V3.5M22.5 27h7" ' + METAL + ' stroke-width="1.3"/>' +
+        '<g transform="' + TILT + '">' + glassBack(tube(13.5, 4, 24.5, 5)) + '<path d="' + tube(14, 13, 24, 4) + '" fill="' + f + '"/>' +
+        glassEdge(tube(13.5, 4, 24.5, 5)) + shine('M14.6 6.5v13') + '<rect x="13.6" y="1.4" width="4.8" height="3.6" rx="0.8" ' + CORK + '/></g>' +
+        '<path d="M26 10.4H17.6" ' + METAL + ' stroke-width="1.3"/><rect x="16.2" y="9.3" width="2" height="2.2" rx="0.4" fill="#7a8794"/>',
+    },
+    conical: {
+      shape: '<path d="' + CONICAL + '"/>',
+      liquid: '<path d="M11.1 18h9.8l4 6.6a1.2 1.2 0 0 1-1 1.8H8.1a1.2 1.2 0 0 1-1-1.8z"/>',
+      bubbles: [[14, 23, 0.7], [17.5, 21.5, 0.6], [19.8, 24.4, 0.55], [16, 19.6, 0.5]],
+      sparkles: [[16, 2.2, 1.6], [5.5, 15, 1.4], [26.5, 17, 1.4]],
+      art: (f) => glassBack(CONICAL) + '<path d="M11.1 18h9.8l4 6.6a1.2 1.2 0 0 1-1 1.8H8.1a1.2 1.2 0 0 1-1-1.8z" fill="' + f + '"/>' +
+        glassEdge(CONICAL) + '<path d="M13.3 4.5h5.4v1.2h-5.4z" ' + GLASS_FILL + ' stroke="#6f8ba6" stroke-width="0.6"/>' +
+        '<path d="M10.2 20.5h1.8M9.2 22.5h1.6" stroke="#6f8ba6" stroke-width="0.5"/>' + shine('M14.9 6v6.6L10.4 20'),
+    },
+    retortpurple: {
+      shape: '<circle cx="11" cy="19.5" r="6.5"/>',
+      liquid: '<path d="' + bulbLiquid(11, 19.5, 6.5, 18.5) + '"/>',
+      bubbles: [[9, 23, 0.7], [12.6, 21.6, 0.6], [10.6, 20.2, 0.5]],
+      sparkles: [[11, 10.8, 1.5], [29.5, 12.5, 1.4], [3.4, 14.5, 1.3]],
+      art: (f) => neck('M15.6 14.8Q18.5 7.6 22 8.6L29 16.5') + bulb(11, 19.5, 6.5, f, 18.5) +
+        '<ellipse cx="11" cy="26.4" rx="3.6" ry="0.8" ' + CORK + '/>',
+    },
+    roundflask: {
+      shape: '<path d="' + ROUND + '"/>',
+      liquid: '<path d="' + bulbLiquid(16, 19, 7.5, 17) + '"/>',
+      bubbles: [[13.5, 23, 0.7], [17.8, 21.4, 0.6], [16, 19.4, 0.5], [19.4, 24, 0.55]],
+      sparkles: [[16, 1.5, 1.4], [6.4, 12, 1.4], [25.6, 12.5, 1.5]],
+      art: (f) => glassBack(ROUND) + '<path d="' + bulbLiquid(16, 19, 7.5, 17) + '" fill="' + f + '"/>' + glassEdge(ROUND) +
+        '<path d="M13.6 3h4.8v1.2h-4.8z" ' + GLASS_FILL + ' stroke="#6f8ba6" stroke-width="0.6"/>' + shine('M10.4 15.4Q11.8 13.2 14 12.6') +
+        '<ellipse cx="16" cy="26.7" rx="4.2" ry="0.9" ' + CORK + '/>',
+    },
+    rack: {
+      shape: '<path d="' + RACK.map(([x]) => tube(x, 4.5, 24, 4)).join('') + '"/>',
+      liquid: '<path d="' + RACK.map(([x, top]) => tube(x + 0.4, top, 23.6, 3.2)).join('') + '"/>',
+      bubbles: [[10.5, 21, 0.55], [16, 21.5, 0.55], [21.5, 19, 0.55], [21.5, 13, 0.5]],
+      sparkles: [[10.5, 2.4, 1.4], [21.5, 2.4, 1.4], [29.2, 9, 1.3]],
+      art: (f, rim, [, , , deep]) => '<path d="M5 15.2h1.8V27H5zM25.2 15.2H27V27h-1.8zM4.5 23.6h23v1.6h-23z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.4"/>' +
+        RACK.map(([x, top, color]) => glassBack(tube(x, 4.5, 24, 4)) + '<path d="' + tube(x + 0.4, top, 23.6, 3.2) + '" fill="' + color + '"/>' +
+          '<path d="' + tube(x + 0.4, top, 23.6, 3.2) + '" fill="url(#sheen)"/>' + glassEdge(tube(x, 4.5, 24, 4)) +
+          '<path d="M' + (x - 0.5) + ' 4.5h5v1.1h-5z" ' + GLASS_FILL + ' stroke="#6f8ba6" stroke-width="0.5"/>' + shine('M' + (x + 0.9) + ' 6.5v6')).join('') +
+        '<path d="M4 12.8h24v2.4H4z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>',
+    },
+    beaker: {
+      shape: '<path d="' + BEAKER + '"/>',
+      liquid: '<path d="M9.1 13.5h13.8v10.8a1.5 1.5 0 0 1-1.5 1.5H10.6a1.5 1.5 0 0 1-1.5-1.5z"/>',
+      bubbles: [[12, 23, 0.7], [16, 21, 0.6], [19.5, 24.2, 0.55], [14, 17.5, 0.5]],
+      sparkles: [[24.8, 3.6, 1.5], [5.6, 12, 1.4], [26, 21, 1.3]],
+      art: (f) => glassBack(BEAKER) + '<path d="M9.1 13.5h13.8v10.8a1.5 1.5 0 0 1-1.5 1.5H10.6a1.5 1.5 0 0 1-1.5-1.5z" fill="' + f + '"/>' +
+        glassEdge(BEAKER) + '<path d="M6.9 4.6Q8 5 8.5 5.5h15" stroke="#6f8ba6" stroke-width="1" fill="none" stroke-linecap="round"/>' +
+        '<path d="M19 9h3M20 11.5h2M19 14h3M20 16.5h2M19 19h3M20 21.5h2" stroke="#6f8ba6" stroke-width="0.5"/>' + shine('M10.2 7v15'),
+    },
+    retortflame: {
+      shape: '<circle cx="11" cy="15" r="6"/>',
+      liquid: '<path d="' + bulbLiquid(11, 15, 6, 14) + '"/>',
+      bubbles: [[9, 18.5, 0.6], [12.6, 19, 0.6], [11, 16.6, 0.5], [13.4, 16.2, 0.45], [8.4, 16, 0.45]],
+      sparkles: [[11, 6.6, 1.4], [29.6, 15, 1.3], [3.4, 9.5, 1.4]],
+      art: (f) => neck('M15.2 11Q18 6 21.5 7.5L28.5 20') + bulb(11, 15, 6, f, 14) +
+        '<path d="M5.5 21.2h11M6.6 21.2L5 27M15.4 21.2L17 27" ' + METAL + ' stroke-width="1.1"/>' +
+        '<path d="M9.2 27v-2.2h3.6V27z" fill="#7a8794"/>' +
+        '<g class="flame"><path d="M11 24.8C9.4 23.8 9.6 22.4 11 21.6C12.4 22.4 12.6 23.8 11 24.8z" fill="#ff9a3c"/>' +
+        '<path d="M11 24.6C10.3 24 10.4 23.2 11 22.7C11.6 23.2 11.7 24 11 24.6z" fill="#ffe27a"/></g>',
+    },
+    volumetric: {
+      shape: '<path d="' + VOLUMETRIC + '"/>',
+      liquid: '<path d="M15.4 8h1.2v7c5 1 8.2 4.3 8.2 7.4 0 2.5-2 4.2-4.6 4.2h-8.4c-2.6 0-4.6-1.7-4.6-4.2 0-3.1 3.2-6.4 8.2-7.4z"/>',
+      bubbles: [[13.8, 23, 0.7], [18, 21.5, 0.6], [16, 18.6, 0.5], [19.6, 24.2, 0.55]],
+      sparkles: [[20.4, 2.6, 1.4], [6, 15, 1.4], [26.4, 15, 1.4]],
+      art: (f, rim, [, , lo, deep]) => glassBack(VOLUMETRIC) +
+        '<path d="M15.4 8h1.2v7c5 1 8.2 4.3 8.2 7.4 0 2.5-2 4.2-4.6 4.2h-8.4c-2.6 0-4.6-1.7-4.6-4.2 0-3.1 3.2-6.4 8.2-7.4z" fill="' + f + '"/>' +
+        glassEdge(VOLUMETRIC) + '<path d="M14.3 1.2h3.4v2.6h-3.4z" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<path d="M14.4 8h3.2" stroke="' + deep + '" stroke-width="0.5"/>' + shine('M9.6 19.5Q11 17 13.6 16'),
+    },
+    separatory: {
+      shape: '<path d="' + FUNNEL + '"/>',
+      liquid: '<rect x="0" y="8.4" width="32" height="17"/>',
+      liquidIn: true,
+      bubbles: [[16, 18, 0.6], [14.4, 16, 0.5], [17.6, 20.4, 0.5], [15, 11, 0.5], [17, 10, 0.45]],
+      sparkles: [[8.6, 5, 1.4], [23.6, 3.4, 1.3], [6.4, 18.5, 1.4]],
+      art: (f, rim, [, , lo, deep], id) => '<path d="M27 27V3M27 9.2H22.6" ' + METAL + ' stroke-width="1.2"/>' +
+        glassBack(FUNNEL) + '<g clip-path="url(#liq-' + id + ')"><path d="M0 8.4h32v5.4H0z" fill="#ffd43b"/><path d="M0 13.8h32v11.4H0z" fill="#3a9be8"/>' +
+        '<path d="' + FUNNEL + '" fill="url(#sheen)"/></g>' + glassEdge(FUNNEL) +
+        '<ellipse cx="16" cy="9.2" rx="6.8" ry="1.1" fill="none" stroke="#7a8794" stroke-width="0.9"/>' +
+        '<path d="M12.4 21.8h7.2v1.4h-7.2zM14.2 1h3.6v2.2h-3.6z" fill="#dfe5ec" stroke="#7a8794" stroke-width="0.4"/>' +
+        '<path d="M16 25v2" stroke="#6f8ba6" stroke-width="1.2"/>' + shine('M10.6 11.5Q11 8.6 13 7.2'),
+    },
+    retortgold: {
+      shape: '<circle cx="12" cy="19" r="7"/>',
+      liquid: '<path d="' + bulbLiquid(12, 19, 7, 17.5) + '"/>',
+      bubbles: [[10, 23, 0.7], [13.6, 21.6, 0.6], [12, 19.6, 0.5], [15, 24, 0.55]],
+      sparkles: [[12, 9.6, 1.6], [29.2, 7.4, 1.4], [3.4, 13, 1.4]],
+      art: (f) => neck('M17.3 14.4Q20.5 6.5 24 5.6L30 3.2') + bulb(12, 19, 7, f, 17.5) +
+        '<ellipse cx="12" cy="26.3" rx="3.8" ry="0.85" ' + CORK + '/>',
+    },
+    rainbow: {
+      shape: '<path d="' + ROUND + '"/>',
+      liquid: '<rect x="0" y="9" width="32" height="18"/>',
+      liquidIn: true,
+      bubbles: [[13.5, 23, 0.65], [18, 20.5, 0.6], [16, 15, 0.5], [16.6, 11, 0.45]],
+      sparkles: [[16, 1.4, 1.5], [6.2, 11.5, 1.5], [25.8, 11.5, 1.5]],
+      art: (f, rim, colors, id) => glassBack(ROUND) +
+        '<g clip-path="url(#liq-' + id + ')">' + RAINBOW.map(([y, color], i) => '<rect x="0" y="' + y + '" width="32" height="' +
+          ((RAINBOW[i + 1] ? RAINBOW[i + 1][0] : 27) - y) + '" fill="' + color + '"/>').join('') +
+        '<path d="' + ROUND + '" fill="url(#sheen)"/></g>' + glassEdge(ROUND) +
+        '<path d="M13.6 3h4.8v1.2h-4.8z" ' + GLASS_FILL + ' stroke="#6f8ba6" stroke-width="0.6"/>' + shine('M10.4 15.4Q11.8 13.2 14 12.6') +
+        '<ellipse cx="16" cy="26.7" rx="4.2" ry="0.9" ' + CORK + '/>',
+    },
+  };
+
+  // A bubble rising in the liquid; i staggers them.
+  const bubble = ([x, y, r], i) => '<circle class="bubble" cx="' + x.toFixed(2) + '" cy="' + y.toFixed(2) + '" r="' + r +
+    '" fill="#fff" fill-opacity="0.75" style="animation-delay:' + (i * 0.55) + 's"/>';
+
+  function glassIcon(id) {
+    const { colors } = GLASSWARE.find((r) => r.id === id) || GLASSWARE[0];
+    const art = GLASS_ART[id];
+    const rim = 'url(#rim-' + id + ')';
+    return '<svg class="trophy-icon shiny" viewBox="0 0 32 32" aria-hidden="true">' +
+      '<rect x="3" y="27" width="26" height="3" rx="1.2" fill="' + rim + '" stroke="' + colors[3] + '" stroke-width="0.7"/>' +
+      art.art('url(#face-' + id + ')', rim, colors, id) +
+      // Glitter and bubbles in the liquid.
+      '<g clip-path="url(#liq-' + id + ')"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/>' +
+      art.bubbles.map(bubble).join('') + '</g>' +
+      glint('clip-' + id) +
+      art.sparkles.map(([x, y, s], i) => sparkle(x, y, s, i)).join('') +
+      '</svg>';
+  }
+
+  const rewardIcon = (id) => (isTimes() ? trophyIcon(id) : app.id === 'capitals' ? souvenirIcon(id) : glassIcon(id));
   // StoliceMax: the capital a souvenir comes from.
   const rewardPlace = (id) => (reward(id).iso ? capitalName(reward(id).iso) : '');
 
@@ -2343,10 +2666,145 @@
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // A trophy gets confetti, a souvenir fireworks.
+      // A trophy gets confetti, a souvenir fireworks, glassware an explosion.
       if (isTimes()) confetti(CELEBRATION_MS);
-      else fireworks(CELEBRATION_MS);
+      else if (app.id === 'capitals') fireworks(CELEBRATION_MS);
+      else explosion(CELEBRATION_MS, colors[1]);
     }
+  }
+
+  // ChemiaMax: an explosion for new glassware: a flash, a shock wave, a
+  // fireball, sparks and drops of the liquid (in the given colour) flying
+  // out, smoke, and the page shakes.
+  function explosion(ms, color) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const cx = innerWidth / 2;
+    const cy = innerHeight * 0.55;
+    const fire = ['#fff6c4', '#ffd34d', '#ff9a3c', '#ff5a3c', '#e2453c'];
+    const pieces = Array.from({ length: 150 }, (_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 250 + Math.random() * 750;
+      const drop = i % 3 === 0; // a drop of the liquid; the others are sparks
+      return {
+        x: cx, y: cy, px: cx, py: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 150,
+        size: drop ? 3 + Math.random() * 4 : 1.5 + Math.random() * 2.5,
+        color: drop ? color : fire[Math.floor(Math.random() * fire.length)],
+        drop,
+        life: 0.9 + Math.random() * 1.3,
+      };
+    });
+    const smoke = Array.from({ length: 22 }, () => ({
+      x: cx + (Math.random() - 0.5) * 60,
+      y: cy + (Math.random() - 0.5) * 40,
+      vx: (Math.random() - 0.5) * 90,
+      vy: -30 - Math.random() * 60,
+      r: 20 + Math.random() * 25,
+      grow: 30 + Math.random() * 40,
+      delay: Math.random() * 0.3,
+    }));
+    for (const el of [document.querySelector('.app'), $('shop-sheet')]) {
+      el.classList.remove('boom');
+      void el.offsetWidth; // restart the animation
+      el.classList.add('boom');
+      setTimeout(() => el.classList.remove('boom'), 700);
+    }
+    const start = performance.now();
+    let last = start;
+    const end = ms / 1000;
+    const frame = (now) => {
+      // The first frame's time can be a little before start.
+      const t = Math.max(0, (now - start) / 1000);
+      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
+      last = now;
+      if (canvas.width !== Math.round(innerWidth * ratio)) {
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      const fade = Math.min(1, Math.max(0, (end - t) / 0.6));
+      // The flash.
+      if (t < 0.35) {
+        ctx.globalAlpha = (1 - t / 0.35) * 0.85;
+        ctx.fillStyle = '#fff8d6';
+        ctx.fillRect(0, 0, innerWidth, innerHeight);
+      }
+      // Smoke, rising and spreading.
+      ctx.fillStyle = '#8a8f99';
+      for (const s of smoke) {
+        const age = t - s.delay;
+        if (age <= 0) continue;
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        ctx.globalAlpha = 0.3 * Math.max(0, 1 - age / (end - 0.4)) * fade;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r + s.grow * age, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // The shock wave.
+      if (t < 0.6) {
+        ctx.globalAlpha = 1 - t / 0.6;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2 + 10 * (1 - t / 0.6);
+        ctx.beginPath();
+        ctx.arc(cx, cy, (t / 0.6) * Math.max(innerWidth, innerHeight) * 0.75, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      // The fireball, swelling and rising.
+      if (t < 1.2) {
+        const r = 30 + 110 * Math.min(1, t / 0.25);
+        const y = cy - 40 * t;
+        const ball = ctx.createRadialGradient(cx, y, 0, cx, y, r);
+        ball.addColorStop(0, '#ffffff');
+        ball.addColorStop(0.25, '#fff2a8');
+        ball.addColorStop(0.55, '#ff9a3c');
+        ball.addColorStop(0.85, 'rgba(226, 69, 60, 0.6)');
+        ball.addColorStop(1, 'rgba(226, 69, 60, 0)');
+        ctx.globalAlpha = Math.max(0, 1 - t / 1.2);
+        ctx.fillStyle = ball;
+        ctx.beginPath();
+        ctx.arc(cx, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Sparks glow where they cross; drops of the liquid fall.
+      ctx.lineCap = 'round';
+      for (const p of pieces) {
+        if (t > p.life) continue;
+        p.px = p.x;
+        p.py = p.y;
+        p.vx *= 1 - 1.6 * dt;
+        p.vy = p.vy * (1 - 1.6 * dt) + 500 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        ctx.globalAlpha = Math.min(1, 2 * (1 - t / p.life)) * fade;
+        if (p.drop) {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = p.size;
+          ctx.beginPath();
+          ctx.moveTo(p.px - (p.x - p.px) * 2, p.py - (p.y - p.py) * 2);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        }
+      }
+      if (t < end) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
   }
 
   // StoliceMax: fireworks for a souvenir. Rockets rise from the bottom of the
@@ -2576,7 +3034,9 @@
     document.body.dataset.app = app.id;
     $('brand-name').textContent = app.name;
     $('brand-icon').innerHTML = APP_ICONS[app.id];
-    $('brand-other').innerHTML = APP_ICONS[otherApps()[0].id];
+    const others = otherApps();
+    $('brand-other').innerHTML = APP_ICONS[others[0].id];
+    $('brand-other2').innerHTML = others[1] ? APP_ICONS[others[1].id] : '';
     $('coin-emblem').innerHTML = EMBLEMS[app.id];
   }
 
@@ -2607,8 +3067,8 @@
 
   function closePanel() {
     if (!panelOpen()) return false;
-    if (!$('apps').hidden && !prefs.seenApps) {
-      prefs.seenApps = true;
+    if (!$('apps').hidden && appsUnseen()) {
+      prefs.appsSeen = Object.keys(APPS).length;
       savePrefs();
     }
     for (const p of panels) p.hidden = true;
@@ -2644,7 +3104,7 @@
   // The menu of apps, with what each one has left for today.
   function renderApps() {
     const t = T();
-    $('apps-hint').textContent = prefs.seenApps ? t.appsHint : t.appsIntro;
+    $('apps-hint').textContent = appsUnseen() ? t.appsIntro : t.appsHint;
     $('app-list').innerHTML = Object.values(APPS).map((a) => {
       const n = countsOf(a.id);
       const parts = [];
@@ -2654,7 +3114,8 @@
       const here = a.id === app.id;
       return '<button type="button" class="app-tile" data-open="' + a.id + '"' + (here ? ' aria-current="true"' : '') + '>' +
         '<span class="app-icon">' + APP_ICONS[a.id] + '</span>' +
-        '<span class="app-name">' + esc(a.name) + (here ? '<span class="app-here">' + esc(t.appOpen) + '</span>' : '') + '</span>' +
+        '<span class="app-name">' + esc(a.name) + (here ? '<span class="app-here">' + esc(t.appOpen) + '</span>' : '') +
+        (prefs.opened.includes(a.id) ? '' : '<span class="app-new">' + esc(t.appNew) + '</span>') + '</span>' +
         '<span class="app-what">' + esc(t.appWhat[a.id]) + '</span>' +
         '<span class="app-due">' + esc(parts.length ? t.appToday(parts.join(', ')) : t.appDone) + '</span>' +
         '</button>';
@@ -2669,6 +3130,7 @@
     clearTimeout(advanceTimer);
     app = APPS[id];
     prefs.app = id;
+    if (!prefs.opened.includes(id)) prefs.opened.push(id);
     savePrefs();
     state = load() || defaultState();
     currentId = null;
@@ -2754,7 +3216,7 @@
       fill($('table-chips'), range(state.settings.size), t.tableChip, 'table-');
       fill($('extra-chips'), extraChoices(), t.tableChip, 'table-');
     } else {
-      fill($('continent-chips'), CONTINENTS, (c) => t.continents[c], 'continent-');
+      fill($('group-chips'), choice().groups, (g) => t.groups[g], 'group-');
     }
   }
 
@@ -2782,7 +3244,7 @@
       for (const n of range(s.size).concat(extraChoices())) $('table-' + n).checked = s.tables.includes(n);
       $('extras-hint').textContent = t.extrasHint(s.size);
     } else {
-      for (const c of CONTINENTS) $('continent-' + c).checked = s.continents.includes(c);
+      for (const g of choice().groups) $('group-' + g).checked = s[app.groupKey].includes(g);
     }
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
@@ -2847,9 +3309,9 @@
   $('table-chips').addEventListener('change', toggleTable);
   $('extra-chips').addEventListener('change', toggleTable);
 
-  // StoliceMax: the continents to practise.
-  $('continent-chips').addEventListener('change', () => {
-    state.settings.continents = CONTINENTS.filter((c) => $('continent-' + c).checked);
+  // StoliceMax and ChemiaMax: the continents or groups of compounds to practise.
+  $('group-chips').addEventListener('change', () => {
+    state.settings[app.groupKey] = choice().groups.filter((g) => $('group-' + g).checked);
     save();
     renderProgress();
   });
@@ -2874,20 +3336,18 @@
   // Columns as read by the FSRS optimizer: card_id, review_time (ms),
   // review_rating (1-4), review_state (0 new, 1 learning, 2 review,
   // 3 relearning), review_duration (ms). The optimizer wants a number as
-  // card_id: 7 × 8 is 708; a country's ISO code has its letters as numbers
-  // 1 to 26, so FR is 618. Extra columns are for people: the fact and the
-  // number typed, or the country and the country whose capital was picked.
+  // card_id: 7 × 8 is 708; for a country or compound see CHOICE. Extra
+  // columns are for people: the fact and the number typed, or the card and
+  // the card whose answer was picked (an ISO code or a formula).
   function logCsv() {
-    const rows = [isTimes()
-      ? 'card_id,review_time,review_rating,review_state,review_duration,fact,typed'
-      : 'card_id,review_time,review_rating,review_state,review_duration,country,picked'];
+    const rows = ['card_id,review_time,review_rating,review_state,review_duration,' +
+      (isTimes() ? 'fact,typed' : choice().logColumns)];
     for (const [t, id, rating, st, ms, answer] of state.log) {
       if (isTimes()) {
         const [a, b] = id.split('x').map(Number);
         rows.push([a * 100 + b, t, rating, st, ms, a + 'x' + b, answer].join(','));
       } else {
-        const number = (id.charCodeAt(0) - 64) * 100 + (id.charCodeAt(1) - 64);
-        rows.push([number, t, rating, st, ms, id, answer || ''].join(','));
+        rows.push([choice().number(id), t, rating, st, ms, id, answer || ''].join(','));
       }
     }
     return rows.join('\n') + '\n';
@@ -3115,8 +3575,9 @@
   buildProgress();
   buildChips();
   next();
-  // The first time, the menu of apps opens by itself, to show there are two.
-  if (!prefs.seenApps) openPanel('apps');
+  // The menu of apps opens by itself the first time, and again when a new
+  // app has been added, to show what there is.
+  if (appsUnseen()) openPanel('apps');
 })();
 </script>
 </body>

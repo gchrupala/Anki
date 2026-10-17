@@ -1,8 +1,8 @@
-# MaxApki: MnożenieMax and StoliceMax
+# MaxApki: MnożenieMax, StoliceMax and ChemiaMax
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds [StoliceMax](#stolicemax), a sister app with the same options that teaches the capitals of countries. The two apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with both apps.
+The same page also holds two sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, and [ChemiaMax](#chemiamax), which teaches the formulas of common chemical compounds. The three apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all three.
 
 ## Running it
 
@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MaxApki", and its icon shows the cards of both apps. MnożenieMax and StoliceMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+The home-screen name is "MaxApki", and its icon shows the cards of the three apps. MnożenieMax, StoliceMax and ChemiaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -154,13 +154,13 @@ StoliceMax teaches the capitals of countries. It runs in the same page and at th
 
 ### Switching apps
 
-The app name at the top of the screen is a button. It shows the icons of both apps and an arrow, and opens a menu with both apps. For each app the menu says what it teaches and how many cards it has left today. The first time the page opens after StoliceMax was added, the menu opens by itself and explains that there are two apps. When all of the day's cards are done, the done card has a button to the other app if that app still has cards for today.
+The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
 
-The app that was open last opens on the next start. The address can also name the app: `#mnozenie` or `#stolice` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
+The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice` or `#chemia` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
 
 The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
-Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star. The language is shared.
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax a flask. The language is shared.
 
 ### Cards
 
@@ -209,15 +209,46 @@ The names are in `countries.js`. Country names come from the Unicode CLDR data t
 - Equatorial Guinea has Ciudad de la Paz, which replaced Malabo in January 2026 according to Wikidata. Older school books give Malabo.
 - Israel has Jerusalem, as in Wikidata. Many countries do not recognise it as the capital.
 
-### How the page holds two apps
+## ChemiaMax
 
-`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. Parts of the page that belong to one app carry `data-app="times"` or `data-app="capitals"` and are hidden while the other app is open. `i18n-capitals.js` has only the text that differs in StoliceMax; the page puts it over the text of `i18n.js` while StoliceMax is open. The open app and the language are saved under their own key (`max-apps`).
+ChemiaMax teaches the formulas of common chemical compounds. It runs in the same page as the other apps and has the same options.
+
+- Each compound is one card: 53 compounds a child meets at home, in nature and in school chemistry, from water, table salt and carbon dioxide to caffeine and vitamin C. The card shows the name, as in school chemistry ("Tlenek węgla(IV)" in Polish), with the everyday name below it if there is one ("dwutlenek węgla"). The child picks the formula from four, written with small numbers (H₂O).
+- The wrong answers are formulas of other compounds, drawn from the six most like the right one: those with the most of its elements and the fewest others. So carbon monoxide often gets CO₂ as a wrong answer, and nitrogen dioxide N₂O or HNO₃.
+- As in StoliceMax, a right answer the first time is never Easy. Easy needs a right answer within 6 seconds. The default time limit is 20 seconds, and 5 new compounds a day, because formulas are harder to learn than capitals.
+- The settings choose the groups of compounds: oxides, acids, bases, salts and organic compounds. All are on by default. The progress view has a square with the formula of each compound, by group.
+- The review log uses the number of the compound in `chemistry.js` as `card_id`, and has the formula and the formula picked.
+
+The shop sells laboratory glassware with coloured liquid that bubbles and glitters:
+
+| Glassware | Coins |
+| --- | --- |
+| Blue test tube | 50 |
+| Green test tube | 75 |
+| Pink conical flask | 100 |
+| Purple retort | 150 |
+| Orange round flask | 200 |
+| Rack of test tubes | 250 |
+| Yellow beaker | 300 |
+| Retort over a flame | 400 |
+| Turquoise volumetric flask | 500 |
+| Separating funnel | 600 |
+| Golden retort | 700 |
+| Rainbow flask | 800 |
+
+Buying one sets off an explosion for 4 seconds: a flash, a shock wave, a fireball, sparks and drops of the liquid flying out, smoke, and the page shakes. With reduced motion switched on in the device settings, only the glassware is shown. The glassware and its prices are set in `GLASSWARE` in `index.html`, the drawings in `GLASS_ART`, the names in `i18n-chemistry.js`.
+
+The compounds and their names in the five languages are in `chemistry.js`. No two compounds share a formula; glucose is there, fructose (also C₆H₁₂O₆) is not. Some everyday names stand for a close relative: gypsum is CaSO₄ with water in it, and the Persian کات کبود is copper sulfate with water.
+
+## How the page holds several apps
+
+`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax and ChemiaMax, the two apps where the child picks one of four answers. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`) and are hidden while another app is open. `i18n-capitals.js` and `i18n-chemistry.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened and the number of apps the menu was last seen with are saved under their own key (`max-apps`).
 
 ## Tests
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
 
-`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language.
+`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per compound, formulas made of element symbols, names in every language, at least four compounds per group, and the ChemiaMax text.
 
 ## Limitations
 
@@ -227,13 +258,15 @@ The names are in `countries.js`. Country names come from the Unicode CLDR data t
 
 ## Files
 
-- `index.html`: both apps (layout, styles and interface code).
+- `index.html`: the three apps (layout, styles and interface code).
 - `i18n.js`: the interface text in Polish, English, Dutch, Spanish and Persian.
 - `i18n-capitals.js`: the text that differs in StoliceMax.
 - `countries.js`: the countries and capitals of StoliceMax.
+- `i18n-chemistry.js`: the text that differs in ChemiaMax.
+- `chemistry.js`: the compounds of ChemiaMax.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `android/`: the Android app.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
-- `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax data.
+- `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax and ChemiaMax data.
 - `stolice/`: the first address of StoliceMax, which now leads to the app, and a service worker that removes the old offline copy.
