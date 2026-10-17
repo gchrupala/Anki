@@ -179,6 +179,7 @@ Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per 
 | Canal houses | Amsterdam | 100 |
 | Big Ben | London | 125 |
 | Giant Ferris Wheel | Vienna | 150 |
+| The Bear and the Strawberry Tree | Madrid | 175 |
 | Brandenburg Gate | Berlin | 200 |
 | Yellow tram | Lisbon | 250 |
 | Atomium | Brussels | 300 |
@@ -186,6 +187,7 @@ Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per 
 | Parthenon | Athens | 400 |
 | White House | Washington | 450 |
 | Torii gate | Tokyo | 500 |
+| Azadi Tower | Tehran | 525 |
 | Petronas Towers | Kuala Lumpur | 550 |
 | Lotus Temple | New Delhi | 600 |
 | Cathedral of Brasília | Brasília | 650 |
@@ -193,7 +195,7 @@ Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per 
 | Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 750 |
 | Forbidden City | Beijing | 800 |
 
-All 18 together cost 7000 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. Trophies in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
+All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. Trophies in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
 
 The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings and the places of their stars in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
 
