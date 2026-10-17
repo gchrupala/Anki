@@ -2,7 +2,7 @@
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The repository also holds [StoliceMax](#stolicemax), a sister app with the same options that teaches the capitals of countries.
+The same page also holds [StoliceMax](#stolicemax), a sister app with the same options that teaches the capitals of countries. Tapping the app name at the top of the screen opens a menu with both apps.
 
 ## Running it
 
@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MnożenieMax". Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+The home-screen name is "MnożenieMax"; StoliceMax is opened from inside it. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -70,7 +70,7 @@ Without this file the APK is built unsigned, and Android will not install it.
 
 ## Languages
 
-The interface follows the device language when it is Polish, English, Dutch, Spanish or Persian, and is in Polish otherwise. A fixed language can be chosen in the settings panel ("Ustawienia", behind the gear button); the first entry in the menu goes back to the device language. All languages write multiplication with ×. Persian is shown right to left, with Persian digits (۷ × ۸ = ۵۶); sums, the keypad and the progress square stay left to right, as in Persian maths. A keyboard may type Persian, Arabic or Western digits. All text is in `i18n.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
+The interface follows the device language when it is Polish, English, Dutch, Spanish or Persian, and is in Polish otherwise. A fixed language can be chosen in the settings panel ("Ustawienia", behind the gear button); the first entry in the menu goes back to the device language. All languages write multiplication with ×. Persian is shown right to left, with Persian digits (۷ × ۸ = ۵۶); sums, the keypad and the progress square stay left to right, as in Persian maths. A keyboard may type Persian, Arabic or Western digits. All text is in `i18n.js`, and the text that differs in StoliceMax in `i18n-capitals.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
 
 ## How it works
 
@@ -125,7 +125,7 @@ Coins are spent in the shop ("Sklep" in the header) on trophies of the child's c
 | Emerald | 650 |
 | Sapphire | 800 |
 
-Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the trophy and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the trophy is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of trophies and the latest one bought. The shop lists all trophies bought, and the settings show the coins collected and spent. Prices and materials are set in `TROPHY_METALS` in `index.html`, the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each trophy as soon as possible, bronze comes on day 1, gold on day 5, diamond on day 13 and sapphire on day 29.
+Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the trophy and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the trophy is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of trophies and the latest one bought. The shop lists all trophies bought, and the settings show the coins collected and spent. Prices and materials are set in `TROPHIES` in `index.html`, the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each trophy as soon as possible, bronze comes on day 1, gold on day 5, diamond on day 13 and sapphire on day 29.
 
 ### Order of cards
 
@@ -150,7 +150,17 @@ The progress square shows each fact: not started, practising (in the learning st
 
 ## StoliceMax
 
-`stolice/` holds a sister app that teaches the capitals of countries, at https://grzegorz.chrupala.me/Anki/stolice/. It works like MnożenieMax: the same scheduling, time limit, coins and shop, languages, settings, review log, updates and offline use. It is installed separately, with its own icon (a globe instead of ×), and keeps its own progress and coins.
+StoliceMax teaches the capitals of countries. It runs in the same page and at the same address as MnożenieMax, and has the same options: scheduling, time limit, coins and shop, languages, settings, review log, updates and offline use.
+
+### Switching apps
+
+The app name at the top of the screen is a button. It shows the icons of both apps and an arrow, and opens a menu with both apps. For each app the menu says what it teaches and how many cards it has left today. The first time the page opens after StoliceMax was added, the menu opens by itself and explains that there are two apps. When all of the day's cards are done, the done card has a button to the other app if that app still has cards for today.
+
+The app that was open last opens on the next start. The address can also name the app: `#mnozenie` or `#stolice` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
+
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star. The language is shared.
+
+### Cards
 
 - Each country is one card: the 193 members of the United Nations and the Vatican. The card shows the flag and the name of the country, and the child picks the capital from four capitals of the same continent, shown in a random order. After a wrong answer, or when the time is up, the right capital turns green and the child taps it to continue.
 - The ratings follow the table above, with two differences. A right answer the first time a country is shown is never Easy, because with four answers it may be a guess; the country goes through the learning steps. Easy needs a right answer within 5 seconds instead of 4, because reading four names takes longer than typing a number. The default time limit is 15 seconds.
@@ -158,21 +168,40 @@ The progress square shows each fact: not started, practising (in the learning st
 - The progress view has a square with the flag of each country, grouped by continent, with the number of capitals learned on each continent. A flag shows in colour once its country has been answered.
 - The review log has a column for the country and one for the country whose capital was picked, both as ISO codes. The `card_id` the FSRS optimizer needs is the ISO code with its letters as numbers (FR is 618).
 
-The names are in `stolice/countries.js`. Country names come from the Unicode CLDR data that browsers use for `Intl.DisplayNames`, capitals and their names from Wikidata. Both were checked and some were corrected by hand. Some choices to be aware of:
+### Rewards
+
+Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per finished day). The shop sells souvenirs instead of trophies: small models of famous buildings in capitals.
+
+| Souvenir | Capital | Coins |
+| --- | --- | --- |
+| Palace of Culture and Science | Warsaw | 50 |
+| Eiffel Tower | Paris | 100 |
+| Big Ben | London | 150 |
+| Atomium | Brussels | 250 |
+| Colosseum | Rome | 350 |
+| Parthenon | Athens | 500 |
+| Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 650 |
+| Forbidden City | Beijing | 800 |
+
+The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
+
+### Names of countries and capitals
+
+The names are in `countries.js`. Country names come from the Unicode CLDR data that browsers use for `Intl.DisplayNames`, capitals and their names from Wikidata. Both were checked and some were corrected by hand. Some choices to be aware of:
 
 - Where a country has more than one capital, the app uses the one Wikidata lists first: Pretoria (South Africa), Sucre (Bolivia), Porto-Novo (Benin), Yamoussoukro (Côte d’Ivoire), Dodoma (Tanzania), Gitega (Burundi), Mbabane (Eswatini) and Sri Jayawardenepura Kotte (Sri Lanka). The others never appear as answers.
 - Equatorial Guinea has Ciudad de la Paz, which replaced Malabo in January 2026 according to Wikidata. Older school books give Malabo.
 - Israel has Jerusalem, as in Wikidata. Many countries do not recognise it as the capital.
 
-`stolice/index.html` started as a copy of `index.html`, with the sums, keypad and progress square replaced. A change to what the two apps share (coins, shop, settings panel, styles) has to be made in both files. StoliceMax loads `srs.js`, `i18n.js` and the fonts from MnożenieMax; `stolice/i18n-stolice.js` replaces the text that is about multiplication. `stolice/sw.js` keeps the offline copy of StoliceMax, including those shared files. The two service workers store their copies on the same site, so each removes only its own old copies.
+### How the page holds two apps
 
-The address of StoliceMax (`/Anki/stolice/`) lies inside the address of MnożenieMax (`/Anki/`). On a device where MnożenieMax is installed, Chrome on Android may treat StoliceMax as part of it and not offer to install it. This has not been tested on a tablet. If it happens, StoliceMax needs an address of its own outside `/Anki/`, for example a separate repository published with GitHub Pages.
+`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. Parts of the page that belong to one app carry `data-app="times"` or `data-app="capitals"` and are hidden while the other app is open. `i18n-capitals.js` has only the text that differs in StoliceMax; the page puts it over the text of `i18n.js` while StoliceMax is open. The open app and the language are saved under their own key (`max-apps`).
 
 ## Tests
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
 
-`tests/countries.test.js` checks the StoliceMax data: 194 countries, each with a country and capital name in every language, at least four countries per continent, and no two capitals with the same name on one continent.
+`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language.
 
 ## Limitations
 
@@ -182,11 +211,13 @@ The address of StoliceMax (`/Anki/stolice/`) lies inside the address of Mnożeni
 
 ## Files
 
-- `index.html`: the app (layout, styles and interface code).
+- `index.html`: both apps (layout, styles and interface code).
 - `i18n.js`: the interface text in Polish, English, Dutch, Spanish and Persian.
+- `i18n-capitals.js`: the text that differs in StoliceMax.
+- `countries.js`: the countries and capitals of StoliceMax.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `android/`: the Android app.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
 - `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax data.
-- `stolice/`: StoliceMax, with its own page, text, country data, manifest, service worker and icons.
+- `stolice/`: the first address of StoliceMax, which now leads to the app, and a service worker that removes the old offline copy.

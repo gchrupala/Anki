@@ -65,7 +65,7 @@ android {
 // out: the APK has its own offline copy and launcher icon.
 val copyWebApp by tasks.registering(Sync::class) {
     from(webRoot) {
-        include("index.html", "srs.js", "i18n.js", "fonts/*.css", "fonts/*.woff2")
+        include("index.html", "srs.js", "i18n.js", "i18n-capitals.js", "countries.js", "fonts/*.css", "fonts/*.woff2")
     }
     into(webAssets)
 }

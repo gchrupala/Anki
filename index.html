@@ -18,8 +18,10 @@
 <meta name="theme-color" content="#1c2925" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-  /* Layout: a 5×3 index card with its keypad on squared notebook paper, and the
-     10×10 progress square beside it (stacked on phones). Dark theme: chalkboard. */
+  /* Two apps in one page: MnożenieMax (times tables) and StoliceMax (capitals).
+     Layout: a 5×3 index card with the keypad or the four answers below it on
+     squared notebook paper, and the progress beside it (stacked on phones).
+     Dark theme: chalkboard. */
   :root {
     --paper: #f7f9fd;
     --grid: #e1e8f3;
@@ -118,6 +120,8 @@
 
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  /* Parts of the page that belong to one app only */
+  body[data-app="times"] [data-app="capitals"], body[data-app="capitals"] [data-app="times"] { display: none !important; }
 
   body {
     margin: 0;
@@ -154,14 +158,57 @@
     align-items: center;
     gap: 0.75rem 1.5rem;
   }
+  /* The app name is a button that opens the menu of apps. The icons of both
+     apps behind it, and the arrow, show that there is more than one. */
+  .brand-title { margin: 0; }
   .brand {
-    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-block: 0.3rem;
+    padding-inline: 0.35rem 0.75rem;
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    background: var(--card);
+    box-shadow: 0 2px 0 var(--line);
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 1.7rem;
+    font-size: 1.6rem;
     line-height: 1.1;
     letter-spacing: 0.01em;
+    cursor: pointer;
   }
+  .brand:hover { border-color: var(--pen); }
+  .brand .chev { width: 1.2rem; height: 1.2rem; flex: none; color: var(--ink-soft); }
+  .app-icon { display: block; flex: none; }
+  .app-icon svg { display: block; width: 100%; height: 100%; }
+  .app-icons { position: relative; width: 3.2rem; height: 2.4rem; flex: none; }
+  .app-icons .app-icon { position: absolute; width: 2rem; height: 2rem; filter: drop-shadow(0 1px 1px rgb(29 39 66 / 0.3)); }
+  .app-icons .app-icon:last-child { inset-inline-start: 0; bottom: 0; }
+  .app-icons .app-icon.behind { inset-inline-end: 0; top: 0; width: 1.8rem; height: 1.8rem; transform: rotate(12deg); }
+  /* Menu of apps */
+  .app-list { display: grid; gap: 0.75rem; }
+  .app-tile {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.15rem 1rem;
+    padding: 0.9rem 1rem;
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    background: var(--paper);
+    text-align: start;
+    cursor: pointer;
+  }
+  .app-tile:hover { border-color: var(--pen); }
+  .app-tile[aria-current="true"] { border-color: var(--pen); background: color-mix(in srgb, var(--pen) 9%, var(--card)); }
+  .app-tile .app-icon { grid-row: span 3; width: 4rem; height: 4rem; filter: drop-shadow(0 2px 2px rgb(29 39 66 / 0.25)); }
+  .app-tile .app-name { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; line-height: 1.15; }
+  .app-tile .app-here { font-family: var(--font-body); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pen); margin-inline-start: 0.4rem; }
+  .app-tile .app-what { font-weight: 600; }
+  .app-tile .app-due { font-size: 0.85rem; color: var(--ink-soft); }
+  .go-other { display: inline-flex; align-items: center; gap: 0.5rem; padding-block: 0.35rem; padding-inline: 0.4rem 0.95rem; }
+  .go-other .app-icon { width: 1.6rem; height: 1.6rem; }
   .counts {
     display: flex;
     flex-wrap: wrap;
@@ -179,7 +226,8 @@
   .count.new b { color: var(--pen); }
   .count.learn b { color: var(--learn); }
   .count.review b { color: var(--good); }
-  /* Coins: a gold coin with a raised rim and an embossed ×, a beam of light
+  /* Coins: a gold coin with a raised rim and an embossed × (MnożenieMax) or
+     star (StoliceMax), a beam of light
      that passes over it now and then, and sparkles when coins are earned. */
   .coins {
     position: relative;
@@ -273,6 +321,7 @@
   }
   .shop-item .trophy-icon { width: 3.6rem; height: 3.6rem; }
   .shop-item .name { font-size: 0.9rem; font-weight: 600; }
+  .shop-item .place { margin-top: -0.3rem; font-size: 0.8rem; color: var(--ink-soft); }
   .shop-item .price { display: inline-flex; align-items: center; font-weight: 700; color: var(--coin-ink); font-variant-numeric: tabular-nums; }
   .shop-item .primary-btn { min-height: 2.4rem; padding: 0.4rem 0.9rem; font-size: 0.9rem; }
   .shop-item .primary-btn[data-armed] { background: var(--good); }
@@ -304,6 +353,7 @@
   .trophy-banner .trophy-icon { width: 5rem; height: 5rem; }
   .trophy-banner strong { font-family: var(--font-display); font-size: 1.6rem; color: var(--ink); }
   .trophy-banner span { color: var(--coin-ink); font-weight: 600; }
+  .trophy-banner .place { color: var(--ink-soft); }
   @keyframes trophy-in {
     0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
     10% { opacity: 1; transform: translateX(-50%) scale(1.08); }
@@ -472,8 +522,27 @@
     80% { transform: translateX(0.04em); }
   }
   @keyframes rise { from { transform: translateY(0.25em); opacity: 0.2; } }
+
+  /* StoliceMax: the country, with its flag and its name */
+  .place {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    text-align: center;
+  }
+  .flag { font-size: clamp(2.6rem, 14cqi, 5rem); line-height: 1; }
+  .country {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 7.5cqi, 3rem);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .card.shake .place { animation: shake 0.35s; }
+  .card.enter .place { animation: rise 0.25s ease-out; }
   @media (prefers-reduced-motion: reduce) {
-    .slot.empty::after, .card.shake .question, .card.enter .question { animation: none; }
+    .slot.empty::after, .card.shake .question, .card.enter .question, .card.shake .place, .card.enter .place { animation: none; }
   }
 
   /* Done card */
@@ -517,6 +586,38 @@
   .key.ok { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); font-size: 1.15rem; letter-spacing: 0.04em; }
   .key svg { width: 1.6rem; height: 1.6rem; }
 
+  /* StoliceMax: the four answers */
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    width: 100%;
+    max-width: 32rem;
+    margin-inline: auto;
+  }
+  .choice {
+    min-height: 3.6rem;
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid var(--key-edge);
+    border-radius: 14px;
+    background: var(--key);
+    box-shadow: 0 3px 0 var(--key-edge);
+    font-size: clamp(1rem, 4.2vw, 1.15rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+    hyphens: auto;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .choice:active, .choice.pressed { transform: translateY(2px); box-shadow: 0 1px 0 var(--key-edge); }
+  .choice.is-right { background: var(--good); border-color: var(--good); color: var(--pen-ink); box-shadow: 0 3px 0 color-mix(in srgb, var(--good) 55%, #000); }
+  .choice.is-wrong { border-color: var(--bad); color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--key)); }
+  .choices.answered .choice:not(.is-right):not(.is-wrong) { opacity: 0.45; }
+
   .primary-btn {
     border: none;
     border-radius: 999px;
@@ -527,7 +628,7 @@
     cursor: pointer;
   }
 
-  /* Progress square */
+  /* Progress: the square of facts (MnożenieMax) or the flags (StoliceMax) */
   .progress { min-width: 0; display: flex; flex-direction: column; gap: 0.9rem; }
   .progress h2 {
     margin: 0;
@@ -559,6 +660,32 @@
   .cell.is-mature { background: var(--mature); border-color: var(--mature); }
   .cell.is-off { background: var(--off); border-color: var(--off); opacity: 0.6; }
   .cell.is-current { outline: 2.5px solid var(--pen); outline-offset: 1px; }
+  /* StoliceMax: one square per country, with its flag, grouped by continent */
+  .map { display: flex; flex-direction: column; gap: 1rem; }
+  .continent h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin: 0 0 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .continent .tally { color: var(--ink-soft); font-weight: 500; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .continent.is-off h3 { color: var(--ink-soft); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.15rem, 1fr)); gap: 3px; }
+  .tiles > div {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+  /* A flag shows in colour once its country has been answered. */
+  .tiles .cell:not(.is-learning):not(.is-young):not(.is-mature) { filter: grayscale(1); }
+  .tiles .cell:not(.is-learning):not(.is-young):not(.is-mature):not(.is-current) { opacity: 0.6; }
+  .tiles .cell.is-off { opacity: 0.25; }
 
   .legend {
     list-style: none;
@@ -663,7 +790,7 @@
   .sheet-foot { display: flex; justify-content: flex-end; }
 </style>
 </head>
-<body>
+<body data-app="times">
 <!-- Gold gradients shared by every coin on the page -->
 <svg id="shine-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
@@ -683,14 +810,20 @@
 </svg>
 <div class="app">
   <header class="top">
-    <h1 class="brand" data-t="appName">MnożenieMax</h1>
+    <h1 class="brand-title">
+      <button type="button" class="brand" id="open-apps" aria-haspopup="dialog">
+        <span class="app-icons" aria-hidden="true"><span class="app-icon behind" id="brand-other"></span><span class="app-icon" id="brand-icon"></span></span>
+        <span id="brand-name">MnożenieMax</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </h1>
     <div class="counts" data-t-aria="countsAria">
       <span class="count new"><b id="count-new">0</b><span id="label-new">new</span></span>
       <span class="count learn"><b id="count-learn">0</b><span id="label-learn">practising</span></span>
       <span class="count review"><b id="count-review">0</b><span id="label-review">to review</span></span>
     </div>
     <span class="coins" id="coins" role="img">
-      <svg class="coin-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="url(#coin-rim)"/><circle cx="16" cy="16" r="12" fill="url(#coin-face)"/><circle cx="16" cy="16" r="12" fill="none" style="stroke: var(--gold-deep)" stroke-opacity="0.45" stroke-width="0.8"/><path d="M12.3 12.8l7.4 7.4M19.7 12.8l-7.4 7.4" style="stroke: var(--gold-hi)" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12l8 8M20 12l-8 8" style="stroke: var(--gold-deep)" stroke-width="2.6" stroke-linecap="round"/><g clip-path="url(#coin-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g></svg>
+      <svg class="coin-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="url(#coin-rim)"/><circle cx="16" cy="16" r="12" fill="url(#coin-face)"/><circle cx="16" cy="16" r="12" fill="none" style="stroke: var(--gold-deep)" stroke-opacity="0.45" stroke-width="0.8"/><g id="coin-emblem"></g><g clip-path="url(#coin-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g></svg>
       <b id="coin-total">0</b>
       <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
       <span class="coin-plus" id="coin-plus" hidden></span>
@@ -718,8 +851,12 @@
           <span id="seen"></span>
         </div>
         <div class="card-body" id="card-body">
-          <div class="question" aria-live="polite">
+          <div class="question" data-app="times" aria-live="polite">
             <span id="qa">2</span><span class="op" data-t="op">×</span><span id="qb">3</span><span class="op">=</span><span class="slot empty" id="slot"></span>
+          </div>
+          <div class="place" data-app="capitals" aria-live="polite">
+            <span class="flag" id="flag" aria-hidden="true"></span>
+            <span class="country" id="country"></span>
           </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
         </div>
@@ -733,10 +870,11 @@
           <p id="done-coins" class="coin-note"></p>
           <p id="done-next"></p>
           <button type="button" class="primary-btn" id="more-new" data-t="moreNew" hidden>Learn 5 more new facts</button>
+          <button type="button" class="ghost-btn go-other" id="other-app" hidden></button>
         </div>
       </div>
 
-      <div class="keypad" id="keypad" data-t-aria="keypadAria">
+      <div class="keypad" id="keypad" data-app="times" data-t-aria="keypadAria">
         <button type="button" class="key" data-key="1" tabindex="-1">1</button>
         <button type="button" class="key" data-key="2" tabindex="-1">2</button>
         <button type="button" class="key" data-key="3" tabindex="-1">3</button>
@@ -752,12 +890,20 @@
         <button type="button" class="key" data-key="0" tabindex="-1">0</button>
         <button type="button" class="key ok" data-key="ok" tabindex="-1">OK</button>
       </div>
+
+      <div class="choices" id="choices" data-app="capitals" data-t-aria="choicesAria">
+        <button type="button" class="choice" data-i="0"></button>
+        <button type="button" class="choice" data-i="1"></button>
+        <button type="button" class="choice" data-i="2"></button>
+        <button type="button" class="choice" data-i="3"></button>
+      </div>
     </section>
 
     <aside class="progress" data-t-aria="progressAria">
       <h2 data-t="progressTitle">Your times table</h2>
       <p class="sub" data-t="progressSub">Each square is one fact: row × column. Squares fill in as facts move into long-term memory.</p>
-      <div class="square" id="square" role="img" data-t-aria="squareAria"></div>
+      <div class="square" id="square" role="img" data-app="times" data-t-aria="squareAria"></div>
+      <div class="map" id="map" role="img" data-app="capitals" data-t-aria="squareAria"></div>
       <ul class="legend">
         <li><span class="sw cell"></span><b id="n-new">0</b> <span data-t="legendNew">not started</span></li>
         <li><span class="sw cell is-learning"></span><b id="n-learning">0</b> <span data-t="legendLearning">practising</span></li>
@@ -780,7 +926,7 @@
       </label>
     </section>
 
-    <section>
+    <section data-app="times">
       <h3 data-t="sizeTitle">Times tables up to</h3>
       <div class="chips" id="size-chips">
         <label class="chip"><input type="radio" name="size" id="size-10" value="10"><span class="size-label" data-n="10">10 × 10</span></label>
@@ -788,15 +934,21 @@
       </div>
     </section>
 
-    <section>
+    <section data-app="times">
       <h3 data-t="tablesTitle">Tables to practise</h3>
       <div class="chips" id="table-chips"></div>
     </section>
 
-    <section>
+    <section data-app="times">
       <h3 data-t="extrasTitle">Extra numbers</h3>
       <p class="hint" id="extras-hint"></p>
       <div class="chips" id="extra-chips"></div>
+    </section>
+
+    <section data-app="capitals">
+      <h3 data-t="continentsTitle">Continents</h3>
+      <div class="chips" id="continent-chips"></div>
+      <p class="hint" data-t="continentsHint" style="margin-top:0.5rem"></p>
     </section>
 
     <section class="fields">
@@ -883,6 +1035,17 @@
   </div>
 </div>
 
+<div class="panel" id="apps" role="dialog" aria-modal="true" aria-labelledby="apps-title" hidden>
+  <div class="sheet" id="apps-sheet" tabindex="-1">
+    <h2 id="apps-title" data-t="appsTitle">Apps</h2>
+    <p id="apps-hint"></p>
+    <div class="app-list" id="app-list"></div>
+    <div class="sheet-foot">
+      <button type="button" class="primary-btn" id="close-apps" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+
 <div class="panel" id="shop" role="dialog" aria-modal="true" aria-labelledby="shop-title" hidden>
   <div class="sheet" id="shop-sheet" tabindex="-1">
     <h2 id="shop-title" data-t="shopTitle">Shop</h2>
@@ -901,38 +1064,26 @@
 
 <script src="srs.js"></script>
 <script src="i18n.js"></script>
+<script src="i18n-capitals.js"></script>
+<script src="countries.js"></script>
 <script>
 (function () {
   'use strict';
 
   const DAY = 24 * 60 * SRS.MINUTE;
   const ROLLOVER = SRS.DEFAULTS.rolloverHour;
-  const STORE_KEY = 'times-table-cards-v2';
   const MATURE_DAYS = 21; // Anki calls a card "mature" from 21 days
   // Coins reward what is remembered, never the number of answers: in spaced
-  // repetition a well-known fact comes back rarely, so coins per answer would
-  // reward forgetting. Each fact pays each level once (so forgetting and
+  // repetition a well-known card comes back rarely, so coins per answer would
+  // reward forgetting. Each card pays each level once (so forgetting and
   // relearning earns nothing), and coins never change the schedule.
   // Level 1: learned (left the first-day steps); 2: next review a week or
-  // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js in step.
+  // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js and
+  // i18n-capitals.js in step.
   const LEVEL_COINS = [0, 2, 5, 10];
-  const OLD_LEVEL_COINS = [0, 1, 2, 5]; // before settings layout 6
+  const OLD_LEVEL_COINS = [0, 1, 2, 5]; // MnożenieMax before settings layout 6
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
   const DAY_BONUS = 10; // for finishing all of the day's cards
-  // Trophies in the shop, cheapest first: name, price in coins, then the
-  // colours highlight, middle, shadow, outline. The price range is also
-  // named in the coin rules text in i18n.js.
-  const TROPHY_METALS = [
-    ['bronze', 50, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
-    ['silver', 100, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
-    ['gold', 150, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
-    ['platinum', 250, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
-    ['diamond', 350, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
-    ['ruby', 500, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
-    ['emerald', 650, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
-    ['sapphire', 800, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
-  ];
-  const metal = (name) => TROPHY_METALS.find((m) => m[0] === name) || TROPHY_METALS[0];
   const CELEBRATION_MS = 4000; // confetti time
   function rewardLevel(c) {
     if (c.type === 'new' || c.type === 'learning') return 0;
@@ -940,19 +1091,11 @@
     if (c.interval >= 7) return 2;
     return 1;
   }
-  const IDLE_SUBMIT_MS = 3000; // check a shorter answer after this pause
+  const IDLE_SUBMIT_MS = 3000; // MnożenieMax: check a shorter answer after this pause
   const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
   // The Android app serves its own copy of these files under this address.
   const inAndroidApp = location.hostname === 'appassets.androidplatform.net';
   const PRAISE = { [SRS.EASY]: 'easy', [SRS.GOOD]: 'good', [SRS.HARD]: 'hard' };
-
-  // Extra numbers practised by default, each times 1 to 12 (not with each other).
-  const DEFAULT_EXTRAS = [15, 20, 25];
-  // Version of the settings layout; 2 added the extra numbers, 3 made the
-  // language follow the device unless one is chosen, 4 lowered the default
-  // time to answer from 20 to 10 seconds, 5 added coins, 6 raised the coin
-  // rewards (and lowered the shop prices).
-  const SETTINGS_LAYOUT = 6;
 
   const $ = (id) => document.getElementById(id);
 
@@ -974,63 +1117,147 @@
   const range = (n) => Array.from({ length: n }, (_, i) => i + 1);
   const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => '&#' + ch.charCodeAt(0) + ';');
 
+  // ---------- the two apps ----------
+
+  // Rewards in the shops, cheapest first: id, price, then the colours
+  // highlight, middle, shadow, outline. The price range is also named in the
+  // coin rules text.
+  // MnożenieMax: trophies in rising materials.
+  const TROPHIES = [
+    ['bronze', 50, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['silver', 100, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['gold', 150, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['platinum', 250, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
+    ['diamond', 350, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
+    ['ruby', 500, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
+    ['emerald', 650, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
+    ['sapphire', 800, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+  ].map(([id, price, ...colors]) => ({ id, price, colors }));
+  // StoliceMax: souvenirs of famous buildings, each with the country whose
+  // capital it stands in (the pyramids stand in Giza, part of greater Cairo).
+  const SOUVENIRS = [
+    ['palace', 50, 'PL', '#fff4dc', '#e9cf9b', '#b8955b', '#6b5131'],
+    ['eiffel', 100, 'FR', '#ffe0bd', '#c98243', '#8f5424', '#542e0f'],
+    ['bigben', 150, 'GB', '#fff4c8', '#e5b95c', '#a97b2a', '#5f4311'],
+    ['atomium', 250, 'BE', '#ffffff', '#d9e2ea', '#8f9caa', '#46525f'],
+    ['colosseum', 350, 'IT', '#fff8e8', '#e7d0a4', '#b89a63', '#6a5432'],
+    ['parthenon', 500, 'GR', '#ffffff', '#eef1f5', '#b7c2ce', '#5c6a79'],
+    ['pyramids', 650, 'EG', '#fff4c4', '#f2c85c', '#c08b27', '#6d4a0f'],
+    ['forbidden', 800, 'CN', '#ffd0c4', '#d93a2b', '#9c1d15', '#560c07'],
+  ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
+
+  // Extra numbers practised by default, each times 1 to 12 (not with each other).
+  const DEFAULT_EXTRAS = [15, 20, 25];
+
+  // Both apps run in this page. Each has its own progress, coins and rewards,
+  // saved under its own key; the app that is open and the language are
+  // shared, under PREFS_KEY.
+  const APPS = {
+    times: {
+      id: 'times',
+      name: 'MnożenieMax',
+      hash: 'mnozenie',
+      storeKey: 'times-table-cards-v2',
+      // Version of the settings layout; 2 added the extra numbers, 3 made the
+      // language follow the device unless one is chosen, 4 lowered the default
+      // time to answer from 20 to 10 seconds, 5 added coins, 6 raised the coin
+      // rewards (and lowered the shop prices).
+      layout: 6,
+      fastSeconds: SRS.DEFAULTS.fastSeconds,
+      settings: () => ({ size: 12, tables: range(12).concat(DEFAULT_EXTRAS), newPerDay: 10, retention: 0.9, answerTime: 10 }),
+      rewards: TROPHIES,
+      strings: () => ({}),
+    },
+    capitals: {
+      id: 'capitals',
+      name: 'StoliceMax',
+      hash: 'stolice',
+      storeKey: 'capitals-cards-v1',
+      layout: 1,
+      // Reading four names takes longer than typing a short number, so a
+      // right answer counts as Easy within 5 seconds instead of 4.
+      fastSeconds: 5,
+      settings: () => ({ continents: ['EU'], newPerDay: 10, retention: 0.9, answerTime: 15 }),
+      rewards: SOUVENIRS,
+      strings: (l) => I18N.CAPITALS[l] || {},
+    },
+  };
+  // The home-screen icons of the apps, for the app menu.
+  const APP_ICONS = {
+    times: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#2a4fc2"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#1b3a99"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M226 238 L286 298 M286 238 L226 298" stroke="#1d2742" stroke-width="22" stroke-linecap="round"/></g></svg>',
+    capitals: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#12806c"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#0b5a4c"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><circle cx="256" cy="277" r="52" fill="#d6ecff"/><g fill="none" stroke="#1d2742" stroke-width="9" stroke-linecap="round"><ellipse cx="256" cy="277" rx="22" ry="52"/><line x1="204" y1="277" x2="308" y2="277"/><line x1="214" y1="251" x2="298" y2="251"/><line x1="214" y1="303" x2="298" y2="303"/><circle cx="256" cy="277" r="52" stroke-width="11"/></g></g></svg>',
+  };
+  // The sign embossed on the coins of each app.
+  const EMBLEMS = {
+    times: '<path d="M12.3 12.8l7.4 7.4M19.7 12.8l-7.4 7.4" style="stroke: var(--gold-hi)" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12l8 8M20 12l-8 8" style="stroke: var(--gold-deep)" stroke-width="2.6" stroke-linecap="round"/>',
+    capitals: '<path d="M16 9l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5L9 14.1l5.2-.2z" style="fill: var(--gold-hi)"/><path d="M15.6 8.6l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5-4.1-3.3 5.2-.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
+  };
+
+  const PREFS_KEY = 'max-apps';
+  function loadPrefs() {
+    try {
+      const p = JSON.parse(localStorage.getItem(PREFS_KEY));
+      if (p && APPS[p.app]) return p;
+    } catch (e) {
+      /* none saved */
+    }
+    // The first start with two apps keeps the language MnożenieMax had.
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(APPS.times.storeKey));
+    } catch (e) {
+      /* none saved */
+    }
+    return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', seenApps: false };
+  }
+  function savePrefs() {
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch (e) {
+      /* storage unavailable */
+    }
+  }
+  const prefs = loadPrefs();
+  // The address can name the app: #mnozenie or #stolice. The first address
+  // of StoliceMax (stolice/) leads here.
+  for (const a of Object.values(APPS)) {
+    if (location.hash === '#' + a.hash) {
+      prefs.app = a.id;
+      savePrefs();
+    }
+  }
+  if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
+  let app = APPS[prefs.app];
+  const isTimes = () => app.id === 'times';
+  const otherApps = () => Object.values(APPS).filter((a) => a.id !== app.id);
+
   // ---------- state ----------
 
   function defaultState() {
     return {
       cards: {},
-      settings: {
-        size: 12,
-        tables: range(12).concat(DEFAULT_EXTRAS),
-        newPerDay: 10,
-        retention: 0.9,
-        answerTime: 10, // seconds without typing before a fact counts as not known; 0 = no limit
-        lang: 'auto', // the device language; or a code such as 'nl'
-        layout: SETTINGS_LAYOUT,
-      },
+      // newPerDay, retention, answerTime (seconds without an answer before a
+      // card counts as not known; 0 = no limit), and the cards to practise.
+      settings: { ...app.settings(), layout: app.layout },
       daily: null,
       coins: 0,
       spent: 0, // coins spent in the shop; coins minus spent can still be spent
-      trophies: [], // bought in the shop: { metal, at }
+      trophies: [], // rewards bought in the shop: { metal: reward id, at }
       clockOffset: 0,
-      // One entry per answer: [time, card id, rating, state before, ms, typed answer].
+      // One entry per answer: [time, card id, rating, state before, ms, answer].
       log: [],
     };
   }
 
   function load() {
     try {
-      const raw = localStorage.getItem(STORE_KEY);
+      const raw = localStorage.getItem(app.storeKey);
       if (!raw) return null;
       const s = JSON.parse(raw);
       if (!s || !s.cards || !s.settings) return null;
-      const layout = s.settings.layout || 1;
-      if (layout < 2) {
-        // Earlier versions had square tables up to 20 × 20. Keep the tables
-        // up to 12 and add the default extra numbers. Progress is kept.
-        const size = Math.min(12, s.settings.size || 12);
-        s.settings.tables = (s.settings.tables || []).filter((n) => n <= size).concat(DEFAULT_EXTRAS);
-        s.settings.size = size;
-      }
-      if (layout < 3) s.settings.lang = 'auto';
-      if (layout < 4 && (s.settings.answerTime === undefined || s.settings.answerTime === 20)) s.settings.answerTime = 10;
-      if (layout === 5) {
-        // Coins were raised: pay the difference for levels already reached.
-        for (const c of Object.values(s.cards)) {
-          for (let l = 1; l <= (c.reward || 0); l++) s.coins += LEVEL_COINS[l] - OLD_LEVEL_COINS[l];
-        }
-      }
-      if (layout < 5) {
-        // Facts learned before coins existed count from the start.
-        s.coins = 0;
-        for (const c of Object.values(s.cards)) {
-          c.reward = rewardLevel(c);
-          for (let l = 1; l <= c.reward; l++) s.coins += LEVEL_COINS[l];
-        }
-      }
-      s.settings.layout = SETTINGS_LAYOUT;
+      if (isTimes()) upgradeTimes(s);
+      s.settings.layout = app.layout;
       const d = defaultState();
-      // Trophies are bought in the shop; the short-lived automatic ones are dropped.
       if (!Array.isArray(s.trophies)) s.trophies = [];
       if (typeof s.spent !== 'number') s.spent = 0;
       return { ...d, ...s, settings: { ...d.settings, ...s.settings } };
@@ -1039,9 +1266,36 @@
     }
   }
 
+  // Brings MnożenieMax progress saved by earlier versions up to date.
+  function upgradeTimes(s) {
+    const layout = s.settings.layout || 1;
+    if (layout < 2) {
+      // Earlier versions had square tables up to 20 × 20. Keep the tables
+      // up to 12 and add the default extra numbers. Progress is kept.
+      const size = Math.min(12, s.settings.size || 12);
+      s.settings.tables = (s.settings.tables || []).filter((n) => n <= size).concat(DEFAULT_EXTRAS);
+      s.settings.size = size;
+    }
+    if (layout < 4 && (s.settings.answerTime === undefined || s.settings.answerTime === 20)) s.settings.answerTime = 10;
+    if (layout === 5) {
+      // Coins were raised: pay the difference for levels already reached.
+      for (const c of Object.values(s.cards)) {
+        for (let l = 1; l <= (c.reward || 0); l++) s.coins += LEVEL_COINS[l] - OLD_LEVEL_COINS[l];
+      }
+    }
+    if (layout < 5) {
+      // Facts learned before coins existed count from the start.
+      s.coins = 0;
+      for (const c of Object.values(s.cards)) {
+        c.reward = rewardLevel(c);
+        for (let l = 1; l <= c.reward; l++) s.coins += LEVEL_COINS[l];
+      }
+    }
+  }
+
   function save() {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      localStorage.setItem(app.storeKey, JSON.stringify(state));
     } catch (e) {
       /* storage unavailable: progress lasts for this visit only */
     }
@@ -1051,7 +1305,7 @@
 
   const now = () => Date.now() + state.clockOffset;
   const today = () => SRS.dayIndex(now(), ROLLOVER);
-  const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention });
+  const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention, fastSeconds: app.fastSeconds });
   // The first device language the app has, e.g. 'nl' for nl-BE; Polish if none.
   function deviceLang() {
     const wanted = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
@@ -1061,9 +1315,10 @@
     }
     return I18N.DEFAULT;
   }
-  const lang = () => (I18N.STRINGS[state.settings.lang] ? state.settings.lang : deviceLang());
-  // English fills in any text a language lacks, so a missing entry can't break the page.
-  const T = () => ({ ...I18N.STRINGS.en, ...I18N.STRINGS[lang()] });
+  const lang = () => (I18N.STRINGS[prefs.lang] ? prefs.lang : deviceLang());
+  // The text of MnożenieMax, with the text of the open app over it. English
+  // fills in any text a language lacks, so a missing entry can't break the page.
+  const T = () => ({ ...I18N.STRINGS.en, ...I18N.STRINGS[lang()], ...app.strings('en'), ...app.strings(lang()) });
 
   function daily() {
     if (!state.daily || state.daily.day !== today()) {
@@ -1072,9 +1327,11 @@
     return state.daily;
   }
 
+  // ---------- MnożenieMax: the facts ----------
+
   // Each card gets a random number once, which fixes its place in the order
   // new cards are introduced.
-  function card(a, b) {
+  function factCard(a, b) {
     const id = a + 'x' + b;
     if (!state.cards[id]) state.cards[id] = { ...SRS.newCard(id), a, b, seed: Math.random() };
     return state.cards[id];
@@ -1101,12 +1358,29 @@
     return (chosen(a) && b <= size) || (chosen(b) && a <= size);
   }
 
-  // The facts that take part, in the (random) order new ones are introduced.
+  // ---------- StoliceMax: the countries ----------
+
+  const BY_ISO = Object.fromEntries(COUNTRIES.map((c) => [c.iso, c]));
+
+  // One card per country, with its ISO code as id.
+  function countryCard(iso) {
+    if (!state.cards[iso]) state.cards[iso] = { ...SRS.newCard(iso), seed: Math.random() };
+    return state.cards[iso];
+  }
+
+  // The cards that take part, in the (random) order new ones are introduced.
   function activeCards() {
     const list = [];
-    for (const a of factors()) {
-      for (const b of factors()) {
-        if (isActive(a, b)) list.push(card(a, b));
+    if (isTimes()) {
+      for (const a of factors()) {
+        for (const b of factors()) {
+          if (isActive(a, b)) list.push(factCard(a, b));
+        }
+      }
+    } else {
+      const on = new Set(state.settings.continents);
+      for (const c of COUNTRIES) {
+        if (on.has(c.continent)) list.push(countryCard(c.iso));
       }
     }
     return list.sort((x, y) => x.seed - y.seed);
@@ -1119,6 +1393,31 @@
 
   function queues() {
     return SRS.buildQueues(activeCards(), now(), newLeft(), cfg());
+  }
+
+  // The numbers of cards left today, as in the header.
+  function counts() {
+    const q = queues();
+    return {
+      new: q.fresh.length,
+      learn: q.learningNow.length + q.learningAhead.length + q.learningLater.length,
+      review: q.review.length,
+    };
+  }
+
+  // Today's counts of any app, from its saved progress: the other app is
+  // loaded for a moment in place of the open one.
+  function countsOf(id) {
+    const open = { app, state };
+    try {
+      if (id !== app.id) {
+        app = APPS[id];
+        state = load() || defaultState();
+      }
+      return counts();
+    } finally {
+      ({ app, state } = open);
+    }
   }
 
   // ---------- wording ----------
@@ -1137,15 +1436,21 @@
   // Numbers in the language's digits (Persian ۰–۹, otherwise 0–9).
   const num = (x) => (T().digits ? T().digits(x) : String(x));
   // Keeps a sum such as "7 × 8 = 56" left to right inside right-to-left text.
-  const ltr = (text) => (T().dir === 'rtl' ? '\u2066' + text + '\u2069' : text);
+  const ltr = (text) => (T().dir === 'rtl' ? '⁦' + text + '⁩' : text);
   const fact = (a, b) => ltr(num(a) + ' ' + T().op + ' ' + num(b));
+  const countryName = (iso) => BY_ISO[iso].name[lang()];
+  const capitalName = (iso) => BY_ISO[iso].capital[lang()];
+  // The flag emoji: the two letters of the code as regional indicator symbols.
+  const flag = (iso) => String.fromCodePoint(...[...iso].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65));
 
   // ---------- study flow ----------
 
   let currentId = null;
   let lastId = null;
   let mode = 'ask'; // ask | right | wrong | done
-  let typed = '';
+  let typed = ''; // MnożenieMax: the digits typed
+  let options = []; // StoliceMax: ISO codes of the countries whose capitals are the four answers
+  let picked = null; // StoliceMax: the wrong answer picked
   let shownAt = 0;
   let advanceTimer = null;
   let idleTimer = null;
@@ -1161,17 +1466,32 @@
   // Avoid repeating the card just answered, or its twin (7 × 3 after 3 × 7).
   function avoidList() {
     if (!lastId) return [];
+    if (!isTimes()) return [lastId];
     const [a, b] = lastId.split('x');
     return [lastId, b + 'x' + a];
   }
 
-  // Starts the time limit while nothing is typed. It does not run while the
-  // settings panel is open or the app is in the background.
+  // StoliceMax: the right capital and three others from the same continent,
+  // in a random order.
+  function makeOptions(iso) {
+    const shuffle = (list) => {
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+      return list;
+    };
+    const others = COUNTRIES.filter((c) => c.continent === BY_ISO[iso].continent && c.iso !== iso).map((c) => c.iso);
+    return shuffle(shuffle(others).slice(0, 3).concat(iso));
+  }
+
+  // Starts the time limit while nothing is typed. It does not run while a
+  // panel is open or the app is in the background.
   function armGiveUp() {
     clearTimeout(giveUpTimer);
     const seconds = state.settings.answerTime;
     if (mode === 'ask' && typed === '' && seconds > 0 && !panelOpen() && document.visibilityState !== 'hidden') {
-      giveUpTimer = setTimeout(() => submit(true), seconds * 1000);
+      giveUpTimer = setTimeout(() => submit(null), seconds * 1000);
     }
   }
 
@@ -1183,12 +1503,13 @@
   function resumeTimers() {
     if (mode !== 'ask') return;
     shownAt = performance.now();
-    if (typed) idleTimer = setTimeout(submit, IDLE_SUBMIT_MS);
+    if (typed) idleTimer = setTimeout(submitTyped, IDLE_SUBMIT_MS);
     else armGiveUp();
   }
 
   // A small copy of the header coin, for text lines.
-  const coinIcon = () => $('coins').querySelector('.coin-icon').outerHTML.replace('class="coin-icon"', 'class="coin-icon small"');
+  const coinIcon = () => $('coins').querySelector('.coin-icon').outerHTML
+    .replace('class="coin-icon"', 'class="coin-icon small"').replace(' id="coin-emblem"', '');
 
   // Pays the levels a card has newly reached. Returns { coins, level }.
   function payRewards(card) {
@@ -1218,8 +1539,411 @@
   // Coins that can still be spent in the shop.
   const balance = () => (state.coins || 0) - (state.spent || 0);
 
-  // A gradient pair for each trophy material, next to the coin's gradients.
-  function makeTrophyGradients() {
+  function next() {
+    clearTimeout(advanceTimer);
+    pauseTimers();
+    const c = SRS.pickNext(queues(), avoidList());
+    typed = '';
+    picked = null;
+    if (!c) {
+      currentId = null;
+      mode = 'done';
+      const d = daily();
+      if (d.answered > 0 && !d.bonus) {
+        d.bonus = DAY_BONUS;
+        addCoins(DAY_BONUS);
+        save();
+      }
+    } else {
+      currentId = c.id;
+      shown = { type: c.type, reps: c.reps };
+      mode = 'ask';
+      if (!isTimes()) options = makeOptions(c.id);
+      shownAt = performance.now();
+      const first = c.reps === 0;
+      feedback = () => (first ? T().newOne : T().typeAnswer);
+      flash('enter');
+    }
+    render();
+    armGiveUp();
+  }
+
+  // value: the answer (MnożenieMax: the number typed; StoliceMax: the ISO code
+  // of the country whose capital was picked), or null when nothing was given
+  // within the time limit, so the card counts as not known (Again), like a
+  // wrong answer.
+  function submit(value) {
+    pauseTimers();
+    const c = current();
+    if (mode !== 'ask' || !c) return;
+    const timedOut = value === null;
+    const right = !timedOut && value === (isTimes() ? c.a * c.b : c.id);
+    const ms = performance.now() - shownAt;
+    let grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
+    // StoliceMax: with four answers to choose from, a right answer the first
+    // time may be a guess. It is never Easy, so the country goes through the
+    // learning steps.
+    if (!isTimes() && c.type === 'new' && grade === SRS.EASY) grade = SRS.GOOD;
+    const wasNew = c.type === 'new';
+    const updated = SRS.answer(c, grade, now(), cfg());
+    state.cards[c.id] = updated;
+    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), value]);
+
+    const d = daily();
+    d.answered += 1;
+    if (right) d.right += 1;
+    if (wasNew) d.newSeen += 1;
+    lastId = c.id;
+    const reward = right ? payRewards(updated) : { coins: 0 };
+    if (reward.coins) addCoins(reward.coins);
+    save();
+
+    if (right) {
+      mode = 'right';
+      const coinNote = () => (reward.coins
+        ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
+        : '');
+      feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
+      advanceTimer = setTimeout(next, reward.coins ? 2200 : 1400);
+    } else {
+      mode = 'wrong';
+      let answer;
+      if (isTimes()) {
+        const product = c.a * c.b;
+        answer = () => esc(ltr(fact(c.a, c.b) + ' = ' + num(product))) + '.<br>' + esc(T().typeToGoOn(product));
+        typed = '';
+      } else {
+        picked = value;
+        answer = () => esc(T().rightIs(capitalName(c.id))) + '<br>' + esc(T().typeToGoOn());
+      }
+      feedback = timedOut
+        ? () => '<strong>' + esc(T().timeUp) + '</strong> ' + answer()
+        : () => '<strong>' + esc(T().notQuite) + '</strong> ' + (isTimes() ? esc(T().youWrote(value)) + ' ' : '') + answer();
+      flash('shake');
+    }
+    render();
+  }
+  const submitTyped = () => submit(Number(typed));
+
+  // After a wrong answer the child gives the right one to move on.
+  function moveOn(c) {
+    mode = 'right';
+    feedback = () => '<strong>' + esc(T().thatsIt) + '</strong><br>' + esc(T().comesBack(whenText(c.due)));
+    advanceTimer = setTimeout(next, 900);
+  }
+
+  // MnożenieMax: in "wrong" mode the child copies the right answer to move on.
+  function checkCopy() {
+    const c = current();
+    const answer = String(c.a * c.b);
+    if (typed === answer) {
+      moveOn(c);
+    } else if (typed.length >= answer.length || !answer.startsWith(typed)) {
+      typed = '';
+      flash('shake');
+    }
+  }
+
+  // MnożenieMax: a key of the keypad.
+  function press(key) {
+    if (mode === 'done') return;
+    if (mode === 'right') {
+      if (key === 'del') return;
+      next();
+      if (key === 'ok' || mode !== 'ask') return;
+    }
+    if (key === 'ok') {
+      if (mode === 'ask' && typed) submitTyped();
+      else if (mode === 'wrong') { checkCopy(); render(); }
+      return;
+    }
+    if (key === 'del') {
+      typed = typed.slice(0, -1);
+    } else if (typed.length < 3) {
+      typed += key;
+    }
+    if (mode === 'wrong' && key !== 'del') checkCopy();
+    renderCard();
+    if (mode !== 'ask') return;
+
+    // Check the answer once it has as many digits as the right one, or after
+    // a pause for a shorter answer.
+    const c = current();
+    pauseTimers();
+    if (typed.length >= String(c.a * c.b).length) submitTyped();
+    else if (typed) idleTimer = setTimeout(submitTyped, IDLE_SUBMIT_MS);
+    else armGiveUp(); // everything deleted: the time limit starts again
+  }
+
+  // StoliceMax: i is the answer tapped (0 to 3). After a wrong answer the
+  // child taps the right one to move on; after a right one any tap moves on.
+  function choose(i) {
+    if (mode === 'done' || !options[i]) return;
+    if (mode === 'right') return next();
+    if (mode === 'ask') return submit(options[i]);
+    const c = current();
+    if (options[i] === c.id) {
+      moveOn(c);
+      renderCard();
+    } else {
+      flash('shake');
+    }
+  }
+
+  function flash(cls) {
+    const el = $('card');
+    el.classList.remove('enter', 'shake');
+    void el.offsetWidth; // restart the animation
+    el.classList.add(cls);
+  }
+
+  // ---------- rendering ----------
+
+  // MnożenieMax: the square of facts, row × column.
+  const square = $('square');
+  let cells = {};
+
+  function buildSquare() {
+    const size = state.settings.size;
+    const edge = factors();
+    square.textContent = '';
+    square.style.setProperty('--cols', edge.length + 1);
+    cells = {};
+    const add = (cls, text) => {
+      const el = document.createElement('div');
+      el.className = cls;
+      el.textContent = text;
+      square.appendChild(el);
+      return el;
+    };
+    add('corner', T().op);
+    for (const b of edge) add('hd', num(b));
+    for (const a of edge) {
+      add('hd', num(a));
+      for (const b of edge) {
+        // Two extra numbers are not multiplied together: leave a gap.
+        if (a <= size || b <= size) cells[a + 'x' + b] = add('cell', '');
+        else add('gap', '');
+      }
+    }
+  }
+
+  // StoliceMax: a section per continent, with a square per country.
+  const map = $('map');
+  let tiles = {};
+  let sections = {};
+
+  function buildMap() {
+    map.textContent = '';
+    tiles = {};
+    sections = {};
+    for (const continent of CONTINENTS) {
+      const section = document.createElement('section');
+      section.className = 'continent';
+      const head = document.createElement('h3');
+      const name = document.createElement('span');
+      name.textContent = T().continents[continent];
+      const tally = document.createElement('span');
+      tally.className = 'tally';
+      head.append(name, tally);
+      const grid = document.createElement('div');
+      grid.className = 'tiles';
+      for (const c of COUNTRIES) {
+        if (c.continent !== continent) continue;
+        const el = document.createElement('div');
+        el.className = 'cell';
+        el.textContent = flag(c.iso);
+        grid.appendChild(el);
+        tiles[c.iso] = el;
+      }
+      section.append(head, grid);
+      map.appendChild(section);
+      sections[continent] = { section, tally };
+    }
+  }
+
+  function buildProgress() {
+    if (isTimes()) buildSquare();
+    else buildMap();
+  }
+
+  function stage(c) {
+    if (c.type === 'new') return 'new';
+    if (SRS.isLearning(c)) return 'learning';
+    return c.interval >= MATURE_DAYS ? 'mature' : 'young';
+  }
+
+  function renderProgress() {
+    const t = T();
+    const active = new Set(activeCards().map((c) => c.id));
+    const n = { new: 0, learning: 0, young: 0, mature: 0 };
+    const learned = {};
+    const els = isTimes() ? cells : tiles;
+    for (const [id, el] of Object.entries(els)) {
+      let c;
+      let label;
+      if (isTimes()) {
+        const [a, b] = id.split('x').map(Number);
+        c = factCard(a, b);
+        label = fact(a, b);
+      } else {
+        c = countryCard(id);
+        label = countryName(id);
+      }
+      const s = stage(c);
+      const on = active.has(c.id);
+      if (on) n[s] += 1;
+      if (!isTimes() && (s === 'young' || s === 'mature')) {
+        const continent = BY_ISO[id].continent;
+        learned[continent] = (learned[continent] || 0) + 1;
+      }
+      el.className = 'cell' +
+        (s === 'new' ? '' : ' is-' + s) +
+        (on ? '' : ' is-off') +
+        (c.id === currentId ? ' is-current' : '');
+      let tip;
+      if (!on) tip = t.tipOff;
+      else if (s === 'new') tip = t.tipNew;
+      else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
+      else tip = t.tipReview(whenText(c.due));
+      el.title = label + ': ' + tip;
+    }
+    if (!isTimes()) {
+      // Countries learned out of all the countries of each continent.
+      for (const continent of CONTINENTS) {
+        const { section, tally } = sections[continent];
+        const total = COUNTRIES.filter((c) => c.continent === continent).length;
+        tally.textContent = num(learned[continent] || 0) + ' / ' + num(total);
+        section.classList.toggle('is-off', !state.settings.continents.includes(continent));
+      }
+    }
+    $('n-new').textContent = num(n.new);
+    $('n-learning').textContent = num(n.learning);
+    $('n-young').textContent = num(n.young);
+    $('n-mature').textContent = num(n.mature);
+  }
+
+  function renderCard() {
+    const c = current();
+    const el = $('card');
+    el.classList.toggle('is-right', mode === 'right');
+    el.classList.toggle('is-wrong', mode === 'wrong');
+    if (!c) return;
+    if (isTimes()) {
+      $('qa').textContent = num(c.a);
+      $('qb').textContent = num(c.b);
+      const slot = $('slot');
+      slot.textContent = '';
+      if (mode === 'wrong') {
+        const answer = String(c.a * c.b);
+        slot.append(num(typed));
+        const ghost = document.createElement('span');
+        ghost.className = 'ghost';
+        ghost.textContent = num(answer.slice(typed.length));
+        slot.append(ghost);
+      } else if (mode === 'right' && typed === '') {
+        slot.textContent = num(c.a * c.b);
+      } else {
+        slot.textContent = num(typed);
+      }
+      slot.classList.toggle('empty', mode === 'ask' && typed === '');
+    } else {
+      $('flag').textContent = flag(c.id);
+      $('country').textContent = countryName(c.id);
+      // Once answered, the right capital turns green and a wrong pick is marked.
+      $('choices').classList.toggle('answered', mode !== 'ask');
+      $('choices').querySelectorAll('.choice').forEach((btn, i) => {
+        const iso = options[i];
+        btn.textContent = iso ? capitalName(iso) : '';
+        btn.classList.toggle('is-right', mode !== 'ask' && iso === c.id);
+        btn.classList.toggle('is-wrong', mode === 'wrong' && iso === picked);
+      });
+    }
+    $('feedback').innerHTML = feedback();
+  }
+
+  function render() {
+    const t = T();
+    const n = counts();
+    $('coin-total').textContent = num(balance());
+    $('coins').setAttribute('aria-label', t.coinsAria(balance()));
+    // The number of rewards bought, with the latest one; redrawn only when
+    // it changes, so its shine keeps running.
+    const owned = state.trophies.length;
+    $('trophies').hidden = owned === 0;
+    $('trophy-total').textContent = num(owned);
+    $('trophies').setAttribute('aria-label', t.trophiesAria(owned));
+    const slot = $('trophy-slot');
+    const latest = owned ? app.id + owned + state.trophies[owned - 1].metal : '';
+    if (slot.dataset.k !== latest) {
+      slot.dataset.k = latest;
+      slot.innerHTML = owned ? rewardIcon(state.trophies[owned - 1].metal) : '';
+    }
+    $('count-new').textContent = num(n.new);
+    $('count-learn').textContent = num(n.learn);
+    $('count-review').textContent = num(n.review);
+    $('label-new').textContent = t.countNew(n.new);
+    $('label-learn').textContent = t.countLearn(n.learn);
+    $('label-review').textContent = t.countReview(n.review);
+
+    const done = mode === 'done';
+    $('card').hidden = done;
+    $('keypad').hidden = done;
+    $('choices').hidden = done;
+    $('done').hidden = !done;
+
+    if (shown && !done) {
+      const tag = $('tag');
+      tag.className = 'tag ' + shown.type;
+      tag.textContent = t.tags[shown.type];
+      $('seen').textContent = shown.reps === 0 ? t.firstTime : t.seen(shown.reps);
+    }
+    renderCard();
+    if (done) renderDone();
+    renderProgress();
+
+    const d = daily();
+    $('today').textContent = d.answered ? t.today(d.answered, d.right) : t.nothingToday;
+
+    const pill = $('clock-pill');
+    const ahead = Math.round(state.clockOffset / DAY);
+    pill.hidden = ahead === 0;
+    pill.textContent = t.testClock(ahead);
+  }
+
+  function renderDone() {
+    const t = T();
+    const d = daily();
+    $('done-date').textContent = new Date(now()).toLocaleDateString(lang(), { weekday: 'long' });
+    $('done-stats').textContent = d.answered ? t.doneStats(d.answered, d.right) : t.nothingNow;
+    $('done-coins').innerHTML = d.coins ? coinIcon() + esc(t.coinsToday(d.coins, d.bonus || 0)) : '';
+
+    const active = activeCards();
+    const dues = active.filter((c) => c.type !== 'new').map((c) => c.due);
+    const unseen = active.some((c) => c.type === 'new');
+    if (unseen) dues.push(SRS.dayStart(today() + 1, ROLLOVER));
+    $('done-next').textContent = dues.length ? t.nextCards(whenText(Math.min(...dues))) : '';
+    $('more-new').hidden = !unseen;
+    // A way to another app that still has cards for today.
+    const other = otherApps().find((a) => {
+      const n = countsOf(a.id);
+      return n.new + n.learn + n.review > 0;
+    });
+    const btn = $('other-app');
+    btn.hidden = !other;
+    if (other) {
+      btn.dataset.open = other.id;
+      btn.innerHTML = '<span class="app-icon">' + APP_ICONS[other.id] + '</span><span>' + esc(t.goTo(other.name)) + '</span>';
+    }
+  }
+
+  // ---------- rewards ----------
+
+  const reward = (id) => app.rewards.find((r) => r.id === id) || app.rewards[0];
+
+  // A gradient pair for each reward, next to the coin's gradients, and the
+  // outline of each souvenir for its beam of light.
+  function makeRewardGradients() {
     const NS = 'http://www.w3.org/2000/svg';
     const defs = $('shine-defs').querySelector('defs');
     const gradient = (kind, id, attrs, stops) => {
@@ -1234,35 +1958,136 @@
       }
       defs.appendChild(g);
     };
-    for (const [name, , hi, mid, lo, deep] of TROPHY_METALS) {
-      gradient('linearGradient', 'rim-' + name, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
-      gradient('radialGradient', 'face-' + name, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
+    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS)) {
+      gradient('linearGradient', 'rim-' + id, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
+      gradient('radialGradient', 'face-' + id, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
+    }
+    for (const { id } of SOUVENIRS) {
+      const clip = document.createElementNS(NS, 'clipPath');
+      clip.id = 'clip-' + id;
+      clip.innerHTML = SOUVENIR_ART[id].shape;
+      defs.appendChild(clip);
     }
   }
 
-  // A trophy drawn in the given material.
+  // The beam of light that passes over a reward now and then.
+  const glint = (clip) => '<g clip-path="url(#' + clip + ')"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g>';
+
+  // MnożenieMax: a trophy drawn in the given material.
   function trophyIcon(name) {
-    const [, , hi, , lo, deep] = metal(name);
+    const [hi, , lo, deep] = reward(name).colors;
     return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
       '<path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" stroke="' + lo + '" stroke-width="2.4" stroke-linecap="round"/>' +
       '<rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#rim-' + name + ')" stroke="' + deep + '" stroke-width="0.8"/>' +
       '<path d="M14.3 19.5h3.4l.9 5.5h-5.2z" fill="url(#rim-' + name + ')"/>' +
       '<path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z" fill="url(#face-' + name + ')" stroke="' + deep + '" stroke-width="0.9"/>' +
       '<path d="M16 7.4l1.2 2.5 2.7.4-2 1.9.5 2.7-2.4-1.3-2.4 1.3.5-2.7-2-1.9 2.7-.4z" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.5"/>' +
-      '<g clip-path="url(#trophy-clip)"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g>' +
+      glint('trophy-clip') +
       '</svg>';
   }
 
-  // Shows the trophy just bought and lets confetti fall from the top of the screen.
-  function celebrate(name) {
+  // StoliceMax: each souvenir as a small model on a stand. "shape" is its
+  // outline (for the beam of light); "art" draws it, given its gradients
+  // (face, rim) and colours.
+  const arches = (y1, y2, xs) => xs.map((x) => 'M' + x + ' ' + y2 + 'V' + (y1 + 1) + 'a1 1 0 0 1 2 0V' + y2 + 'z').join('');
+  const PALACE = 'M7.5 27V21.5H10V17h2.5V10.5h1.2V8h4.6v2.5h1.2V17H22v4.5h2.5V27zM15.3 8.2L16 2l.7 6.2z';
+  const EIFFEL = 'M5.5 27C9.5 24.5 12 19 13.6 11L15.2 3h1.6l1.6 8c1.6 8 4.1 13.5 8.1 16h-4.7c-1.2-3.4-3.3-5.2-5.8-5.2s-4.6 1.8-5.8 5.2zM15.6 3V.8h.8V3z';
+  const BIGBEN = 'M12.6 27V14h-.9V8.4h.9V6.2L16 1.6l3.4 4.6v2.2h.9V14h-.9v13z';
+  const ATOMS = [[16, 13], [16, 3.6], [24.1, 8.3], [24.1, 17.7], [16, 22.4], [7.9, 17.7], [7.9, 8.3]];
+  const COLOSSEUM = 'M3.5 27V12.4Q13 9 21.5 10.2V12.6Q25.5 13.2 28.5 15V27z';
+  const PARTHENON = 'M4.5 10L16 4.6 27.5 10zM4.5 10h23v2.6h-23zM4 24h24v1.5H4zM3 25.5h26V27H3z' +
+    [5.6, 9.4, 13.2, 17, 20.8, 24.6].map((x) => 'M' + x + ' 12.6h1.8V24h-1.8z').join('');
+  const PYRAMIDS = 'M3 27L14 7l11 20zM17.5 27l6-12.5L30 27z';
+  const FORBIDDEN = 'M4.5 23.5h23V27h-23zM7.5 16.2h17v7.3h-17zM2.5 16.5Q7.5 16.1 9.2 12.8h13.6Q24.5 16.1 29.5 16.5Q16 18.2 2.5 16.5zM10.5 10.4h11v2.6h-11zM6.5 10.9Q10.5 10.6 11.7 8h8.6Q21.5 10.6 25.5 10.9Q16 12.2 6.5 10.9z';
+  const ROOF = 'fill="url(#face-gold)" stroke="#9c6200" stroke-width="0.6" stroke-linejoin="round"';
+  const SOUVENIR_ART = {
+    palace: {
+      shape: '<path d="' + PALACE + '"/>',
+      art: (f, rim, [, , lo, deep]) => '<path d="' + PALACE + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.7" stroke-linejoin="round"/>' +
+        '<path d="M14.7 11.5v4.5M16 11.5v4.5M17.3 11.5v4.5M11.5 18.3v2.4M13.6 18.3v2.4M18.4 18.3v2.4M20.5 18.3v2.4M9 22.8v3M11.3 22.8v3M13.6 22.8v3M18.4 22.8v3M20.7 22.8v3M23 22.8v3" stroke="' + lo + '" stroke-width="0.7"/>' +
+        '<path d="M14.9 27v-3.2h2.2V27z" fill="' + deep + '"/>',
+    },
+    eiffel: {
+      shape: '<path d="' + EIFFEL + '"/>',
+      art: (f, rim, [, , lo, deep]) => '<path d="' + EIFFEL + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
+        '<path d="M12.2 18.4l2.3-6.6M19.8 18.4l-2.3-6.6M9.6 24.4l2.6-4.3M22.4 24.4l-2.6-4.3M14.6 10.4L16 4.5l1.4 5.9" stroke="' + lo + '" stroke-width="0.55" fill="none"/>' +
+        '<path d="M10.4 18.4h11.2v1.7H10.4zM13.1 10.4h5.8v1.4h-5.8z" fill="' + deep + '"/>',
+    },
+    bigben: {
+      shape: '<path d="' + BIGBEN + '"/>',
+      art: (f, rim, [, , lo, deep]) => '<path d="' + BIGBEN + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.7" stroke-linejoin="round"/>' +
+        '<path d="M12.6 6.2h6.8M11.7 14h8.6" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<path d="M14.3 15.5v10M16 15.5v10M17.7 15.5v10M14.3 6.9v1M16 6.9v1M17.7 6.9v1" stroke="' + lo + '" stroke-width="0.7"/>' +
+        '<circle cx="16" cy="11.2" r="2.25" fill="#fffdf4" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<path d="M16 11.2V9.7M16 11.2l1.1.7" stroke="' + deep + '" stroke-width="0.55" stroke-linecap="round"/>',
+    },
+    atomium: {
+      shape: ATOMS.map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="2.5"/>').join(''),
+      art: (f, rim, [, , lo, deep]) => '<path d="' +
+        ATOMS.slice(1).map(([x, y]) => 'M16 13L' + x + ' ' + y).join('') +
+        'M16 3.6L24.1 8.3L24.1 17.7L16 22.4L7.9 17.7L7.9 8.3ZM7.9 17.7L9.6 27M24.1 17.7L22.4 27M16 22.4V27" stroke="' + lo + '" stroke-width="1.1" fill="none"/>' +
+        ATOMS.map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="2.5" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>').join(''),
+    },
+    colosseum: {
+      shape: '<path d="' + COLOSSEUM + '"/>',
+      art: (f, rim, [, , lo, deep]) => '<path d="' + COLOSSEUM + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.7" stroke-linejoin="round"/>' +
+        '<path d="M3.5 17h25M3.5 21.2h25" stroke="' + lo + '" stroke-width="0.6"/>' +
+        '<path d="' + arches(13.2, 16.2, [5, 8.4, 11.8, 15.2, 18.6]) + arches(17.8, 20.6, [5, 8.4, 11.8, 15.2, 18.6, 22, 25.4]) +
+        arches(22, 26, [5, 8.4, 11.8, 15.2, 18.6, 22, 25.4]) + '" fill="' + deep + '" fill-opacity="0.75"/>',
+    },
+    parthenon: {
+      shape: '<path d="' + PARTHENON + '"/>',
+      art: (f, rim, [, , lo, deep]) => '<path d="' + PARTHENON + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5" stroke-linejoin="round"/>' +
+        '<path d="M8 9.1L16 5.5l8 3.6M4.5 11.3h23" stroke="' + lo + '" stroke-width="0.5" fill="none"/>',
+    },
+    pyramids: {
+      shape: '<path d="' + PYRAMIDS + '"/>',
+      art: (f, rim, [, , lo, deep]) => '<circle cx="6.5" cy="7" r="2.6" fill="#ffe27a" stroke="' + lo + '" stroke-width="0.5"/>' +
+        '<path d="M17.5 27L23.5 14.5 24.8 27z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
+        '<path d="M24.8 27L23.5 14.5 30 27z" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
+        '<path d="M3 27L14 7l2.5 20z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
+        '<path d="M16.5 27L14 7l11 20z" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
+        '<path d="M9.6 15H15M6.9 20h8.7M4.9 23.5h11.1" stroke="' + lo + '" stroke-width="0.45" stroke-opacity="0.7"/>',
+    },
+    forbidden: {
+      shape: '<path d="' + FORBIDDEN + '"/>',
+      art: (f, rim, [, , , deep]) => '<path d="M4.5 23.5h23V27h-23z" fill="#efe2cf" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<path d="M7.5 16.2h17v7.3h-17z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<path d="M9.8 17v6.5M12.6 17v6.5M19.4 17v6.5M22.2 17v6.5" stroke="#f2b632" stroke-width="0.7"/>' +
+        '<path d="M14.6 23.5v-4.3h2.8v4.3z" fill="' + deep + '"/>' +
+        '<path d="M2.5 16.5Q7.5 16.1 9.2 12.8h13.6Q24.5 16.1 29.5 16.5Q16 18.2 2.5 16.5z" ' + ROOF + '/>' +
+        '<path d="M10.5 10.4h11v2.6h-11z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<path d="M6.5 10.9Q10.5 10.6 11.7 8h8.6Q21.5 10.6 25.5 10.9Q16 12.2 6.5 10.9z" ' + ROOF + '/>' +
+        '<path d="M11.4 8h9.2" stroke="#9c6200" stroke-width="0.9" stroke-linecap="round"/>',
+    },
+  };
+
+  function souvenirIcon(id) {
+    const { colors } = SOUVENIRS.find((r) => r.id === id) || SOUVENIRS[0];
+    const rim = 'url(#rim-' + id + ')';
+    return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
+      '<rect x="3" y="27" width="26" height="3" rx="1.2" fill="' + rim + '" stroke="' + colors[3] + '" stroke-width="0.7"/>' +
+      SOUVENIR_ART[id].art('url(#face-' + id + ')', rim, colors) +
+      glint('clip-' + id) +
+      '</svg>';
+  }
+
+  const rewardIcon = (id) => (isTimes() ? trophyIcon(id) : souvenirIcon(id));
+  // StoliceMax: the capital a souvenir comes from.
+  const rewardPlace = (id) => (reward(id).iso ? capitalName(reward(id).iso) : '');
+
+  // Shows the reward just bought and lets confetti fall from the top of the screen.
+  function celebrate(id) {
     const t = T();
-    const [, price, , mid] = metal(name);
+    const { price, colors } = reward(id);
+    const place = rewardPlace(id);
     const banner = document.createElement('div');
     banner.className = 'trophy-banner';
-    banner.style.setProperty('--metal', mid); // frame and glow in the trophy's colour
+    banner.style.setProperty('--metal', colors[1]); // frame and glow in the reward's colour
     banner.setAttribute('role', 'status');
-    banner.innerHTML = trophyIcon(name) +
-      '<strong>' + esc(t.trophyTitle(name)) + '</strong><span>' + esc(t.trophyFor(price)) + '</span>';
+    banner.innerHTML = rewardIcon(id) + '<strong>' + esc(t.trophyTitle(id)) + '</strong>' +
+      (place ? '<span class="place">' + esc(place) + '</span>' : '') +
+      '<span>' + esc(t.trophyFor(price)) + '</span>';
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) confetti(CELEBRATION_MS);
@@ -1333,286 +2158,6 @@
     requestAnimationFrame(frame);
   }
 
-  function next() {
-    clearTimeout(advanceTimer);
-    pauseTimers();
-    const c = SRS.pickNext(queues(), avoidList());
-    typed = '';
-    if (!c) {
-      currentId = null;
-      mode = 'done';
-      const d = daily();
-      if (d.answered > 0 && !d.bonus) {
-        d.bonus = DAY_BONUS;
-        addCoins(DAY_BONUS);
-        save();
-      }
-    } else {
-      currentId = c.id;
-      shown = { type: c.type, reps: c.reps };
-      mode = 'ask';
-      shownAt = performance.now();
-      const first = c.reps === 0;
-      feedback = () => (first ? T().newOne : T().typeAnswer);
-      flash('enter');
-    }
-    render();
-    armGiveUp();
-  }
-
-  // timedOut: nothing was typed within the time limit, so the fact counts as
-  // not known (Again), like a wrong answer.
-  function submit(timedOut = false) {
-    pauseTimers();
-    const c = current();
-    if (mode !== 'ask' || !c || (typed === '' && !timedOut)) return;
-    const product = c.a * c.b;
-    const answer = typed;
-    const right = !timedOut && Number(answer) === product;
-    const ms = performance.now() - shownAt;
-    const grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
-    const wasNew = c.type === 'new';
-    const updated = SRS.answer(c, grade, now(), cfg());
-    state.cards[c.id] = updated;
-    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), timedOut ? null : Number(answer)]);
-
-    const d = daily();
-    d.answered += 1;
-    if (right) d.right += 1;
-    if (wasNew) d.newSeen += 1;
-    lastId = c.id;
-    const reward = right ? payRewards(updated) : { coins: 0 };
-    if (reward.coins) addCoins(reward.coins);
-    save();
-
-    if (right) {
-      mode = 'right';
-      const coinNote = () => (reward.coins
-        ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
-        : '');
-      feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
-      advanceTimer = setTimeout(next, reward.coins ? 2200 : 1400);
-    } else {
-      mode = 'wrong';
-      const sum = esc(ltr(fact(c.a, c.b) + ' = ' + num(product))) + '.<br>' + esc(T().typeToGoOn(product));
-      feedback = timedOut
-        ? () => '<strong>' + esc(T().timeUp) + '</strong> ' + sum
-        : () => '<strong>' + esc(T().notQuite) + '</strong> ' + esc(T().youWrote(answer)) + ' ' + sum;
-      typed = '';
-      flash('shake');
-    }
-    render();
-  }
-
-  // In "wrong" mode the child copies the right answer to move on.
-  function checkCopy() {
-    const c = current();
-    const answer = String(c.a * c.b);
-    if (typed === answer) {
-      mode = 'right';
-      feedback = () => '<strong>' + esc(T().thatsIt) + '</strong><br>' + esc(T().comesBack(whenText(c.due)));
-      advanceTimer = setTimeout(next, 900);
-    } else if (typed.length >= answer.length || !answer.startsWith(typed)) {
-      typed = '';
-      flash('shake');
-    }
-  }
-
-  function press(key) {
-    if (mode === 'done') return;
-    if (mode === 'right') {
-      if (key === 'del') return;
-      next();
-      if (key === 'ok' || mode !== 'ask') return;
-    }
-    if (key === 'ok') {
-      if (mode === 'ask') submit();
-      else if (mode === 'wrong') { checkCopy(); render(); }
-      return;
-    }
-    if (key === 'del') {
-      typed = typed.slice(0, -1);
-    } else if (typed.length < 3) {
-      typed += key;
-    }
-    if (mode === 'wrong' && key !== 'del') checkCopy();
-    renderCard();
-    if (mode !== 'ask') return;
-
-    // Check the answer once it has as many digits as the right one, or after
-    // a pause for a shorter answer.
-    const c = current();
-    pauseTimers();
-    if (typed.length >= String(c.a * c.b).length) submit();
-    else if (typed) idleTimer = setTimeout(submit, IDLE_SUBMIT_MS);
-    else armGiveUp(); // everything deleted: the time limit starts again
-  }
-
-  function flash(cls) {
-    const el = $('card');
-    el.classList.remove('enter', 'shake');
-    void el.offsetWidth; // restart the animation
-    el.classList.add(cls);
-  }
-
-  // ---------- rendering ----------
-
-  const square = $('square');
-  let cells = {};
-
-  function buildSquare() {
-    const size = state.settings.size;
-    const edge = factors();
-    square.textContent = '';
-    square.style.setProperty('--cols', edge.length + 1);
-    cells = {};
-    const add = (cls, text) => {
-      const el = document.createElement('div');
-      el.className = cls;
-      el.textContent = text;
-      square.appendChild(el);
-      return el;
-    };
-    add('corner', T().op);
-    for (const b of edge) add('hd', num(b));
-    for (const a of edge) {
-      add('hd', num(a));
-      for (const b of edge) {
-        // Two extra numbers are not multiplied together: leave a gap.
-        if (a <= size || b <= size) cells[a + 'x' + b] = add('cell', '');
-        else add('gap', '');
-      }
-    }
-  }
-
-  function stage(c) {
-    if (c.type === 'new') return 'new';
-    if (SRS.isLearning(c)) return 'learning';
-    return c.interval >= MATURE_DAYS ? 'mature' : 'young';
-  }
-
-  function renderSquare() {
-    const t = T();
-    const active = new Set(activeCards().map((c) => c.id));
-    const n = { new: 0, learning: 0, young: 0, mature: 0 };
-    for (const [id, el] of Object.entries(cells)) {
-      const [a, b] = id.split('x').map(Number);
-      const c = card(a, b);
-      const s = stage(c);
-      const on = active.has(c.id);
-      if (on) n[s] += 1;
-      el.className = 'cell' +
-        (s === 'new' ? '' : ' is-' + s) +
-        (on ? '' : ' is-off') +
-        (c.id === currentId ? ' is-current' : '');
-      let tip;
-      if (!on) tip = t.tipOff;
-      else if (s === 'new') tip = t.tipNew;
-      else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
-      else tip = t.tipReview(whenText(c.due));
-      el.title = fact(a, b) + ': ' + tip;
-    }
-    $('n-new').textContent = num(n.new);
-    $('n-learning').textContent = num(n.learning);
-    $('n-young').textContent = num(n.young);
-    $('n-mature').textContent = num(n.mature);
-  }
-
-  function renderCard() {
-    const c = current();
-    const el = $('card');
-    el.classList.toggle('is-right', mode === 'right');
-    el.classList.toggle('is-wrong', mode === 'wrong');
-    if (!c) return;
-    $('qa').textContent = num(c.a);
-    $('qb').textContent = num(c.b);
-
-    const slot = $('slot');
-    slot.textContent = '';
-    if (mode === 'wrong') {
-      const answer = String(c.a * c.b);
-      slot.append(num(typed));
-      const ghost = document.createElement('span');
-      ghost.className = 'ghost';
-      ghost.textContent = num(answer.slice(typed.length));
-      slot.append(ghost);
-    } else if (mode === 'right' && typed === '') {
-      slot.textContent = num(c.a * c.b);
-    } else {
-      slot.textContent = num(typed);
-    }
-    slot.classList.toggle('empty', mode === 'ask' && typed === '');
-    $('feedback').innerHTML = feedback();
-  }
-
-  function render() {
-    const t = T();
-    const q = queues();
-    const counts = {
-      new: q.fresh.length,
-      learn: q.learningNow.length + q.learningAhead.length + q.learningLater.length,
-      review: q.review.length,
-    };
-    $('coin-total').textContent = num(balance());
-    $('coins').setAttribute('aria-label', t.coinsAria(balance()));
-    // The trophy count, with the latest trophy bought; redrawn only when it
-    // changes, so its shine keeps running.
-    const owned = state.trophies.length;
-    $('trophies').hidden = owned === 0;
-    $('trophy-total').textContent = num(owned);
-    $('trophies').setAttribute('aria-label', t.trophiesAria(owned));
-    const slot = $('trophy-slot');
-    const latest = owned ? owned + state.trophies[owned - 1].metal : '';
-    if (slot.dataset.k !== latest) {
-      slot.dataset.k = latest;
-      slot.innerHTML = owned ? trophyIcon(state.trophies[owned - 1].metal) : '';
-    }
-    $('count-new').textContent = num(counts.new);
-    $('count-learn').textContent = num(counts.learn);
-    $('count-review').textContent = num(counts.review);
-    $('label-new').textContent = t.countNew(counts.new);
-    $('label-learn').textContent = t.countLearn(counts.learn);
-    $('label-review').textContent = t.countReview(counts.review);
-
-    const done = mode === 'done';
-    $('card').hidden = done;
-    $('keypad').hidden = done;
-    $('done').hidden = !done;
-
-    if (shown && !done) {
-      const tag = $('tag');
-      tag.className = 'tag ' + shown.type;
-      tag.textContent = t.tags[shown.type];
-      $('seen').textContent = shown.reps === 0 ? t.firstTime : t.seen(shown.reps);
-    }
-    renderCard();
-    if (done) renderDone();
-    renderSquare();
-
-    const d = daily();
-    $('today').textContent = d.answered ? t.today(d.answered, d.right) : t.nothingToday;
-
-    const pill = $('clock-pill');
-    const ahead = Math.round(state.clockOffset / DAY);
-    pill.hidden = ahead === 0;
-    pill.textContent = t.testClock(ahead);
-  }
-
-  function renderDone() {
-    const t = T();
-    const d = daily();
-    $('done-date').textContent = new Date(now()).toLocaleDateString(lang(), { weekday: 'long' });
-    $('done-stats').textContent = d.answered ? t.doneStats(d.answered, d.right) : t.nothingNow;
-    $('done-coins').innerHTML = d.coins ? coinIcon() + esc(t.coinsToday(d.coins, d.bonus || 0)) : '';
-
-    const active = activeCards();
-    const dues = active.filter((c) => c.type !== 'new').map((c) => c.due);
-    const unseen = active.some((c) => c.type === 'new');
-    if (unseen) dues.push(SRS.dayStart(today() + 1, ROLLOVER));
-    $('done-next').textContent = dues.length ? t.nextCards(whenText(Math.min(...dues))) : '';
-    $('more-new').hidden = !unseen;
-  }
-
   // ---------- language ----------
 
   function applyLanguage() {
@@ -1620,6 +2165,7 @@
     document.documentElement.lang = lang();
     document.documentElement.dir = t.dir || 'ltr';
     document.title = t.appName;
+    $('open-apps').setAttribute('aria-label', app.name + ': ' + t.appsAria);
     document.querySelectorAll('#keypad [data-key]').forEach((el) => {
       if (/^[0-9]$/.test(el.dataset.key)) el.textContent = num(el.dataset.key);
     });
@@ -1629,34 +2175,203 @@
     for (const opt of $('answer-time').options) {
       opt.textContent = opt.value === '0' ? t.noLimit : seconds.format(Number(opt.value));
     }
+    // Text of the other app's parts may be missing; those parts are hidden.
     document.querySelectorAll('[data-t]').forEach((el) => {
-      el.textContent = t[el.dataset.t];
+      el.textContent = t[el.dataset.t] || '';
     });
     document.querySelectorAll('[data-t-aria]').forEach((el) => {
-      el.setAttribute('aria-label', t[el.dataset.tAria]);
+      el.setAttribute('aria-label', t[el.dataset.tAria] || '');
     });
     document.querySelectorAll('.size-label').forEach((el) => {
       el.textContent = fact(el.dataset.n, el.dataset.n);
     });
   }
 
-  // ---------- settings ----------
+  // Shows the parts of the page that belong to the open app.
+  function applyApp() {
+    document.body.dataset.app = app.id;
+    $('brand-name').textContent = app.name;
+    $('brand-icon').innerHTML = APP_ICONS[app.id];
+    $('brand-other').innerHTML = APP_ICONS[otherApps()[0].id];
+    $('coin-emblem').innerHTML = EMBLEMS[app.id];
+  }
 
-  const panels = [$('settings'), $('shop')];
+  // ---------- panels ----------
+
+  const panels = [$('settings'), $('shop'), $('apps')];
   const panelOpen = () => panels.some((p) => !p.hidden);
 
+  // Open the panel first, so it opens even if filling it in fails: the
+  // settings are the only way to change the language or reload the app.
+  // Opening a panel adds a step to the page history, so Android's Back
+  // gesture closes the panel instead of leaving the app.
+  // which: 'settings', 'shop' or 'apps'.
+  function openPanel(which) {
+    pauseTimers();
+    if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
+    for (const p of panels) p.hidden = p.id !== which;
+    document.body.classList.add('panel-open');
+    $(which + '-sheet').focus({ preventScroll: true });
+    try {
+      if (which === 'settings') syncSettings();
+      else if (which === 'shop') renderShop();
+      else renderApps();
+    } catch (e) {
+      noteError(e);
+    }
+  }
+
+  function closePanel() {
+    if (!panelOpen()) return false;
+    if (!$('apps').hidden && !prefs.seenApps) {
+      prefs.seenApps = true;
+      savePrefs();
+    }
+    for (const p of panels) p.hidden = true;
+    document.body.classList.remove('panel-open');
+    for (const id of ['open-settings', 'open-shop', 'open-apps']) $(id).blur();
+    if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
+    else {
+      render();
+      resumeTimers();
+    }
+    if (history.state && history.state.panel) history.back();
+    return true;
+  }
+  window.addEventListener('popstate', closePanel);
+  // The Android app's Back button calls this.
+  window.closeParentPanel = closePanel;
+
+  $('open-settings').addEventListener('click', () => openPanel('settings'));
+  $('open-shop').addEventListener('click', () => openPanel('shop'));
+  $('open-apps').addEventListener('click', () => openPanel('apps'));
+  $('close-settings').addEventListener('click', closePanel);
+  $('close-shop').addEventListener('click', closePanel);
+  $('close-apps').addEventListener('click', closePanel);
+  // A tap on the dimmed area around a panel closes it.
+  for (const p of panels) {
+    p.addEventListener('click', (e) => {
+      if (e.target === p) closePanel();
+    });
+  }
+
+  // ---------- apps ----------
+
+  // The menu of apps, with what each one has left for today.
+  function renderApps() {
+    const t = T();
+    $('apps-hint').textContent = prefs.seenApps ? t.appsHint : t.appsIntro;
+    $('app-list').innerHTML = Object.values(APPS).map((a) => {
+      const n = countsOf(a.id);
+      const parts = [];
+      if (n.new) parts.push(num(n.new) + ' ' + t.countNew(n.new));
+      if (n.learn) parts.push(num(n.learn) + ' ' + t.countLearn(n.learn));
+      if (n.review) parts.push(num(n.review) + ' ' + t.countReview(n.review));
+      const here = a.id === app.id;
+      return '<button type="button" class="app-tile" data-open="' + a.id + '"' + (here ? ' aria-current="true"' : '') + '>' +
+        '<span class="app-icon">' + APP_ICONS[a.id] + '</span>' +
+        '<span class="app-name">' + esc(a.name) + (here ? '<span class="app-here">' + esc(t.appOpen) + '</span>' : '') + '</span>' +
+        '<span class="app-what">' + esc(t.appWhat[a.id]) + '</span>' +
+        '<span class="app-due">' + esc(parts.length ? t.appToday(parts.join(', ')) : t.appDone) + '</span>' +
+        '</button>';
+    }).join('');
+  }
+
+  // Opens another app in place of this one.
+  function switchApp(id) {
+    if (id === app.id) return;
+    save();
+    pauseTimers();
+    clearTimeout(advanceTimer);
+    app = APPS[id];
+    prefs.app = id;
+    savePrefs();
+    state = load() || defaultState();
+    currentId = null;
+    lastId = null;
+    shown = null;
+    applyApp();
+    applyLanguage();
+    buildProgress();
+    buildChips();
+    next();
+  }
+
+  $('app-list').addEventListener('click', (e) => {
+    const tile = e.target.closest('[data-open]');
+    if (!tile) return;
+    switchApp(tile.dataset.open);
+    closePanel();
+  });
+  $('other-app').addEventListener('click', (e) => switchApp(e.currentTarget.dataset.open));
+
+  // ---------- shop ----------
+
+  function renderShop() {
+    const t = T();
+    const have = balance();
+    $('shop-balance').innerHTML = coinIcon() + esc(t.shopBalance(have));
+    $('shop-grid').innerHTML = app.rewards.map(({ id, price }) => {
+      const short = price - have;
+      const place = rewardPlace(id);
+      return '<div class="shop-item' + (short > 0 ? ' too-dear' : '') + '">' + rewardIcon(id) +
+        '<span class="name">' + esc(t.trophyName(id)) + '</span>' +
+        (place ? '<span class="place">' + esc(place) + '</span>' : '') +
+        '<span class="price">' + coinIcon() + esc(num(price)) + '</span>' +
+        (short > 0
+          ? '<span class="missing">' + esc(t.missingCoins(short)) + '</span>'
+          : '<button type="button" class="primary-btn" data-reward="' + id + '">' + esc(t.buy) + '</button>') +
+        '</div>';
+    }).join('');
+    $('trophy-shelf').innerHTML = state.trophies.length
+      ? state.trophies.map((tr) => '<span title="' + esc(t.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal) + '</span>').join('')
+      : '<p class="hint">' + esc(t.noTrophies) + '</p>';
+  }
+
+  // Buying takes two taps, so a mis-tap does not spend her coins.
+  let confirmTimer = null;
+  $('shop-grid').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-reward]');
+    if (!btn) return;
+    const id = btn.dataset.reward;
+    const { price } = reward(id);
+    if (balance() < price) return;
+    clearTimeout(confirmTimer);
+    if (!btn.dataset.armed) {
+      renderShop(); // undo any other button waiting for confirmation
+      const again = $('shop-grid').querySelector('button[data-reward="' + id + '"]');
+      again.dataset.armed = '1';
+      again.textContent = T().buyConfirm(num(price));
+      confirmTimer = setTimeout(renderShop, 4000);
+      return;
+    }
+    state.spent = (state.spent || 0) + price;
+    state.trophies.push({ metal: id, at: now() });
+    save();
+    renderShop();
+    render();
+    celebrate(id);
+  });
+
+  // ---------- settings ----------
+
   function buildChips() {
-    const fill = (wrap, numbers) => {
+    const fill = (wrap, values, label, prefix) => {
       wrap.textContent = '';
-      for (const n of numbers) {
-        const label = document.createElement('label');
-        label.className = 'chip';
-        label.innerHTML = '<input type="checkbox" id="table-' + n + '" value="' + n + '"><span>' + T().tableChip(n) + '</span>';
-        wrap.appendChild(label);
+      for (const v of values) {
+        const el = document.createElement('label');
+        el.className = 'chip';
+        el.innerHTML = '<input type="checkbox" id="' + prefix + v + '" value="' + v + '"><span>' + esc(label(v)) + '</span>';
+        wrap.appendChild(el);
       }
     };
-    fill($('table-chips'), range(state.settings.size));
-    fill($('extra-chips'), extraChoices());
+    const t = T();
+    if (isTimes()) {
+      fill($('table-chips'), range(state.settings.size), t.tableChip, 'table-');
+      fill($('extra-chips'), extraChoices(), t.tableChip, 'table-');
+    } else {
+      fill($('continent-chips'), CONTINENTS, (c) => t.continents[c], 'continent-');
+    }
   }
 
   function buildLanguageMenu() {
@@ -1676,11 +2391,15 @@
   function syncSettings() {
     const t = T();
     const s = state.settings;
-    $('lang').value = I18N.STRINGS[s.lang] ? s.lang : 'auto';
+    $('lang').value = I18N.STRINGS[prefs.lang] ? prefs.lang : 'auto';
     $('lang-auto').textContent = t.deviceLanguage + ' (' + I18N.STRINGS[deviceLang()].name + ')';
-    $('size-' + s.size).checked = true;
-    for (const n of range(s.size).concat(extraChoices())) $('table-' + n).checked = s.tables.includes(n);
-    $('extras-hint').textContent = t.extrasHint(s.size);
+    if (isTimes()) {
+      $('size-' + s.size).checked = true;
+      for (const n of range(s.size).concat(extraChoices())) $('table-' + n).checked = s.tables.includes(n);
+      $('extras-hint').textContent = t.extrasHint(s.size);
+    } else {
+      for (const c of CONTINENTS) $('continent-' + c).checked = s.continents.includes(c);
+    }
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
@@ -1698,118 +2417,24 @@
     $('update-section').hidden = inAndroidApp;
   }
 
-  // Open the panel first, so it opens even if filling it in fails: it is the
-  // only way to change the language or reload the app.
-  // Opening the panel adds a step to the page history, so Android's Back
-  // gesture closes the panel instead of leaving the app.
-  // which: 'settings' or 'shop'.
-  function openPanel(which) {
-    pauseTimers();
-    if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
-    for (const p of panels) p.hidden = p.id !== which;
-    document.body.classList.add('panel-open');
-    $(which + '-sheet').focus({ preventScroll: true });
-    try {
-      if (which === 'settings') syncSettings();
-      else renderShop();
-    } catch (e) {
-      noteError(e);
-    }
-  }
-
-  function closePanel() {
-    if (!panelOpen()) return false;
-    for (const p of panels) p.hidden = true;
-    document.body.classList.remove('panel-open');
-    $('open-settings').blur();
-    $('open-shop').blur();
-    if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
-    else {
-      render();
-      resumeTimers();
-    }
-    if (history.state && history.state.panel) history.back();
-    return true;
-  }
-  window.addEventListener('popstate', closePanel);
-  // The Android app's Back button calls this.
-  window.closeParentPanel = closePanel;
-
-  $('open-settings').addEventListener('click', () => openPanel('settings'));
-  $('open-shop').addEventListener('click', () => openPanel('shop'));
-  $('close-settings').addEventListener('click', closePanel);
-  $('close-shop').addEventListener('click', closePanel);
-  // A tap on the dimmed area around a panel closes it.
-  for (const p of panels) {
-    p.addEventListener('click', (e) => {
-      if (e.target === p) closePanel();
-    });
-  }
-
-  // ---------- shop ----------
-
-  function renderShop() {
-    const t = T();
-    const have = balance();
-    $('shop-balance').innerHTML = coinIcon() + esc(t.shopBalance(have));
-    $('shop-grid').innerHTML = TROPHY_METALS.map(([name, price]) => {
-      const short = price - have;
-      return '<div class="shop-item' + (short > 0 ? ' too-dear' : '') + '">' + trophyIcon(name) +
-        '<span class="name">' + esc(t.trophyName(name)) + '</span>' +
-        '<span class="price">' + coinIcon() + esc(num(price)) + '</span>' +
-        (short > 0
-          ? '<span class="missing">' + esc(t.missingCoins(short)) + '</span>'
-          : '<button type="button" class="primary-btn" data-metal="' + name + '">' + esc(t.buy) + '</button>') +
-        '</div>';
-    }).join('');
-    $('trophy-shelf').innerHTML = state.trophies.length
-      ? state.trophies.map((tr) => '<span title="' + esc(t.trophyName(tr.metal)) + '">' + trophyIcon(tr.metal) + '</span>').join('')
-      : '<p class="hint">' + esc(t.noTrophies) + '</p>';
-  }
-
-  // Buying takes two taps, so a mis-tap does not spend her coins.
-  let confirmTimer = null;
-  $('shop-grid').addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-metal]');
-    if (!btn) return;
-    const name = btn.dataset.metal;
-    const price = metal(name)[1];
-    if (balance() < price) return;
-    clearTimeout(confirmTimer);
-    if (!btn.dataset.armed) {
-      renderShop(); // undo any other button waiting for confirmation
-      const again = $('shop-grid').querySelector('button[data-metal="' + name + '"]');
-      again.dataset.armed = '1';
-      again.textContent = T().buyConfirm(num(price));
-      confirmTimer = setTimeout(renderShop, 4000);
-      return;
-    }
-    state.spent = (state.spent || 0) + price;
-    state.trophies.push({ metal: name, at: now() });
-    save();
-    renderShop();
-    render();
-    celebrate(name);
-  });
-
   function languageChanged() {
     applyLanguage();
     buildChips();
-    buildSquare();
+    buildProgress();
     syncSettings();
     render();
   }
   $('lang').addEventListener('change', (e) => {
-    state.settings.lang = e.target.value;
-    save();
+    prefs.lang = e.target.value;
+    savePrefs();
     languageChanged();
   });
   // Follow a change of the device language while the app is open.
   window.addEventListener('languagechange', () => {
-    if (!I18N.STRINGS[state.settings.lang]) languageChanged();
+    if (!I18N.STRINGS[prefs.lang]) languageChanged();
   });
 
-  // Going from 10 to 12 adds the tables of 11 and 12; going back removes them.
+  // MnożenieMax: going from 10 to 12 adds the tables of 11 and 12; going back removes them.
   $('size-chips').addEventListener('change', (e) => {
     const s = state.settings;
     const size = Number(e.target.value);
@@ -1821,7 +2446,7 @@
     save();
     buildChips();
     buildSquare();
-    renderSquare();
+    renderProgress();
     syncSettings();
   });
 
@@ -1833,10 +2458,17 @@
     state.settings.tables = [...set].sort((x, y) => x - y);
     save();
     buildSquare();
-    renderSquare();
+    renderProgress();
   }
   $('table-chips').addEventListener('change', toggleTable);
   $('extra-chips').addEventListener('change', toggleTable);
+
+  // StoliceMax: the continents to practise.
+  $('continent-chips').addEventListener('change', () => {
+    state.settings.continents = CONTINENTS.filter((c) => $('continent-' + c).checked);
+    save();
+    renderProgress();
+  });
 
   $('new-per-day').addEventListener('change', (e) => {
     const v = Math.round(Number(e.target.value));
@@ -1857,12 +2489,22 @@
 
   // Columns as read by the FSRS optimizer: card_id, review_time (ms),
   // review_rating (1-4), review_state (0 new, 1 learning, 2 review,
-  // 3 relearning), review_duration (ms). Extra columns are for people.
+  // 3 relearning), review_duration (ms). The optimizer wants a number as
+  // card_id: 7 × 8 is 708; a country's ISO code has its letters as numbers
+  // 1 to 26, so FR is 618. Extra columns are for people: the fact and the
+  // number typed, or the country and the country whose capital was picked.
   function logCsv() {
-    const rows = ['card_id,review_time,review_rating,review_state,review_duration,fact,typed'];
-    for (const [t, id, rating, st, ms, typedAnswer] of state.log) {
-      const [a, b] = id.split('x').map(Number);
-      rows.push([a * 100 + b, t, rating, st, ms, a + 'x' + b, typedAnswer].join(','));
+    const rows = [isTimes()
+      ? 'card_id,review_time,review_rating,review_state,review_duration,fact,typed'
+      : 'card_id,review_time,review_rating,review_state,review_duration,country,picked'];
+    for (const [t, id, rating, st, ms, answer] of state.log) {
+      if (isTimes()) {
+        const [a, b] = id.split('x').map(Number);
+        rows.push([a * 100 + b, t, rating, st, ms, a + 'x' + b, answer].join(','));
+      } else {
+        const number = (id.charCodeAt(0) - 64) * 100 + (id.charCodeAt(1) - 64);
+        rows.push([number, t, rating, st, ms, id, answer || ''].join(','));
+      }
     }
     return rows.join('\n') + '\n';
   }
@@ -1959,6 +2601,13 @@
     if (btn) press(btn.dataset.key);
   });
 
+  const choices = $('choices');
+  choices.addEventListener('mousedown', (e) => e.preventDefault());
+  choices.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-i]');
+    if (btn) choose(Number(btn.dataset.i));
+  });
+
   $('card-body').addEventListener('click', () => {
     if (mode === 'right') next();
   });
@@ -1969,6 +2618,12 @@
     next();
   });
 
+  const pressed = (btn) => {
+    if (!btn) return;
+    btn.classList.add('pressed');
+    setTimeout(() => btn.classList.remove('pressed'), 120);
+  };
+
   document.addEventListener('keydown', (e) => {
     if (panelOpen()) {
       if (e.key === 'Escape') closePanel();
@@ -1977,22 +2632,32 @@
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const t = e.target;
     if (t.closest && t.closest('input, textarea, select')) return;
-    let key = null;
+    const onButton = t.closest && t.closest('button') && !t.closest('#keypad, #choices');
     const digit = e.key.length === 1 ? '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩0123456789'.indexOf(e.key) % 10 : -1;
+    if (!isTimes()) {
+      // StoliceMax: keys 1 to 4 pick an answer, in reading order; Enter or
+      // space moves on after a right answer.
+      if (digit >= 1 && digit <= 4) {
+        e.preventDefault();
+        choose(digit - 1);
+        pressed(choices.querySelector('[data-i="' + (digit - 1) + '"]'));
+      } else if ((e.key === 'Enter' || e.key === ' ') && mode === 'right' && !onButton) {
+        e.preventDefault();
+        next();
+      }
+      return;
+    }
+    let key = null;
     if (digit >= 0) key = String(digit);
     else if (e.key === 'Backspace') key = 'del';
     else if (e.key === 'Enter') {
-      if (t.closest && t.closest('button') && !t.closest('#keypad')) return;
+      if (onButton) return;
       key = 'ok';
     }
     if (!key) return;
     e.preventDefault();
     press(key);
-    const btn = keypad.querySelector('[data-key="' + key + '"]');
-    if (btn) {
-      btn.classList.add('pressed');
-      setTimeout(() => btn.classList.remove('pressed'), 120);
-    }
+    pressed(keypad.querySelector('[data-key="' + key + '"]'));
   });
 
   // Time in another app or tab counts neither as thinking time nor against
@@ -2019,12 +2684,15 @@
     navigator.storage.persist().catch(() => {});
   }
 
-  makeTrophyGradients();
+  makeRewardGradients();
   buildLanguageMenu();
+  applyApp();
   applyLanguage();
-  buildSquare();
+  buildProgress();
   buildChips();
   next();
+  // The first time, the menu of apps opens by itself, to show there are two.
+  if (!prefs.seenApps) openPanel('apps');
 })();
 </script>
 </body>

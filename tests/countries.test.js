@@ -1,8 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 require('../i18n.js');
-require('../stolice/i18n-stolice.js');
-require('../stolice/countries.js');
+require('../i18n-capitals.js');
+require('../countries.js');
 
 const { COUNTRIES, CONTINENTS, I18N } = globalThis;
 
@@ -38,13 +38,26 @@ test('no two capitals of a continent share a name, so one answer is right', () =
 });
 
 test('every language has the StoliceMax text', () => {
+  const souvenirs = ['palace', 'eiffel', 'bigben', 'atomium', 'colosseum', 'parthenon', 'pyramids', 'forbidden'];
   for (const lang of I18N.LANGS) {
-    const t = I18N.STRINGS[lang];
+    const t = I18N.CAPITALS[lang];
     assert.equal(t.appName, 'StoliceMax');
-    for (const key of ['pickAnswer', 'newOne', 'tapToGoOn', 'choicesAria', 'continentsTitle', 'continentsHint', 'ruleFastRating']) {
+    for (const key of ['typeAnswer', 'newOne', 'choicesAria', 'continentsTitle', 'continentsHint', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
       assert.ok(t[key], `${lang} ${key}`);
     }
-    assert.equal(typeof t.rightIs, 'function', `${lang} rightIs`);
+    for (const key of ['rightIs', 'typeToGoOn', 'trophyName', 'trophyTitle', 'trophiesAria']) {
+      assert.equal(typeof t[key], 'function', `${lang} ${key}`);
+    }
     for (const continent of CONTINENTS) assert.ok(t.continents[continent], `${lang} ${continent}`);
+    for (const id of souvenirs) assert.ok(t.trophyName(id), `${lang} ${id}`);
+  }
+});
+
+test('every language has the text of the app menu', () => {
+  for (const lang of I18N.LANGS) {
+    const t = I18N.STRINGS[lang];
+    for (const key of ['appsTitle', 'appsAria', 'appsIntro', 'appsHint', 'appDone', 'appOpen']) assert.ok(t[key], `${lang} ${key}`);
+    assert.ok(t.appWhat.times && t.appWhat.capitals, `${lang} appWhat`);
+    assert.equal(typeof t.goTo, 'function', `${lang} goTo`);
   }
 });
