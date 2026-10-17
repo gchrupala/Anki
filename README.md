@@ -223,20 +223,20 @@ The shop sells laboratory glassware with coloured liquid that bubbles and glitte
 
 | Glassware | Coins |
 | --- | --- |
-| Blue test tube | 50 |
-| Green test tube | 75 |
-| Pink conical flask | 100 |
-| Purple retort | 150 |
-| Orange round flask | 200 |
-| Rack of test tubes | 250 |
-| Yellow beaker | 300 |
-| Retort over a flame | 400 |
-| Turquoise volumetric flask | 500 |
-| Separating funnel | 600 |
-| Golden retort | 700 |
-| Rainbow flask | 800 |
+| Blue test tube | 30 |
+| Green test tube | 50 |
+| Pink conical flask | 70 |
+| Purple retort | 100 |
+| Orange round flask | 140 |
+| Rack of test tubes | 175 |
+| Yellow beaker | 200 |
+| Retort over a flame | 275 |
+| Turquoise volumetric flask | 350 |
+| Separating funnel | 425 |
+| Golden retort | 500 |
+| Rainbow flask | 575 |
 
-Buying one sets off an explosion for 4 seconds: a flash, a shock wave, a fireball, sparks and drops of the liquid flying out, smoke, and the page shakes. With reduced motion switched on in the device settings, only the glassware is shown. The glassware and its prices are set in `GLASSWARE` in `index.html`, the drawings in `GLASS_ART`, the names in `i18n-chemistry.js`.
+The prices are about a third lower than in the other shops, since ChemiaMax has fewer cards to earn coins with. Buying one sets off an explosion for 4 seconds: a flash, a shock wave, a fireball, sparks and drops of the liquid flying out, smoke, and the page shakes. With reduced motion switched on in the device settings, only the glassware is shown. The glassware and its prices are set in `GLASSWARE` in `index.html`, the drawings in `GLASS_ART`, the names in `i18n-chemistry.js`.
 
 The elements and compounds and their names in the five languages are in `chemistry.js`. No two share a formula; glucose is there, fructose (also C₆H₁₂O₆) is not. Some everyday names stand for a close relative: gypsum is CaSO₄ with water in it, and the Persian کات کبود is copper sulfate with water.
 
