@@ -12,11 +12,41 @@
 
   // Names of the souvenirs in the shop (SOUVENIRS in index.html).
   const SOUVENIRS = {
-    pl: { palace: 'Pałac Kultury', eiffel: 'Wieża Eiffla', bigben: 'Big Ben', atomium: 'Atomium', colosseum: 'Koloseum', parthenon: 'Partenon', pyramids: 'Piramidy w Gizie', forbidden: 'Zakazane Miasto' },
-    en: { palace: 'Palace of Culture and Science', eiffel: 'Eiffel Tower', bigben: 'Big Ben', atomium: 'Atomium', colosseum: 'Colosseum', parthenon: 'Parthenon', pyramids: 'Pyramids of Giza', forbidden: 'Forbidden City' },
-    nl: { palace: 'Cultuurpaleis', eiffel: 'Eiffeltoren', bigben: 'Big Ben', atomium: 'Atomium', colosseum: 'Colosseum', parthenon: 'Parthenon', pyramids: 'Piramides van Gizeh', forbidden: 'Verboden Stad' },
-    es: { palace: 'Palacio de la Cultura', eiffel: 'Torre Eiffel', bigben: 'Big Ben', atomium: 'Atomium', colosseum: 'Coliseo', parthenon: 'Partenón', pyramids: 'Pirámides de Guiza', forbidden: 'Ciudad Prohibida' },
-    fa: { palace: 'کاخ فرهنگ و علم', eiffel: 'برج ایفل', bigben: 'بیگ بن', atomium: 'اتمیوم', colosseum: 'کولوسئوم', parthenon: 'پارتنون', pyramids: 'اهرام جیزه', forbidden: 'شهر ممنوعه' },
+    pl: {
+      palace: 'Pałac Kultury', eiffel: 'Wieża Eiffla', amsterdam: 'Kamieniczki nad kanałem', bigben: 'Big Ben',
+      riesenrad: 'Diabelski młyn', brandenburg: 'Brama Brandenburska', tram: 'Żółty tramwaj', atomium: 'Atomium',
+      colosseum: 'Koloseum', parthenon: 'Partenon', whitehouse: 'Biały Dom', torii: 'Brama torii',
+      petronas: 'Wieże Petronas', lotus: 'Świątynia Lotosu', brasilia: 'Katedra w Brasílii', mosque: 'Meczet Szejka Zajida',
+      pyramids: 'Piramidy w Gizie', forbidden: 'Zakazane Miasto',
+    },
+    en: {
+      palace: 'Palace of Culture and Science', eiffel: 'Eiffel Tower', amsterdam: 'Canal houses', bigben: 'Big Ben',
+      riesenrad: 'Giant Ferris Wheel', brandenburg: 'Brandenburg Gate', tram: 'Yellow tram', atomium: 'Atomium',
+      colosseum: 'Colosseum', parthenon: 'Parthenon', whitehouse: 'White House', torii: 'Torii gate',
+      petronas: 'Petronas Towers', lotus: 'Lotus Temple', brasilia: 'Cathedral of Brasília', mosque: 'Sheikh Zayed Mosque',
+      pyramids: 'Pyramids of Giza', forbidden: 'Forbidden City',
+    },
+    nl: {
+      palace: 'Cultuurpaleis', eiffel: 'Eiffeltoren', amsterdam: 'Grachtenpanden', bigben: 'Big Ben',
+      riesenrad: 'Reuzenrad', brandenburg: 'Brandenburger Tor', tram: 'Gele tram', atomium: 'Atomium',
+      colosseum: 'Colosseum', parthenon: 'Parthenon', whitehouse: 'Witte Huis', torii: 'Toriipoort',
+      petronas: 'Petronas Towers', lotus: 'Lotustempel', brasilia: 'Kathedraal van Brasília', mosque: 'Sjeik Zayedmoskee',
+      pyramids: 'Piramides van Gizeh', forbidden: 'Verboden Stad',
+    },
+    es: {
+      palace: 'Palacio de la Cultura', eiffel: 'Torre Eiffel', amsterdam: 'Casas del canal', bigben: 'Big Ben',
+      riesenrad: 'Noria gigante', brandenburg: 'Puerta de Brandeburgo', tram: 'Tranvía amarillo', atomium: 'Atomium',
+      colosseum: 'Coliseo', parthenon: 'Partenón', whitehouse: 'Casa Blanca', torii: 'Puerta torii',
+      petronas: 'Torres Petronas', lotus: 'Templo del Loto', brasilia: 'Catedral de Brasilia', mosque: 'Mezquita Sheikh Zayed',
+      pyramids: 'Pirámides de Guiza', forbidden: 'Ciudad Prohibida',
+    },
+    fa: {
+      palace: 'کاخ فرهنگ و علم', eiffel: 'برج ایفل', amsterdam: 'خانه‌های کنار کانال', bigben: 'بیگ بن',
+      riesenrad: 'چرخ‌وفلک بزرگ', brandenburg: 'دروازهٔ براندنبورگ', tram: 'تراموای زرد', atomium: 'اتمیوم',
+      colosseum: 'کولوسئوم', parthenon: 'پارتنون', whitehouse: 'کاخ سفید', torii: 'دروازهٔ توری',
+      petronas: 'برج‌های پتروناس', lotus: 'معبد لوتوس', brasilia: 'کلیسای جامع برازیلیا', mosque: 'مسجد شیخ زاید',
+      pyramids: 'اهرام جیزه', forbidden: 'شهر ممنوعه',
+    },
   };
 
   root.I18N.CAPITALS = {

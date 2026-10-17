@@ -38,7 +38,8 @@ test('no two capitals of a continent share a name, so one answer is right', () =
 });
 
 test('every language has the StoliceMax text', () => {
-  const souvenirs = ['palace', 'eiffel', 'bigben', 'atomium', 'colosseum', 'parthenon', 'pyramids', 'forbidden'];
+  const souvenirs = ['palace', 'eiffel', 'amsterdam', 'bigben', 'riesenrad', 'brandenburg', 'tram', 'atomium', 'colosseum',
+    'parthenon', 'whitehouse', 'torii', 'petronas', 'lotus', 'brasilia', 'mosque', 'pyramids', 'forbidden'];
   for (const lang of I18N.LANGS) {
     const t = I18N.CAPITALS[lang];
     assert.equal(t.appName, 'StoliceMax');

@@ -170,20 +170,32 @@ Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have 
 
 ### Rewards
 
-Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per finished day). The shop sells souvenirs instead of trophies: small models of famous buildings in capitals.
+Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per finished day). The shop sells souvenirs instead of trophies: small glittering models of famous sights in capitals.
 
 | Souvenir | Capital | Coins |
 | --- | --- | --- |
 | Palace of Culture and Science | Warsaw | 50 |
-| Eiffel Tower | Paris | 100 |
-| Big Ben | London | 150 |
-| Atomium | Brussels | 250 |
+| Eiffel Tower | Paris | 75 |
+| Canal houses | Amsterdam | 100 |
+| Big Ben | London | 125 |
+| Giant Ferris Wheel | Vienna | 150 |
+| Brandenburg Gate | Berlin | 200 |
+| Yellow tram | Lisbon | 250 |
+| Atomium | Brussels | 300 |
 | Colosseum | Rome | 350 |
-| Parthenon | Athens | 500 |
-| Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 650 |
+| Parthenon | Athens | 400 |
+| White House | Washington | 450 |
+| Torii gate | Tokyo | 500 |
+| Petronas Towers | Kuala Lumpur | 550 |
+| Lotus Temple | New Delhi | 600 |
+| Cathedral of Brasília | Brasília | 650 |
+| Sheikh Zayed Mosque | Abu Dhabi | 700 |
+| Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 750 |
 | Forbidden City | Beijing | 800 |
 
-The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
+All 18 together cost 7000 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks, with some confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
+
+The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings and the places of their stars in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
 
 ### Names of countries and capitals
 

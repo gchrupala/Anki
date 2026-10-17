@@ -329,6 +329,18 @@
   .shop-item .missing { min-height: 2.4rem; display: flex; align-items: center; font-size: 0.8rem; color: var(--ink-soft); }
   .shop-item.too-dear .trophy-icon { opacity: 0.55; }
   .trophy-icon .glint { animation: glint 4.5s ease-in-out infinite 1.5s; }
+  /* Souvenirs glitter: the two layers of dots shimmer in turn and stars twinkle.
+     In the header they stay still, so they don't distract from the cards. */
+  .souvenir .glitter { opacity: 0.5; animation: glitter 1.4s ease-in-out infinite alternate; }
+  .souvenir .glitter.b { animation-delay: -0.7s; }
+  .souvenir .sparkle { opacity: 0; transform-box: fill-box; transform-origin: center; animation: sparkle 2.4s ease-in-out infinite; }
+  @keyframes glitter { from { opacity: 0.1; } to { opacity: 0.9; } }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(45deg); }
+  }
+  .trophies .souvenir .glitter { animation: none; }
+  .trophies .souvenir .sparkle { animation: none; opacity: 0.85; transform: scale(0.8); }
   .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
   .trophy-banner {
     position: fixed;
@@ -364,7 +376,8 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .trophy-banner { animation: none; }
-    .trophy-icon .glint { animation: none; }
+    .trophy-icon .glint, .souvenir .glitter, .souvenir .sparkle { animation: none; }
+    .souvenir .sparkle { opacity: 0.85; transform: none; }
   }
   .pill {
     font-size: 0.75rem;
@@ -410,16 +423,22 @@
   /* The index card */
   .card {
     container-type: inline-size;
-    aspect-ratio: 5 / 3;
     max-width: 100%;
     display: grid;
+    grid-template-columns: minmax(0, 1fr); /* never wider than the page */
     grid-template-rows: auto 1fr;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 6px;
     box-shadow: var(--shadow);
-    overflow: clip; /* not "hidden": that would stop the card growing to fit its text */
+    overflow: clip;
   }
+  /* An empty box across both rows keeps the card at least 5 × 3. The card
+     grows taller when its text needs it, e.g. a right answer with coins on a
+     phone; "aspect-ratio" on the card itself cut off the last line there. */
+  .card::before { content: ""; grid-area: 1 / 1 / 3 / 2; aspect-ratio: 5 / 3; }
+  .card > .card-head { grid-area: 1 / 1; }
+  .card > .card-body { grid-area: 2 / 1; }
   .card-head {
     display: flex;
     align-items: center;
@@ -806,6 +825,23 @@
       <stop offset="1" style="stop-color: var(--gold-lo)"/>
     </radialGradient>
     <clipPath id="coin-clip"><circle cx="16" cy="16" r="15"/></clipPath>
+    <!-- Glitter on the souvenirs: two layers of tiny dots in white, gold, pink and blue -->
+    <pattern id="glitter-a" width="5" height="5" patternUnits="userSpaceOnUse">
+      <circle cx="0.8" cy="1.1" r="0.45" fill="#ffffff"/>
+      <circle cx="3.4" cy="0.6" r="0.32" fill="#fff1a8"/>
+      <circle cx="2.2" cy="3.3" r="0.38" fill="#ffd1ef"/>
+      <circle cx="4.3" cy="4.1" r="0.3" fill="#c8f3ff"/>
+    </pattern>
+    <pattern id="glitter-b" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="translate(2.4 1.6)">
+      <circle cx="1.6" cy="0.7" r="0.36" fill="#fff1a8"/>
+      <circle cx="4.1" cy="2.2" r="0.45" fill="#ffffff"/>
+      <circle cx="0.6" cy="3.7" r="0.3" fill="#c8f3ff"/>
+      <circle cx="3" cy="4.4" r="0.32" fill="#ffd1ef"/>
+    </pattern>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
     <clipPath id="trophy-clip"><path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z"/></clipPath>
   </defs>
 </svg>
@@ -1134,18 +1170,28 @@
     ['emerald', 650, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
     ['sapphire', 800, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
   ].map(([id, price, ...colors]) => ({ id, price, colors }));
-  // StoliceMax: souvenirs of famous buildings, each with the country whose
+  // StoliceMax: souvenirs of famous sights, each with the country whose
   // capital it stands in (the pyramids stand in Giza, part of greater Cairo).
   const SOUVENIRS = [
     ['palace', 50, 'PL', '#fff4dc', '#e9cf9b', '#b8955b', '#6b5131'],
-    ['eiffel', 100, 'FR', '#ffe0bd', '#c98243', '#8f5424', '#542e0f'],
-    ['bigben', 150, 'GB', '#fff4c8', '#e5b95c', '#a97b2a', '#5f4311'],
-    ['atomium', 250, 'BE', '#ffffff', '#d9e2ea', '#8f9caa', '#46525f'],
+    ['eiffel', 75, 'FR', '#ffe0bd', '#c98243', '#8f5424', '#542e0f'],
+    ['amsterdam', 100, 'NL', '#ffe9dc', '#e9845f', '#b54e33', '#5e2516'],
+    ['bigben', 125, 'GB', '#fff4c8', '#e5b95c', '#a97b2a', '#5f4311'],
+    ['riesenrad', 150, 'AT', '#ffffff', '#dfe5ec', '#9aa6b4', '#4a5563'],
+    ['brandenburg', 200, 'DE', '#fff6e0', '#e6d2a6', '#b49b6a', '#66542f'],
+    ['tram', 250, 'PT', '#fff7c2', '#ffd43b', '#d9a300', '#5a4300'],
+    ['atomium', 300, 'BE', '#ffffff', '#d9e2ea', '#8f9caa', '#46525f'],
     ['colosseum', 350, 'IT', '#fff8e8', '#e7d0a4', '#b89a63', '#6a5432'],
-    ['parthenon', 500, 'GR', '#ffffff', '#eef1f5', '#b7c2ce', '#5c6a79'],
-    ['pyramids', 650, 'EG', '#fff4c4', '#f2c85c', '#c08b27', '#6d4a0f'],
+    ['parthenon', 400, 'GR', '#ffffff', '#eef1f5', '#b7c2ce', '#5c6a79'],
+    ['whitehouse', 450, 'US', '#ffffff', '#f1f3f6', '#bcc5d0', '#56637a'],
+    ['torii', 500, 'JP', '#ffd2c2', '#e8432d', '#a8261a', '#4a0d07'],
+    ['petronas', 550, 'MY', '#ffffff', '#cfd9e6', '#8798ad', '#3e4c60'],
+    ['lotus', 600, 'IN', '#ffffff', '#f6eef0', '#c9b8c0', '#6b5864'],
+    ['brasilia', 650, 'BR', '#ffffff', '#e8eef3', '#a9b8c6', '#4b5a69'],
+    ['mosque', 700, 'AE', '#ffffff', '#f3f5f8', '#c3cad4', '#5a6574'],
+    ['pyramids', 750, 'EG', '#fff4c4', '#f2c85c', '#c08b27', '#6d4a0f'],
     ['forbidden', 800, 'CN', '#ffd0c4', '#d93a2b', '#9c1d15', '#560c07'],
-  ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
+].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
 
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
@@ -1988,43 +2034,118 @@
       '</svg>';
   }
 
-  // StoliceMax: each souvenir as a small model on a stand. "shape" is its
-  // outline (for the beam of light); "art" draws it, given its gradients
-  // (face, rim) and colours.
+  // StoliceMax: each souvenir as a small glittering model on a stand.
+  // "shape" is its outline (for the glitter and the beam of light), "art"
+  // draws it, given its gradients (face, rim) and colours, and "sparkles"
+  // are the places [x, y, size] of the stars that twinkle on it.
   const arches = (y1, y2, xs) => xs.map((x) => 'M' + x + ' ' + y2 + 'V' + (y1 + 1) + 'a1 1 0 0 1 2 0V' + y2 + 'z').join('');
   const PALACE = 'M7.5 27V21.5H10V17h2.5V10.5h1.2V8h4.6v2.5h1.2V17H22v4.5h2.5V27zM15.3 8.2L16 2l.7 6.2z';
   const EIFFEL = 'M5.5 27C9.5 24.5 12 19 13.6 11L15.2 3h1.6l1.6 8c1.6 8 4.1 13.5 8.1 16h-4.7c-1.2-3.4-3.3-5.2-5.8-5.2s-4.6 1.8-5.8 5.2zM15.6 3V.8h.8V3z';
+  const HOUSES = [
+    [3.5, 10, 'M3.5 27V12.5h1.2V11h1.3V9.5h2.5V11h1.3v1.5H10V27z', '#d9573f'],
+    [10, 16.5, 'M10 27V11.5c1 0 1.5-.7 1.5-1.8V8.2c0-.6.6-1.2 1.75-1.2s1.75.6 1.75 1.2v1.5c0 1.1.5 1.8 1.5 1.8V27z', '#f0b93a'],
+    [16.5, 23, 'M16.5 27V13H18V9h3.5v4H23V27z', '#4a86cf'],
+    [23, 28.5, 'M23 27V14l2.75-3.5L28.5 14V27z', '#3aa776'],
+  ];
   const BIGBEN = 'M12.6 27V14h-.9V8.4h.9V6.2L16 1.6l3.4 4.6v2.2h.9V14h-.9v13z';
+  const WHEEL = Array.from({ length: 8 }, (_, i) => [16 + 10 * Math.cos(i * Math.PI / 4), 12.5 + 10 * Math.sin(i * Math.PI / 4)]);
+  const BRANDENBURG = 'M4 25h24v2H4zM3.5 10.5h25v3h-25zM8 8.5h16v2H8zM12.5 7h7v1.5h-7z' +
+    [5, 9.1, 13.2, 17.2, 21.3, 25.4].map((x) => 'M' + x + ' 13.5h1.6V25H' + x + 'z').join('');
+  const QUADRIGA = 'M13 7l1-2.2h1.2l.5-1.5h.9l-.2 1.5h1.4l1.2 2.2z';
+  const TRAM = 'M4 25.5V15a2 2 0 0 1 2-2h20a2 2 0 0 1 2 2v10.5zM5.5 13Q5.5 10.8 8 10.8H24Q26.5 10.8 26.5 13z';
   const ATOMS = [[16, 13], [16, 3.6], [24.1, 8.3], [24.1, 17.7], [16, 22.4], [7.9, 17.7], [7.9, 8.3]];
   const COLOSSEUM = 'M3.5 27V12.4Q13 9 21.5 10.2V12.6Q25.5 13.2 28.5 15V27z';
   const PARTHENON = 'M4.5 10L16 4.6 27.5 10zM4.5 10h23v2.6h-23zM4 24h24v1.5H4zM3 25.5h26V27H3z' +
     [5.6, 9.4, 13.2, 17, 20.8, 24.6].map((x) => 'M' + x + ' 12.6h1.8V24h-1.8z').join('');
+  const WHITEHOUSE = 'M3.5 26V15h25v11zM3 13.8h26V15H3zM10.8 12h10.4v1.8H10.8zM10.8 12L16 8.8l5.2 3.2z';
+  const TORII = 'M2.5 9.6Q16 11.4 29.5 9.6L29 7.4Q16 9.4 3 7.4zM4.2 9.9h23.6v1.5H4.2zM5 14.2h22v1.6H5zM15.2 11.4h1.6v2.8h-1.6zM8.2 11.4h2V25h-2zM21.8 11.4h2V25h-2zM7.9 25h2.6V27H7.9zM21.5 25h2.6V27h-2.6z';
+  // A tower of the Petronas Towers, in tiers that narrow to a spire.
+  const tower = (x) => 'M' + (x - 3) + ' 27V14h.5V10h.6V7h.6V5h.9L' + x + ' 1l.4 4h.9v2h.6v3h.6v4h.5v13z';
+  const PETRONAS = tower(10.5) + tower(21.5) + 'M13 15.4h6v1.2h-6z';
+  const LOTUS = [
+    'M16 24Q8.5 22.5 5.5 14Q12 15 16 24zM16 24Q23.5 22.5 26.5 14Q20 15 16 24z',
+    'M16 24Q10.5 19.5 10.2 10Q14.6 14.2 16 24zM16 24Q21.5 19.5 21.8 10Q17.4 14.2 16 24z',
+    'M16 24Q12.4 15.5 16 5.5Q19.6 15.5 16 24z',
+    'M6.5 24.2Q11 20.6 16 24.2Q21 20.6 25.5 24.2z',
+  ];
+  const BRASILIA = 'M8.2 26C11.2 20 11.2 14 9 7.5H23C20.8 14 20.8 20 23.8 26z';
+  // The curved concrete ribs of the cathedral, from the ground to the crown.
+  const RIBS = [-3, -2, -1, 0, 1, 2, 3].map((i) => 'M' + (16 + i * 2.6) + ' 26Q' + (16 + i * 1.75) + ' 16 ' + (16 + i * 2.25) + ' 7.5L' + (16 + i * 2.9) + ' 4').join('');
+  const MOSQUE = 'M5 20h22v7H5zM11 18.4h10V20H11zM10.6 18.4C10.6 13.6 13 10.4 16 9.6C19 10.4 21.4 13.6 21.4 18.4z' +
+    'M5.9 20C5.9 17.6 6.8 16.1 8 15.7C9.2 16.1 10.1 17.6 10.1 20zM21.9 20C21.9 17.6 22.8 16.1 24 15.7C25.2 16.1 26.1 17.6 26.1 20z' +
+    'M2.4 27V10h1.8v17zM27.8 27V10h1.8v17z';
   const PYRAMIDS = 'M3 27L14 7l11 20zM17.5 27l6-12.5L30 27z';
   const FORBIDDEN = 'M4.5 23.5h23V27h-23zM7.5 16.2h17v7.3h-17zM2.5 16.5Q7.5 16.1 9.2 12.8h13.6Q24.5 16.1 29.5 16.5Q16 18.2 2.5 16.5zM10.5 10.4h11v2.6h-11zM6.5 10.9Q10.5 10.6 11.7 8h8.6Q21.5 10.6 25.5 10.9Q16 12.2 6.5 10.9z';
-  const ROOF = 'fill="url(#face-gold)" stroke="#9c6200" stroke-width="0.6" stroke-linejoin="round"';
+  const GOLD = 'fill="url(#face-gold)" stroke="#9c6200" stroke-width="0.6" stroke-linejoin="round"';
+  const path = (d, fill, deep, width = 0.6) => '<path d="' + d + '" fill="' + fill + '" stroke="' + deep + '" stroke-width="' + width + '" stroke-linejoin="round"/>';
   const SOUVENIR_ART = {
     palace: {
       shape: '<path d="' + PALACE + '"/>',
-      art: (f, rim, [, , lo, deep]) => '<path d="' + PALACE + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.7" stroke-linejoin="round"/>' +
+      sparkles: [[16, 1.6, 1.8], [6.5, 18, 1.5], [25.5, 15, 1.6]],
+      art: (f, rim, [, , lo, deep]) => path(PALACE, f, deep, 0.7) +
         '<path d="M14.7 11.5v4.5M16 11.5v4.5M17.3 11.5v4.5M11.5 18.3v2.4M13.6 18.3v2.4M18.4 18.3v2.4M20.5 18.3v2.4M9 22.8v3M11.3 22.8v3M13.6 22.8v3M18.4 22.8v3M20.7 22.8v3M23 22.8v3" stroke="' + lo + '" stroke-width="0.7"/>' +
         '<path d="M14.9 27v-3.2h2.2V27z" fill="' + deep + '"/>',
     },
     eiffel: {
       shape: '<path d="' + EIFFEL + '"/>',
-      art: (f, rim, [, , lo, deep]) => '<path d="' + EIFFEL + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
+      sparkles: [[16, 2.2, 1.6], [7, 21, 1.5], [25, 20, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path(EIFFEL, f, deep) +
         '<path d="M12.2 18.4l2.3-6.6M19.8 18.4l-2.3-6.6M9.6 24.4l2.6-4.3M22.4 24.4l-2.6-4.3M14.6 10.4L16 4.5l1.4 5.9" stroke="' + lo + '" stroke-width="0.55" fill="none"/>' +
         '<path d="M10.4 18.4h11.2v1.7H10.4zM13.1 10.4h5.8v1.4h-5.8z" fill="' + deep + '"/>',
     },
+    amsterdam: {
+      shape: '<path d="' + HOUSES.map((h) => h[2]).join('') + '"/>',
+      sparkles: [[6.75, 7.5, 1.5], [13.25, 5, 1.6], [25.75, 8.5, 1.5]],
+      art: () => HOUSES.map(([x0, x1, d, color]) => {
+        const w = x1 - x0;
+        let windows = '';
+        for (const y of [14, 17.5, 21]) {
+          for (const x of [x0 + w * 0.2, x0 + w * 0.6]) windows += 'M' + x.toFixed(2) + ' ' + y + 'h' + (w * 0.2).toFixed(2) + 'v2h-' + (w * 0.2).toFixed(2) + 'z';
+        }
+        return path(d, color, '#3b2a20', 0.5) + '<path d="' + windows + '" fill="#fffaf0" stroke="#3b2a20" stroke-width="0.3"/>' +
+          '<path d="M' + (x0 + w / 2 - 0.8).toFixed(2) + ' 27v-3h1.6v3z" fill="#3b2a20"/>';
+      }).join('') + '<path d="' + HOUSES.map((h) => h[2]).join('') + '" fill="url(#sheen)"/>',
+    },
     bigben: {
       shape: '<path d="' + BIGBEN + '"/>',
-      art: (f, rim, [, , lo, deep]) => '<path d="' + BIGBEN + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.7" stroke-linejoin="round"/>' +
+      sparkles: [[16, 1.4, 1.5], [10.5, 7.5, 1.4], [22, 17, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path(BIGBEN, f, deep, 0.7) +
         '<path d="M12.6 6.2h6.8M11.7 14h8.6" stroke="' + deep + '" stroke-width="0.6"/>' +
         '<path d="M14.3 15.5v10M16 15.5v10M17.7 15.5v10M14.3 6.9v1M16 6.9v1M17.7 6.9v1" stroke="' + lo + '" stroke-width="0.7"/>' +
         '<circle cx="16" cy="11.2" r="2.25" fill="#fffdf4" stroke="' + deep + '" stroke-width="0.6"/>' +
         '<path d="M16 11.2V9.7M16 11.2l1.1.7" stroke="' + deep + '" stroke-width="0.55" stroke-linecap="round"/>',
     },
+    riesenrad: {
+      shape: '<circle cx="16" cy="12.5" r="11.6"/><path d="M15 12.5L9.5 27h2L16 15l4.5 12h2L17 12.5z"/>',
+      sparkles: [[26.5, 3.2, 1.6], [5.5, 4, 1.4], [26, 24, 1.4]],
+      art: (f, rim, [, , lo, deep]) => '<path d="M16 12.5L10.5 27M16 12.5L21.5 27M12.3 21.5h7.4" stroke="' + deep + '" stroke-width="1.2" stroke-linecap="round" fill="none"/>' +
+        '<path d="' + WHEEL.map(([x, y]) => 'M16 12.5L' + x.toFixed(2) + ' ' + y.toFixed(2)).join('') + '" stroke="' + lo + '" stroke-width="0.5"/>' +
+        '<circle cx="16" cy="12.5" r="8.8" fill="none" stroke="' + lo + '" stroke-width="0.5"/>' +
+        '<circle cx="16" cy="12.5" r="10" fill="none" stroke="' + rim + '" stroke-width="1.6"/>' +
+        '<circle cx="16" cy="12.5" r="1.5" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        WHEEL.map(([x, y]) => '<rect x="' + (x - 1.4).toFixed(2) + '" y="' + (y - 0.6).toFixed(2) + '" width="2.8" height="2" rx="0.5" fill="#e2453c" stroke="' + deep + '" stroke-width="0.4"/>').join(''),
+    },
+    brandenburg: {
+      shape: '<path d="' + BRANDENBURG + QUADRIGA + '"/>',
+      sparkles: [[16, 1.8, 1.7], [4, 8.5, 1.5], [28, 8.5, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path(BRANDENBURG, f, deep, 0.5) +
+        '<path d="M3.5 12h25" stroke="' + lo + '" stroke-width="0.4"/>' +
+        path(QUADRIGA, '#4fa58b', '#235c4b', 0.4),
+    },
+    tram: {
+      shape: '<path d="' + TRAM + '"/>',
+      sparkles: [[16, 5.6, 1.5], [3.5, 10.2, 1.4], [28.5, 10.2, 1.4]],
+      art: (f, rim, [, , lo, deep]) => '<path d="M14 10.8L16 7.5 18 10.8M13 7.5h6" stroke="' + deep + '" stroke-width="0.6" fill="none"/>' +
+        path('M5.5 13Q5.5 10.8 8 10.8H24Q26.5 10.8 26.5 13z', '#f4efe2', deep, 0.5) +
+        path('M4 25.5V15a2 2 0 0 1 2-2h20a2 2 0 0 1 2 2v10.5z', f, deep, 0.6) +
+        '<path d="' + [0, 1, 2, 3, 4].map((i) => 'M' + (5.6 + i * 4.55).toFixed(2) + ' 15h3.2v4.2h-3.2z').join('') + '" fill="#cfe6f5" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<path d="M4 20.6h24v1.2H4z" fill="#fffdf2"/><path d="M3.5 24.2h25v1.3h-25z" fill="' + lo + '"/>' +
+        '<circle cx="9.5" cy="26" r="1.5" fill="#333"/><circle cx="22.5" cy="26" r="1.5" fill="#333"/>' +
+        '<circle cx="27.2" cy="22.8" r="0.5" fill="#fff6b0"/>',
+    },
     atomium: {
       shape: ATOMS.map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="2.5"/>').join(''),
+      sparkles: [[27, 4.5, 1.6], [4.5, 13, 1.5], [21, 25, 1.3]],
       art: (f, rim, [, , lo, deep]) => '<path d="' +
         ATOMS.slice(1).map(([x, y]) => 'M16 13L' + x + ' ' + y).join('') +
         'M16 3.6L24.1 8.3L24.1 17.7L16 22.4L7.9 17.7L7.9 8.3ZM7.9 17.7L9.6 27M24.1 17.7L22.4 27M16 22.4V27" stroke="' + lo + '" stroke-width="1.1" fill="none"/>' +
@@ -2032,45 +2153,113 @@
     },
     colosseum: {
       shape: '<path d="' + COLOSSEUM + '"/>',
-      art: (f, rim, [, , lo, deep]) => '<path d="' + COLOSSEUM + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.7" stroke-linejoin="round"/>' +
+      sparkles: [[21.5, 8.2, 1.6], [3.8, 10.3, 1.5], [28.2, 13, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path(COLOSSEUM, f, deep, 0.7) +
         '<path d="M3.5 17h25M3.5 21.2h25" stroke="' + lo + '" stroke-width="0.6"/>' +
         '<path d="' + arches(13.2, 16.2, [5, 8.4, 11.8, 15.2, 18.6]) + arches(17.8, 20.6, [5, 8.4, 11.8, 15.2, 18.6, 22, 25.4]) +
         arches(22, 26, [5, 8.4, 11.8, 15.2, 18.6, 22, 25.4]) + '" fill="' + deep + '" fill-opacity="0.75"/>',
     },
     parthenon: {
       shape: '<path d="' + PARTHENON + '"/>',
-      art: (f, rim, [, , lo, deep]) => '<path d="' + PARTHENON + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5" stroke-linejoin="round"/>' +
+      sparkles: [[16, 3, 1.7], [3.8, 8.2, 1.5], [28.2, 8.2, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path(PARTHENON, f, deep, 0.5) +
         '<path d="M8 9.1L16 5.5l8 3.6M4.5 11.3h23" stroke="' + lo + '" stroke-width="0.5" fill="none"/>',
+    },
+    whitehouse: {
+      shape: '<path d="' + WHITEHOUSE + '"/>',
+      sparkles: [[21, 2.6, 1.4], [3, 11.5, 1.5], [29, 11.5, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path(WHITEHOUSE, f, deep, 0.5) +
+        '<path d="M11 13.8h10v10.7H11z" fill="' + lo + '" fill-opacity="0.55"/>' +
+        '<path d="' + [11.7, 14.25, 16.75, 19.3].map((x) => 'M' + x + ' 13.8h1v10.7h-1z').join('') + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.3"/>' +
+        '<path d="' + [4.3, 6.6, 8.9, 21.9, 24.2, 26.5].map((x) => 'M' + x + ' 16.5h1.2v2.2h-1.2zM' + x + ' 20.5h1.2v2.2h-1.2z').join('') + '" fill="' + deep + '" fill-opacity="0.7"/>' +
+        '<path d="M12.5 24.5h7V26h-7z" fill="' + lo + '"/>' +
+        '<path d="M16 8.8V4" stroke="' + deep + '" stroke-width="0.5"/>' +
+        '<path d="M16.2 4h3.6v2.4h-3.6z" fill="#d63c3c"/><path d="M16.2 4.8h3.6M16.2 5.6h3.6" stroke="#fff" stroke-width="0.35"/>' +
+        '<path d="M16.2 4h1.5v1.3h-1.5z" fill="#2f4fa8"/>',
+    },
+    torii: {
+      shape: '<path d="' + TORII + '"/>',
+      sparkles: [[3, 5.2, 1.5], [29, 5.2, 1.5], [16, 4.2, 1.6]],
+      art: (f, rim, [, , , deep]) => path('M4.2 9.9h23.6v1.5H4.2zM5 14.2h22v1.6H5zM15.2 11.4h1.6v2.8h-1.6zM8.2 11.4h2V25h-2zM21.8 11.4h2V25h-2z', f, deep, 0.5) +
+        path('M2.5 9.6Q16 11.4 29.5 9.6L29 7.4Q16 9.4 3 7.4zM7.9 25h2.6V27H7.9zM21.5 25h2.6V27h-2.6z', '#2b2b2b', '#111', 0.4) +
+        '<path d="M2.5 9.6Q16 11.4 29.5 9.6L29 7.4Q16 9.4 3 7.4z" fill="url(#sheen)"/>',
+    },
+    petronas: {
+      shape: '<path d="' + PETRONAS + '"/>',
+      sparkles: [[7, 3, 1.4], [25, 3, 1.4], [16, 9, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path(tower(10.5) + tower(21.5), f, deep, 0.5) +
+        '<path d="M9.3 8.5V26M10.5 6V26M11.7 8.5V26M20.3 8.5V26M21.5 6V26M22.7 8.5V26" stroke="' + lo + '" stroke-width="0.35"/>' +
+        path('M13 15.4h6v1.2h-6z', f, deep, 0.4) +
+        '<path d="M13.6 16.6L16 20.5l2.4-3.9" stroke="' + deep + '" stroke-width="0.5" fill="none"/>',
+    },
+    lotus: {
+      shape: '<path d="' + LOTUS.join('') + 'M4 24.2h24V27H4z"/>',
+      sparkles: [[16, 3.2, 1.7], [5, 11.5, 1.5], [27, 11.5, 1.5]],
+      art: (f, rim, [, , lo, deep]) => path('M4 24.2h24V27H4z', f, deep, 0.5) +
+        '<path d="M5 25.3h22v.9H5z" fill="#9fd3ee"/>' +
+        path(LOTUS[0], rim, deep, 0.5) + path(LOTUS[1], f, deep, 0.5) + path(LOTUS[2], f, deep, 0.5) + path(LOTUS[3], f, deep, 0.5) +
+        '<path d="M16 23.5V8M12.5 21Q11.5 16 11 11.5M19.5 21Q20.5 16 21 11.5" stroke="' + lo + '" stroke-width="0.35" fill="none"/>',
+    },
+    brasilia: {
+      shape: '<path d="M7.6 26C10.8 20 10.8 14 8.6 7.4L7 3.6h18L23.4 7.4C21.2 14 21.2 20 24.4 26z"/>',
+      sparkles: [[6, 2.8, 1.5], [26, 2.8, 1.5], [16, 15, 1.4]],
+      art: (f, rim, [, , , deep]) => '<path d="M3.5 25.6h25V27h-25z" fill="#bfe3f2"/>' +
+        path(BRASILIA, '#8cc4ec', deep, 0.4) + '<path d="' + BRASILIA + '" fill="url(#sheen)"/>' +
+        '<path d="' + RIBS + '" stroke="' + deep + '" stroke-width="1.9" stroke-linecap="round" fill="none"/>' +
+        '<path d="' + RIBS + '" stroke="' + rim + '" stroke-width="1.15" stroke-linecap="round" fill="none"/>' +
+        '<path d="M16 .9V4.2M14.8 2h2.4" stroke="' + deep + '" stroke-width="0.6" stroke-linecap="round"/>',
+    },
+    mosque: {
+      shape: '<path d="' + MOSQUE + 'M2.4 10L3.3 7l.9 3zM27.8 10l.9-3 .9 3z"/>',
+      sparkles: [[16, 4.4, 1.6], [6, 9, 1.3], [26, 9, 1.3]],
+      art: (f, rim, [, , lo, deep]) => path(MOSQUE, f, deep, 0.5) +
+        '<path d="' + arches(21.5, 26, [6.5, 9.5, 12.5, 17.5, 20.5, 23.5]) + 'M14.6 27v-4a1.4 1.4 0 0 1 2.8 0v4z" fill="' + lo + '" fill-opacity="0.8"/>' +
+        '<path d="M2 13.2h2.6v.9H2zM27.4 13.2h2.6v.9h-2.6z" fill="' + lo + '"/>' +
+        '<path d="M16 9.6V7.2M8 15.7V14M24 15.7V14" stroke="#d9a400" stroke-width="0.7"/>' +
+        '<circle cx="16" cy="6.7" r="0.55" fill="#ffd34d"/><circle cx="8" cy="13.6" r="0.4" fill="#ffd34d"/><circle cx="24" cy="13.6" r="0.4" fill="#ffd34d"/>' +
+        '<path d="M2.4 10L3.3 7l.9 3zM27.8 10l.9-3 .9 3z" ' + GOLD + '/>',
     },
     pyramids: {
       shape: '<path d="' + PYRAMIDS + '"/>',
+      sparkles: [[14, 4.8, 1.8], [23.5, 12.2, 1.5], [28, 21, 1.3]],
       art: (f, rim, [, , lo, deep]) => '<circle cx="6.5" cy="7" r="2.6" fill="#ffe27a" stroke="' + lo + '" stroke-width="0.5"/>' +
-        '<path d="M17.5 27L23.5 14.5 24.8 27z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
-        '<path d="M24.8 27L23.5 14.5 30 27z" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
-        '<path d="M3 27L14 7l2.5 20z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
-        '<path d="M16.5 27L14 7l11 20z" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.6" stroke-linejoin="round"/>' +
+        path('M17.5 27L23.5 14.5 24.8 27z', f, deep) + path('M24.8 27L23.5 14.5 30 27z', lo, deep) +
+        path('M3 27L14 7l2.5 20z', f, deep) + path('M16.5 27L14 7l11 20z', lo, deep) +
         '<path d="M9.6 15H15M6.9 20h8.7M4.9 23.5h11.1" stroke="' + lo + '" stroke-width="0.45" stroke-opacity="0.7"/>',
     },
     forbidden: {
       shape: '<path d="' + FORBIDDEN + '"/>',
-      art: (f, rim, [, , , deep]) => '<path d="M4.5 23.5h23V27h-23z" fill="#efe2cf" stroke="' + deep + '" stroke-width="0.6"/>' +
-        '<path d="M7.5 16.2h17v7.3h-17z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+      sparkles: [[16, 5.6, 1.6], [2.5, 14.5, 1.5], [29.5, 14.5, 1.5]],
+      art: (f, rim, [, , , deep]) => path('M4.5 23.5h23V27h-23z', '#efe2cf', deep) +
+        path('M7.5 16.2h17v7.3h-17z', f, deep) +
         '<path d="M9.8 17v6.5M12.6 17v6.5M19.4 17v6.5M22.2 17v6.5" stroke="#f2b632" stroke-width="0.7"/>' +
         '<path d="M14.6 23.5v-4.3h2.8v4.3z" fill="' + deep + '"/>' +
-        '<path d="M2.5 16.5Q7.5 16.1 9.2 12.8h13.6Q24.5 16.1 29.5 16.5Q16 18.2 2.5 16.5z" ' + ROOF + '/>' +
-        '<path d="M10.5 10.4h11v2.6h-11z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6"/>' +
-        '<path d="M6.5 10.9Q10.5 10.6 11.7 8h8.6Q21.5 10.6 25.5 10.9Q16 12.2 6.5 10.9z" ' + ROOF + '/>' +
+        '<path d="M2.5 16.5Q7.5 16.1 9.2 12.8h13.6Q24.5 16.1 29.5 16.5Q16 18.2 2.5 16.5z" ' + GOLD + '/>' +
+        path('M10.5 10.4h11v2.6h-11z', f, deep) +
+        '<path d="M6.5 10.9Q10.5 10.6 11.7 8h8.6Q21.5 10.6 25.5 10.9Q16 12.2 6.5 10.9z" ' + GOLD + '/>' +
         '<path d="M11.4 8h9.2" stroke="#9c6200" stroke-width="0.9" stroke-linecap="round"/>',
     },
   };
 
+  // A four-pointed star that twinkles; i staggers the twinkling.
+  const sparkle = (x, y, s, i) => {
+    const q = 'Q' + x + ' ' + y + ' ';
+    return '<path class="sparkle" style="animation-delay:' + (i * 0.8) + 's" d="M' + x + ' ' + (y - s) +
+      q + (x + s) + ' ' + y + q + x + ' ' + (y + s) + q + (x - s) + ' ' + y + q + x + ' ' + (y - s) +
+      'z" fill="#fffdf0" stroke="#f5b700" stroke-width="0.3"/>';
+  };
+
   function souvenirIcon(id) {
     const { colors } = SOUVENIRS.find((r) => r.id === id) || SOUVENIRS[0];
+    const art = SOUVENIR_ART[id];
     const rim = 'url(#rim-' + id + ')';
-    return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
+    return '<svg class="trophy-icon souvenir" viewBox="0 0 32 32" aria-hidden="true">' +
       '<rect x="3" y="27" width="26" height="3" rx="1.2" fill="' + rim + '" stroke="' + colors[3] + '" stroke-width="0.7"/>' +
-      SOUVENIR_ART[id].art('url(#face-' + id + ')', rim, colors) +
+      art.art('url(#face-' + id + ')', rim, colors) +
+      // Glitter: two layers of tiny dots that shimmer in turn.
+      '<g clip-path="url(#clip-' + id + ')"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/></g>' +
       glint('clip-' + id) +
+      art.sparkles.map(([x, y, s], i) => sparkle(x, y, s, i)).join('') +
       '</svg>';
   }
 
@@ -2092,10 +2281,143 @@
       '<span>' + esc(t.trophyFor(price)) + '</span>';
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) confetti(CELEBRATION_MS);
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // A souvenir gets fireworks, with less confetti so the bursts show.
+      if (!isTimes()) fireworks(CELEBRATION_MS);
+      confetti(CELEBRATION_MS, isTimes() ? 1 : 0.35);
+    }
   }
 
-  function confetti(ms) {
+  // StoliceMax: fireworks for a souvenir. Rockets rise from the bottom of the
+  // screen and burst into sparks, over a darkened screen.
+  function fireworks(ms) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const colors = ['#ffd34d', '#ff5fa2', '#4fd8ff', '#6dff8a', '#b18cff', '#ff9a3c', '#ffffff'];
+    const pick = () => colors[Math.floor(Math.random() * colors.length)];
+    const ROCKETS = 10;
+    // Launch times spread over the first part, so the last bursts fade before the end.
+    const launches = Array.from({ length: ROCKETS }, (_, i) => (i * (ms - 2300)) / ROCKETS + Math.random() * 150);
+    const rockets = [];
+    const sparks = [];
+    // A rocket rises to its peak in 0.6 to 0.85 seconds, slowing down evenly.
+    const launch = () => {
+      const rise = innerHeight + 10 - innerHeight * (0.15 + Math.random() * 0.45);
+      const time = 0.6 + Math.random() * 0.25;
+      rockets.push({
+        x: innerWidth * (0.15 + Math.random() * 0.7),
+        y: innerHeight + 10,
+        vx: (Math.random() - 0.5) * 60,
+        vy: (-2 * rise) / time,
+        slow: (2 * rise) / (time * time),
+        color: pick(),
+      });
+    };
+    const burst = (r) => {
+      const n = 70 + Math.floor(Math.random() * 40);
+      const ring = Math.random() < 0.35; // some bursts are a ring, the others a ball
+      const second = pick();
+      for (let i = 0; i < n; i++) {
+        const angle = (i / n) * Math.PI * 2 + Math.random() * 0.1;
+        const speed = ring ? 240 : 70 + Math.random() * 230;
+        sparks.push({
+          x: r.x, y: r.y,
+          trail: [],
+          vx: Math.cos(angle) * speed + r.vx,
+          vy: Math.sin(angle) * speed,
+          age: 0,
+          life: 1.1 + Math.random() * 0.7,
+          color: i % 3 ? r.color : second,
+        });
+      }
+    };
+    const start = performance.now();
+    let last = start;
+    let launched = 0;
+    const frame = (now) => {
+      const elapsed = now - start;
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      while (launched < ROCKETS && elapsed >= launches[launched]) {
+        launch();
+        launched += 1;
+      }
+      if (canvas.width !== Math.round(innerWidth * ratio)) {
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      // The night sky fades in and out.
+      const fade = Math.min(1, elapsed / 400, Math.max(0, (ms - elapsed) / 600));
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(8, 12, 36, ' + (0.72 * fade) + ')';
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+      ctx.globalCompositeOperation = 'lighter'; // overlapping sparks glow
+      ctx.lineCap = 'round';
+      for (let i = rockets.length - 1; i >= 0; i--) {
+        const r = rockets[i];
+        r.vy += r.slow * dt;
+        r.x += r.vx * dt;
+        r.y += r.vy * dt;
+        ctx.globalAlpha = fade;
+        ctx.strokeStyle = r.color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(r.x, r.y);
+        ctx.lineTo(r.x - r.vx * 0.02, r.y - r.vy * 0.02);
+        ctx.stroke();
+        if (r.vy >= -30) {
+          burst(r);
+          rockets.splice(i, 1);
+        }
+      }
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const p = sparks[i];
+        p.age += dt;
+        if (p.age >= p.life) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        p.trail.unshift([p.x, p.y]);
+        if (p.trail.length > 5) p.trail.pop();
+        p.vx *= 1 - 1.3 * dt; // air slows the sparks down
+        p.vy = p.vy * (1 - 1.3 * dt) + 140 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        let alpha = 1 - p.age / p.life;
+        if (p.age > p.life * 0.6) alpha *= 0.4 + Math.random() * 0.6; // crackle as they die out
+        // A short tail, a soft glow and a bright spark.
+        ctx.globalAlpha = alpha * fade * 0.6;
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        for (const [x, y] of p.trail) ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = alpha * fade * 0.25;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = alpha * fade;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (elapsed < ms) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  }
+
+  // density: 1 for the full amount of confetti, less for fewer pieces.
+  function confetti(ms, density = 1) {
     const canvas = document.createElement('canvas');
     canvas.className = 'confetti';
     canvas.setAttribute('aria-hidden', 'true');
@@ -2124,14 +2446,14 @@
     };
     const start = performance.now();
     let last = start;
-    spawn(90);
+    spawn(Math.round(90 * density));
     const frame = (now) => {
       const elapsed = now - start;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       // New pieces keep coming until shortly before the end, so the last
       // ones are still falling when the confetti fades out.
-      if (elapsed < ms - 1500) spawn(Math.round(160 * dt));
+      if (elapsed < ms - 1500 && Math.random() < density) spawn(Math.round(160 * dt));
       if (canvas.width !== Math.round(innerWidth * ratio)) {
         canvas.width = Math.round(innerWidth * ratio);
         canvas.height = Math.round(innerHeight * ratio);
