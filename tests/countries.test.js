@@ -56,7 +56,7 @@ test('every language has the StoliceMax text', () => {
 test('every language has the text of the app menu', () => {
   for (const lang of I18N.LANGS) {
     const t = I18N.STRINGS[lang];
-    for (const key of ['appsTitle', 'appsAria', 'appsIntro', 'appsHint', 'appDone', 'appOpen']) assert.ok(t[key], `${lang} ${key}`);
+    for (const key of ['appsAria', 'appsIntro', 'appsHint', 'appDone', 'appOpen']) assert.ok(t[key], `${lang} ${key}`);
     assert.ok(t.appWhat.times && t.appWhat.capitals, `${lang} appWhat`);
     assert.equal(typeof t.goTo, 'function', `${lang} goTo`);
   }

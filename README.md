@@ -1,8 +1,8 @@
-# MnożenieMax
+# MaxApki: MnożenieMax and StoliceMax
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds [StoliceMax](#stolicemax), a sister app with the same options that teaches the capitals of countries. Tapping the app name at the top of the screen opens a menu with both apps.
+The same page also holds [StoliceMax](#stolicemax), a sister app with the same options that teaches the capitals of countries. The two apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with both apps.
 
 ## Running it
 
@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MnożenieMax"; StoliceMax is opened from inside it. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+The home-screen name is "MaxApki", and its icon shows the cards of both apps. MnożenieMax and StoliceMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 

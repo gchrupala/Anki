@@ -13,12 +13,13 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MnożenieMax">
+<meta name="apple-mobile-web-app-title" content="MaxApki">
 <meta name="theme-color" content="#f7f9fd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1c2925" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-  /* Two apps in one page: MnożenieMax (times tables) and StoliceMax (capitals).
+  /* MaxApki, a family of two apps in one page: MnożenieMax (times tables) and
+     StoliceMax (capitals).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -1037,7 +1038,7 @@
 
 <div class="panel" id="apps" role="dialog" aria-modal="true" aria-labelledby="apps-title" hidden>
   <div class="sheet" id="apps-sheet" tabindex="-1">
-    <h2 id="apps-title" data-t="appsTitle">Apps</h2>
+    <h2 id="apps-title">MaxApki</h2>
     <p id="apps-hint"></p>
     <div class="app-list" id="app-list"></div>
     <div class="sheet-foot">
@@ -1149,7 +1150,8 @@
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
 
-  // Both apps run in this page. Each has its own progress, coins and rewards,
+  // Both apps of the MaxApki family run in this page; it is installed as one
+  // app, MaxApki. Each app has its own progress, coins and rewards,
   // saved under its own key; the app that is open and the language are
   // shared, under PREFS_KEY.
   const APPS = {
