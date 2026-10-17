@@ -19,7 +19,8 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
   /* MaxApki, a family of apps in one page: MnożenieMax (times tables),
-     StoliceMax (capitals) and ChemiaMax (chemical formulas).
+     StoliceMax (capitals), ChemiaMax (chemical formulas) and LiteraturaMax
+     (authors of books).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -124,7 +125,8 @@
   /* Parts of the page that belong to one app only */
   body[data-app="times"] [data-app]:not([data-app~="times"]),
   body[data-app="capitals"] [data-app]:not([data-app~="capitals"]),
-  body[data-app="chemistry"] [data-app]:not([data-app~="chemistry"]) { display: none !important; }
+  body[data-app="chemistry"] [data-app]:not([data-app~="chemistry"]),
+  body[data-app="literature"] [data-app]:not([data-app~="literature"]) { display: none !important; }
 
   body {
     margin: 0;
@@ -601,6 +603,8 @@
     line-height: 1.15;
     text-wrap: balance;
   }
+  /* LiteraturaMax: titles are longer than country names */
+  .country.book { font-size: clamp(1.3rem, 6.2cqi, 2.5rem); }
   .card.shake .place { animation: shake 0.35s; }
   .card.enter .place { animation: rise 0.25s ease-out; }
   @media (prefers-reduced-motion: reduce) {
@@ -956,6 +960,10 @@
             <span class="country" id="compound"></span>
             <span class="nick" id="nick"></span>
           </div>
+          <div class="place" data-app="literature" aria-live="polite">
+            <span class="country book" id="book-title"></span>
+            <span class="nick" id="book-original"></span>
+          </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
         </div>
       </div>
@@ -989,7 +997,7 @@
         <button type="button" class="key ok" data-key="ok" tabindex="-1">OK</button>
       </div>
 
-      <div class="choices" id="choices" data-app="capitals chemistry" data-t-aria="choicesAria">
+      <div class="choices" id="choices" data-app="capitals chemistry literature" data-t-aria="choicesAria">
         <button type="button" class="choice" data-i="0"></button>
         <button type="button" class="choice" data-i="1"></button>
         <button type="button" class="choice" data-i="2"></button>
@@ -1001,7 +1009,7 @@
       <h2 data-t="progressTitle">Your times table</h2>
       <p class="sub" data-t="progressSub">Each square is one fact: row × column. Squares fill in as facts move into long-term memory.</p>
       <div class="square" id="square" role="img" data-app="times" data-t-aria="squareAria"></div>
-      <div class="map" id="map" role="img" data-app="capitals chemistry" data-t-aria="squareAria"></div>
+      <div class="map" id="map" role="img" data-app="capitals chemistry literature" data-t-aria="squareAria"></div>
       <ul class="legend">
         <li><span class="sw cell"></span><b id="n-new">0</b> <span data-t="legendNew">not started</span></li>
         <li><span class="sw cell is-learning"></span><b id="n-learning">0</b> <span data-t="legendLearning">practising</span></li>
@@ -1043,7 +1051,7 @@
       <div class="chips" id="extra-chips"></div>
     </section>
 
-    <section data-app="capitals chemistry">
+    <section data-app="capitals chemistry literature">
       <h3 data-t="groupsTitle">Groups</h3>
       <div class="chips" id="group-chips"></div>
       <p class="hint" data-t="groupsHint" style="margin-top:0.5rem"></p>
@@ -1164,8 +1172,10 @@
 <script src="i18n.js"></script>
 <script src="i18n-capitals.js"></script>
 <script src="i18n-chemistry.js"></script>
+<script src="i18n-literature.js"></script>
 <script src="countries.js"></script>
 <script src="chemistry.js"></script>
+<script src="literature.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1179,7 +1189,7 @@
   // relearning earns nothing), and coins never change the schedule.
   // Level 1: learned (left the first-day steps); 2: next review a week or
   // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js,
-  // i18n-capitals.js and i18n-chemistry.js in step.
+  // i18n-capitals.js, i18n-chemistry.js and i18n-literature.js in step.
   const LEVEL_COINS = [0, 2, 5, 10];
   const OLD_LEVEL_COINS = [0, 1, 2, 5]; // MnożenieMax before settings layout 6
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
@@ -1273,6 +1283,23 @@
     ['retortgold', 500, '#fff6c4', '#ffc928', '#e09a00', '#7a5200'],
     ['rainbow', 575, '#fbe3ff', '#c36bff', '#8a2be2', '#3d0f66'],
   ].map(([id, price, ...colors]) => ({ id, price, colors }));
+  // LiteraturaMax: literary prizes, each with the country that gives it, or
+  // null for an international prize. The Nobel Prize is the dearest.
+  const PRIZES = [
+    ['newbery', 30, 'US', '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['carnegie', 40, 'GB', '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['kafka', 50, 'CZ', '#f3d2a8', '#b9783a', '#7f4b1c', '#4f2c0c'],
+    ['goncourt', 75, 'FR', '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['cervantes', 100, 'ES', '#ffe3d6', '#e8a17f', '#b86b4b', '#6e3622'],
+    ['shevchenko', 125, 'UA', '#fff6c4', '#ffd23f', '#d9a300', '#806000'],
+    ['jalal', 150, 'IR', '#fff3c0', '#f4c430', '#c99400', '#7a5600'],
+    ['hugo', 200, null, '#ffffff', '#d6e0ea', '#93a4b6', '#47566a'],
+    ['arabic', 250, null, '#fff1c9', '#e9b949', '#b5851d', '#6a4a0b'],
+    ['nike', 300, 'PL', '#fff8d0', '#ffd23f', '#e3a700', '#8a6100'],
+    ['booker', 375, 'GB', '#fff4c6', '#f7c948', '#cf9714', '#7a5200'],
+    ['andersen', 450, null, '#fffbe0', '#ffd700', '#d4a200', '#806000'],
+    ['nobel', 700, 'SE', '#fffbe6', '#ffd84a', '#e2a400', '#8a5a00'],
+  ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
 
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
@@ -1325,15 +1352,30 @@
       rewards: GLASSWARE,
       strings: (l) => I18N.CHEMISTRY[l] || {},
     },
+    literature: {
+      id: 'literature',
+      name: 'LiteraturaMax',
+      hash: 'literatura',
+      storeKey: 'literature-cards-v1',
+      layout: 1,
+      // Titles and four names take a moment to read: Easy within 6 seconds.
+      fastSeconds: 6,
+      settings: () => ({ groups: BOOK_GROUPS.slice(), newPerDay: 5, retention: 0.9, answerTime: 20 }),
+      groupKey: 'groups', // the setting with the categories of books to practise
+      rewards: PRIZES,
+      strings: (l) => I18N.LITERATURE[l] || {},
+    },
   };
   // The home-screen icons of the apps, for the app menu.
   const APP_ICONS = {
     times: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#2a4fc2"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#1b3a99"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M226 238 L286 298 M286 238 L226 298" stroke="#1d2742" stroke-width="22" stroke-linecap="round"/></g></svg>',
     chemistry: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#7b3fc4"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#4f2386"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M219 290H293l17 26a8 8 0 0 1-7 12H209a8 8 0 0 1-7-12z" fill="#5fd38d"/><circle cx="245" cy="306" r="7" fill="#fff" fill-opacity="0.8"/><circle cx="266" cy="296" r="5" fill="#fff" fill-opacity="0.8"/><path d="M240 222h32v36l38 58a8 8 0 0 1-7 12H209a8 8 0 0 1-7-12l38-58z" fill="none" stroke="#1d2742" stroke-width="10" stroke-linejoin="round"/><path d="M230 222h52" stroke="#1d2742" stroke-width="10" stroke-linecap="round"/></g></svg>',
+    literature: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#c0392b"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#7d2219"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M256 250c-22-14-50-16-74-10v72c24-6 52-4 74 10zM256 250c22-14 50-16 74-10v72c-24-6-52-4-74 10z" fill="#ffe08a" stroke="#1d2742" stroke-width="9" stroke-linejoin="round"/><path d="M200 266c13-3 28-2 40 3M200 288c13-3 28-2 40 3M312 266c-13-3-28-2-40 3M312 288c-13-3-28-2-40 3" stroke="#c0392b" stroke-width="6" stroke-linecap="round" fill="none"/></g></svg>',
     capitals: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#12806c"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#0b5a4c"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><circle cx="256" cy="277" r="52" fill="#d6ecff"/><g fill="none" stroke="#1d2742" stroke-width="9" stroke-linecap="round"><ellipse cx="256" cy="277" rx="22" ry="52"/><line x1="204" y1="277" x2="308" y2="277"/><line x1="214" y1="251" x2="298" y2="251"/><line x1="214" y1="303" x2="298" y2="303"/><circle cx="256" cy="277" r="52" stroke-width="11"/></g></g></svg>',
   };
   // The sign embossed on the coins of each app.
   const EMBLEMS = {
+    literature: '<path d="M16.4 11.6c-1.8-1.1-4-1.3-6-.8v8.6c2-.5 4.2-.3 6 .8zM16.4 11.6c1.8-1.1 4-1.3 6-.8v8.6c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-hi)"/><path d="M16 11.2c-1.8-1.1-4-1.3-6-.8V19c2-.5 4.2-.3 6 .8zM16 11.2c1.8-1.1 4-1.3 6-.8V19c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     times: '<path d="M12.3 12.8l7.4 7.4M19.7 12.8l-7.4 7.4" style="stroke: var(--gold-hi)" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12l8 8M20 12l-8 8" style="stroke: var(--gold-deep)" stroke-width="2.6" stroke-linecap="round"/>',
     chemistry: '<path d="M14.6 8.9h3.6v4.2l4.4 7.2a1 1 0 0 1-.9 1.5H11.1a1 1 0 0 1-.9-1.5l4.4-7.2z" style="fill: var(--gold-hi)"/><path d="M14.2 8.5h3.6v4.2l4.4 7.2a1 1 0 0 1-.9 1.5H10.7a1 1 0 0 1-.9-1.5l4.4-7.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     capitals: '<path d="M16 9l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5L9 14.1l5.2-.2z" style="fill: var(--gold-hi)"/><path d="M15.6 8.6l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5-4.1-3.3 5.2-.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
@@ -1520,10 +1562,11 @@
     return (chosen(a) && b <= size) || (chosen(b) && a <= size);
   }
 
-  // ---------- StoliceMax and ChemiaMax: picking one of four answers ----------
+  // ---------- StoliceMax, ChemiaMax and LiteraturaMax: picking one of four answers ----------
 
   const BY_ISO = Object.fromEntries(COUNTRIES.map((c) => [c.iso, c]));
   const BY_FORMULA = Object.fromEntries(COMPOUNDS.map((c) => [c.formula, c]));
+  const BY_BOOK = Object.fromEntries(BOOKS.map((b) => [b.id, b]));
   const shuffle = (list) => {
     for (let i = list.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -1535,8 +1578,8 @@
   const elements = (formula) => new Set(formula.match(/[A-Z][a-z]?/g));
   const formulaHtml = (formula) => '<span class="formula">' + esc(formula).replace(/(\d+)/g, '<sub>$1</sub>') + '</span>';
 
-  // What differs between the two apps. A card id is the ISO code of a
-  // country or the formula of a compound.
+  // What differs between these apps. A card id is the ISO code of a
+  // country, the formula of a compound or the id of a book (b1).
   //   groups: the continents or groups of compounds, each can be switched off
   //   ids: all cards, and group(id) the group of one
   //   options(id): the right answer and three wrong ones, in a random order
@@ -1584,6 +1627,29 @@
       label: (formula) => BY_FORMULA[formula].name[lang()],
       number: (formula) => BY_FORMULA[formula].number,
       logColumns: 'compound,picked',
+    },
+    literature: {
+      groups: BOOK_GROUPS,
+      ids: BOOKS.map((b) => b.id),
+      group: (id) => BY_BOOK[id].group,
+      // The right book and three by other authors, each author once: the
+      // author most like the right one, and two more from the next five.
+      // Alike means writing in the same language, coming from the same
+      // country or writing in the same category.
+      options: (id) => {
+        const book = BY_BOOK[id];
+        const author = (b) => AUTHORS[b.author];
+        const alike = (b) => (b.lang === book.lang ? 3 : 0) + (author(b).country === author(book).country ? 2 : 0) + (b.group === book.group ? 2 : 0);
+        const seen = new Set([book.author]);
+        const others = shuffle(BOOKS.slice()).sort((x, y) => alike(y) - alike(x))
+          .filter((b) => !seen.has(b.author) && seen.add(b.author)).map((b) => b.id);
+        return shuffle([id, others[0], ...shuffle(others.slice(1, 6)).slice(0, 2)]);
+      },
+      answer: (id) => esc(AUTHORS[BY_BOOK[id].author].name[lang()]),
+      tile: (id) => flag(AUTHORS[BY_BOOK[id].author].country),
+      label: (id) => BY_BOOK[id].title[lang()],
+      number: (id) => BY_BOOK[id].number,
+      logColumns: 'book,picked',
     },
   };
   const choice = () => CHOICE[app.id];
@@ -1675,8 +1741,8 @@
   let lastId = null;
   let mode = 'ask'; // ask | right | wrong | done
   let typed = ''; // MnożenieMax: the digits typed
-  let options = []; // StoliceMax and ChemiaMax: the cards whose answers are the four choices
-  let picked = null; // StoliceMax and ChemiaMax: the wrong answer picked
+  let options = []; // the apps with four answers: the cards whose answers are the choices
+  let picked = null; // the apps with four answers: the wrong answer picked
   let shownAt = 0;
   let advanceTimer = null;
   let idleTimer = null;
@@ -2064,9 +2130,14 @@
       if (app.id === 'capitals') {
         $('flag').textContent = flag(c.id);
         $('country').textContent = countryName(c.id);
-      } else {
+      } else if (app.id === 'chemistry') {
         $('compound').textContent = BY_FORMULA[c.id].name[lang()];
         $('nick').textContent = BY_FORMULA[c.id].nick[lang()];
+      } else {
+        const book = BY_BOOK[c.id];
+        const title = book.title[lang()];
+        $('book-title').textContent = title;
+        $('book-original').innerHTML = originalLine(book, title);
       }
       // Once answered, the right answer turns green and a wrong pick is marked.
       $('choices').classList.toggle('answered', mode !== 'ask');
@@ -2155,13 +2226,28 @@
     }
   }
 
+  // LiteraturaMax: under the title, the original title (when it differs)
+  // and the language the book was written in, unless it is the language of
+  // the page.
+  function originalLine(book, title) {
+    if (book.lang === lang()) return '';
+    let name = book.lang;
+    try {
+      name = new Intl.DisplayNames([lang()], { type: 'language' }).of(book.lang) || book.lang;
+    } catch (e) {
+      /* the code as it is */
+    }
+    const language = esc(T().inLanguage(name));
+    return book.original === title ? language : '<bdi>' + esc(book.original) + '</bdi> · ' + language;
+  }
+
   // ---------- rewards ----------
 
   const reward = (id) => app.rewards.find((r) => r.id === id) || app.rewards[0];
 
   // A gradient pair for each reward, next to the coin's gradients, and the
-  // outlines of the souvenirs and glassware for their beam of light, glitter
-  // and bubbles.
+  // outlines of the souvenirs, glassware and prizes for their beam of light,
+  // glitter and bubbles.
   function makeRewardGradients() {
     const NS = 'http://www.w3.org/2000/svg';
     const defs = $('shine-defs').querySelector('defs');
@@ -2177,7 +2263,7 @@
       }
       defs.appendChild(g);
     };
-    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE)) {
+    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE, PRIZES)) {
       gradient('linearGradient', 'rim-' + id, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
       gradient('radialGradient', 'face-' + id, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
     }
@@ -2194,6 +2280,7 @@
       clipPath('clip-' + id, GLASS_ART[id].shape);
       clipPath('liq-' + id, GLASS_ART[id].liquid, GLASS_ART[id].liquidIn && 'clip-' + id);
     }
+    for (const { id } of PRIZES) clipPath('clip-' + id, PRIZE_ART[id].shape);
   }
 
   // The beam of light that passes over a reward now and then.
@@ -2660,9 +2747,179 @@
       '</svg>';
   }
 
-  const rewardIcon = (id) => (isTimes() ? trophyIcon(id) : app.id === 'capitals' ? souvenirIcon(id) : glassIcon(id));
-  // StoliceMax: the capital a souvenir comes from.
-  const rewardPlace = (id) => (reward(id).iso ? capitalName(reward(id).iso) : '');
+
+  // LiteraturaMax: each prize as a glittering medal on a ribbon or a
+  // statuette, as for the souvenirs: "shape" is its outline (for the glitter
+  // and the beam of light), "art" draws it and "sparkles" are the stars.
+  // A medal of radius r hangs on a ribbon in the given stripes; emblem draws
+  // the sign on its face, given the colours highlight, shadow and outline.
+  const medal = (stripes, emblem, sparkles, r = 7.6) => ({
+    shape: '<circle cx="16" cy="20" r="' + r + '"/>',
+    sparkles,
+    art: (f, rim, [hi, , lo, deep]) => {
+      const bottom = (20 - Math.sqrt(r * r - 12.25) + 1).toFixed(2); // hidden behind the medal
+      const n = stripes.length;
+      const at = (from, width, i) => (from + (width * i) / n).toFixed(2);
+      return stripes.map((color, i) => '<path d="M' + at(10.5, 11, i) + ' 2H' + at(10.5, 11, i + 1) + 'L' + at(12.5, 7, i + 1) + ' ' + bottom + 'H' + at(12.5, 7, i) + 'z" fill="' + color + '"/>').join('') +
+        '<path d="M10.5 2h11l-2 ' + (bottom - 2).toFixed(2) + 'h-7z" fill="none" stroke="#000" stroke-opacity="0.3" stroke-width="0.5" stroke-linejoin="round"/>' +
+        '<rect x="9.6" y="1" width="12.8" height="2" rx="0.7" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<circle cx="16" cy="20" r="' + r + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.8"/>' +
+        '<circle cx="16" cy="20" r="' + (r - 1.5) + '" fill="none" stroke="' + lo + '" stroke-width="0.5"/>' +
+        emblem(hi, lo, deep, rim);
+    },
+  });
+  // A five-pointed star with outer radius R and inner radius r.
+  const star = (cx, cy, R, r) => 'M' + Array.from({ length: 10 }, (_, i) => {
+    const a = (Math.PI * i) / 5 - Math.PI / 2;
+    const d = i % 2 ? r : R;
+    return (cx + d * Math.cos(a)).toFixed(2) + ' ' + (cy + d * Math.sin(a)).toFixed(2);
+  }).join('L') + 'z';
+  // Laurel leaves around the face of the Nobel medal, both sides.
+  const LAUREL = Array.from({ length: 6 }, (_, i) => 118 + i * 24).flatMap((deg) => {
+    const a = (deg * Math.PI) / 180;
+    const x = 16 + 6.2 * Math.cos(a);
+    const y = (20 + 6.2 * Math.sin(a)).toFixed(2);
+    const turn = deg + 65; // along the wreath, tipped outwards
+    return [[x.toFixed(2), y, turn], [(32 - x).toFixed(2), y, 180 - turn]];
+  });
+  // Golden rays around a medal, drawn behind it.
+  const shining = (prize) => ({
+    ...prize,
+    art: (f, rim, colors) => Array.from({ length: 16 }, (_, i) => {
+      const a = (i * Math.PI) / 8;
+      const long = i % 2 ? 11.4 : 13.6;
+      const at = (r, da) => (16 + r * Math.cos(a + da)).toFixed(2) + ' ' + (20 + r * Math.sin(a + da)).toFixed(2);
+      return '<path d="M' + at(8, -0.14) + 'L' + at(long, 0) + 'L' + at(8, 0.14) + 'z" fill="' + colors[1] + '" fill-opacity="0.8" stroke="' + colors[2] + '" stroke-width="0.3"/>';
+    }).join('') + prize.art(f, rim, colors),
+  });
+  // A black stone stand with a gold plate, for the statuettes.
+  const plinth = (rim) => '<path d="M9 24.6h14l1 2.4H8z" fill="#4a5163" stroke="#8b93a6" stroke-width="0.4" stroke-linejoin="round"/>' +
+    '<rect x="6.5" y="27" width="19" height="3.2" rx="0.8" fill="#2c313d" stroke="#8b93a6" stroke-width="0.4"/>' +
+    '<rect x="12.5" y="27.8" width="7" height="1.6" rx="0.3" fill="' + rim + '"/>';
+  const KAFKA = 'M13 10.4c.7-.9 1.8-1.3 3-1.3s2.3.4 3 1.3l.9 9.4h-1.5l-.3 4.8h-1.5L16 19.9l-.6 4.7h-1.5l-.3-4.8h-1.5z';
+  const BOWLER = 'M13.3 5.3h5.4v.8h-5.4zM14.3 5.3c0-2 .7-2.9 1.7-2.9s1.7.9 1.7 2.9z';
+  const QUILL = 'M16.4 15.5C16.6 9.6 19.6 4.6 25.4 1.8C25.8 7.8 22.4 12.6 17.4 15.4z';
+  const INKWELL = 'M9.5 27v-5.6c0-1.6 1.4-2.8 3-2.8h7c1.6 0 3 1.2 3 2.8V27z';
+  const ROCKET = 'M16 1.6c2.6 2.8 3.6 6.6 3.6 10.8V21h-7.2v-8.6c0-4.2 1-8 3.6-10.8z';
+  const FINS = 'M12.4 15.4l-3.4 5v4.2l3.4-2.4zM19.6 15.4l3.4 5v4.2l-3.4-2.4z';
+  const ARCH = 'M8 27V13.6C8 8.4 11.6 4.6 16 2c4.4 2.6 8 6.4 8 11.6V27z';
+  // A wing raised up and out, with its feathers along the lower edge.
+  const WING = 'M15.4 12.2C12.6 9.4 9 6.6 5.4 4.2C6.2 7.2 7.6 9.6 9.4 11.2C8.6 11.4 8 11.4 7.4 11.2C8.6 12.8 10.2 13.6 11.8 13.8C11.2 14.2 10.6 14.4 10 14.4C11.6 15.4 13.6 15.6 15.4 15z';
+  const MIRROR = 'matrix(-1 0 0 1 32 0)';
+  const NIKE = 'M13.6 24.6c.6-3.2 1-6 1-8.8-.5-.9-.7-2-.3-3l.9-1.6h1.6l.9 1.6c.4 1 .2 2.1-.3 3 0 2.8.4 5.6 1 8.8z';
+  // The books of the Booker Prize: x, y, width, height, tilt.
+  const BOOKS_STACK = [[5.5, 22.4, 21, 4.6, 0], [7.2, 18, 18, 4.4, -3], [8.6, 13.8, 15.4, 4.2, 4]];
+  const bookBox = ([x, y, w, h, tilt]) => 'x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="0.8" transform="rotate(' + tilt + ' 16 ' + (y + h / 2) + ')"';
+  const PROFILE = 'M19 24.4L18.8 22.6C20.6 21.4 20.8 17.2 17.6 15.6C15.4 15.2 13.8 16.4 13.9 18.2L13 19.8L13.8 20.1L13.6 20.8L14 21.1L13.8 21.7C13.9 22.4 14.6 22.6 15.4 22.4L15.6 24.4z';
+  const PRIZE_ART = {
+    newbery: medal(['#b22234', '#ffffff', '#3c3b6e'], (hi, lo, deep) =>
+      path('M11.6 17.4c1.6-.7 3.2-.5 4.4.5v5.4c-1.2-1-2.8-1.2-4.4-.5zM20.4 17.4c-1.6-.7-3.2-.5-4.4.5v5.4c1.2-1 2.8-1.2 4.4-.5z', hi, deep, 0.45),
+    [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
+    carnegie: medal(['#5a2d82', '#ffd23f', '#5a2d82'], (hi, lo, deep) => path(star(16, 20.4, 4.4, 1.9), hi, deep, 0.45),
+      [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
+    kafka: {
+      shape: '<circle cx="16" cy="7.4" r="1.9"/><path d="' + KAFKA + BOWLER + '"/>',
+      sparkles: [[21.5, 6, 1.5], [10.5, 14, 1.3], [21.5, 21, 1.3]],
+      art: (f, rim, [, , lo, deep]) => plinth(rim) +
+        '<circle cx="16" cy="7.4" r="1.9" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        path(BOWLER, rim, deep, 0.4) + path(KAFKA, f, deep, 0.6) +
+        '<path d="M16 10v9.6" stroke="' + lo + '" stroke-width="0.5"/>',
+    },
+    goncourt: medal(['#0055a4', '#ffffff', '#ef4135'], (hi, lo, deep) =>
+      path('M20.4 15.2c-3.6.4-6.6 3.4-7.4 7.6l2 .4c3.4-1.4 5.4-4.4 5.4-8z', hi, deep, 0.45) +
+      '<path d="M11.8 25.2l6.4-7.2" stroke="' + deep + '" stroke-width="0.6" stroke-linecap="round"/>',
+    [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
+    cervantes: medal(['#aa151b', '#f1bf00', '#aa151b'], (hi, lo, deep) =>
+      path('M14.2 25.2l.8-6.4h2l.8 6.4z', hi, deep, 0.4) +
+      [45, 135, 225, 315].map((a) => '<rect x="15.35" y="13.6" width="1.3" height="4.8" rx="0.3" transform="rotate(' + a + ' 16 18.4)" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.35"/>').join('') +
+      '<circle cx="16" cy="18.4" r="0.7" fill="' + deep + '"/>',
+    [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
+    shevchenko: medal(['#0057b7', '#ffd700'], (hi, lo, deep) =>
+      Array.from({ length: 10 }, (_, i) => '<ellipse cx="16" cy="16.9" rx="0.9" ry="1.6" transform="rotate(' + i * 36 + ' 16 20)" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.3"/>').join('') +
+      '<circle cx="16" cy="20" r="1.9" fill="#7a4a1c" stroke="' + deep + '" stroke-width="0.3"/>',
+    [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
+    jalal: {
+      shape: '<path d="' + QUILL + INKWELL + '"/>',
+      sparkles: [[25, 9, 1.4], [8, 17, 1.4], [23.5, 22.5, 1.3]],
+      art: (f, rim, [, , lo, deep]) => path(QUILL, f, deep, 0.5) +
+        '<path d="M15.8 17.5L24.6 2.6" stroke="' + deep + '" stroke-width="0.6" stroke-linecap="round"/>' +
+        '<path d="M19.6 10.6l2.4-.8M20.8 8.2l2.6-.9M22 6l2.2-.9" stroke="' + lo + '" stroke-width="0.4" stroke-linecap="round"/>' +
+        '<rect x="6.5" y="27" width="19" height="2.8" rx="0.8" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        path(INKWELL, '#1e2f6e', '#0e1838', 0.6) + path('M13.2 18.6v-1.6h5.6v1.6z', rim, deep, 0.4) +
+        '<path d="M9.5 23.4h13v1.4h-13z" fill="' + rim + '"/>' +
+        '<path d="M11.2 21.2v1.6M11.2 25.4v.6" stroke="#fff" stroke-opacity="0.6" stroke-width="0.7" stroke-linecap="round"/>',
+    },
+    hugo: {
+      shape: '<path d="' + ROCKET + FINS + '"/>',
+      sparkles: [[22.5, 5, 1.5], [9, 12, 1.3], [24.5, 18, 1.3]],
+      art: (f, rim, [, , lo, deep]) => plinth(rim) + path(FINS, rim, deep, 0.5) +
+        path('M13.8 21h4.4l.9 3.6h-6.2z', lo, deep, 0.4) + path(ROCKET, f, deep, 0.6) +
+        '<circle cx="16" cy="10.4" r="1.7" fill="#9fd6ff" stroke="' + deep + '" stroke-width="0.5"/>' +
+        '<path d="M15.3 9.7a1 1 0 0 1 .9-.5" stroke="#fff" stroke-width="0.4" stroke-linecap="round" fill="none"/>',
+    },
+    arabic: {
+      shape: '<path d="' + ARCH + '"/>',
+      sparkles: [[16, 1.8, 1.5], [6.5, 16, 1.3], [25.5, 21, 1.3]],
+      art: (f, rim, [hi, , , deep]) => '<rect x="6" y="27" width="20" height="3" rx="1" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+        path(ARCH, f, deep, 0.7) +
+        path('M10.2 25.6V13.9c0-4 2.6-7.2 5.8-9.3 3.2 2.1 5.8 5.3 5.8 9.3v11.7z', '#127a72', deep, 0.4) +
+        '<path d="M12.4 19.8c1.4-1.8 2.8-1.8 3.6 0s2.4 1.9 3.8-.4M13 15.6c.8 1 2 1 2.6-.2M16.8 14.2c.6 1.6 1.8 1.9 2.6.6M12.6 22.9h6.8M15.9 8.6v3" stroke="' + hi + '" stroke-width="0.7" stroke-linecap="round" fill="none"/>' +
+        '<circle cx="14.2" cy="17.4" r="0.45" fill="' + hi + '"/><circle cx="18.4" cy="17.2" r="0.45" fill="' + hi + '"/>',
+    },
+    nike: {
+      shape: '<path d="' + WING + '"/><path d="' + WING + '" transform="' + MIRROR + '"/><path d="' + NIKE + '"/><circle cx="16" cy="9.2" r="1.3"/>',
+      sparkles: [[5.4, 4.2, 1.5], [26.6, 4.2, 1.5], [21.5, 19, 1.3]],
+      art: (f, rim, [, , lo, deep]) => plinth(rim) +
+        path(WING, f, deep, 0.5) + '<g transform="' + MIRROR + '">' + path(WING, f, deep, 0.5) + '</g>' +
+        path(NIKE, f, deep, 0.5) + '<circle cx="16" cy="9.2" r="1.3" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        '<path d="M15.4 15.6l-.6 8.6M16.6 15.6l.6 8.6M12.4 9.4l-3.6-2.8M12.6 12l-3-1.2" stroke="' + lo + '" stroke-width="0.4" fill="none"/>' +
+        '<path d="M19.6 9.4l3.6-2.8M19.4 12l3 1.2" stroke="' + lo + '" stroke-width="0.4" fill="none"/>',
+    },
+    booker: {
+      shape: BOOKS_STACK.map((b) => '<rect ' + bookBox(b) + '/>').join(''),
+      sparkles: [[24.5, 12, 1.5], [6.5, 19, 1.3], [27.5, 21, 1.2]],
+      art: (f, rim, [, , lo, deep]) => '<rect x="3.5" y="27" width="25" height="2.8" rx="1" fill="#6b4a2b"/>' +
+        BOOKS_STACK.map((b, i) => {
+          const [x, y, w, h, tilt] = b;
+          return '<g transform="rotate(' + tilt + ' 16 ' + (y + h / 2) + ')">' +
+            '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="0.8" fill="' + (i === 1 ? rim : f) + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+            '<rect x="' + (x + 2.2) + '" y="' + (y + 0.9) + '" width="' + (w - 3) + '" height="' + (h - 1.8) + '" fill="#fff1c9" stroke="' + lo + '" stroke-width="0.3"/>' +
+            '<path d="M' + (x + 2.2) + ' ' + (y + h / 2) + 'h' + (w - 3) + '" stroke="' + lo + '" stroke-width="0.25"/></g>';
+        }).join(''),
+    },
+    andersen: medal(['#2a6fdb', '#ffffff', '#2a6fdb'], (hi, lo, deep) =>
+      path('M11.4 23.4h9.2l.9-6.6-3 2.6L16 15.2l-2.5 4.2-3-2.6z', hi, deep, 0.45) +
+      path('M11.4 23.4h9.2v1.4h-9.2z', lo, deep, 0.35) +
+      [[10.5, 16.8], [16, 15.2], [21.5, 16.8]].map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="0.75" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.3"/>').join(''),
+    [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
+    // The Nobel Prize: a bigger medal with a profile in a laurel wreath, in
+    // a ring of golden rays.
+    nobel: shining(medal(['#006aa7', '#fecc00', '#006aa7'], (hi, lo, deep) =>
+      LAUREL.map(([x, y, turn]) => '<ellipse cx="' + x + '" cy="' + y + '" rx="1.15" ry="0.5" transform="rotate(' + turn + ' ' + x + ' ' + y + ')" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.3"/>').join('') +
+      '<g transform="translate(16 20) scale(0.92) translate(-16.7 -20)">' + path(PROFILE, hi, deep, 0.45) + '</g>',
+    [[24.5, 12.5, 1.7], [7.5, 26, 1.5], [24, 4, 1.3], [8, 9, 1.2]], 8.8)),
+  };
+
+  function prizeIcon(id) {
+    const { colors } = PRIZES.find((r) => r.id === id) || PRIZES[0];
+    const art = PRIZE_ART[id];
+    return '<svg class="trophy-icon shiny" viewBox="0 0 32 32" aria-hidden="true">' +
+      art.art('url(#face-' + id + ')', 'url(#rim-' + id + ')', colors) +
+      '<g clip-path="url(#clip-' + id + ')"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/></g>' +
+      glint('clip-' + id) +
+      art.sparkles.map(([x, y, s], i) => sparkle(x, y, s, i)).join('') +
+      '</svg>';
+  }
+
+  const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon };
+  const rewardIcon = (id) => REWARD_ICONS[app.id](id);
+  // StoliceMax: the capital a souvenir comes from. LiteraturaMax: the
+  // country that gives a prize.
+  function rewardPlace(id) {
+    const { iso } = reward(id);
+    if (app.id === 'literature') return iso ? countryName(iso) : T().international;
+    return iso ? capitalName(iso) : '';
+  }
 
   // Shows the reward just bought and lets confetti fall from the top of the screen.
   function celebrate(id) {
@@ -2679,10 +2936,12 @@
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // A trophy gets confetti, a souvenir fireworks, glassware an explosion.
+      // A trophy gets confetti, a souvenir fireworks, glassware an
+      // explosion, a literary prize a rain of letters.
       if (isTimes()) confetti(CELEBRATION_MS);
       else if (app.id === 'capitals') fireworks(CELEBRATION_MS);
-      else explosion(CELEBRATION_MS, colors[1]);
+      else if (app.id === 'chemistry') explosion(CELEBRATION_MS, colors[1]);
+      else letterRain(CELEBRATION_MS);
     }
   }
 
@@ -3005,6 +3264,92 @@
         ctx.scale(1, Math.cos(p.flip)); // turning over as it falls
         ctx.fillStyle = p.color;
         ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (elapsed < ms) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  }
+
+
+  // LiteraturaMax: letters of many alphabets rain down for a new prize.
+  const ALPHABETS = [
+    'ABCDEFGHIJKLMNOPRSTUWZĄĆĘŁŃÓŚŹŻ', // Latin, with the Polish letters
+    'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ', // Cyrillic, with the Ukrainian letters
+    'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ', // Greek
+    'אבגדהוזחטיכלמנסעפצקרשת', // Hebrew
+    'ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی', // Arabic and Persian
+    'აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ', // Georgian
+    'ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖ', // Armenian
+    'अआइईउऊएओकखगघचछजझटठडढणतथदधनपफबभमयरलवशसह', // Devanagari
+    'กขคงจฉชซญดตถทธนบปผพฟภมยรลวศสหอฮ', // Thai
+    '文字书诗画山水月日人心爱', // Chinese
+    'あいうえおかきくけこさしすせそたちつてとなにぬねの', // Japanese
+    '가나다라마바사아자차카타파하', // Korean
+  ].map((letters) => [...letters]);
+  const RAIN_COLORS = ['#e63946', '#f4a261', '#ffbe0b', '#06d6a0', '#2a9d8f', '#00bbf9', '#457b9d', '#9b5de5', '#f15bb5'];
+
+  function letterRain(ms) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+    const letters = [];
+    const spawn = (count) => {
+      for (let i = 0; i < count; i++) {
+        const size = 18 + Math.random() * 28;
+        letters.push({
+          ch: pick(pick(ALPHABETS)),
+          x: Math.random() * innerWidth,
+          y: -size - Math.random() * 80,
+          size,
+          // Big letters fall a little faster, as if nearer.
+          vy: 120 + size * 3 + Math.random() * 80,
+          angle: (Math.random() - 0.5) * 0.8,
+          spin: (Math.random() - 0.5) * 2.5,
+          sway: Math.random() * Math.PI * 2,
+          color: pick(RAIN_COLORS),
+        });
+      }
+    };
+    const start = performance.now();
+    let last = start;
+    spawn(40);
+    const frame = (now) => {
+      const elapsed = Math.max(0, now - start);
+      const dt = Math.min(0.05, Math.max(0, now - last) / 1000);
+      last = now;
+      // New letters keep coming until shortly before the end, so the last
+      // ones are still falling when the rain fades out.
+      if (elapsed < ms - 1500) spawn(Math.round(70 * dt + Math.random() * 0.6));
+      if (canvas.width !== Math.round(innerWidth * ratio)) {
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      ctx.globalAlpha = elapsed > ms - 600 ? Math.max(0, (ms - elapsed) / 600) : 1;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineJoin = 'round';
+      for (const l of letters) {
+        l.y += l.vy * dt;
+        l.angle += l.spin * dt;
+        if (l.y > innerHeight + l.size) continue;
+        ctx.save();
+        ctx.translate(l.x + Math.sin(l.sway + elapsed / 400) * 18, l.y);
+        ctx.rotate(l.angle);
+        ctx.font = '700 ' + l.size.toFixed(1) + 'px system-ui, sans-serif';
+        // A thin dark edge keeps light letters visible on a light page.
+        ctx.lineWidth = Math.max(1.5, l.size / 14);
+        ctx.strokeStyle = 'rgba(29, 39, 66, 0.55)';
+        ctx.strokeText(l.ch, 0, 0);
+        ctx.fillStyle = l.color;
+        ctx.fillText(l.ch, 0, 0);
         ctx.restore();
       }
       if (elapsed < ms) requestAnimationFrame(frame);

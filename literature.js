@@ -1,0 +1,267 @@
+/*
+ * The books of LiteraturaMax: well-known books from many countries and
+ * languages, the child guesses the author from the title.
+ *
+ * AUTHORS: id: [country (ISO 3166 code, for the flag), name in English,
+ * Polish, Dutch, Spanish, Persian]. '' means the same as in English.
+ *
+ * ROWS: number, group, author, language of the original (ISO 639 code),
+ * original title, then the title in Polish, English, Dutch, Spanish and
+ * Persian. '' means no well-known title in that language: the app then
+ * shows the original title if it is in the Latin alphabet, or else the
+ * English one. The number is the card_id in the review log: keep the
+ * numbers when rows are added or moved.
+ *
+ * Groups: KID children's books, YA books for young people, FAN fantasy and
+ * science fiction, CRI crime and detective stories, ADV adventure, CLA
+ * classic novels and plays, POE poetry and epics.
+ */
+(function (root) {
+  'use strict';
+
+  const LANGS = ['pl', 'en', 'nl', 'es', 'fa'];
+  const AUTHORS = {
+    saintex: ['FR', 'Antoine de Saint-Exupéry', '', '', '', 'آنتوان دو سنت‌اگزوپری'],
+    lindgren: ['SE', 'Astrid Lindgren', '', '', '', 'آسترید لیندگرن'],
+    carroll: ['GB', 'Lewis Carroll', '', '', '', 'لوئیس کارول'],
+    milne: ['GB', 'A. A. Milne', '', '', '', 'اِی. اِی. میلن'],
+    collodi: ['IT', 'Carlo Collodi', '', '', '', 'کارلو کلودی'],
+    jansson: ['FI', 'Tove Jansson', '', '', '', 'توو یانسون'],
+    dahl: ['GB', 'Roald Dahl', '', '', '', 'رولد دال'],
+    brzechwa: ['PL', 'Jan Brzechwa', '', '', '', 'یان بژخوا'],
+    lagerlof: ['SE', 'Selma Lagerlöf', '', '', '', 'سلما لاگرلوف'],
+    kastner: ['DE', 'Erich Kästner', '', '', '', 'اریش کستنر'],
+    andersen: ['DK', 'Hans Christian Andersen', '', '', '', 'هانس کریستین اندرسن'],
+    grimm: ['DE', 'The Brothers Grimm', 'Bracia Grimm', 'De gebroeders Grimm', 'Los hermanos Grimm', 'برادران گریم'],
+    perrault: ['FR', 'Charles Perrault', '', '', '', 'شارل پرو'],
+    spyri: ['CH', 'Johanna Spyri', '', '', '', 'یوهانا اشپیری'],
+    schmidt: ['NL', 'Annie M. G. Schmidt', '', '', '', 'آنی اشمیت'],
+    behrangi: ['IR', 'Samad Behrangi', '', '', '', 'صمد بهرنگی'],
+    uspensky: ['RU', 'Eduard Uspensky', 'Eduard Uspienski', 'Edoeard Oespenski', 'Eduard Uspenski', 'ادوارد اوسپنسکی'],
+    goscinny: ['FR', 'René Goscinny', '', '', '', 'رنه گوسینی'],
+    baum: ['US', 'L. Frank Baum', '', '', '', 'ال. فرانک باوم'],
+    seuss: ['US', 'Dr. Seuss', '', '', '', 'دکتر سوس'],
+    jimenez: ['ES', 'Juan Ramón Jiménez', '', '', '', 'خوان رامون خیمنس'],
+    rowling: ['GB', 'J. K. Rowling', '', '', '', 'جی. کی. رولینگ'],
+    montgomery: ['CA', 'L. M. Montgomery', '', '', '', 'ال. ام. مونتگمری'],
+    burnett: ['GB', 'Frances Hodgson Burnett', '', '', '', 'فرانسیس هاجسن برنت'],
+    molnar: ['HU', 'Ferenc Molnár', '', '', '', 'فرنتس مولنار'],
+    frank: ['NL', 'Anne Frank', '', '', 'Ana Frank', 'آنه فرانک'],
+    makuszynski: ['PL', 'Kornel Makuszyński', '', '', '', 'کورنل ماکوشینسکی'],
+    kaminski: ['PL', 'Aleksander Kamiński', '', '', '', 'الکساندر کامینسکی'],
+    salinger: ['US', 'J. D. Salinger', '', '', '', 'جی. دی. سلینجر'],
+    collins: ['US', 'Suzanne Collins', '', '', '', 'سوزان کالینز'],
+    deamicis: ['IT', 'Edmondo De Amicis', '', '', '', 'ادموندو د آمیچیس'],
+    satrapi: ['IR', 'Marjane Satrapi', '', '', '', 'مرجان ساتراپی'],
+    nestayko: ['UA', 'Vsevolod Nestayko', 'Wsewołod Nestajko', '', 'Vsévolod Nestaiko', 'وسوولود نستایکو'],
+    boyne: ['IE', 'John Boyne', '', '', '', 'جان بوین'],
+    grin: ['RU', 'Alexander Grin', 'Aleksander Grin', 'Aleksandr Grin', 'Aleksandr Grin', 'الکساندر گرین'],
+    porter: ['US', 'Eleanor H. Porter', '', '', '', 'النور اچ. پورتر'],
+    tolkien: ['GB', 'J. R. R. Tolkien', '', '', '', 'جی. آر. آر. تالکین'],
+    sapkowski: ['PL', 'Andrzej Sapkowski', '', '', '', 'آندژی ساپکوفسکی'],
+    lem: ['PL', 'Stanisław Lem', '', '', '', 'استانیسواف لم'],
+    lewis: ['GB', 'C. S. Lewis', '', '', '', 'سی. اس. لوئیس'],
+    ende: ['DE', 'Michael Ende', '', '', '', 'میشائیل انده'],
+    herbert: ['US', 'Frank Herbert', '', '', '', 'فرانک هربرت'],
+    leguin: ['US', 'Ursula K. Le Guin', '', '', '', 'اورسولا کی. لوگوین'],
+    strugatsky: ['RU', 'Arkady and Boris Strugatsky', 'Arkadij i Borys Strugaccy', 'Arkadi en Boris Stroegatski', 'Arkadi y Borís Strugatski', 'برادران استروگاتسکی'],
+    capek: ['CZ', 'Karel Čapek', '', '', '', 'کارل چاپک'],
+    wells: ['GB', 'H. G. Wells', '', '', '', 'اچ. جی. ولز'],
+    shelley: ['GB', 'Mary Shelley', '', '', '', 'مری شلی'],
+    asimov: ['US', 'Isaac Asimov', '', '', '', 'آیزاک آسیموف'],
+    pratchett: ['GB', 'Terry Pratchett', '', '', '', 'تری پرچت'],
+    bradbury: ['US', 'Ray Bradbury', '', '', '', 'ری بردبری'],
+    doyle: ['GB', 'Arthur Conan Doyle', '', '', '', 'آرتور کانن دویل'],
+    christie: ['GB', 'Agatha Christie', '', '', '', 'آگاتا کریستی'],
+    eco: ['IT', 'Umberto Eco', '', '', '', 'اومبرتو اکو'],
+    simenon: ['BE', 'Georges Simenon', '', '', '', 'ژرژ سیمنون'],
+    leblanc: ['FR', 'Maurice Leblanc', '', '', '', 'موریس لبلان'],
+    poe: ['US', 'Edgar Allan Poe', '', '', '', 'ادگار آلن پو'],
+    chesterton: ['GB', 'G. K. Chesterton', '', '', '', 'جی. کی. چسترتون'],
+    chmielewska: ['PL', 'Joanna Chmielewska', '', '', '', 'یوانا خمیلفسکا'],
+    mahfouz: ['EG', 'Naguib Mahfouz', 'Nadżib Mahfuz', '', 'Naguib Mahfuz', 'نجیب محفوظ'],
+    wcollins: ['GB', 'Wilkie Collins', '', '', '', 'ویلکی کالینز'],
+    defoe: ['GB', 'Daniel Defoe', '', '', '', 'دانیل دفو'],
+    verne: ['FR', 'Jules Verne', 'Juliusz Verne', '', 'Julio Verne', 'ژول ورن'],
+    stevenson: ['GB', 'Robert Louis Stevenson', '', '', '', 'رابرت لویی استیونسن'],
+    twain: ['US', 'Mark Twain', '', '', '', 'مارک تواین'],
+    sienkiewicz: ['PL', 'Henryk Sienkiewicz', '', '', '', 'هنریک سینکیویچ'],
+    may: ['DE', 'Karl May', '', '', '', 'کارل مای'],
+    kipling: ['GB', 'Rudyard Kipling', '', '', '', 'رودیارد کیپلینگ'],
+    london: ['US', 'Jack London', '', '', '', 'جک لندن'],
+    dumas: ['FR', 'Alexandre Dumas', 'Aleksander Dumas', '', 'Alejandro Dumas', 'الکساندر دوما'],
+    szklarski: ['PL', 'Alfred Szklarski', '', '', '', 'آلفرد شکلارسکی'],
+    swift: ['IE', 'Jonathan Swift', '', '', '', 'جاناتان سویفت'],
+    coelho: ['BR', 'Paulo Coelho', '', '', '', 'پائولو کوئلیو'],
+    battuta: ['MA', 'Ibn Battuta', '', '', '', 'ابن بطوطه'],
+    nienacki: ['PL', 'Zbigniew Nienacki', '', '', '', 'زبیگنیف نیناتسکی'],
+    prus: ['PL', 'Bolesław Prus', '', '', '', 'بولسواف پروس'],
+    cervantes: ['ES', 'Miguel de Cervantes', '', '', '', 'میگل د سروانتس'],
+    shakespeare: ['GB', 'William Shakespeare', '', '', '', 'ویلیام شکسپیر'],
+    dostoevsky: ['RU', 'Fyodor Dostoevsky', 'Fiodor Dostojewski', 'Fjodor Dostojevski', 'Fiódor Dostoyevski', 'فئودور داستایفسکی'],
+    tolstoy: ['RU', 'Leo Tolstoy', 'Lew Tołstoj', 'Lev Tolstoj', 'León Tolstói', 'لئو تولستوی'],
+    kafka: ['CZ', 'Franz Kafka', '', '', '', 'فرانتس کافکا'],
+    hasek: ['CZ', 'Jaroslav Hašek', '', '', '', 'یاروسلاو هاشک'],
+    marquez: ['CO', 'Gabriel García Márquez', '', '', '', 'گابریل گارسیا مارکز'],
+    austen: ['GB', 'Jane Austen', '', '', '', 'جین آستین'],
+    hugo: ['FR', 'Victor Hugo', 'Wiktor Hugo', '', '', 'ویکتور هوگو'],
+    orwell: ['GB', 'George Orwell', '', '', '', 'جورج اورول'],
+    hemingway: ['US', 'Ernest Hemingway', '', '', '', 'ارنست همینگوی'],
+    pamuk: ['TR', 'Orhan Pamuk', '', '', '', 'اورهان پاموک'],
+    hedayat: ['IR', 'Sadegh Hedayat', 'Sadegh Hedajat', '', '', 'صادق هدایت'],
+    vazov: ['BG', 'Ivan Vazov', 'Iwan Wazow', 'Ivan Vazov', 'Iván Vazov', 'ایوان وازوف'],
+    chekhov: ['RU', 'Anton Chekhov', 'Antoni Czechow', 'Anton Tsjechov', 'Antón Chéjov', 'آنتون چخوف'],
+    mickiewicz: ['PL', 'Adam Mickiewicz', '', '', '', 'آدام میتسکیویچ'],
+    khayyam: ['IR', 'Omar Khayyam', 'Omar Chajjam', '', 'Omar Jayam', 'عمر خیام'],
+    hafez: ['IR', 'Hafez', '', '', '', 'حافظ'],
+    saadi: ['IR', 'Saadi', '', '', '', 'سعدی'],
+    ferdowsi: ['IR', 'Ferdowsi', 'Firdausi', '', 'Ferdousí', 'فردوسی'],
+    shevchenko: ['UA', 'Taras Shevchenko', 'Taras Szewczenko', 'Taras Sjevtsjenko', 'Tarás Shevchenko', 'تاراس شوچنکو'],
+    rustaveli: ['GE', 'Shota Rustaveli', 'Szota Rustaweli', 'Sjota Roestaveli', '', 'شوتا روستاولی'],
+    gibran: ['LB', 'Kahlil Gibran', 'Khalil Gibran', '', 'Khalil Gibran', 'جبران خلیل جبران'],
+    homer: ['GR', 'Homer', '', 'Homerus', 'Homero', 'هومر'],
+    dante: ['IT', 'Dante Alighieri', '', '', '', 'دانته آلیگیری'],
+    pushkin: ['RU', 'Alexander Pushkin', 'Aleksander Puszkin', 'Aleksandr Poesjkin', 'Aleksandr Pushkin', 'الکساندر پوشکین'],
+    szymborska: ['PL', 'Wisława Szymborska', '', '', '', 'ویسواوا شیمبورسکا'],
+    tagore: ['IN', 'Rabindranath Tagore', '', '', '', 'رابیندرانات تاگور'],
+    whitman: ['US', 'Walt Whitman', '', '', '', 'والت ویتمن'],
+  };
+
+  const ROWS = [
+    // Children's books
+    [1, 'KID', 'saintex', 'fr', 'Le Petit Prince', 'Mały Książę', 'The Little Prince', 'De kleine prins', 'El principito', 'شازده کوچولو'],
+    [2, 'KID', 'lindgren', 'sv', 'Pippi Långstrump', 'Pippi Pończoszanka', 'Pippi Longstocking', 'Pippi Langkous', 'Pippi Calzaslargas', 'پیپی جوراب‌بلند'],
+    [3, 'KID', 'carroll', 'en', 'Alice’s Adventures in Wonderland', 'Alicja w Krainie Czarów', 'Alice’s Adventures in Wonderland', 'De avonturen van Alice in Wonderland', 'Alicia en el país de las maravillas', 'آلیس در سرزمین عجایب'],
+    [4, 'KID', 'milne', 'en', 'Winnie-the-Pooh', 'Kubuś Puchatek', 'Winnie-the-Pooh', 'Winnie de Poeh', 'Winnie the Pooh', 'وینی پو'],
+    [5, 'KID', 'collodi', 'it', 'Le avventure di Pinocchio', 'Pinokio', 'The Adventures of Pinocchio', 'Pinokkio', 'Las aventuras de Pinocho', 'ماجراهای پینوکیو'],
+    [6, 'KID', 'jansson', 'sv', 'Trollkarlens hatt', 'W Dolinie Muminków', 'Finn Family Moomintroll', '', '', ''],
+    [7, 'KID', 'dahl', 'en', 'Charlie and the Chocolate Factory', 'Charlie i fabryka czekolady', 'Charlie and the Chocolate Factory', 'Sjakie en de chocoladefabriek', 'Charlie y la fábrica de chocolate', 'چارلی و کارخانهٔ شکلات‌سازی'],
+    [8, 'KID', 'brzechwa', 'pl', 'Akademia pana Kleksa', 'Akademia pana Kleksa', '', '', '', ''],
+    [9, 'KID', 'lagerlof', 'sv', 'Nils Holgerssons underbara resa genom Sverige', 'Cudowna podróż', 'The Wonderful Adventures of Nils', 'De wonderbare reis van Nils Holgersson', 'El maravilloso viaje de Nils Holgersson', 'سفر شگفت‌انگیز نیلز'],
+    [10, 'KID', 'kastner', 'de', 'Emil und die Detektive', 'Emil i detektywi', 'Emil and the Detectives', 'Emil en de detectives', 'Emilio y los detectives', 'امیل و کارآگاهان'],
+    [11, 'KID', 'andersen', 'da', 'Den grimme ælling', 'Brzydkie kaczątko', 'The Ugly Duckling', 'Het lelijke jonge eendje', 'El patito feo', 'جوجه اردک زشت'],
+    [12, 'KID', 'grimm', 'de', 'Hänsel und Gretel', 'Jaś i Małgosia', 'Hansel and Gretel', 'Hans en Grietje', 'Hansel y Gretel', 'هانسل و گرتل'],
+    [13, 'KID', 'perrault', 'fr', 'Le Chat botté', 'Kot w butach', 'Puss in Boots', 'De gelaarsde kat', 'El gato con botas', 'گربهٔ چکمه‌پوش'],
+    [14, 'KID', 'spyri', 'de', 'Heidi', 'Heidi', 'Heidi', 'Heidi', 'Heidi', 'هایدی'],
+    [15, 'KID', 'schmidt', 'nl', 'Jip en Janneke', '', 'Jip and Janneke', 'Jip en Janneke', '', ''],
+    [16, 'KID', 'behrangi', 'fa', 'ماهی سیاه کوچولو', 'Mała czarna rybka', 'The Little Black Fish', '', '', 'ماهی سیاه کوچولو'],
+    [17, 'KID', 'uspensky', 'ru', 'Крокодил Гена и его друзья', 'Krokodyl Giena i jego przyjaciele', 'Gena the Crocodile and His Friends', '', '', ''],
+    [18, 'KID', 'goscinny', 'fr', 'Le Petit Nicolas', 'Mikołajek', 'Little Nicholas', 'De kleine Nicolaas', 'El pequeño Nicolás', 'نیکولا کوچولو'],
+    [19, 'KID', 'baum', 'en', 'The Wonderful Wizard of Oz', 'Czarnoksiężnik z Krainy Oz', 'The Wonderful Wizard of Oz', 'De tovenaar van Oz', 'El maravilloso mago de Oz', 'جادوگر شهر اوز'],
+    [20, 'KID', 'seuss', 'en', 'The Cat in the Hat', 'Kot Prot', 'The Cat in the Hat', '', '', ''],
+    [21, 'KID', 'jimenez', 'es', 'Platero y yo', 'Platero i ja', 'Platero and I', 'Platero en ik', 'Platero y yo', ''],
+
+    // Books for young people
+    [22, 'YA', 'rowling', 'en', 'Harry Potter and the Philosopher’s Stone', 'Harry Potter i Kamień Filozoficzny', 'Harry Potter and the Philosopher’s Stone', 'Harry Potter en de Steen der Wijzen', 'Harry Potter y la piedra filosofal', 'هری پاتر و سنگ جادو'],
+    [23, 'YA', 'montgomery', 'en', 'Anne of Green Gables', 'Ania z Zielonego Wzgórza', 'Anne of Green Gables', '', 'Ana de las Tejas Verdes', 'آن شرلی'],
+    [24, 'YA', 'burnett', 'en', 'The Secret Garden', 'Tajemniczy ogród', 'The Secret Garden', 'De geheime tuin', 'El jardín secreto', 'باغ مخفی'],
+    [25, 'YA', 'molnar', 'hu', 'A Pál utcai fiúk', 'Chłopcy z Placu Broni', 'The Paul Street Boys', 'De jongens van de Paulstraat', 'Los chicos de la calle Pál', ''],
+    [26, 'YA', 'frank', 'nl', 'Het Achterhuis', 'Dziennik', 'The Diary of a Young Girl', 'Het Achterhuis', 'El diario de Ana Frank', 'خاطرات آنه فرانک'],
+    [27, 'YA', 'makuszynski', 'pl', 'Szatan z siódmej klasy', 'Szatan z siódmej klasy', '', '', '', ''],
+    [28, 'YA', 'kaminski', 'pl', 'Kamienie na szaniec', 'Kamienie na szaniec', 'Stones for the Rampart', '', '', ''],
+    [29, 'YA', 'salinger', 'en', 'The Catcher in the Rye', 'Buszujący w zbożu', 'The Catcher in the Rye', 'De vanger in het graan', 'El guardián entre el centeno', 'ناتور دشت'],
+    [30, 'YA', 'collins', 'en', 'The Hunger Games', 'Igrzyska śmierci', 'The Hunger Games', 'De hongerspelen', 'Los juegos del hambre', 'بازی‌های گرسنگی'],
+    [31, 'YA', 'deamicis', 'it', 'Cuore', 'Serce', 'Heart', '', 'Corazón', ''],
+    [32, 'YA', 'satrapi', 'fr', 'Persepolis', 'Persepolis', 'Persepolis', 'Persepolis', 'Persépolis', 'پرسپولیس'],
+    [33, 'YA', 'nestayko', 'uk', 'Тореадори з Васюківки', 'Toreadorzy z Wasiukówki', 'Toreadors from Vasiukivka', '', '', ''],
+    [34, 'YA', 'lindgren', 'sv', 'Bröderna Lejonhjärta', 'Bracia Lwie Serce', 'The Brothers Lionheart', 'De gebroeders Leeuwenhart', 'Los hermanos Corazón de León', ''],
+    [35, 'YA', 'boyne', 'en', 'The Boy in the Striped Pyjamas', 'Chłopiec w pasiastej piżamie', 'The Boy in the Striped Pyjamas', 'De jongen in de gestreepte pyjama', 'El niño con el pijama de rayas', 'پسری با پیژامهٔ راه‌راه'],
+    [36, 'YA', 'grin', 'ru', 'Алые паруса', 'Szkarłatne żagle', 'Scarlet Sails', '', 'Velas escarlata', ''],
+    [37, 'YA', 'porter', 'en', 'Pollyanna', 'Pollyanna', 'Pollyanna', 'Pollyanna', 'Pollyanna', 'پولیانا'],
+
+    // Fantasy and science fiction
+    [38, 'FAN', 'tolkien', 'en', 'The Hobbit', 'Hobbit, czyli tam i z powrotem', 'The Hobbit', 'De hobbit', 'El hobbit', 'هابیت'],
+    [39, 'FAN', 'sapkowski', 'pl', 'Ostatnie życzenie', 'Ostatnie życzenie', 'The Last Wish', 'De laatste wens', 'El último deseo', ''],
+    [40, 'FAN', 'lem', 'pl', 'Solaris', 'Solaris', 'Solaris', 'Solaris', 'Solaris', 'سولاریس'],
+    [41, 'FAN', 'lewis', 'en', 'The Lion, the Witch and the Wardrobe', 'Lew, czarownica i stara szafa', 'The Lion, the Witch and the Wardrobe', 'De leeuw, de heks en de kleerkast', 'El león, la bruja y el armario', 'شیر، جادوگر و کمد لباس'],
+    [42, 'FAN', 'ende', 'de', 'Die unendliche Geschichte', 'Niekończąca się historia', 'The Neverending Story', 'Het oneindige verhaal', 'La historia interminable', 'داستان بی‌پایان'],
+    [43, 'FAN', 'herbert', 'en', 'Dune', 'Diuna', 'Dune', 'Duin', 'Dune', 'تل‌ماسه'],
+    [44, 'FAN', 'leguin', 'en', 'A Wizard of Earthsea', 'Czarnoksiężnik z Archipelagu', 'A Wizard of Earthsea', 'De tovenaar van Aardzee', 'Un mago de Terramar', ''],
+    [45, 'FAN', 'strugatsky', 'ru', 'Пикник на обочине', 'Piknik na skraju drogi', 'Roadside Picnic', '', 'Picnic extraterrestre', ''],
+    [46, 'FAN', 'capek', 'cs', 'R.U.R.', 'R.U.R.', 'R.U.R.', 'R.U.R.', 'R.U.R.', ''],
+    [47, 'FAN', 'wells', 'en', 'The Time Machine', 'Wehikuł czasu', 'The Time Machine', 'De tijdmachine', 'La máquina del tiempo', 'ماشین زمان'],
+    [48, 'FAN', 'shelley', 'en', 'Frankenstein', 'Frankenstein', 'Frankenstein', 'Frankenstein', 'Frankenstein', 'فرانکنشتاین'],
+    [49, 'FAN', 'asimov', 'en', 'I, Robot', 'Ja, robot', 'I, Robot', 'Ik, robot', 'Yo, robot', 'من، روبات'],
+    [50, 'FAN', 'pratchett', 'en', 'The Colour of Magic', 'Kolor magii', 'The Colour of Magic', 'De kleur van toverij', 'El color de la magia', ''],
+    [51, 'FAN', 'bradbury', 'en', 'Fahrenheit 451', 'Fahrenheit 451', 'Fahrenheit 451', 'Fahrenheit 451', 'Fahrenheit 451', 'فارنهایت ۴۵۱'],
+
+    // Crime and detective stories
+    [52, 'CRI', 'doyle', 'en', 'The Hound of the Baskervilles', 'Pies Baskerville’ów', 'The Hound of the Baskervilles', 'De hond van de Baskervilles', 'El sabueso de los Baskerville', 'سگ باسکرویل‌ها'],
+    [53, 'CRI', 'christie', 'en', 'Murder on the Orient Express', 'Morderstwo w Orient Expressie', 'Murder on the Orient Express', 'Moord in de Oriënt-Express', 'Asesinato en el Orient Express', 'قتل در قطار سریع‌السیر شرق'],
+    [54, 'CRI', 'eco', 'it', 'Il nome della rosa', 'Imię róży', 'The Name of the Rose', 'De naam van de roos', 'El nombre de la rosa', 'نام گل سرخ'],
+    [55, 'CRI', 'simenon', 'fr', 'Pietr le Letton', 'Pietr Łotysz', 'Pietr the Latvian', 'Pietr de Let', 'Pietr el Letón', ''],
+    [56, 'CRI', 'leblanc', 'fr', 'Arsène Lupin, gentleman-cambrioleur', 'Arsène Lupin, dżentelmen włamywacz', 'Arsène Lupin, Gentleman Burglar', '', 'Arsène Lupin, caballero ladrón', 'آرسن لوپن، دزد جنتلمن'],
+    [57, 'CRI', 'poe', 'en', 'The Murders in the Rue Morgue', 'Zabójstwo przy Rue Morgue', 'The Murders in the Rue Morgue', 'De moorden in de Rue Morgue', 'Los crímenes de la calle Morgue', 'قتل‌های خیابان مورگ'],
+    [58, 'CRI', 'chesterton', 'en', 'The Innocence of Father Brown', 'Przygody księdza Browna', 'The Innocence of Father Brown', '', 'El candor del padre Brown', ''],
+    [59, 'CRI', 'chmielewska', 'pl', 'Wszystko czerwone', 'Wszystko czerwone', '', '', '', ''],
+    [60, 'CRI', 'mahfouz', 'ar', 'اللص والكلاب', 'Złodziej i psy', 'The Thief and the Dogs', 'De dief en de honden', 'El ladrón y los perros', 'دزد و سگ‌ها'],
+    [61, 'CRI', 'wcollins', 'en', 'The Moonstone', 'Kamień Księżycowy', 'The Moonstone', 'De maansteen', 'La piedra lunar', 'سنگ ماه'],
+
+    // Adventure
+    [62, 'ADV', 'defoe', 'en', 'Robinson Crusoe', 'Robinson Crusoe', 'Robinson Crusoe', 'Robinson Crusoe', 'Robinson Crusoe', 'رابینسون کروزوئه'],
+    [63, 'ADV', 'verne', 'fr', 'Le Tour du monde en quatre-vingts jours', 'W 80 dni dookoła świata', 'Around the World in Eighty Days', 'De reis om de wereld in tachtig dagen', 'La vuelta al mundo en ochenta días', 'دور دنیا در هشتاد روز'],
+    [64, 'ADV', 'stevenson', 'en', 'Treasure Island', 'Wyspa skarbów', 'Treasure Island', 'Schateiland', 'La isla del tesoro', 'جزیرهٔ گنج'],
+    [65, 'ADV', 'twain', 'en', 'The Adventures of Tom Sawyer', 'Przygody Tomka Sawyera', 'The Adventures of Tom Sawyer', 'De avonturen van Tom Sawyer', 'Las aventuras de Tom Sawyer', 'ماجراهای تام سایر'],
+    [66, 'ADV', 'sienkiewicz', 'pl', 'W pustyni i w puszczy', 'W pustyni i w puszczy', 'In Desert and Wilderness', '', '', ''],
+    [67, 'ADV', 'may', 'de', 'Winnetou', 'Winnetou', 'Winnetou', 'Winnetou', 'Winnetou', 'وینتو'],
+    [68, 'ADV', 'kipling', 'en', 'The Jungle Book', 'Księga dżungli', 'The Jungle Book', 'Het jungleboek', 'El libro de la selva', 'کتاب جنگل'],
+    [69, 'ADV', 'london', 'en', 'White Fang', 'Biały Kieł', 'White Fang', 'Pittah', 'Colmillo Blanco', 'سپیددندان'],
+    [70, 'ADV', 'dumas', 'fr', 'Les Trois Mousquetaires', 'Trzej muszkieterowie', 'The Three Musketeers', 'De drie musketiers', 'Los tres mosqueteros', 'سه تفنگدار'],
+    [71, 'ADV', 'szklarski', 'pl', 'Tomek w krainie kangurów', 'Tomek w krainie kangurów', '', '', '', ''],
+    [72, 'ADV', 'swift', 'en', 'Gulliver’s Travels', 'Podróże Guliwera', 'Gulliver’s Travels', 'Gullivers reizen', 'Los viajes de Gulliver', 'سفرهای گالیور'],
+    [73, 'ADV', 'coelho', 'pt', 'O Alquimista', 'Alchemik', 'The Alchemist', 'De alchemist', 'El alquimista', 'کیمیاگر'],
+    [74, 'ADV', 'battuta', 'ar', 'الرحلة', 'Podróże', 'The Travels', '', '', 'سفرنامهٔ ابن بطوطه'],
+    [75, 'ADV', 'nienacki', 'pl', 'Pan Samochodzik i templariusze', 'Pan Samochodzik i templariusze', '', '', '', ''],
+
+    // Classic novels and plays
+    [76, 'CLA', 'prus', 'pl', 'Lalka', 'Lalka', 'The Doll', 'De pop', 'La muñeca', ''],
+    [77, 'CLA', 'cervantes', 'es', 'Don Quijote de la Mancha', 'Don Kichot', 'Don Quixote', 'Don Quichot', 'Don Quijote de la Mancha', 'دن کیشوت'],
+    [78, 'CLA', 'shakespeare', 'en', 'Romeo and Juliet', 'Romeo i Julia', 'Romeo and Juliet', 'Romeo en Julia', 'Romeo y Julieta', 'رومئو و ژولیت'],
+    [79, 'CLA', 'dostoevsky', 'ru', 'Преступление и наказание', 'Zbrodnia i kara', 'Crime and Punishment', 'Misdaad en straf', 'Crimen y castigo', 'جنایت و مکافات'],
+    [80, 'CLA', 'tolstoy', 'ru', 'Война и мир', 'Wojna i pokój', 'War and Peace', 'Oorlog en vrede', 'Guerra y paz', 'جنگ و صلح'],
+    [81, 'CLA', 'kafka', 'de', 'Die Verwandlung', 'Przemiana', 'The Metamorphosis', 'De gedaanteverwisseling', 'La metamorfosis', 'مسخ'],
+    [82, 'CLA', 'hasek', 'cs', 'Osudy dobrého vojáka Švejka za světové války', 'Przygody dobrego wojaka Szwejka', 'The Good Soldier Švejk', 'De lotgevallen van de brave soldaat Švejk', 'Las aventuras del buen soldado Švejk', 'سرباز خوب شوایک'],
+    [83, 'CLA', 'marquez', 'es', 'Cien años de soledad', 'Sto lat samotności', 'One Hundred Years of Solitude', 'Honderd jaar eenzaamheid', 'Cien años de soledad', 'صد سال تنهایی'],
+    [84, 'CLA', 'austen', 'en', 'Pride and Prejudice', 'Duma i uprzedzenie', 'Pride and Prejudice', 'Trots en vooroordeel', 'Orgullo y prejuicio', 'غرور و تعصب'],
+    [85, 'CLA', 'hugo', 'fr', 'Les Misérables', 'Nędznicy', 'Les Misérables', 'De ellendigen', 'Los miserables', 'بینوایان'],
+    [86, 'CLA', 'orwell', 'en', 'Animal Farm', 'Folwark zwierzęcy', 'Animal Farm', 'Animal Farm', 'Rebelión en la granja', 'قلعهٔ حیوانات'],
+    [87, 'CLA', 'hemingway', 'en', 'The Old Man and the Sea', 'Stary człowiek i morze', 'The Old Man and the Sea', 'De oude man en de zee', 'El viejo y el mar', 'پیرمرد و دریا'],
+    [88, 'CLA', 'pamuk', 'tr', 'Benim Adım Kırmızı', 'Nazywam się Czerwień', 'My Name Is Red', 'Mijn naam is rood', 'Me llamo Rojo', 'نام من سرخ'],
+    [89, 'CLA', 'hedayat', 'fa', 'بوف کور', 'Ślepa sowa', 'The Blind Owl', 'De blinde uil', 'La lechuza ciega', 'بوف کور'],
+    [90, 'CLA', 'vazov', 'bg', 'Под игото', 'Pod jarzmem', 'Under the Yoke', '', 'Bajo el yugo', ''],
+    [91, 'CLA', 'chekhov', 'ru', 'Вишнёвый сад', 'Wiśniowy sad', 'The Cherry Orchard', 'De kersentuin', 'El jardín de los cerezos', 'باغ آلبالو'],
+
+    // Poetry and epics
+    [92, 'POE', 'mickiewicz', 'pl', 'Pan Tadeusz', 'Pan Tadeusz', 'Pan Tadeusz', 'Pan Tadeusz', 'Pan Tadeusz', 'پان تادئوش'],
+    [93, 'POE', 'khayyam', 'fa', 'رباعیات', 'Rubajaty', 'Rubaiyat', 'Rubaiyat', 'Rubaiyat', 'رباعیات'],
+    [94, 'POE', 'hafez', 'fa', 'دیوان حافظ', 'Diwan', 'The Divan', 'De divan', 'El diván', 'دیوان حافظ'],
+    [95, 'POE', 'saadi', 'fa', 'گلستان', 'Gulistan', 'The Rose Garden', 'De rozentuin', 'El jardín de las rosas', 'گلستان'],
+    [96, 'POE', 'ferdowsi', 'fa', 'شاهنامه', 'Szahname', 'Shahnameh', 'Sjahnameh', 'El libro de los reyes', 'شاهنامه'],
+    [97, 'POE', 'shevchenko', 'uk', 'Кобзар', 'Kobziarz', 'Kobzar', 'Kobzar', 'Kobzar', ''],
+    [98, 'POE', 'rustaveli', 'ka', 'ვეფხისტყაოსანი', 'Rycerz w tygrysiej skórze', 'The Knight in the Panther’s Skin', '', 'El caballero de la piel de tigre', ''],
+    [99, 'POE', 'gibran', 'en', 'The Prophet', 'Prorok', 'The Prophet', 'De profeet', 'El profeta', 'پیامبر'],
+    [100, 'POE', 'homer', 'grc', 'Ὀδύσσεια', 'Odyseja', 'The Odyssey', 'Odyssee', 'La Odisea', 'ادیسه'],
+    [101, 'POE', 'dante', 'it', 'Divina Commedia', 'Boska komedia', 'The Divine Comedy', 'De goddelijke komedie', 'La divina comedia', 'کمدی الهی'],
+    [102, 'POE', 'pushkin', 'ru', 'Евгений Онегин', 'Eugeniusz Oniegin', 'Eugene Onegin', 'Jevgeni Onegin', 'Eugenio Oneguin', 'یوگنی اونگین'],
+    [103, 'POE', 'szymborska', 'pl', 'Koniec i początek', 'Koniec i początek', 'The End and the Beginning', '', '', ''],
+    [104, 'POE', 'tagore', 'bn', 'গীতাঞ্জলি', 'Gitanjali', 'Gitanjali', 'Gitanjali', 'Gitanjali', 'گیتانجلی'],
+    [105, 'POE', 'whitman', 'en', 'Leaves of Grass', 'Źdźbła trawy', 'Leaves of Grass', 'Grashalmen', 'Hojas de hierba', 'برگ‌های علف'],
+  ];
+
+  const LATIN = /^[\p{Script=Latin}\p{N}\p{P}\p{Zs}]+$/u;
+  root.AUTHORS = Object.fromEntries(Object.entries(AUTHORS).map(([id, [country, en, ...names]]) => [id, {
+    id,
+    country,
+    name: Object.fromEntries(LANGS.map((l) => [l, l === 'en' ? en : names[['pl', 'nl', 'es', 'fa'].indexOf(l)] || en])),
+  }]));
+  root.BOOKS = ROWS.map(([number, group, author, lang, original, ...titles]) => {
+    const title = Object.fromEntries(LANGS.map((l, i) => [l, titles[i]]));
+    // A language without its own title shows the original in the Latin
+    // alphabet, or else the English title.
+    for (const l of LANGS) {
+      if (!title[l]) title[l] = l === lang || LATIN.test(original) ? original : title.en || original;
+    }
+    return { id: 'b' + number, number, group, author, lang, original, title };
+  });
+  root.BOOK_GROUPS = ['KID', 'YA', 'FAN', 'CRI', 'ADV', 'CLA', 'POE'];
+})(typeof globalThis !== 'undefined' ? globalThis : this);

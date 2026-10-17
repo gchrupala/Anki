@@ -1,27 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- MaxApki: the cards of the three apps in steps, ChemiaMax (flask) at the
-       back, StoliceMax (globe) in the middle and MnożenieMax (×) in front.
-       Each symbol sits on the part of its card the next card leaves free. -->
+  <!-- MaxApki: the cards of the four apps in steps, LiteraturaMax (book) at
+       the back, then ChemiaMax (flask), StoliceMax (globe) and MnożenieMax
+       (×) in front. Each symbol sits on the part of its card the next card
+       leaves free. -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7b3fc4"/>
-      <stop offset="0.5" stop-color="#2a4fc2"/>
+      <stop offset="0" stop-color="#c0392b"/>
+      <stop offset="0.35" stop-color="#7b3fc4"/>
+      <stop offset="0.68" stop-color="#2a4fc2"/>
       <stop offset="1" stop-color="#12806c"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
-  <rect x="248" y="148" width="170" height="100" rx="10" fill="#4f2386"/>
-  <rect x="244" y="141" width="170" height="100" rx="10" fill="#ffffff"/>
-  <line x1="244" y1="166" x2="414" y2="166" stroke="#e2645a" stroke-width="4"/>
-  <g transform="translate(381 186) scale(0.7)">
+  <rect x="266" y="145" width="140" height="82" rx="9" fill="#7d2219"/>
+  <rect x="262" y="138" width="140" height="82" rx="9" fill="#ffffff"/>
+  <line x1="262" y1="158" x2="402" y2="158" stroke="#e2645a" stroke-width="3.5"/>
+  <path d="M375 181c-7-5-16-6-22-4v24c6-2 15-1 22 4zM375 181c7-5 16-6 22-4v24c-6-2-15-1-22 4z" fill="#ffe08a" stroke="#1d2742" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="212" y="199" width="140" height="82" rx="9" fill="#4f2386"/>
+  <rect x="208" y="192" width="140" height="82" rx="9" fill="#ffffff"/>
+  <line x1="208" y1="212" x2="348" y2="212" stroke="#e2645a" stroke-width="3.5"/>
+  <g transform="translate(321 235) scale(0.58)">
     <path d="M-23 24h46l11 14a5 5 0 0 1-4 8h-60a5 5 0 0 1-4-8z" fill="#5fd38d"/>
     <path d="M-10 -14h20v20l24 32a5 5 0 0 1-4 8h-60a5 5 0 0 1-4-8l24-32z" fill="none" stroke="#1d2742" stroke-width="7" stroke-linejoin="round"/>
     <path d="M-17 -14h34" stroke="#1d2742" stroke-width="7" stroke-linecap="round"/>
   </g>
-  <rect x="181" y="215" width="170" height="100" rx="10" fill="#0b5a4c"/>
-  <rect x="177" y="208" width="170" height="100" rx="10" fill="#ffffff"/>
-  <line x1="177" y1="233" x2="347" y2="233" stroke="#e2645a" stroke-width="4"/>
-  <g transform="translate(314 260)">
+  <rect x="158" y="253" width="140" height="82" rx="9" fill="#0b5a4c"/>
+  <rect x="154" y="246" width="140" height="82" rx="9" fill="#ffffff"/>
+  <line x1="154" y1="266" x2="294" y2="266" stroke="#e2645a" stroke-width="3.5"/>
+  <g transform="translate(267 297) scale(0.85)">
     <circle r="21" fill="#d6ecff"/>
     <g fill="none" stroke="#1d2742" stroke-width="4" stroke-linecap="round">
       <ellipse rx="9" ry="21"/>
@@ -31,10 +37,10 @@
       <circle r="21" stroke-width="5"/>
     </g>
   </g>
-  <rect x="114" y="282" width="170" height="100" rx="10" fill="#1b3a99"/>
-  <rect x="110" y="275" width="170" height="100" rx="10" fill="#ffffff"/>
-  <line x1="110" y1="300" x2="280" y2="300" stroke="#e2645a" stroke-width="4"/>
-  <line x1="120" y1="330" x2="270" y2="330" stroke="#dbe5f4" stroke-width="3"/>
-  <line x1="120" y1="355" x2="270" y2="355" stroke="#dbe5f4" stroke-width="3"/>
-  <path d="M177 318 L213 354 M213 318 L177 354" stroke="#1d2742" stroke-width="14" stroke-linecap="round"/>
+  <rect x="104" y="307" width="140" height="82" rx="9" fill="#1b3a99"/>
+  <rect x="100" y="300" width="140" height="82" rx="9" fill="#ffffff"/>
+  <line x1="100" y1="320" x2="240" y2="320" stroke="#e2645a" stroke-width="3.5"/>
+  <line x1="108" y1="345" x2="232" y2="345" stroke="#dbe5f4" stroke-width="2.5"/>
+  <line x1="108" y1="366" x2="232" y2="366" stroke="#dbe5f4" stroke-width="2.5"/>
+  <path d="M155 336 L185 366 M185 336 L155 366" stroke="#1d2742" stroke-width="12" stroke-linecap="round"/>
 </svg>
