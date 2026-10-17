@@ -262,6 +262,7 @@ The shop sells literary prizes from many countries and international ones, each 
 | Cervantes Prize | Spain | 100 |
 | Shevchenko Prize | Ukraine | 125 |
 | Jalal Al-e Ahmad Prize | Iran | 150 |
+| Gouden Griffel | Netherlands | 175 |
 | Hugo Award | international | 200 |
 | International Prize for Arabic Fiction | international | 250 |
 | Nike Award | Poland | 300 |
@@ -269,7 +270,7 @@ The shop sells literary prizes from many countries and international ones, each 
 | Hans Christian Andersen Award | international | 450 |
 | Nobel Prize in Literature | Sweden | 700 |
 
-All 13 together cost 2845 coins; learning all 105 books to the mastered level pays 1785, plus 10 for each finished day. The Nobel medal is the largest and has golden rays around it. Buying a prize sets off a rain of letters for 4 seconds: letters of the Latin, Cyrillic, Greek, Hebrew, Arabic and Persian, Georgian, Armenian, Devanagari, Thai, Chinese, Japanese and Korean scripts fall and turn. With reduced motion switched on in the device settings, only the prize is shown. The prizes and their prices are set in `PRIZES` in `index.html`, the drawings in `PRIZE_ART`, the names in `i18n-literature.js`.
+All 14 together cost 3020 coins; learning all 105 books to the mastered level pays 1785, plus 10 for each finished day. The Nobel medal is the largest and has golden rays around it. Buying a prize sets off a rain of letters for 4 seconds: letters of the Latin, Cyrillic, Greek, Hebrew, Arabic and Persian, Georgian, Armenian, Devanagari, Thai, Chinese, Japanese and Korean scripts fall and turn. With reduced motion switched on in the device settings, only the prize is shown. The prizes and their prices are set in `PRIZES` in `index.html`, the drawings in `PRIZE_ART`, the names in `i18n-literature.js`.
 
 The books and authors and their names in the five languages are in `literature.js`. Titles were chosen from published translations where they are well known; where a book has no known title in a language, the field is left empty and the rule above applies.
 

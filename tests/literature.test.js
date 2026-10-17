@@ -47,7 +47,7 @@ test('each category has books by enough authors for four answers', () => {
 });
 
 test('every language has the LiteraturaMax text', () => {
-  const prizes = ['newbery', 'carnegie', 'kafka', 'goncourt', 'cervantes', 'shevchenko', 'jalal', 'hugo', 'arabic', 'nike',
+  const prizes = ['newbery', 'carnegie', 'kafka', 'goncourt', 'cervantes', 'shevchenko', 'jalal', 'griffel', 'hugo', 'arabic', 'nike',
     'booker', 'andersen', 'nobel'];
   for (const lang of I18N.LANGS) {
     const t = I18N.LITERATURE[lang];

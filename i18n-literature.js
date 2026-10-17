@@ -15,31 +15,31 @@
   const PRIZES = {
     pl: {
       newbery: 'Medal Newbery', carnegie: 'Medal Carnegie', kafka: 'Nagroda Franza Kafki', goncourt: 'Nagroda Goncourtów',
-      cervantes: 'Nagroda Cervantesa', shevchenko: 'Nagroda Szewczenki', jalal: 'Nagroda Dżalala Al-e Ahmada', hugo: 'Nagroda Hugo',
+      cervantes: 'Nagroda Cervantesa', shevchenko: 'Nagroda Szewczenki', jalal: 'Nagroda Dżalala Al-e Ahmada', griffel: 'Gouden Griffel', hugo: 'Nagroda Hugo',
       arabic: 'Nagroda za powieść arabską', nike: 'Nagroda Nike', booker: 'Nagroda Bookera', andersen: 'Medal Andersena',
       nobel: 'Literacka Nagroda Nobla',
     },
     en: {
       newbery: 'Newbery Medal', carnegie: 'Carnegie Medal', kafka: 'Franz Kafka Prize', goncourt: 'Prix Goncourt',
-      cervantes: 'Cervantes Prize', shevchenko: 'Shevchenko Prize', jalal: 'Jalal Al-e Ahmad Prize', hugo: 'Hugo Award',
+      cervantes: 'Cervantes Prize', shevchenko: 'Shevchenko Prize', jalal: 'Jalal Al-e Ahmad Prize', griffel: 'Gouden Griffel', hugo: 'Hugo Award',
       arabic: 'Prize for Arabic Fiction', nike: 'Nike Award', booker: 'Booker Prize', andersen: 'Hans Christian Andersen Award',
       nobel: 'Nobel Prize in Literature',
     },
     nl: {
       newbery: 'Newbery-medaille', carnegie: 'Carnegie-medaille', kafka: 'Franz Kafkaprijs', goncourt: 'Prix Goncourt',
-      cervantes: 'Cervantesprijs', shevchenko: 'Sjevtsjenkoprijs', jalal: 'Jalal Al-e Ahmadprijs', hugo: 'Hugo Award',
+      cervantes: 'Cervantesprijs', shevchenko: 'Sjevtsjenkoprijs', jalal: 'Jalal Al-e Ahmadprijs', griffel: 'Gouden Griffel', hugo: 'Hugo Award',
       arabic: 'Prijs voor Arabische fictie', nike: 'Nike-prijs', booker: 'Booker Prize', andersen: 'Hans Christian Andersenprijs',
       nobel: 'Nobelprijs voor de Literatuur',
     },
     es: {
       newbery: 'Medalla Newbery', carnegie: 'Medalla Carnegie', kafka: 'Premio Franz Kafka', goncourt: 'Premio Goncourt',
-      cervantes: 'Premio Cervantes', shevchenko: 'Premio Shevchenko', jalal: 'Premio Jalal Al-e Ahmad', hugo: 'Premio Hugo',
+      cervantes: 'Premio Cervantes', shevchenko: 'Premio Shevchenko', jalal: 'Premio Jalal Al-e Ahmad', griffel: 'Gouden Griffel', hugo: 'Premio Hugo',
       arabic: 'Premio de Novela Árabe', nike: 'Premio Nike', booker: 'Premio Booker', andersen: 'Premio Hans Christian Andersen',
       nobel: 'Premio Nobel de Literatura',
     },
     fa: {
       newbery: 'مدال نیوبری', carnegie: 'مدال کارنگی', kafka: 'جایزهٔ فرانتس کافکا', goncourt: 'جایزهٔ گنکور',
-      cervantes: 'جایزهٔ سروانتس', shevchenko: 'جایزهٔ شوچنکو', jalal: 'جایزهٔ جلال آل احمد', hugo: 'جایزهٔ هوگو',
+      cervantes: 'جایزهٔ سروانتس', shevchenko: 'جایزهٔ شوچنکو', jalal: 'جایزهٔ جلال آل احمد', griffel: 'گریفل طلایی', hugo: 'جایزهٔ هوگو',
       arabic: 'جایزهٔ رمان عربی', nike: 'جایزهٔ نیکه', booker: 'جایزهٔ بوکر', andersen: 'جایزهٔ هانس کریستین اندرسن',
       nobel: 'جایزهٔ نوبل ادبیات',
     },
