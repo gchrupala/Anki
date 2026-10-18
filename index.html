@@ -1176,6 +1176,8 @@
       </label>
       <p class="hint" data-t="nextAfterHint"></p>
       <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
+      <label class="field" for="auto-say" data-app="languages"><span data-t="autoSay">Read aloud by itself</span> <input id="auto-say" type="checkbox"></label>
+      <p class="hint" data-app="languages" data-t="autoSayHint"></p>
     </section>
 
     <section>
@@ -1512,8 +1514,9 @@
       layout: 1,
       // Reading a sentence and four answers takes a while: Easy within 6 seconds.
       fastSeconds: 6,
-      // target: the language learned (fr, es, nl or it); levels: A1, A2, B1.
-      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30 }),
+      // target: the language learned (fr, es, nl or it); levels: A1, A2, B1;
+      // autoSay: read the cards aloud without the speaker button.
+      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, autoSay: false }),
       groupKey: 'levels',
       rewards: CITIES,
       strings: (l) => I18N.LANGUAGES[l] || {},
@@ -2100,6 +2103,7 @@
     }
     render();
     armGiveUp();
+    if (mode === 'ask') sayByItself();
   }
 
   // value: the answer (MnożenieMax: the number typed; StoliceMax and ChemiaMax:
@@ -2157,6 +2161,7 @@
       flash('shake');
     }
     render();
+    sayByItself();
   }
   const submitTyped = () => submit(Number(typed));
 
@@ -2554,6 +2559,11 @@
     const voices = speechSynthesis.getVoices();
     const tag = (v) => v.lang.replace('_', '-').toLowerCase();
     return voices.find((v) => tag(v) === VOICES[target]) || voices.find((v) => tag(v).startsWith(target)) || null;
+  }
+  // JęzykiMax, with the setting on: read the card aloud when it is shown
+  // and again, with the answer, once it is answered.
+  function sayByItself() {
+    if (app.id === 'languages' && state.settings.autoSay) say();
   }
   function say() {
     const c = current();
@@ -4505,6 +4515,7 @@
     $('answer-time').value = String(s.answerTime);
     $('next-after').value = String(s.nextAfter);
     $('sound').checked = s.sound !== false;
+    $('auto-say').checked = !!s.autoSay;
     $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
@@ -4596,6 +4607,11 @@
 
   $('sound').addEventListener('change', (e) => {
     state.settings.sound = e.target.checked;
+    save();
+  });
+
+  $('auto-say').addEventListener('change', (e) => {
+    state.settings.autoSay = e.target.checked;
     save();
   });
 
