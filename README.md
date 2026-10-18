@@ -204,7 +204,7 @@ The shop sells laboratory glassware with coloured liquid that bubbles and glitte
 | Golden retort | 500 |
 | Rainbow flask | 575 |
 
-The prices are about a third lower than in the other shops, since ChemiaMax has fewer cards to earn coins with. Buying one sets off an explosion for 4 seconds: a flash, a shock wave, a fireball, sparks and drops of the liquid flying out, smoke, and the page shakes. With reduced motion switched on in the device settings, only the glassware is shown. The glassware and its prices are set in `GLASSWARE` in `index.html`, the drawings in `GLASS_ART`, the names in `i18n-chemistry.js`.
+The prices are about a third lower than in the other shops, since ChemiaMax has fewer cards to earn coins with. Buying one makes an elixir explode, for 4 seconds in all: a bottle of glowing green elixir appears, shakes harder and harder while it bubbles, and its cork pops off. Then it bursts with a green flash and a shock wave, glass shards and green droplets fly all around, some splash onto the screen and drip down, green mist rises with sparkles in it, and the page shakes. With reduced motion switched on in the device settings, only the glassware is shown. The glassware and its prices are set in `GLASSWARE` in `index.html`, the drawings in `GLASS_ART`, the names in `i18n-chemistry.js`.
 
 The elements and compounds and their names in the five languages are in `chemistry.js`. No two share a formula; glucose is there, fructose (also C₆H₁₂O₆) is not. Some everyday names stand for a close relative: gypsum is CaSO₄ with water in it, and the Persian کات کبود is copper sulfate with water.
 
