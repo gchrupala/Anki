@@ -1673,6 +1673,9 @@
       },
       answer: (formula) => formulaHtml(formula),
       tile: (formula) => formulaHtml(formula),
+      // The tile shows the answer itself, so the grid marks the card being
+      // asked only once it has been answered.
+      markWhenAnswered: true,
       label: (formula) => BY_FORMULA[formula].name[lang()],
       number: (formula) => BY_FORMULA[formula].number,
       logColumns: 'compound,picked',
@@ -1696,6 +1699,8 @@
       },
       answer: (id) => esc(AUTHORS[BY_BOOK[id].author].name[lang()]),
       tile: (id) => flag(AUTHORS[BY_BOOK[id].author].country),
+      // The flag on the tile hints at the author: mark it once answered.
+      markWhenAnswered: true,
       label: (id) => BY_BOOK[id].title[lang()],
       number: (id) => BY_BOOK[id].number,
       logColumns: 'book,picked',
@@ -2107,6 +2112,7 @@
     const n = { new: 0, learning: 0, young: 0, mature: 0 };
     const learned = {};
     const els = isTimes() ? cells : tiles;
+    const marked = mode === 'ask' && !isTimes() && choice().markWhenAnswered ? null : currentId;
     for (const [id, el] of Object.entries(els)) {
       let c;
       let label;
@@ -2128,7 +2134,7 @@
       el.className = 'cell' +
         (s === 'new' ? '' : ' is-' + s) +
         (on ? '' : ' is-off') +
-        (c.id === currentId ? ' is-current' : '');
+        (c.id === marked ? ' is-current' : '');
       let tip;
       if (!on) tip = t.tipOff;
       else if (s === 'new') tip = t.tipNew;
