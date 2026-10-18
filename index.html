@@ -865,6 +865,7 @@
   .chip input:focus-visible + span { outline: 3px solid var(--pen); outline-offset: 2px; }
   .fields { display: flex; flex-direction: column; gap: 0.6rem; }
   .field { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; max-width: 20rem; }
+  .field input[type="checkbox"] { width: 1.4rem; height: 1.4rem; margin: 0; accent-color: var(--pen); }
   .hint { font-size: 0.8rem; color: var(--ink-soft); }
   textarea {
     width: 100%;
@@ -1110,6 +1111,7 @@
         </select>
       </label>
       <p class="hint" data-t="answerTimeHint"></p>
+      <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
     </section>
 
     <section>
@@ -1378,7 +1380,7 @@
       // Reading four names takes longer than typing a short number, so a
       // right answer counts as Easy within 5 seconds instead of 4.
       fastSeconds: 5,
-      settings: () => ({ continents: ['EU'], newPerDay: 10, retention: 0.9, answerTime: 15 }),
+      settings: () => ({ continents: ['EU'], newPerDay: 10, retention: 0.9, answerTime: 15, sound: true }),
       groupKey: 'continents', // the setting with the continents to practise
       rewards: SOUVENIRS,
       strings: (l) => I18N.CAPITALS[l] || {},
@@ -3082,7 +3084,7 @@
       // A trophy gets confetti, a souvenir fireworks, glassware an
       // explosion, a literary prize a rain of letters.
       if (isTimes()) confetti(CELEBRATION_MS);
-      else if (app.id === 'capitals') fireworks(CELEBRATION_MS);
+      else if (app.id === 'capitals') fireworks(CELEBRATION_MS, fireworksSound());
       else if (app.id === 'chemistry') explosion(CELEBRATION_MS, colors[1]);
       else letterRain(RAIN_MAX_MS);
     }
@@ -3222,9 +3224,91 @@
     requestAnimationFrame(frame);
   }
 
+  // StoliceMax: quiet sounds for the fireworks, made by the browser (Web
+  // Audio) rather than played from files: a whistle and a hiss as a rocket
+  // rises, a bang with a low thump and a crackle as it bursts, each from the
+  // side of the screen where it is. Browsers only start sound in a tap, so
+  // this is called in the tap that buys the souvenir. Returns null when the
+  // sound is switched off or the browser has no Web Audio.
+  let audio = null;
+  let noiseBuffer = null;
+  function fireworksSound() {
+    if (state.settings.sound === false) return null;
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!Context) return null;
+    try {
+      if (!audio) {
+        audio = new Context();
+        // A second of white noise, for the hiss, the bangs and the crackle.
+        noiseBuffer = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      }
+      if (audio.state !== 'running') audio.resume();
+    } catch (e) {
+      return null;
+    }
+    const ctx = audio;
+    const out = ctx.createGain();
+    out.gain.value = 0.4; // a little sound, not a loud one
+    out.connect(ctx.destination);
+    // pan: -1 for the left edge of the screen, 1 for the right.
+    const side = (pan) => {
+      if (!ctx.createStereoPanner) return out;
+      const node = ctx.createStereoPanner();
+      node.pan.value = Math.max(-1, Math.min(1, pan));
+      node.connect(out);
+      return node;
+    };
+    // A sound that rises to peak at once and dies away over seconds.
+    const envelope = (to, at, seconds, peak) => {
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(peak, at + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + seconds);
+      gain.connect(to);
+      return gain;
+    };
+    const noise = (to, at, seconds, type, frequency, peak) => {
+      const source = ctx.createBufferSource();
+      source.buffer = noiseBuffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = type;
+      filter.frequency.value = frequency;
+      source.connect(filter);
+      filter.connect(envelope(to, at, seconds, peak));
+      source.start(at, Math.random() * 0.5);
+      source.stop(at + seconds + 0.05);
+    };
+    const tone = (to, at, seconds, from, till, peak) => {
+      const osc = ctx.createOscillator();
+      osc.frequency.setValueAtTime(from, at);
+      osc.frequency.exponentialRampToValueAtTime(till, at + seconds);
+      osc.connect(envelope(to, at, seconds, peak));
+      osc.start(at);
+      osc.stop(at + seconds + 0.05);
+    };
+    return {
+      launch(pan, seconds) {
+        const to = side(pan);
+        const at = ctx.currentTime;
+        tone(to, at, seconds, 900, 2000, 0.03);
+        noise(to, at, seconds, 'bandpass', 1500, 0.05);
+      },
+      burst(pan) {
+        const to = side(pan);
+        const at = ctx.currentTime;
+        noise(to, at, 0.9, 'lowpass', 900, 0.5);
+        tone(to, at, 0.35, 110, 40, 0.35);
+        for (let i = 0; i < 14; i++) noise(to, at + 0.25 + Math.random() * 1.1, 0.04, 'highpass', 3000, 0.05 + Math.random() * 0.06);
+      },
+    };
+  }
+
   // StoliceMax: fireworks for a souvenir. Rockets rise from the bottom of the
-  // screen and burst into sparks, over a darkened screen.
-  function fireworks(ms) {
+  // screen and burst into sparks, over a darkened screen. sound, if given,
+  // plays a sound for each rocket and burst (see fireworksSound).
+  function fireworks(ms, sound) {
     const canvas = document.createElement('canvas');
     canvas.className = 'confetti';
     canvas.setAttribute('aria-hidden', 'true');
@@ -3239,11 +3323,14 @@
     const rockets = [];
     const sparks = [];
     // A rocket rises to its peak in 0.6 to 0.85 seconds, slowing down evenly.
+    const pan = (x) => (x / innerWidth) * 1.4 - 0.7;
     const launch = () => {
       const rise = innerHeight + 10 - innerHeight * (0.15 + Math.random() * 0.45);
       const time = 0.6 + Math.random() * 0.25;
+      const x = innerWidth * (0.15 + Math.random() * 0.7);
+      if (sound) sound.launch(pan(x), time);
       rockets.push({
-        x: innerWidth * (0.15 + Math.random() * 0.7),
+        x,
         y: innerHeight + 10,
         vx: (Math.random() - 0.5) * 60,
         vy: (-2 * rise) / time,
@@ -3252,6 +3339,7 @@
       });
     };
     const burst = (r) => {
+      if (sound) sound.burst(pan(r.x));
       const n = 70 + Math.floor(Math.random() * 40);
       const ring = Math.random() < 0.35; // some bursts are a ring, the others a ball
       const second = pick();
@@ -3806,6 +3894,7 @@
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
+    $('sound').checked = s.sound !== false;
     $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
@@ -3887,6 +3976,11 @@
 
   $('answer-time').addEventListener('change', (e) => {
     state.settings.answerTime = Number(e.target.value);
+    save();
+  });
+
+  $('sound').addEventListener('change', (e) => {
+    state.settings.sound = e.target.checked;
     save();
   });
 

@@ -143,6 +143,7 @@ The settings panel (the gear button, "Ustawienia" in Polish) lets you:
 
 - choose the size of the table (10 × 10 or 12 × 12), which tables to practise and which extra numbers to add (13 to 20, and 25);
 - change the number of new facts per day and the target recall;
+- switch the sound of the fireworks on or off (StoliceMax only; on by default);
 - move the app clock ahead by a day, to see how reviews come back;
 - copy the review log as CSV.
 
@@ -199,7 +200,7 @@ Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per 
 | Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 750 |
 | Forbidden City | Beijing | 800 |
 
-All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. Keychains in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
+All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. A quiet sound goes with them: a whistle and a hiss as each rocket rises, and a bang with a crackle as it bursts, from the side of the screen where it is. The browser makes the sounds itself (Web Audio), so there are no sound files. The sound can be switched off in the settings ("Dźwięk fajerwerków"). Keychains in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
 
 The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings, the places of their stars and the point where the chain holds them in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
 
