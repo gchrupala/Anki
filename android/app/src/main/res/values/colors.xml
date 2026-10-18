@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- The page background of the web app, so there is no white flash on start. -->
-    <color name="paper">#F7F9FD</color>
-    <color name="pen">#2A4FC2</color>
-    <color name="icon_background">#2A4FC2</color>
-    <bool name="light_bars">true</bool>
-</resources>

@@ -1376,8 +1376,6 @@
   const NEXT_NOW_MS = 400; // "at once": just long enough to see the answer turn green
   const IDLE_SUBMIT_MS = 3000; // MnożenieMax: check a shorter answer after this pause
   const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
-  // The Android app serves its own copy of these files under this address.
-  const inAndroidApp = location.hostname === 'appassets.androidplatform.net';
   const PRAISE = { [SRS.EASY]: 'easy', [SRS.GOOD]: 'good', [SRS.HARD]: 'hard' };
 
   const $ = (id) => document.getElementById(id);
@@ -4415,8 +4413,6 @@
     return true;
   }
   window.addEventListener('popstate', closePanel);
-  // The Android app's Back button calls this.
-  window.closeParentPanel = closePanel;
 
   $('open-settings').addEventListener('click', () => openPanel('settings'));
   $('open-shop').addEventListener('click', () => openPanel('shop'));
@@ -4778,7 +4774,6 @@
     const published = new Date(document.lastModified);
     $('app-version').textContent = isNaN(published) ? '' :
       t.versionFrom(published.toLocaleString(lang(), { dateStyle: 'medium', timeStyle: 'short' }));
-    $('update-section').hidden = inAndroidApp;
   }
 
   function languageChanged() {
@@ -4973,9 +4968,9 @@
   // ---------- sharing ----------
 
   // The address of the app, without the name of an app (#stolice) after it.
-  // The Android app has its own address, so it shares the public one.
+  // A local file has no address to share, so it shares the public one.
   const PUBLIC_URL = 'https://grzegorz.chrupala.me/Anki/';
-  const shareUrl = () => (/^https?:$/.test(location.protocol) && !inAndroidApp ? location.origin + location.pathname : PUBLIC_URL);
+  const shareUrl = () => (/^https?:$/.test(location.protocol) ? location.origin + location.pathname : PUBLIC_URL);
 
   function toast(text) {
     const el = document.createElement('div');
@@ -5123,8 +5118,8 @@
 
   // Offline copy and protected storage, when the app is served over http(s).
   // The offline copy is not available from a local file or inside the Claude
-  // preview, and not needed in the Android app, which carries its own files.
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !inAndroidApp) {
+  // preview.
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
   if (navigator.storage && navigator.storage.persist) {

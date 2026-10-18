@@ -31,43 +31,6 @@ The home-screen name is "MaxApki", and its icon shows the cards of the five apps
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
-## Android app
-
-`android/` builds an Android app (an APK) that contains the web app. It runs without internet and does not depend on Chrome, so Google Family Link treats it like any other app: it can have its own daily time limit, or be marked "Always allowed".
-
-### Installing on a tablet with Family Link
-
-1. In the Family Link app on the parent's phone, open the child's profile, then the tablet under the signed-in devices, and turn on "Apps from unknown sources". The exact place of this setting differs between Family Link versions.
-2. Copy the APK to the tablet, for example through Google Drive, and open it there to install it.
-3. Turn "Apps from unknown sources" off again.
-4. In Family Link, set a limit for "MnożenieMax" under the app limits.
-
-To update, install a newer APK over the old one. Progress is kept, but only if the new APK is signed with the same key as the old one. An APK signed with another key can only be installed after uninstalling the old app, which erases the progress.
-
-### Building the APK
-
-This needs JDK 17 or later and the Android SDK with platform 35 and build-tools 35, with `ANDROID_HOME` pointing to the SDK.
-
-```
-cd android
-./gradlew assembleRelease
-```
-
-The APK is written to `android/app/build/outputs/apk/release/app-release.apk`. Its version number is the number of commits in the repository, so each new commit gives a higher version.
-
-The signing key is not in the repository. To sign the APK, create `android/keystore.properties` (ignored by git):
-
-```
-storeFile=/path/to/tabliczka-release.jks
-storePassword=...
-keyAlias=tabliczka
-keyPassword=...
-```
-
-Without this file the APK is built unsigned, and Android will not install it.
-
-`MainActivity.java` shows the bundled files in Android's web view, under the address `https://appassets.androidplatform.net/`. Progress is saved in the app's own storage, separately from any browser.
-
 ## Languages
 
 The interface follows the device language when it is Polish, English, Dutch, Spanish or Persian, and is in Polish otherwise. A fixed language can be chosen in the settings panel ("Ustawienia", behind the gear button); the first entry in the menu goes back to the device language. All languages write multiplication with ×. Persian is shown right to left, with Persian digits (۷ × ۸ = ۵۶); sums, the keypad and the progress square stay left to right, as in Persian maths. A keyboard may type Persian, Arabic or Western digits. All text is in `i18n.js`, and the text that differs in StoliceMax in `i18n-capitals.js`. Times such as "tomorrow" or "in 3 days" and plural forms come from the browser (`Intl.RelativeTimeFormat` and `Intl.PluralRules`).
@@ -331,7 +294,7 @@ The button with the latest reward in the header opens the collection: the reward
 
 - **Giving.** "Podaruj" (give away), then a second tap to confirm, opens the share menu of the device with a gift link, for example to send it in a message. Without a share menu, the link is copied. Once the link is out, the reward leaves the collection and the link stays on show, to copy again. Closing the share menu without sharing keeps the reward. Coins are not given back.
 - **Receiving.** Opening a gift link starts the app of the gift and puts the reward among its rewards, with the same celebration as buying it and "Prezent dla Ciebie!" (a gift for you). Shown large, it says when it was received. One link is received only once on a device.
-- **Pasting a link.** A link opens in the browser, which keeps its own progress, separate from the Android app and from the app added to the iPad home screen. The collection therefore has a field "Odbierz prezent" (receive a gift) where a gift link can be pasted.
+- **Pasting a link.** A link opens in the browser, which on an iPad keeps its own progress, separate from the app added to the home screen. The collection therefore has a field "Odbierz prezent" (receive a gift) where a gift link can be pasted.
 - **Trading** is two gifts, one each way.
 
 A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`, for example `#gift/capitals/eiffel/k3f9q`. The code is random; it only keeps the same link from being received twice on one device. Nothing checks that a link comes from a real gift, so anyone can write one for any reward: gifts are for fun, not safe against cheating.
@@ -367,7 +330,6 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 - `languages-translations.js`: what the sentences with a gap mean, in the languages of the interface.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
-- `android/`: the Android app.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
 - `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax data.
 - `stolice/`: the first address of StoliceMax, which now leads to the app, and a service worker that removes the old offline copy.
