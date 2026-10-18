@@ -20,7 +20,7 @@
 <style>
   /* MaxApki, a family of apps in one page: MnożenieMax (times tables),
      StoliceMax (capitals), ChemiaMax (chemical formulas), LiteraturaMax
-     (authors of books) and JęzykiMax (French, Spanish and Dutch).
+     (authors of books) and JęzykiMax (French, Spanish, Dutch and Italian).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -619,9 +619,10 @@
     cursor: pointer;
   }
   .targets button[aria-pressed="true"] { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
-  @media (max-width: 440px) {
-    .targets { gap: 0.3rem; }
-    .targets button { padding: 0.3rem 0.55rem; font-size: 0.85rem; }
+  /* Four languages: two rows of two on a phone */
+  @media (max-width: 560px) {
+    .targets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
+    .targets button { padding: 0.3rem 0.55rem; }
   }
   .target { direction: ltr; unicode-bidi: isolate; }
   .target.sentence { font-size: clamp(1.2rem, 5.4cqi, 2rem); line-height: 1.3; }
@@ -973,6 +974,7 @@
         <button type="button" data-target="fr" lang="fr" aria-pressed="false">🇫🇷 Français</button>
         <button type="button" data-target="es" lang="es" aria-pressed="false">🇪🇸 Español</button>
         <button type="button" data-target="nl" lang="nl" aria-pressed="false">🇳🇱 Nederlands</button>
+        <button type="button" data-target="it" lang="it" aria-pressed="false">🇮🇹 Italiano</button>
       </div>
       <div class="card" id="card">
         <div class="card-head">
@@ -1340,22 +1342,26 @@
     ['andersen', 450, null, '#fffbe0', '#ffd700', '#d4a200', '#806000'],
     ['nobel', 700, 'SE', '#fffbe6', '#ffd84a', '#e2a400', '#8a5a00'],
   ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
-  // JęzykiMax: symbols of cities where French, Spanish or Dutch is spoken,
-  // with the country of the city. One shop for all three languages.
+  // JęzykiMax: symbols of cities where French, Spanish, Dutch or Italian is
+  // spoken, with the country of the city. One shop for all four languages.
   const CITIES = [
     ['tilburg', 30, 'NL', '#e7f9d9', '#5cbf4a', '#2f8a2a', '#1a4d17'],
     ['paris', 50, 'FR', '#fff8ec', '#e9dcc2', '#bfae8c', '#6b5c3e'],
+    ['bocca', 60, 'IT', '#ffffff', '#dcd8d0', '#a8a294', '#5a5448'],
     ['sevilla', 75, 'ES', '#ffe9d6', '#e0a072', '#b0683c', '#5e3016'],
     ['amsterdamarms', 100, 'NL', '#ffd6d2', '#e3262e', '#a3121a', '#5c070b'],
     ['bruxelles', 125, 'BE', '#ffe1bf', '#c98a4b', '#8c5726', '#4e2d10'],
+    ['pisa', 140, 'IT', '#ffffff', '#f1ede4', '#c9c0ae', '#6b6252'],
     ['buenosaires', 150, 'AR', '#ffffff', '#eef1f5', '#b9c3cf', '#5a6778'],
     ['antwerpen', 175, 'BE', '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
     ['geneve', 200, 'CH', '#ffffff', '#cdeeff', '#7fc4ef', '#2f7fb8'],
     ['habana', 250, 'CU', '#d9fffa', '#2ec4b6', '#1a8a80', '#0a4a44'],
+    ['venezia', 275, 'IT', '#fff6c4', '#ffc928', '#e09a00', '#8a5a00'],
     ['utrecht', 300, 'NL', '#fbf3e4', '#d9c7a4', '#a8916a', '#5a4a30'],
     ['quebec', 350, 'CA', '#d6f5e6', '#3fae80', '#23714f', '#0f3d29'],
     ['mexico', 400, 'MX', '#fff6c4', '#ffc928', '#e09a00', '#8a5a00'],
     ['marseille', 450, 'FR', '#fff6c4', '#ffd23f', '#e0a800', '#8a5a00'],
+    ['firenze', 500, 'IT', '#ffe0cc', '#e07a4a', '#b0502a', '#5e2410'],
     ['rotterdam', 525, 'NL', '#ffffff', '#e3edf6', '#a7bccf', '#46586b'],
     ['barcelona', 600, 'ES', '#fff3dc', '#e7cb96', '#b89458', '#5e4626'],
   ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
@@ -1432,7 +1438,7 @@
       layout: 1,
       // Reading a sentence and four answers takes a while: Easy within 6 seconds.
       fastSeconds: 6,
-      // target: the language learned (fr, es or nl); levels: A1, A2, B1.
+      // target: the language learned (fr, es, nl or it); levels: A1, A2, B1.
       settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30 }),
       groupKey: 'levels',
       rewards: CITIES,
@@ -2410,7 +2416,7 @@
     if (card.kind === 'g') return answered ? fillGap(card.show, card.answer) : '';
     return answered ? card.show + ' – ' + card.answer : card.show;
   }
-  const VOICES = { fr: 'fr-fr', es: 'es-es', nl: 'nl-nl' };
+  const VOICES = { fr: 'fr-fr', es: 'es-es', nl: 'nl-nl', it: 'it-it' };
   function voiceFor(target) {
     if (!('speechSynthesis' in window)) return null;
     const voices = speechSynthesis.getVoices();
@@ -3153,6 +3159,18 @@
   const SPIRES = [[8, 7], [12.2, 4], [16, 1.6], [19.8, 4], [24, 7]];
   const spire = ([x, top]) => 'M' + (x - 1.6) + ' 21V' + (top + 5) + 'C' + (x - 1.6) + ' ' + (top + 2) + ' ' + (x - 0.8) + ' ' + top + ' ' + x + ' ' + top +
     'C' + (x + 0.8) + ' ' + top + ' ' + (x + 1.6) + ' ' + (top + 2) + ' ' + (x + 1.6) + ' ' + (top + 5) + 'V21z';
+  // Rome: the Mouth of Truth, a round stone face with an open mouth.
+  const BOCCA_RAYS = Array.from({ length: 20 }, (_, i) => {
+    const a = (i * Math.PI) / 10;
+    return 'M' + (16 + 9 * Math.cos(a)).toFixed(2) + ' ' + (15 + 9 * Math.sin(a)).toFixed(2) + 'L' + (16 + 11.2 * Math.cos(a)).toFixed(2) + ' ' + (15 + 11.2 * Math.sin(a)).toFixed(2);
+  }).join('');
+  // Pisa: the Leaning Tower, in storeys of arches, leaning to the right.
+  const PISA = 'M12 27V8h8v19zM12.8 8V5.2h6.4V8z';
+  const PISA_TILT = 'rotate(7 16 27)';
+  // Venice: a gondola with its gondolier.
+  const GONDOLA = 'M2.5 20.6c5 2.6 17 2.8 23.6-1.6l1.4-3.6 1.2.4-.9 3.9c-.6 1.2-1.6 2.2-3 2.8C19 24.6 9 24.6 4 22.2z';
+  // Florence: the dome of the cathedral, on its drum, with its lantern.
+  const DUOMO = 'M8.4 19C8.4 12.2 11.8 7.6 16 6.6c4.2 1 7.6 5.6 7.6 12.4z';
   const SAGRADA = SPIRES.map(spire).join('') + 'M5 27V19h22v8z';
   const CITY_ART = {
     tilburg: {
@@ -3269,6 +3287,51 @@
         SPIRES.map(([x, top], i) => '<circle cx="' + x + '" cy="' + top + '" r="0.9" fill="' + ['#e63946', '#ffbe0b', '#06d6a0', '#00bbf9', '#f15bb5'][i] + '"/>').join(''),
     },
   };
+  Object.assign(CITY_ART, {
+    bocca: {
+      shape: '<circle cx="16" cy="15" r="11.2"/>',
+      sparkles: [[27, 5, 1.5], [4.5, 7, 1.4], [27.5, 22, 1.3]],
+      art: (f, rim, [, , lo, deep]) => '<circle cx="16" cy="15" r="11.2" fill="' + f + '" stroke="' + deep + '" stroke-width="0.7"/>' +
+        '<path d="' + BOCCA_RAYS + '" stroke="' + lo + '" stroke-width="0.6"/>' +
+        '<circle cx="16" cy="15" r="9" fill="none" stroke="' + lo + '" stroke-width="0.5"/>' +
+        '<ellipse cx="12.6" cy="12.6" rx="1.5" ry="1.1" fill="' + deep + '"/><ellipse cx="19.4" cy="12.6" rx="1.5" ry="1.1" fill="' + deep + '"/>' +
+        '<path d="M16 12.6v4.2l-1.2.8M10.6 10.6c1-.8 2.4-.8 3.4 0M18 10.6c1-.8 2.4-.8 3.4 0" stroke="' + deep + '" stroke-width="0.6" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="16" cy="20.2" rx="3" ry="1.8" fill="#2b2620"/>' +
+        '<path d="M11.6 22.4c1 1.4 2.6 2 4.4 2s3.4-.6 4.4-2" stroke="' + lo + '" stroke-width="0.5" fill="none"/>',
+    },
+    pisa: {
+      shape: '<path d="' + PISA + '" transform="' + PISA_TILT + '"/>',
+      sparkles: [[19.5, 2.5, 1.5], [7, 12, 1.4], [26, 18, 1.4]],
+      art: (f, rim, [, , lo, deep]) => '<g transform="' + PISA_TILT + '">' + path(PISA, f, deep, 0.6) +
+        path('M13.8 5.2a2.2 2.2 0 0 1 4.4 0z', f, deep, 0.5) +
+        '<path d="' + [10.6, 13.4, 16.2, 19, 21.8, 24.6].map((y) => 'M12 ' + y + 'h8').join('') + 'M12.8 8h6.4" stroke="' + deep + '" stroke-width="0.5"/>' +
+        '<path d="' + [8.4, 11.2, 14, 16.8, 19.6, 22.4].map((y) => [13.2, 15.2, 17.2, 19.2].map((x) => 'M' + x + ' ' + (y + 1.8) + 'v-1a.6.6 0 0 1 1.2 0v1').join('')).join('') + '" stroke="' + lo + '" stroke-width="0.4" fill="none"/></g>',
+    },
+    venezia: {
+      shape: '<path d="' + GONDOLA + '"/>',
+      sparkles: [[27, 12, 1.4], [5, 15, 1.4], [14, 4, 1.3]],
+      art: (f, rim, [hi, , , deep]) => '<path d="M2 23h28v4H2z" fill="#3a9be8"/><path d="M5 25.2c1.2-.6 2.2-.6 3.4 0M20 25.4c1.2-.6 2.2-.6 3.4 0" stroke="#fff" stroke-width="0.5" fill="none"/>' +
+        '<path d="M21.4 10.4l4.4 13.4" stroke="#8a5a2b" stroke-width="0.7" stroke-linecap="round"/>' +
+        '<path d="M18.8 19.6l.4-4.4h1.6l.4 4.4z" fill="#1f2433"/>' +
+        '<path d="M18.6 10.6h2.8v4.8h-2.8z" fill="#fff" stroke="#1f2433" stroke-width="0.4"/><path d="M18.6 12h2.8M18.6 13.6h2.8" stroke="#d62839" stroke-width="0.6"/>' +
+        '<path d="M20.6 11.4l1 1.2" stroke="#e8b48a" stroke-width="0.7" stroke-linecap="round"/>' +
+        '<circle cx="20" cy="9.2" r="1.1" fill="#e8b48a"/><path d="M18.4 8.4h3.2v.6h-3.2zM19 8.4v-.9h2v.9z" fill="#f4d35e" stroke="#8a6d1b" stroke-width="0.2"/>' +
+        path(GONDOLA, '#1f2433', '#0b0d14', 0.5) +
+        '<path d="M4 21.6c5 2 15 2.2 21.6-1.6" stroke="' + f + '" stroke-width="0.8" fill="none"/>' +
+        path('M26.4 15.6l2.2-.8.4 1-1.8.6zM26.8 16.8l1.6-.5M26.6 17.8l1.5-.4', f, deep, 0.3) +
+        '<path d="M9 19.6h5v1.8H9z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.3"/><path d="M9.4 19.6a2.1 2.1 0 0 1 4.2 0" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.3"/>',
+    },
+    firenze: {
+      shape: '<path d="' + DUOMO + '"/>',
+      sparkles: [[16, 0.8, 1.4], [6, 12, 1.4], [26, 12, 1.4]],
+      art: (f, rim, [, , lo, deep]) => path('M6.4 27v-8h19.2v8z', '#f4f1ea', '#5f7a5a', 0.5) +
+        '<path d="M6.4 21.4h19.2M6.4 24.2h19.2" stroke="#5f9a6a" stroke-width="0.5"/>' +
+        [9, 13, 17, 21].map((x) => '<circle cx="' + (x + 1) + '" cy="22.8" r="0.8" fill="#5f7a5a"/>').join('') +
+        path(DUOMO, f, deep, 0.6) +
+        '<path d="M12 19c0-5 1.6-9.2 4-12.4M20 19c0-5-1.6-9.2-4-12.4M16 19V6.6" stroke="#fff" stroke-width="0.6" fill="none"/>' +
+        path('M14.8 6.6V3.8h2.4v2.8zM15 3.8l1-2 1 2z', '#f4f1ea', '#5f7a5a', 0.4) + '<circle cx="16" cy="1.6" r="0.5" fill="#ffc928"/>',
+    },
+  });
   const cityIcon = (id) => modelIcon(id, CITIES, CITY_ART);
 
   const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon };
@@ -3722,12 +3785,13 @@
   }
 
   // JęzykiMax: thought bubbles with words in many languages pop up and rise
-  // for a new city symbol, most of them in French, Spanish and Dutch.
+  // for a new city symbol, most of them in French, Spanish, Dutch and Italian.
   const BUBBLE_WORDS = [
     'Bonjour !', 'Merci !', 'Bravo !', 'Super !', 'Salut !', 'Génial !',
     '¡Hola!', '¡Gracias!', '¡Olé!', '¡Genial!', '¡Vamos!', '¡Qué bien!',
     'Hallo!', 'Dank je!', 'Goed zo!', 'Hoera!', 'Top!', 'Gezellig!',
-    'Cześć!', 'Brawo!', 'Hello!', 'Ciao!', 'Hej!', 'Olá!', 'Привіт!', 'Γεια!', 'Ahoj!', 'Merhaba!', 'Jambo!',
+    'Ciao!', 'Grazie!', 'Evviva!', 'Bellissimo!', 'Forza!', 'Bravissima!',
+    'Cześć!', 'Brawo!', 'Hello!', 'Hej!', 'Olá!', 'Привіт!', 'Γεια!', 'Ahoj!', 'Merhaba!', 'Jambo!',
     'سلام', 'آفرین', 'مرحبا', 'שלום', 'नमस्ते', 'こんにちは', '你好', '안녕!',
   ];
 

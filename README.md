@@ -2,7 +2,7 @@
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds four sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, and [JęzykiMax](#językimax), which teaches French, Spanish and Dutch. The five apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all five.
+The same page also holds four sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, and [JęzykiMax](#językimax), which teaches French, Spanish, Dutch and Italian. The five apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all five.
 
 ## Running it
 
@@ -276,7 +276,7 @@ The books and authors and their names in the five languages are in `literature.j
 
 ## JęzykiMax
 
-JęzykiMax teaches French, Spanish and Dutch at the levels A1, A2 and B1 of the Common European Framework of Reference for Languages. It runs in the same page as the other apps and has the same options. The language to learn is separate from the language of the interface: three buttons above the card choose it, and each language has its own cards and its own number of new cards a day. The coins of the three languages go into one purse.
+JęzykiMax teaches French, Spanish, Dutch and Italian at the levels A1, A2 and B1 of the Common European Framework of Reference for Languages. It runs in the same page as the other apps and has the same options. The language to learn is separate from the language of the interface: four buttons above the card choose it, and each language has its own cards and its own number of new cards a day. The coins of the four languages go into one purse.
 
 - The cards are only in the language being learned, with pictures (emoji), so they need no translation into the five interface languages. The instruction ("Co to jest?", "Which word is missing?") is in the interface language. There are five kinds of card, each with four answers:
   - a picture, and the child picks the word or phrase ("la pomme", "Il pleut.", "Tengo frío.");
@@ -297,23 +297,27 @@ The shop sells symbols of cities where these languages are spoken, drawn as glit
 | --- | --- | --- |
 | Linden tree (from its coat of arms) | Tilburg | 30 |
 | Arc de Triomphe | Paris | 50 |
+| Mouth of Truth | Rome | 60 |
 | Giralda | Seville | 75 |
 | Coat of arms | Amsterdam | 100 |
 | Manneken Pis | Brussels | 125 |
+| Leaning Tower | Pisa | 140 |
 | Obelisk | Buenos Aires | 150 |
 | Antwerp hand | Antwerp | 175 |
 | Jet d’Eau | Geneva | 200 |
 | Classic car | Havana | 250 |
+| Gondola | Venice | 275 |
 | Dom Tower | Utrecht | 300 |
 | Château Frontenac | Quebec City | 350 |
 | Angel of Independence | Mexico City | 400 |
 | Notre-Dame de la Garde | Marseille | 450 |
+| Cathedral dome | Florence | 500 |
 | Erasmus Bridge | Rotterdam | 525 |
 | Sagrada Família | Barcelona | 600 |
 
-All 15 together cost 3780 coins; learning all the cards of one language to the mastered level pays 5610. Buying one makes thought bubbles (💭) pop up and rise for 4 seconds, with words such as "Bonjour !", "¡Hola!", "Goed zo!" and greetings in many other languages and scripts. With reduced motion switched on in the device settings, only the symbol is shown. The symbols and their prices are set in `CITIES` in `index.html`, the drawings in `CITY_ART`, the names of the symbols and cities in `i18n-languages.js`.
+All 19 together cost 4755 coins; learning all the cards of one language to the mastered level pays 5610. Buying one makes thought bubbles (💭) pop up and rise for 4 seconds, with words such as "Bonjour !", "¡Hola!", "Goed zo!", "Evviva!" and greetings in many other languages and scripts. With reduced motion switched on in the device settings, only the symbol is shown. The symbols and their prices are set in `CITIES` in `index.html`, the drawings in `CITY_ART`, the names of the symbols and cities in `i18n-languages.js`.
 
-The cards are in `languages.js`. They were written for this app; the Dutch, French and Spanish have not been checked by a teacher.
+The cards are in `languages.js`. They were written for this app; the French, Spanish, Dutch and Italian have not been checked by a teacher.
 
 ## How the page holds several apps
 
@@ -342,7 +346,7 @@ The cards are in `languages.js`. They were written for this app; the Dutch, Fren
 - `i18n-literature.js`: the text that differs in LiteraturaMax.
 - `literature.js`: the books and authors of LiteraturaMax.
 - `i18n-languages.js`: the text that differs in JęzykiMax.
-- `languages.js`: the French, Spanish and Dutch cards of JęzykiMax.
+- `languages.js`: the French, Spanish, Dutch and Italian cards of JęzykiMax.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `android/`: the Android app.

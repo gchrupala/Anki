@@ -12,29 +12,34 @@
   const fa = (x) => String(x).replace(/[0-9]/g, (c) => '۰۱۲۳۴۵۶۷۸۹'[c]);
 
   // The rewards in the shop (CITIES in index.html): a symbol of a city where
-  // French, Spanish or Dutch is spoken, and the city.
+  // French, Spanish, Dutch or Italian is spoken, and the city.
   const SYMBOLS = {
     pl: {
+      bocca: 'Usta Prawdy', pisa: 'Krzywa Wieża', venezia: 'Gondola', firenze: 'Kopuła katedry',
       tilburg: 'Lipa', paris: 'Łuk Triumfalny', sevilla: 'Giralda', amsterdamarms: 'Herb Amsterdamu', bruxelles: 'Manneken Pis',
       buenosaires: 'Obelisk', antwerpen: 'Dłoń Antwerpii', geneve: 'Fontanna Jet d’Eau', habana: 'Stary samochód', utrecht: 'Wieża Dom',
       quebec: 'Château Frontenac', mexico: 'Anioł Niepodległości', marseille: 'Notre-Dame de la Garde', rotterdam: 'Most Erazma', barcelona: 'Sagrada Família',
     },
     en: {
+      bocca: 'Mouth of Truth', pisa: 'Leaning Tower', venezia: 'Gondola', firenze: 'Cathedral dome',
       tilburg: 'Linden tree', paris: 'Arc de Triomphe', sevilla: 'Giralda', amsterdamarms: 'Amsterdam coat of arms', bruxelles: 'Manneken Pis',
       buenosaires: 'Obelisk', antwerpen: 'Antwerp hand', geneve: 'Jet d’Eau fountain', habana: 'Classic car', utrecht: 'Dom Tower',
       quebec: 'Château Frontenac', mexico: 'Angel of Independence', marseille: 'Notre-Dame de la Garde', rotterdam: 'Erasmus Bridge', barcelona: 'Sagrada Família',
     },
     nl: {
+      bocca: 'Mond der Waarheid', pisa: 'Scheve Toren', venezia: 'Gondel', firenze: 'Koepel van de Dom',
       tilburg: 'Linde', paris: 'Arc de Triomphe', sevilla: 'Giralda', amsterdamarms: 'Wapen van Amsterdam', bruxelles: 'Manneken Pis',
       buenosaires: 'Obelisk', antwerpen: 'Antwerpse hand', geneve: 'Jet d’Eau', habana: 'Oldtimer', utrecht: 'Domtoren',
       quebec: 'Château Frontenac', mexico: 'Engel van de Onafhankelijkheid', marseille: 'Notre-Dame de la Garde', rotterdam: 'Erasmusbrug', barcelona: 'Sagrada Família',
     },
     es: {
+      bocca: 'Boca de la Verdad', pisa: 'Torre inclinada', venezia: 'Góndola', firenze: 'Cúpula de la catedral',
       tilburg: 'Tilo', paris: 'Arco del Triunfo', sevilla: 'La Giralda', amsterdamarms: 'Escudo de Ámsterdam', bruxelles: 'Manneken Pis',
       buenosaires: 'Obelisco', antwerpen: 'Mano de Amberes', geneve: 'Fuente Jet d’Eau', habana: 'Coche clásico', utrecht: 'Torre del Dom',
       quebec: 'Château Frontenac', mexico: 'Ángel de la Independencia', marseille: 'Notre-Dame de la Garde', rotterdam: 'Puente Erasmus', barcelona: 'Sagrada Familia',
     },
     fa: {
+      bocca: 'دهان حقیقت', pisa: 'برج کج', venezia: 'گوندولا', firenze: 'گنبد کلیسای جامع',
       tilburg: 'درخت زیرفون', paris: 'طاق پیروزی', sevilla: 'خیرالدا', amsterdamarms: 'نشان آمستردام', bruxelles: 'مانکن پیس',
       buenosaires: 'ابلیسک', antwerpen: 'دست آنتورپ', geneve: 'فوارهٔ ژنو', habana: 'ماشین قدیمی', utrecht: 'برج دوم',
       quebec: 'شاتو فرونتناک', mexico: 'فرشتهٔ استقلال', marseille: 'نوتردام دلا گارد', rotterdam: 'پل اراسموس', barcelona: 'ساگرادا فامیلیا',
@@ -42,26 +47,31 @@
   };
   const CITIES = {
     pl: {
+      bocca: 'Rzym', pisa: 'Piza', venezia: 'Wenecja', firenze: 'Florencja',
       tilburg: 'Tilburg', paris: 'Paryż', sevilla: 'Sewilla', amsterdamarms: 'Amsterdam', bruxelles: 'Bruksela', buenosaires: 'Buenos Aires',
       antwerpen: 'Antwerpia', geneve: 'Genewa', habana: 'Hawana', utrecht: 'Utrecht', quebec: 'Quebec', mexico: 'Meksyk',
       marseille: 'Marsylia', rotterdam: 'Rotterdam', barcelona: 'Barcelona',
     },
     en: {
+      bocca: 'Rome', pisa: 'Pisa', venezia: 'Venice', firenze: 'Florence',
       tilburg: 'Tilburg', paris: 'Paris', sevilla: 'Seville', amsterdamarms: 'Amsterdam', bruxelles: 'Brussels', buenosaires: 'Buenos Aires',
       antwerpen: 'Antwerp', geneve: 'Geneva', habana: 'Havana', utrecht: 'Utrecht', quebec: 'Quebec City', mexico: 'Mexico City',
       marseille: 'Marseille', rotterdam: 'Rotterdam', barcelona: 'Barcelona',
     },
     nl: {
+      bocca: 'Rome', pisa: 'Pisa', venezia: 'Venetië', firenze: 'Florence',
       tilburg: 'Tilburg', paris: 'Parijs', sevilla: 'Sevilla', amsterdamarms: 'Amsterdam', bruxelles: 'Brussel', buenosaires: 'Buenos Aires',
       antwerpen: 'Antwerpen', geneve: 'Genève', habana: 'Havana', utrecht: 'Utrecht', quebec: 'Quebec', mexico: 'Mexico-Stad',
       marseille: 'Marseille', rotterdam: 'Rotterdam', barcelona: 'Barcelona',
     },
     es: {
+      bocca: 'Roma', pisa: 'Pisa', venezia: 'Venecia', firenze: 'Florencia',
       tilburg: 'Tilburg', paris: 'París', sevilla: 'Sevilla', amsterdamarms: 'Ámsterdam', bruxelles: 'Bruselas', buenosaires: 'Buenos Aires',
       antwerpen: 'Amberes', geneve: 'Ginebra', habana: 'La Habana', utrecht: 'Utrecht', quebec: 'Quebec', mexico: 'Ciudad de México',
       marseille: 'Marsella', rotterdam: 'Róterdam', barcelona: 'Barcelona',
     },
     fa: {
+      bocca: 'رم', pisa: 'پیزا', venezia: 'ونیز', firenze: 'فلورانس',
       tilburg: 'تیلبورخ', paris: 'پاریس', sevilla: 'سویل', amsterdamarms: 'آمستردام', bruxelles: 'بروکسل', buenosaires: 'بوئنوس آیرس',
       antwerpen: 'آنتورپ', geneve: 'ژنو', habana: 'هاوانا', utrecht: 'اوترخت', quebec: 'کبک', mexico: 'مکزیکوسیتی',
       marseille: 'مارسی', rotterdam: 'روتردام', barcelona: 'بارسلون',
@@ -99,7 +109,7 @@
       howP3: 'Nowa karta wraca po 1 i po 10 minutach, a potem po kilku dniach. Za każdym razem, gdy dziecko ją pamięta, przerwa się wydłuża. Nowe karty przychodzą poziomami: najpierw A1, potem A2, potem B1. Na każdym poziomie karty ze słowem do obrazka przychodzą po pozostałych, gdy obrazki są już znane.',
       clockReal: 'Używany jest prawdziwy zegar. Przesuń go do przodu, żeby zobaczyć, które karty wrócą w kolejnych dniach.',
       coinReason: { learned: 'Nowa karta nauczona!', week: 'Znasz ją już dobrze!', mastered: 'Karta opanowana!' },
-      coinsRules: 'Monety nagradzają to, co dziecko pamięta, a nie liczbę rozwiązanych kart: 2 monety, gdy nowa karta zostanie nauczona, 5, gdy przerwa do następnej powtórki dojdzie do tygodnia, 10, gdy karta zostanie opanowana (przerwa 3 tygodnie lub więcej), i 10 za skończenie wszystkich kart danego dnia. Każda karta daje każdą nagrodę tylko raz, więc zapomnienie i ponowna nauka nie dają monet. Monety nie wpływają na planowanie powtórek. Monety ze wszystkich trzech języków trafiają do jednego portfela i można je wydać w sklepie na symbole miast, w których mówi się tymi językami: od lipy Tilburga za 30 monet do Sagrady Família za 600.',
+      coinsRules: 'Monety nagradzają to, co dziecko pamięta, a nie liczbę rozwiązanych kart: 2 monety, gdy nowa karta zostanie nauczona, 5, gdy przerwa do następnej powtórki dojdzie do tygodnia, 10, gdy karta zostanie opanowana (przerwa 3 tygodnie lub więcej), i 10 za skończenie wszystkich kart danego dnia. Każda karta daje każdą nagrodę tylko raz, więc zapomnienie i ponowna nauka nie dają monet. Monety nie wpływają na planowanie powtórek. Monety ze wszystkich czterech języków trafiają do jednego portfela i można je wydać w sklepie na symbole miast, w których mówi się tymi językami: od lipy Tilburga za 30 monet do Sagrady Família za 600.',
       shopHint: 'Wybierz symbol miasta i kup go za monety. Monety zdobywasz, gdy uczysz się nowych kart i je pamiętasz.',
       yourTrophies: 'Twoje miasta',
       noTrophies: 'Nie masz jeszcze żadnego symbolu miasta.',
@@ -138,7 +148,7 @@
       howP3: 'A new card comes back after 1 and 10 minutes, then a few days later. Each time it is remembered the gap grows. New cards come level by level: A1 first, then A2, then B1. Within a level, the cards that show a word and ask for the picture come after the others, once the pictures are known.',
       clockReal: 'Using the real clock. Jump ahead to see which cards come back on later days.',
       coinReason: { learned: 'New card learned!', week: 'You know this one well!', mastered: 'Card mastered!' },
-      coinsRules: 'Coins reward what your child remembers, not the number of cards done: 2 coins when a new card is learned, 5 when the gap before its next review reaches a week, 10 when the card is mastered (a gap of 3 weeks or more), and 10 for finishing all of the day’s cards. Each card gives each reward only once, so forgetting and relearning earns nothing. Coins do not affect when cards come back. The coins of all three languages go into one purse, and can be spent in the shop on symbols of cities where these languages are spoken, from the Tilburg linden tree for 30 coins to the Sagrada Família for 600.',
+      coinsRules: 'Coins reward what your child remembers, not the number of cards done: 2 coins when a new card is learned, 5 when the gap before its next review reaches a week, 10 when the card is mastered (a gap of 3 weeks or more), and 10 for finishing all of the day’s cards. Each card gives each reward only once, so forgetting and relearning earns nothing. Coins do not affect when cards come back. The coins of all four languages go into one purse, and can be spent in the shop on symbols of cities where these languages are spoken, from the Tilburg linden tree for 30 coins to the Sagrada Família for 600.',
       shopHint: 'Pick a symbol of a city and buy it with your coins. You earn coins by learning new cards and remembering them.',
       yourTrophies: 'Your cities',
       noTrophies: 'No city symbols yet.',
@@ -179,7 +189,7 @@
       howP3: 'Een nieuwe kaart komt terug na 1 en 10 minuten, en daarna na een paar dagen. Elke keer dat je kind het antwoord weet, wordt de tussentijd langer. Nieuwe kaarten komen per niveau: eerst A1, dan A2, dan B1. Binnen een niveau komen de kaarten die een woord tonen en naar het plaatje vragen na de andere, als de plaatjes al bekend zijn.',
       clockReal: 'De echte klok wordt gebruikt. Spring vooruit om te zien welke kaarten op latere dagen terugkomen.',
       coinReason: { learned: 'Nieuwe kaart geleerd!', week: 'Die ken je al goed!', mastered: 'Kaart beheerst!' },
-      coinsRules: 'Munten belonen wat je kind onthoudt, niet het aantal gemaakte kaarten: 2 munten als een nieuwe kaart geleerd is, 5 als de tijd tot de volgende herhaling een week wordt, 10 als de kaart beheerst is (3 weken of meer), en 10 voor het afmaken van alle kaarten van de dag. Elke kaart geeft elke beloning maar één keer, dus vergeten en opnieuw leren levert niets op. Munten hebben geen invloed op wanneer kaarten terugkomen. De munten van alle drie de talen gaan in één portemonnee en kun je in de winkel uitgeven aan symbolen van steden waar deze talen gesproken worden, van de Tilburgse linde voor 30 munten tot de Sagrada Família voor 600.',
+      coinsRules: 'Munten belonen wat je kind onthoudt, niet het aantal gemaakte kaarten: 2 munten als een nieuwe kaart geleerd is, 5 als de tijd tot de volgende herhaling een week wordt, 10 als de kaart beheerst is (3 weken of meer), en 10 voor het afmaken van alle kaarten van de dag. Elke kaart geeft elke beloning maar één keer, dus vergeten en opnieuw leren levert niets op. Munten hebben geen invloed op wanneer kaarten terugkomen. De munten van alle vier de talen gaan in één portemonnee en kun je in de winkel uitgeven aan symbolen van steden waar deze talen gesproken worden, van de Tilburgse linde voor 30 munten tot de Sagrada Família voor 600.',
       shopHint: 'Kies een symbool van een stad en koop het met je munten. Munten verdien je door nieuwe kaarten te leren en te onthouden.',
       yourTrophies: 'Jouw steden',
       noTrophies: 'Nog geen stadssymbolen.',
@@ -218,7 +228,7 @@
       howP3: 'Una tarjeta nueva vuelve al cabo de 1 y de 10 minutos, y después a los pocos días. Cada vez que se recuerda, el intervalo crece. Las tarjetas nuevas salen por niveles: primero A1, luego A2, luego B1. Dentro de un nivel, las tarjetas que muestran una palabra y piden la imagen salen después de las demás, cuando las imágenes ya se conocen.',
       clockReal: 'Se usa el reloj real. Adelántalo para ver qué tarjetas vuelven en los próximos días.',
       coinReason: { learned: '¡Tarjeta nueva aprendida!', week: '¡Esta ya te la sabes bien!', mastered: '¡Tarjeta dominada!' },
-      coinsRules: 'Las monedas premian lo que se recuerda, no el número de tarjetas: 2 monedas cuando se aprende una tarjeta nueva, 5 cuando el intervalo hasta el próximo repaso llega a una semana, 10 cuando la tarjeta está dominada (3 semanas o más) y 10 por terminar todas las tarjetas del día. Cada tarjeta da cada premio una sola vez, así que olvidar y volver a aprender no da monedas. Las monedas no cambian cuándo vuelven las tarjetas. Las monedas de los tres idiomas van a un solo monedero y se pueden gastar en la tienda en símbolos de ciudades donde se hablan estos idiomas, desde el tilo de Tilburg por 30 monedas hasta la Sagrada Familia por 600.',
+      coinsRules: 'Las monedas premian lo que se recuerda, no el número de tarjetas: 2 monedas cuando se aprende una tarjeta nueva, 5 cuando el intervalo hasta el próximo repaso llega a una semana, 10 cuando la tarjeta está dominada (3 semanas o más) y 10 por terminar todas las tarjetas del día. Cada tarjeta da cada premio una sola vez, así que olvidar y volver a aprender no da monedas. Las monedas no cambian cuándo vuelven las tarjetas. Las monedas de los cuatro idiomas van a un solo monedero y se pueden gastar en la tienda en símbolos de ciudades donde se hablan estos idiomas, desde el tilo de Tilburg por 30 monedas hasta la Sagrada Familia por 600.',
       shopHint: 'Elige el símbolo de una ciudad y cómpralo con tus monedas. Las monedas se ganan aprendiendo tarjetas nuevas y recordándolas.',
       yourTrophies: 'Tus ciudades',
       noTrophies: 'Aún no tienes símbolos de ciudades.',
@@ -258,7 +268,7 @@
       howP3: 'یک کارت جدید پس از ' + fa(1) + ' و ' + fa(10) + ' دقیقه برمی‌گردد و بعد از چند روز. هر بار که به یاد بماند، فاصله بیشتر می‌شود. کارت‌های جدید سطح به سطح می‌آیند: اول A1، بعد A2، بعد B1. در هر سطح، کارت‌هایی که کلمه را نشان می‌دهند و تصویر را می‌پرسند بعد از بقیه می‌آیند، وقتی تصویرها آشنا شده‌اند.',
       clockReal: 'از ساعت واقعی استفاده می‌شود. آن را جلو ببرید تا ببینید کدام کارت‌ها در روزهای بعد برمی‌گردند.',
       coinReason: { learned: 'یک کارت جدید یاد گرفتی!', week: 'این یکی را خوب بلدی!', mastered: 'این کارت را کاملاً بلدی!' },
-      coinsRules: 'سکه‌ها به آنچه کودک به یاد می‌سپارد پاداش می‌دهند، نه به تعداد کارت‌ها: ' + fa(2) + ' سکه وقتی یک کارت جدید یاد گرفته شود، ' + fa(5) + ' وقتی فاصله تا مرور بعدی به یک هفته برسد، ' + fa(10) + ' وقتی کارت کاملاً یاد گرفته شود (' + fa(3) + ' هفته یا بیشتر)، و ' + fa(10) + ' برای تمام کردن همهٔ کارت‌های روز. هر کارت هر پاداش را فقط یک بار می‌دهد، پس فراموش کردن و دوباره یاد گرفتن سکه ندارد. سکه‌ها روی زمان برگشت کارت‌ها اثری ندارند. سکه‌های هر سه زبان در یک کیف پول جمع می‌شوند و می‌توان آن‌ها را در فروشگاه برای نمادهای شهرهایی که در آن‌ها به این زبان‌ها حرف می‌زنند خرج کرد، از درخت زیرفون تیلبورخ با ' + fa(30) + ' سکه تا ساگرادا فامیلیا با ' + fa(600) + '.',
+      coinsRules: 'سکه‌ها به آنچه کودک به یاد می‌سپارد پاداش می‌دهند، نه به تعداد کارت‌ها: ' + fa(2) + ' سکه وقتی یک کارت جدید یاد گرفته شود، ' + fa(5) + ' وقتی فاصله تا مرور بعدی به یک هفته برسد، ' + fa(10) + ' وقتی کارت کاملاً یاد گرفته شود (' + fa(3) + ' هفته یا بیشتر)، و ' + fa(10) + ' برای تمام کردن همهٔ کارت‌های روز. هر کارت هر پاداش را فقط یک بار می‌دهد، پس فراموش کردن و دوباره یاد گرفتن سکه ندارد. سکه‌ها روی زمان برگشت کارت‌ها اثری ندارند. سکه‌های هر چهار زبان در یک کیف پول جمع می‌شوند و می‌توان آن‌ها را در فروشگاه برای نمادهای شهرهایی که در آن‌ها به این زبان‌ها حرف می‌زنند خرج کرد، از درخت زیرفون تیلبورخ با ' + fa(30) + ' سکه تا ساگرادا فامیلیا با ' + fa(600) + '.',
       shopHint: 'نماد یک شهر را انتخاب کن و با سکه‌هایت بخر. سکه‌ها را با یاد گرفتن و به یاد سپردن کارت‌های جدید به دست می‌آوری.',
       yourTrophies: 'شهرهای تو',
       noTrophies: 'هنوز نماد شهری نداری.',
