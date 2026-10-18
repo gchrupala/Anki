@@ -2302,10 +2302,11 @@
       '</svg>';
   }
 
-  // StoliceMax: each souvenir as a small glittering model on a stand.
-  // "shape" is its outline (for the glitter and the beam of light), "art"
-  // draws it, given its gradients (face, rim) and colours, and "sparkles"
-  // are the places [x, y, size] of the stars that twinkle on it.
+  // StoliceMax: each souvenir as a keychain with a small glittering model.
+  // "shape" is its outline (for the glitter and the beam of light), "hook"
+  // the point [x, y] where the chain holds it, "art" draws it, given its
+  // gradients (face, rim) and colours, and "sparkles" are the places
+  // [x, y, size] of the stars that twinkle on it.
   const arches = (y1, y2, xs) => xs.map((x) => 'M' + x + ' ' + y2 + 'V' + (y1 + 1) + 'a1 1 0 0 1 2 0V' + y2 + 'z').join('');
   const PALACE = 'M7.5 27V21.5H10V17h2.5V10.5h1.2V8h4.6v2.5h1.2V17H22v4.5h2.5V27zM15.3 8.2L16 2l.7 6.2z';
   const EIFFEL = 'M5.5 27C9.5 24.5 12 19 13.6 11L15.2 3h1.6l1.6 8c1.6 8 4.1 13.5 8.1 16h-4.7c-1.2-3.4-3.3-5.2-5.8-5.2s-4.6 1.8-5.8 5.2zM15.6 3V.8h.8V3z';
@@ -2365,6 +2366,7 @@
   const SOUVENIR_ART = {
     palace: {
       shape: '<path d="' + PALACE + '"/>',
+      hook: [16, 2],
       sparkles: [[16, 1.6, 1.8], [6.5, 18, 1.5], [25.5, 15, 1.6]],
       art: (f, rim, [, , lo, deep]) => path(PALACE, f, deep, 0.7) +
         '<path d="M14.7 11.5v4.5M16 11.5v4.5M17.3 11.5v4.5M11.5 18.3v2.4M13.6 18.3v2.4M18.4 18.3v2.4M20.5 18.3v2.4M9 22.8v3M11.3 22.8v3M13.6 22.8v3M18.4 22.8v3M20.7 22.8v3M23 22.8v3" stroke="' + lo + '" stroke-width="0.7"/>' +
@@ -2372,6 +2374,7 @@
     },
     eiffel: {
       shape: '<path d="' + EIFFEL + '"/>',
+      hook: [16, 0.8],
       sparkles: [[16, 2.2, 1.6], [7, 21, 1.5], [25, 20, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(EIFFEL, f, deep) +
         '<path d="M12.2 18.4l2.3-6.6M19.8 18.4l-2.3-6.6M9.6 24.4l2.6-4.3M22.4 24.4l-2.6-4.3M14.6 10.4L16 4.5l1.4 5.9" stroke="' + lo + '" stroke-width="0.55" fill="none"/>' +
@@ -2379,6 +2382,7 @@
     },
     amsterdam: {
       shape: '<path d="' + HOUSES.map((h) => h[2]).join('') + '"/>',
+      hook: [13.25, 7],
       sparkles: [[6.75, 7.5, 1.5], [13.25, 5, 1.6], [25.75, 8.5, 1.5]],
       art: () => HOUSES.map(([x0, x1, d, color]) => {
         const w = x1 - x0;
@@ -2392,6 +2396,7 @@
     },
     bigben: {
       shape: '<path d="' + BIGBEN + '"/>',
+      hook: [16, 1.6],
       sparkles: [[16, 1.4, 1.5], [10.5, 7.5, 1.4], [22, 17, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(BIGBEN, f, deep, 0.7) +
         '<path d="M12.6 6.2h6.8M11.7 14h8.6" stroke="' + deep + '" stroke-width="0.6"/>' +
@@ -2401,6 +2406,7 @@
     },
     riesenrad: {
       shape: '<circle cx="16" cy="12.5" r="11.6"/><path d="M15 12.5L9.5 27h2L16 15l4.5 12h2L17 12.5z"/>',
+      hook: [16, 1.6],
       sparkles: [[26.5, 3.2, 1.6], [5.5, 4, 1.4], [26, 24, 1.4]],
       art: (f, rim, [, , lo, deep]) => '<path d="M16 12.5L10.5 27M16 12.5L21.5 27M12.3 21.5h7.4" stroke="' + deep + '" stroke-width="1.2" stroke-linecap="round" fill="none"/>' +
         '<path d="' + WHEEL.map(([x, y]) => 'M16 12.5L' + x.toFixed(2) + ' ' + y.toFixed(2)).join('') + '" stroke="' + lo + '" stroke-width="0.5"/>' +
@@ -2411,6 +2417,7 @@
     },
     brandenburg: {
       shape: '<path d="' + BRANDENBURG + QUADRIGA + '"/>',
+      hook: [16, 3.3],
       sparkles: [[16, 1.8, 1.7], [4, 8.5, 1.5], [28, 8.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(BRANDENBURG, f, deep, 0.5) +
         '<path d="M3.5 12h25" stroke="' + lo + '" stroke-width="0.4"/>' +
@@ -2418,6 +2425,7 @@
     },
     tram: {
       shape: '<path d="' + TRAM + '"/>',
+      hook: [16, 7.5],
       sparkles: [[16, 5.6, 1.5], [3.5, 10.2, 1.4], [28.5, 10.2, 1.4]],
       art: (f, rim, [, , lo, deep]) => '<path d="M14 10.8L16 7.5 18 10.8M13 7.5h6" stroke="' + deep + '" stroke-width="0.6" fill="none"/>' +
         path('M5.5 13Q5.5 10.8 8 10.8H24Q26.5 10.8 26.5 13z', '#f4efe2', deep, 0.5) +
@@ -2429,6 +2437,7 @@
     },
     atomium: {
       shape: ATOMS.map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="2.5"/>').join(''),
+      hook: [16, 1.1],
       sparkles: [[27, 4.5, 1.6], [4.5, 13, 1.5], [21, 25, 1.3]],
       art: (f, rim, [, , lo, deep]) => '<path d="' +
         ATOMS.slice(1).map(([x, y]) => 'M16 13L' + x + ' ' + y).join('') +
@@ -2437,6 +2446,7 @@
     },
     colosseum: {
       shape: '<path d="' + COLOSSEUM + '"/>',
+      hook: [16, 10.4],
       sparkles: [[21.5, 8.2, 1.6], [3.8, 10.3, 1.5], [28.2, 13, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(COLOSSEUM, f, deep, 0.7) +
         '<path d="M3.5 17h25M3.5 21.2h25" stroke="' + lo + '" stroke-width="0.6"/>' +
@@ -2445,12 +2455,14 @@
     },
     parthenon: {
       shape: '<path d="' + PARTHENON + '"/>',
+      hook: [16, 4.6],
       sparkles: [[16, 3, 1.7], [3.8, 8.2, 1.5], [28.2, 8.2, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(PARTHENON, f, deep, 0.5) +
         '<path d="M8 9.1L16 5.5l8 3.6M4.5 11.3h23" stroke="' + lo + '" stroke-width="0.5" fill="none"/>',
     },
     whitehouse: {
       shape: '<path d="' + WHITEHOUSE + '"/>',
+      hook: [16, 4],
       sparkles: [[21, 2.6, 1.4], [3, 11.5, 1.5], [29, 11.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(WHITEHOUSE, f, deep, 0.5) +
         '<path d="M11 13.8h10v10.7H11z" fill="' + lo + '" fill-opacity="0.55"/>' +
@@ -2463,6 +2475,7 @@
     },
     torii: {
       shape: '<path d="' + TORII + '"/>',
+      hook: [16, 8.5],
       sparkles: [[3, 5.2, 1.5], [29, 5.2, 1.5], [16, 4.2, 1.6]],
       art: (f, rim, [, , , deep]) => path('M4.2 9.9h23.6v1.5H4.2zM5 14.2h22v1.6H5zM15.2 11.4h1.6v2.8h-1.6zM8.2 11.4h2V25h-2zM21.8 11.4h2V25h-2z', f, deep, 0.5) +
         path('M2.5 9.6Q16 11.4 29.5 9.6L29 7.4Q16 9.4 3 7.4zM7.9 25h2.6V27H7.9zM21.5 25h2.6V27h-2.6z', '#2b2b2b', '#111', 0.4) +
@@ -2470,6 +2483,7 @@
     },
     petronas: {
       shape: '<path d="' + PETRONAS + '"/>',
+      hook: [16, 15.4],
       sparkles: [[7, 3, 1.4], [25, 3, 1.4], [16, 9, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(tower(10.5) + tower(21.5), f, deep, 0.5) +
         '<path d="M9.3 8.5V26M10.5 6V26M11.7 8.5V26M20.3 8.5V26M21.5 6V26M22.7 8.5V26" stroke="' + lo + '" stroke-width="0.35"/>' +
@@ -2478,6 +2492,7 @@
     },
     lotus: {
       shape: '<path d="' + LOTUS.join('') + 'M4 24.2h24V27H4z"/>',
+      hook: [16, 5.5],
       sparkles: [[16, 3.2, 1.7], [5, 11.5, 1.5], [27, 11.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path('M4 24.2h24V27H4z', f, deep, 0.5) +
         '<path d="M5 25.3h22v.9H5z" fill="#9fd3ee"/>' +
@@ -2486,6 +2501,7 @@
     },
     brasilia: {
       shape: '<path d="M7.6 26C10.8 20 10.8 14 8.6 7.4L7 3.6h18L23.4 7.4C21.2 14 21.2 20 24.4 26z"/>',
+      hook: [16, 0.9],
       sparkles: [[6, 2.8, 1.5], [26, 2.8, 1.5], [16, 15, 1.4]],
       art: (f, rim, [, , , deep]) => '<path d="M3.5 25.6h25V27h-25z" fill="#bfe3f2"/>' +
         path(BRASILIA, '#8cc4ec', deep, 0.4) + '<path d="' + BRASILIA + '" fill="url(#sheen)"/>' +
@@ -2495,6 +2511,7 @@
     },
     mosque: {
       shape: '<path d="' + MOSQUE + 'M2.4 10L3.3 7l.9 3zM27.8 10l.9-3 .9 3z"/>',
+      hook: [16, 6.2],
       sparkles: [[16, 4.4, 1.6], [6, 9, 1.3], [26, 9, 1.3]],
       art: (f, rim, [, , lo, deep]) => path(MOSQUE, f, deep, 0.5) +
         '<path d="' + arches(21.5, 26, [6.5, 9.5, 12.5, 17.5, 20.5, 23.5]) + 'M14.6 27v-4a1.4 1.4 0 0 1 2.8 0v4z" fill="' + lo + '" fill-opacity="0.8"/>' +
@@ -2505,6 +2522,7 @@
     },
     bear: {
       shape: BEAR,
+      hook: [23.8, 3.4],
       sparkles: [[23.8, 2.4, 1.6], [6, 9.5, 1.5], [29.5, 16, 1.4]],
       art: (f, rim, [, , lo, deep]) => path(PLINTH, '#ddd3c4', deep, 0.5) +
         path(TRUNK, rim, deep, 0.5) +
@@ -2519,6 +2537,7 @@
     },
     azadi: {
       shape: '<path d="' + AZADI + '"/>',
+      hook: [16, 4.9],
       sparkles: [[16, 2.2, 1.6], [4.5, 18.5, 1.5], [27.5, 18.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(AZADI, f, deep, 0.6) +
         '<path d="M7 25C10 20 12 14 12.6 9.6M25 25C22 20 20 14 19.4 9.6M11 26C12 21 13.8 16 16 13.4C18.2 16 20 21 21 26M12.2 10.2Q16 8 19.8 10.2" stroke="' + lo + '" stroke-width="0.45" fill="none"/>' +
@@ -2527,6 +2546,7 @@
     },
     pyramids: {
       shape: '<path d="' + PYRAMIDS + '"/>',
+      hook: [14, 7],
       sparkles: [[14, 4.8, 1.8], [23.5, 12.2, 1.5], [28, 21, 1.3]],
       art: (f, rim, [, , lo, deep]) => '<circle cx="6.5" cy="7" r="2.6" fill="#ffe27a" stroke="' + lo + '" stroke-width="0.5"/>' +
         path('M17.5 27L23.5 14.5 24.8 27z', f, deep) + path('M24.8 27L23.5 14.5 30 27z', lo, deep) +
@@ -2535,6 +2555,7 @@
     },
     forbidden: {
       shape: '<path d="' + FORBIDDEN + '"/>',
+      hook: [16, 8],
       sparkles: [[16, 5.6, 1.6], [2.5, 14.5, 1.5], [29.5, 14.5, 1.5]],
       art: (f, rim, [, , , deep]) => path('M4.5 23.5h23V27h-23z', '#efe2cf', deep) +
         path('M7.5 16.2h17v7.3h-17z', f, deep) +
@@ -2555,18 +2576,46 @@
       'z" fill="#fffdf0" stroke="#f5b700" stroke-width="0.3"/>';
   };
 
+  // A key ring at the top and a chain down to an eyelet at (x, y), where
+  // the charm of a keychain hangs.
+  const KEY_METAL = 'fill="none" stroke="#7f8a96" stroke-linecap="round"';
+  function keyChain(x, y) {
+    const top = 5.9; // the bottom of the ring
+    const dx = x - 16;
+    const dy = y - 0.9 - top;
+    const n = Math.max(1, Math.round(Math.hypot(dx, dy) / 1.5));
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    let links = '';
+    for (let i = 0; i < n; i++) {
+      const cx = (16 + (dx * (i + 0.5)) / n).toFixed(2);
+      const cy = (top + (dy * (i + 0.5)) / n).toFixed(2);
+      // The links alternate: one seen from the side, the next edge-on.
+      links += i % 2
+        ? '<path d="M-0.8 0h1.6" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.6"/>'
+        : '<ellipse rx="1" ry="0.55" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.45"/>';
+    }
+    return '<circle cx="16" cy="3.5" r="2.4" ' + KEY_METAL + ' stroke-width="1.1"/>' +
+      '<circle cx="16" cy="3.5" r="2.4" fill="none" stroke="#eef2f6" stroke-width="0.45"/>' +
+      '<path d="M13.9 2.3a2.4 2.4 0 0 1 2.1-1.2" ' + KEY_METAL + ' stroke-width="0.5"/>' +
+      links + '<circle cx="' + x + '" cy="' + (y - 0.6).toFixed(2) + '" r="0.75" ' + KEY_METAL + ' stroke-width="0.45"/>';
+  }
+
+  // The model of a souvenir, made smaller to leave room for the chain.
+  const CHARM = [3.2, 7.4, 0.8]; // x, y, scale
   function souvenirIcon(id) {
     const { colors } = SOUVENIRS.find((r) => r.id === id) || SOUVENIRS[0];
     const art = SOUVENIR_ART[id];
     const rim = 'url(#rim-' + id + ')';
+    const [x, y, scale] = CHARM;
     return '<svg class="trophy-icon shiny" viewBox="0 0 32 32" aria-hidden="true">' +
-      '<rect x="3" y="27" width="26" height="3" rx="1.2" fill="' + rim + '" stroke="' + colors[3] + '" stroke-width="0.7"/>' +
+      keyChain(x + art.hook[0] * scale, y + art.hook[1] * scale) +
+      '<g transform="translate(' + x + ' ' + y + ') scale(' + scale + ')">' +
       art.art('url(#face-' + id + ')', rim, colors) +
       // Glitter: two layers of tiny dots that shimmer in turn.
       '<g clip-path="url(#clip-' + id + ')"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/></g>' +
       glint('clip-' + id) +
-      art.sparkles.map(([x, y, s], i) => sparkle(x, y, s, i)).join('') +
-      '</svg>';
+      art.sparkles.map(([sx, sy, s], i) => sparkle(sx, sy, s, i)).join('') +
+      '</g></svg>';
   }
 
   // ChemiaMax: laboratory glassware with coloured liquid that bubbles and
