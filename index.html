@@ -308,11 +308,33 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--coin-edge) 35%, transparent);
+    border: 0;
+    font-family: inherit;
+    cursor: pointer;
   }
   .trophy-icon { width: 1.7rem; height: 1.7rem; flex: none; filter: drop-shadow(0 1px 1px rgb(60 40 20 / 0.35)); }
   #trophy-slot { display: inline-flex; }
   .trophy-shelf { display: flex; flex-wrap: wrap; gap: 0.35rem; }
   .trophy-shelf .trophy-icon { width: 2.4rem; height: 2.4rem; }
+  .trophy-shelf button { display: inline-flex; padding: 0.2rem; border: 0; border-radius: 10px; background: none; cursor: pointer; }
+  .trophy-shelf button:hover, .trophy-shelf button:focus-visible { background: var(--coin-soft); }
+  /* A reward bought, shown large: it glows in its colour, and a keychain
+     swings gently on its ring. */
+  .showcase-sheet { align-items: center; text-align: center; gap: 0.6rem; }
+  .showcase-art {
+    display: grid;
+    place-items: center;
+    width: min(16rem, 70vw);
+    aspect-ratio: 1;
+    margin-block: 0.4rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--metal, var(--gold)) 40%, transparent) 0%, transparent 70%);
+  }
+  .showcase-art .trophy-icon { width: 85%; height: 85%; }
+  .showcase-art.swing .trophy-icon { transform-origin: 50% 11%; animation: swing 3s ease-in-out infinite alternate; }
+  @keyframes swing { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+  .showcase-sheet .place { margin: -0.4rem 0 0; color: var(--ink-soft); }
+  .showcase-sheet .sheet-foot { align-self: stretch; }
   /* Shop */
   .shop-balance { display: flex; align-items: center; gap: 0.2rem; margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--coin-ink); }
   .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.75rem; }
@@ -355,6 +377,12 @@
     0%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
     50% { opacity: 1; transform: scale(1) rotate(45deg); }
   }
+  /* LiteraturaMax: white stars twinkle faster, and never quite go out. */
+  .shiny .sparkle.white { animation-name: star-twinkle; animation-duration: 2.2s; }
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.55); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
   .trophies .shiny .glitter, .trophies .shiny .flame { animation: none; }
   .trophies .shiny .sparkle { animation: none; opacity: 0.85; transform: scale(0.8); }
   .trophies .shiny .bubble { animation: none; opacity: 0.7; }
@@ -393,7 +421,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .trophy-banner { animation: none; }
-    .trophy-icon .glint, .shiny .glitter, .shiny .sparkle, .shiny .bubble, .shiny .flame { animation: none; }
+    .trophy-icon .glint, .shiny .glitter, .shiny .sparkle, .shiny .bubble, .shiny .flame, .showcase-art.swing .trophy-icon { animation: none; }
     .shiny .sparkle { opacity: 0.85; transform: none; }
     .shiny .bubble { opacity: 0.7; }
   }
@@ -879,6 +907,7 @@
   .chip input:focus-visible + span { outline: 3px solid var(--pen); outline-offset: 2px; }
   .fields { display: flex; flex-direction: column; gap: 0.6rem; }
   .field { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; max-width: 20rem; }
+  .field input[type="checkbox"] { width: 1.4rem; height: 1.4rem; margin: 0; accent-color: var(--pen); }
   .hint { font-size: 0.8rem; color: var(--ink-soft); }
   textarea {
     width: 100%;
@@ -938,11 +967,14 @@
       <circle cx="0.6" cy="3.7" r="0.3" fill="#c8f3ff"/>
       <circle cx="3" cy="4.4" r="0.32" fill="#ffd1ef"/>
     </pattern>
+    <radialGradient id="star-glow">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
       <stop offset="0.55" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <clipPath id="trophy-clip"><path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z"/></clipPath>
   </defs>
 </svg>
 <div class="app">
@@ -965,10 +997,10 @@
       <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
       <span class="coin-plus" id="coin-plus" hidden></span>
     </span>
-    <span class="trophies" id="trophies" role="img" hidden>
+    <button type="button" class="trophies" id="trophies" hidden>
       <span id="trophy-slot"></span>
       <b id="trophy-total">0</b>
-    </span>
+    </button>
     <button type="button" class="ghost-btn settings-btn" id="open-shop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg>
       <span data-t="shopButton">Shop</span>
@@ -1143,6 +1175,7 @@
         </select>
       </label>
       <p class="hint" data-t="nextAfterHint"></p>
+      <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
     </section>
 
     <section>
@@ -1224,10 +1257,22 @@
     <div class="shop-grid" id="shop-grid"></div>
     <section>
       <h3 data-t="yourTrophies">Your trophies</h3>
+      <p class="hint" id="shelf-hint" data-t="shelfHint" hidden></p>
       <div class="trophy-shelf" id="trophy-shelf"></div>
     </section>
     <div class="sheet-foot">
       <button type="button" class="primary-btn" id="close-shop" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+<div class="panel" id="showcase" role="dialog" aria-modal="true" aria-labelledby="showcase-name" hidden>
+  <div class="sheet showcase-sheet" id="showcase-sheet" tabindex="-1">
+    <div class="showcase-art" id="showcase-art"></div>
+    <h2 id="showcase-name"></h2>
+    <p class="place" id="showcase-place" hidden></p>
+    <p class="hint" id="showcase-bought"></p>
+    <div class="sheet-foot">
+      <button type="button" class="primary-btn" id="close-showcase" data-t="close">Done</button>
     </div>
   </div>
 </div>
@@ -1301,17 +1346,18 @@
   // Rewards in the shops, cheapest first: id, price, then the colours
   // highlight, middle, shadow, outline. The price range is also named in the
   // coin rules text.
-  // MnożenieMax: trophies in rising materials.
+  // MnożenieMax: keychains with the prime numbers in rising materials. The
+  // ids are the materials, as when they were trophies.
   const TROPHIES = [
-    ['bronze', 50, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
-    ['silver', 100, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
-    ['gold', 150, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
-    ['platinum', 250, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
-    ['diamond', 350, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
-    ['ruby', 500, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
-    ['emerald', 650, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
-    ['sapphire', 800, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
-  ].map(([id, price, ...colors]) => ({ id, price, colors }));
+    ['bronze', 50, 2, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['silver', 100, 3, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['gold', 150, 5, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['platinum', 250, 7, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
+    ['diamond', 350, 11, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
+    ['ruby', 500, 13, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
+    ['emerald', 650, 17, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
+    ['sapphire', 800, 19, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+  ].map(([id, price, prime, ...colors]) => ({ id, price, prime, colors }));
   // StoliceMax: souvenirs of famous sights, each with the country whose
   // capital it stands in (the pyramids stand in Giza, part of greater Cairo).
   const SOUVENIRS = [
@@ -1426,7 +1472,7 @@
       // Reading four names takes longer than typing a short number, so a
       // right answer counts as Easy within 5 seconds instead of 4.
       fastSeconds: 5,
-      settings: () => ({ continents: ['EU'], newPerDay: 10, retention: 0.9, answerTime: 15 }),
+      settings: () => ({ continents: ['EU'], newPerDay: 10, retention: 0.9, answerTime: 15, sound: true }),
       groupKey: 'continents', // the setting with the continents to practise
       rewards: SOUVENIRS,
       strings: (l) => I18N.CAPITALS[l] || {},
@@ -1473,20 +1519,22 @@
       strings: (l) => I18N.LANGUAGES[l] || {},
     },
   };
-  // The home-screen icons of the apps, for the app menu.
+  // The icons of the apps, for the app menu and the header, in black and
+  // white, with a white edge that keeps them apart where they overlap (the
+  // home-screen icon of MaxApki keeps its colours).
   const APP_ICONS = {
-    languages: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#e8710a"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#9c4a05"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M190 222h90a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-58l-28 22 6-22h-10a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#2a7de1"/><path d="M196 244h78M196 264h50" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M252 262h86a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-6l6 20-28-20h-58a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#ff9f1c"/><path d="M258 284h74M258 304h44" stroke="#fff" stroke-width="9" stroke-linecap="round"/></g></svg>',
-    times: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#2a4fc2"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#1b3a99"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M226 238 L286 298 M286 238 L226 298" stroke="#1d2742" stroke-width="22" stroke-linecap="round"/></g></svg>',
-    chemistry: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#7b3fc4"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#4f2386"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M219 290H293l17 26a8 8 0 0 1-7 12H209a8 8 0 0 1-7-12z" fill="#5fd38d"/><circle cx="245" cy="306" r="7" fill="#fff" fill-opacity="0.8"/><circle cx="266" cy="296" r="5" fill="#fff" fill-opacity="0.8"/><path d="M240 222h32v36l38 58a8 8 0 0 1-7 12H209a8 8 0 0 1-7-12l38-58z" fill="none" stroke="#1d2742" stroke-width="10" stroke-linejoin="round"/><path d="M230 222h52" stroke="#1d2742" stroke-width="10" stroke-linecap="round"/></g></svg>',
-    literature: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#c0392b"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#7d2219"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><path d="M256 250c-22-14-50-16-74-10v72c24-6 52-4 74 10zM256 250c22-14 50-16 74-10v72c-24-6-52-4-74 10z" fill="#ffe08a" stroke="#1d2742" stroke-width="9" stroke-linejoin="round"/><path d="M200 266c13-3 28-2 40 3M200 288c13-3 28-2 40 3M312 266c-13-3-28-2-40 3M312 288c-13-3-28-2-40 3" stroke="#c0392b" stroke-width="6" stroke-linecap="round" fill="none"/></g></svg>',
-    capitals: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#12806c"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#0b5a4c"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#e2645a" stroke-width="6"/><circle cx="256" cy="277" r="52" fill="#d6ecff"/><g fill="none" stroke="#1d2742" stroke-width="9" stroke-linecap="round"><ellipse cx="256" cy="277" rx="22" ry="52"/><line x1="204" y1="277" x2="308" y2="277"/><line x1="214" y1="251" x2="298" y2="251"/><line x1="214" y1="303" x2="298" y2="303"/><circle cx="256" cy="277" r="52" stroke-width="11"/></g></g></svg>',
+    languages: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect x="10" y="10" width="492" height="492" rx="102" fill="#000" stroke="#fff" stroke-width="20"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#5a5a5a"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M190 222h90a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-58l-28 22 6-22h-10a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#000"/><path d="M196 244h78M196 264h50" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M252 262h86a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-6l6 20-28-20h-58a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#fff" stroke="#000" stroke-width="8" stroke-linejoin="round"/><path d="M258 284h74M258 304h44" stroke="#000" stroke-width="9" stroke-linecap="round"/></g></svg>',
+    times: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect x="10" y="10" width="492" height="492" rx="102" fill="#000" stroke="#fff" stroke-width="20"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#5a5a5a"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M226 238 L286 298 M286 238 L226 298" stroke="#000" stroke-width="22" stroke-linecap="round"/></g></svg>',
+    chemistry: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect x="10" y="10" width="492" height="492" rx="102" fill="#000" stroke="#fff" stroke-width="20"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#5a5a5a"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><g fill="none" stroke="#000" stroke-width="10"><ellipse cx="256" cy="277" rx="68" ry="24" transform="rotate(0 256 277)"/><ellipse cx="256" cy="277" rx="68" ry="24" transform="rotate(60 256 277)"/><ellipse cx="256" cy="277" rx="68" ry="24" transform="rotate(120 256 277)"/></g><circle cx="256" cy="277" r="17" fill="#000" stroke="#000" stroke-width="8"/><g fill="#fff" stroke="#000" stroke-width="7"><circle cx="188" cy="277" r="11"/><circle cx="290" cy="336" r="11"/><circle cx="290" cy="218" r="11"/></g></g></svg>',
+    literature: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect x="10" y="10" width="492" height="492" rx="102" fill="#000" stroke="#fff" stroke-width="20"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#5a5a5a"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M256 250c-22-14-50-16-74-10v72c24-6 52-4 74 10zM256 250c22-14 50-16 74-10v72c-24-6-52-4-74 10z" fill="#fff" stroke="#000" stroke-width="9" stroke-linejoin="round"/><path d="M200 266c13-3 28-2 40 3M200 288c13-3 28-2 40 3M312 266c-13-3-28-2-40 3M312 288c-13-3-28-2-40 3" stroke="#000" stroke-width="6" stroke-linecap="round" fill="none"/></g></svg>',
+    capitals: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect x="10" y="10" width="492" height="492" rx="102" fill="#000" stroke="#fff" stroke-width="20"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#5a5a5a"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><circle cx="256" cy="277" r="52" fill="#fff"/><g fill="none" stroke="#000" stroke-width="9" stroke-linecap="round"><ellipse cx="256" cy="277" rx="22" ry="52"/><line x1="204" y1="277" x2="308" y2="277"/><line x1="214" y1="251" x2="298" y2="251"/><line x1="214" y1="303" x2="298" y2="303"/><circle cx="256" cy="277" r="52" stroke-width="11"/></g></g></svg>',
   };
   // The sign embossed on the coins of each app.
   const EMBLEMS = {
     languages: '<path d="M10.4 9.4h11.6a2 2 0 0 1 2 2v6.4a2 2 0 0 1-2 2h-5.6l-4 3.2v-3.2h-2a2 2 0 0 1-2-2v-6.4a2 2 0 0 1 2-2z" style="fill: var(--gold-hi)"/><path d="M10 9h11.6a2 2 0 0 1 2 2v6.4a2 2 0 0 1-2 2H16l-4 3.2v-3.2h-2a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     literature: '<path d="M16.4 11.6c-1.8-1.1-4-1.3-6-.8v8.6c2-.5 4.2-.3 6 .8zM16.4 11.6c1.8-1.1 4-1.3 6-.8v8.6c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-hi)"/><path d="M16 11.2c-1.8-1.1-4-1.3-6-.8V19c2-.5 4.2-.3 6 .8zM16 11.2c1.8-1.1 4-1.3 6-.8V19c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     times: '<path d="M12.3 12.8l7.4 7.4M19.7 12.8l-7.4 7.4" style="stroke: var(--gold-hi)" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12l8 8M20 12l-8 8" style="stroke: var(--gold-deep)" stroke-width="2.6" stroke-linecap="round"/>',
-    chemistry: '<path d="M14.6 8.9h3.6v4.2l4.4 7.2a1 1 0 0 1-.9 1.5H11.1a1 1 0 0 1-.9-1.5l4.4-7.2z" style="fill: var(--gold-hi)"/><path d="M14.2 8.5h3.6v4.2l4.4 7.2a1 1 0 0 1-.9 1.5H10.7a1 1 0 0 1-.9-1.5l4.4-7.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
+    chemistry: '<g fill="none" style="stroke: var(--gold-hi)" stroke-width="1.1"><ellipse cx="16.4" cy="16.4" rx="6.4" ry="2.4" transform="rotate(0 16.4 16.4)"/><ellipse cx="16.4" cy="16.4" rx="6.4" ry="2.4" transform="rotate(60 16.4 16.4)"/><ellipse cx="16.4" cy="16.4" rx="6.4" ry="2.4" transform="rotate(120 16.4 16.4)"/></g><circle cx="16.4" cy="16.4" r="1.5" style="fill: var(--gold-hi)"/><g fill="none" style="stroke: var(--gold-deep)" stroke-width="1.1" opacity="0.85"><ellipse cx="16" cy="16" rx="6.4" ry="2.4" transform="rotate(0 16 16)"/><ellipse cx="16" cy="16" rx="6.4" ry="2.4" transform="rotate(60 16 16)"/><ellipse cx="16" cy="16" rx="6.4" ry="2.4" transform="rotate(120 16 16)"/></g><circle cx="16" cy="16" r="1.5" style="fill: var(--gold-deep)" opacity="0.85"/>',
     capitals: '<path d="M16 9l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5L9 14.1l5.2-.2z" style="fill: var(--gold-hi)"/><path d="M15.6 8.6l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5-4.1-3.3 5.2-.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
   };
 
@@ -1752,6 +1800,8 @@
       },
       answer: (formula) => formulaHtml(formula),
       tile: (formula) => formulaHtml(formula),
+      // The tile shows the answer itself (see tileHints in renderProgress).
+      tileHints: true,
       label: (formula) => BY_FORMULA[formula].name[lang()],
       number: (formula) => BY_FORMULA[formula].number,
       logColumns: 'compound,picked',
@@ -1775,6 +1825,8 @@
       },
       answer: (id) => esc(AUTHORS[BY_BOOK[id].author].name[lang()]),
       tile: (id) => flag(AUTHORS[BY_BOOK[id].author].country),
+      // The flag on the tile hints at the author.
+      tileHints: true,
       label: (id) => BY_BOOK[id].title[lang()],
       number: (id) => BY_BOOK[id].number,
       logColumns: 'book,picked',
@@ -1816,6 +1868,9 @@
         const card = BY_LANG[id];
         return { p: card.show, w: card.answer, g: '_', q: '?', o: '⇄' }[card.kind];
       },
+      // The tile or the label can be the answer: a picture, a word or an
+      // opposite.
+      tileHints: true,
       label: (id) => BY_LANG[id].label,
       number: (id) => BY_LANG[id].number,
       logColumns: 'card,picked',
@@ -2260,6 +2315,12 @@
     const n = { new: 0, learning: 0, young: 0, mature: 0 };
     const learned = {};
     const els = isTimes() ? cells : tiles;
+    // Where a tile shows the answer or a hint to it (tileHints), the card
+    // being asked is marked only once it has been answered, and the hover
+    // labels leave out the name of the card, so neither can be looked up on
+    // the grid.
+    const hints = !isTimes() && choice().tileHints;
+    const marked = hints && mode === 'ask' ? null : currentId;
     for (const [id, el] of Object.entries(els)) {
       let c;
       let label;
@@ -2281,13 +2342,13 @@
       el.className = 'cell' +
         (s === 'new' ? '' : ' is-' + s) +
         (on ? '' : ' is-off') +
-        (c.id === currentId ? ' is-current' : '');
+        (c.id === marked ? ' is-current' : '');
       let tip;
       if (!on) tip = t.tipOff;
       else if (s === 'new') tip = t.tipNew;
       else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
       else tip = t.tipReview(whenText(c.due));
-      el.title = label + ': ' + tip;
+      el.title = hints ? tip.charAt(0).toLocaleUpperCase(lang()) + tip.slice(1) : label + ': ' + tip;
     }
     if (!isTimes()) {
       // Cards learned out of all the cards of each continent or group.
@@ -2381,7 +2442,7 @@
     $('trophy-total').textContent = num(owned);
     $('trophies').setAttribute('aria-label', t.trophiesAria(owned));
     const slot = $('trophy-slot');
-    const latest = owned ? app.id + owned + state.trophies[owned - 1].metal : '';
+    const latest = owned ? app.id + owned + state.trophies[owned - 1].metal + lang() : '';
     if (slot.dataset.k !== latest) {
       slot.dataset.k = latest;
       slot.innerHTML = owned ? rewardIcon(state.trophies[owned - 1].metal) : '';
@@ -2550,6 +2611,11 @@
       if (within) clip.setAttribute('clip-path', 'url(#' + within + ')');
       defs.appendChild(clip);
     };
+    // The numbers, in the digits 0-9 and in Persian digits.
+    for (const { id, prime } of TROPHIES) {
+      clipPath('clip-' + id, primeText(String(prime)));
+      clipPath('clip-' + id + '-fa', primeText(I18N.STRINGS.fa.digits(prime)));
+    }
     for (const { id } of SOUVENIRS) clipPath('clip-' + id, SOUVENIR_ART[id].shape);
     for (const { id } of GLASSWARE) {
       clipPath('clip-' + id, GLASS_ART[id].shape);
@@ -2562,23 +2628,51 @@
   // The beam of light that passes over a reward now and then.
   const glint = (clip) => '<g clip-path="url(#' + clip + ')"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g>';
 
-  // MnożenieMax: a trophy drawn in the given material.
+  // A key ring at the top and a chain down to an eyelet at (x, y), where
+  // the charm of a keychain hangs.
+  const KEY_METAL = 'fill="none" stroke="#7f8a96" stroke-linecap="round"';
+  function keyChain(x, y) {
+    const top = 5.9; // the bottom of the ring
+    const dx = x - 16;
+    const dy = y - 0.9 - top;
+    const n = Math.max(1, Math.round(Math.hypot(dx, dy) / 1.5));
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    let links = '';
+    for (let i = 0; i < n; i++) {
+      const cx = (16 + (dx * (i + 0.5)) / n).toFixed(2);
+      const cy = (top + (dy * (i + 0.5)) / n).toFixed(2);
+      // The links alternate: one seen from the side, the next edge-on.
+      links += i % 2
+        ? '<path d="M-0.8 0h1.6" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.6"/>'
+        : '<ellipse rx="1" ry="0.55" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.45"/>';
+    }
+    return '<circle cx="16" cy="3.5" r="2.4" ' + KEY_METAL + ' stroke-width="1.1"/>' +
+      '<circle cx="16" cy="3.5" r="2.4" fill="none" stroke="#eef2f6" stroke-width="0.45"/>' +
+      '<path d="M13.9 2.3a2.4 2.4 0 0 1 2.1-1.2" ' + KEY_METAL + ' stroke-width="0.5"/>' +
+      links + '<circle cx="' + x + '" cy="' + (y - 0.6).toFixed(2) + '" r="0.75" ' + KEY_METAL + ' stroke-width="0.45"/>';
+  }
+
+  // MnożenieMax: a prime number on a keychain, in the given material. A
+  // number with two digits is smaller, and hangs by its first digit.
+  const primeText = (digits, attrs = '') => '<text x="16" y="29" font-size="' + (digits.length > 1 ? 17 : 22) +
+    '" font-family="Grandstander, Vazirmatn, sans-serif" font-weight="800" text-anchor="middle" letter-spacing="-0.6" direction="ltr"' + attrs + '>' + digits + '</text>';
   function trophyIcon(name) {
-    const [hi, , lo, deep] = reward(name).colors;
+    const { prime, colors: [hi, , , deep] } = reward(name);
+    const digits = num(prime);
+    const two = digits.length > 1;
     return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
-      '<path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" stroke="' + lo + '" stroke-width="2.4" stroke-linecap="round"/>' +
-      '<rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#rim-' + name + ')" stroke="' + deep + '" stroke-width="0.8"/>' +
-      '<path d="M14.3 19.5h3.4l.9 5.5h-5.2z" fill="url(#rim-' + name + ')"/>' +
-      '<path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z" fill="url(#face-' + name + ')" stroke="' + deep + '" stroke-width="0.9"/>' +
-      '<path d="M16 7.4l1.2 2.5 2.7.4-2 1.9.5 2.7-2.4-1.3-2.4 1.3.5-2.7-2-1.9 2.7-.4z" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.5"/>' +
-      glint('trophy-clip') +
+      keyChain(two ? 12.2 : 16, two ? 17.4 : 13.8) +
+      primeText(digits, ' fill="' + deep + '" stroke="' + deep + '" stroke-width="2.2" stroke-linejoin="round"') +
+      primeText(digits, ' fill="url(#face-' + name + ')" stroke="' + hi + '" stroke-width="0.35"') +
+      glint('clip-' + name + (T().digits ? '-fa' : '')) +
       '</svg>';
   }
 
-  // StoliceMax: each souvenir as a small glittering model on a stand.
-  // "shape" is its outline (for the glitter and the beam of light), "art"
-  // draws it, given its gradients (face, rim) and colours, and "sparkles"
-  // are the places [x, y, size] of the stars that twinkle on it.
+  // StoliceMax: each souvenir as a keychain with a small glittering model.
+  // "shape" is its outline (for the glitter and the beam of light), "hook"
+  // the point [x, y] where the chain holds it, "art" draws it, given its
+  // gradients (face, rim) and colours, and "sparkles" are the places
+  // [x, y, size] of the stars that twinkle on it.
   const arches = (y1, y2, xs) => xs.map((x) => 'M' + x + ' ' + y2 + 'V' + (y1 + 1) + 'a1 1 0 0 1 2 0V' + y2 + 'z').join('');
   const PALACE = 'M7.5 27V21.5H10V17h2.5V10.5h1.2V8h4.6v2.5h1.2V17H22v4.5h2.5V27zM15.3 8.2L16 2l.7 6.2z';
   const EIFFEL = 'M5.5 27C9.5 24.5 12 19 13.6 11L15.2 3h1.6l1.6 8c1.6 8 4.1 13.5 8.1 16h-4.7c-1.2-3.4-3.3-5.2-5.8-5.2s-4.6 1.8-5.8 5.2zM15.6 3V.8h.8V3z';
@@ -2616,14 +2710,20 @@
     'M5.9 20C5.9 17.6 6.8 16.1 8 15.7C9.2 16.1 10.1 17.6 10.1 20zM21.9 20C21.9 17.6 22.8 16.1 24 15.7C25.2 16.1 26.1 17.6 26.1 20z' +
     'M2.4 27V10h1.8v17zM27.8 27V10h1.8v17z';
   const PYRAMIDS = 'M3 27L14 7l11 20zM17.5 27l6-12.5L30 27z';
-  // The bear and the strawberry tree of Madrid: a bear on its hind legs
-  // against a tree, on a stone base.
-  const TREE_CROWN = [[17, 10.5, 3.4], [21, 8, 3.8], [24.5, 10.8, 3.2], [20.5, 12, 3]];
-  const BERRIES = [[16.2, 9.6], [19.2, 6.4], [22.6, 6.9], [24.8, 9.6], [23, 12.4], [18.4, 12.2], [20.8, 9.8], [25.6, 12.6]];
-  const BEAR = '<path d="M8 23.5h16V27H8z"/><path d="M18.8 23.5C19.4 19 19 16 18 13h2c1 3 1.6 6 1.4 10.5z"/>' +
+  // The bear and the strawberry tree of Madrid: a bear stands on its hind
+  // legs with its front paws on the trunk and reaches up for the berries.
+  const PLINTH = 'M6 23.5h20V27H6z';
+  const TRUNK = 'M21 23.5C21.6 19.2 21.2 16 20.4 12.4h2.2c1 3.6 1.4 6.8 1.2 11.1z';
+  const TREE_CROWN = [[20.2, 9.4, 3.1], [23.8, 7, 3.6], [27.2, 9.8, 3], [24, 11.6, 3]];
+  const BERRIES = [[19, 8.2], [22.4, 5.4], [25.4, 6.2], [27.8, 8.6], [26.4, 12.2], [22.6, 12.4], [24, 9.2], [21.2, 10.8]];
+  // The parts of the bear, from the back to the front.
+  const BEAR_FAR = 'M13.6 17.2c1 1.9 1.4 4 1.4 6.3h3c0-.7-.5-1.1-1.3-1.2-.1-2-.5-4-1.1-5.8zM14.2 11.2c2.2-.9 4.4-1.1 6.6-.6.9.2.9 1.6 0 1.7-2 .1-4 .5-5.8 1.3z';
+  const BEAR_BODY = 'M12.8 9.2C9.6 9.6 8 12.8 8.2 16.4c.2 2.6 1.4 4.4 3.4 4.8l3.8-.4c1.4-2 1.9-5.2 1.4-8-.4-2-1.6-3.4-3.2-3.8z';
+  const BEAR_NEAR = 'M9.8 16.8c-1 2.2-1 4.6-.4 6.7h4.4c.1-.7-.5-1.1-1.4-1.2.5-1.8.8-3.6.6-5.4zM13.4 12.6c2.4-.4 4.8 0 7.2.8.9.3.8 1.7-.1 1.7-2.2-.1-4.4.1-6.4.7z';
+  const BEAR_MUZZLE = 'M16.4 7c1.4-.3 2.8.1 3.4.9.5.7.1 1.6-.9 1.7-1.1.1-2.2 0-2.9-.5z';
+  const BEAR = '<path d="' + PLINTH + TRUNK + BEAR_FAR + BEAR_BODY + BEAR_NEAR + BEAR_MUZZLE + '"/>' +
     TREE_CROWN.map(([x, y, r]) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '"/>').join('') +
-    '<ellipse cx="13" cy="18" rx="3.6" ry="5" transform="rotate(15 13 18)"/><circle cx="15.6" cy="11.6" r="2.6"/>' +
-    '<path d="M10.6 21.5l-.4 2h2l.2-1.7zM14 21.8l.4 1.7h1.8l-.4-2.1z"/>';
+    '<circle cx="15.2" cy="7.8" r="2.6"/><circle cx="13.3" cy="5.7" r="1.05"/>';
   // The Azadi Tower of Tehran: one tower that opens into a high pointed arch.
   const AZADI = 'M4.5 27C8.5 21.5 10.6 15 11 8.6V6.2Q16 3.6 21 6.2v2.4c.4 6.4 2.5 12.9 6.5 18.4h-4.9C21.5 21 19.3 15.2 16 11.2C12.7 15.2 10.5 21 9.4 27z';
   const FORBIDDEN = 'M4.5 23.5h23V27h-23zM7.5 16.2h17v7.3h-17zM2.5 16.5Q7.5 16.1 9.2 12.8h13.6Q24.5 16.1 29.5 16.5Q16 18.2 2.5 16.5zM10.5 10.4h11v2.6h-11zM6.5 10.9Q10.5 10.6 11.7 8h8.6Q21.5 10.6 25.5 10.9Q16 12.2 6.5 10.9z';
@@ -2632,6 +2732,7 @@
   const SOUVENIR_ART = {
     palace: {
       shape: '<path d="' + PALACE + '"/>',
+      hook: [16, 2],
       sparkles: [[16, 1.6, 1.8], [6.5, 18, 1.5], [25.5, 15, 1.6]],
       art: (f, rim, [, , lo, deep]) => path(PALACE, f, deep, 0.7) +
         '<path d="M14.7 11.5v4.5M16 11.5v4.5M17.3 11.5v4.5M11.5 18.3v2.4M13.6 18.3v2.4M18.4 18.3v2.4M20.5 18.3v2.4M9 22.8v3M11.3 22.8v3M13.6 22.8v3M18.4 22.8v3M20.7 22.8v3M23 22.8v3" stroke="' + lo + '" stroke-width="0.7"/>' +
@@ -2639,6 +2740,7 @@
     },
     eiffel: {
       shape: '<path d="' + EIFFEL + '"/>',
+      hook: [16, 0.8],
       sparkles: [[16, 2.2, 1.6], [7, 21, 1.5], [25, 20, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(EIFFEL, f, deep) +
         '<path d="M12.2 18.4l2.3-6.6M19.8 18.4l-2.3-6.6M9.6 24.4l2.6-4.3M22.4 24.4l-2.6-4.3M14.6 10.4L16 4.5l1.4 5.9" stroke="' + lo + '" stroke-width="0.55" fill="none"/>' +
@@ -2646,6 +2748,7 @@
     },
     amsterdam: {
       shape: '<path d="' + HOUSES.map((h) => h[2]).join('') + '"/>',
+      hook: [13.25, 7],
       sparkles: [[6.75, 7.5, 1.5], [13.25, 5, 1.6], [25.75, 8.5, 1.5]],
       art: () => HOUSES.map(([x0, x1, d, color]) => {
         const w = x1 - x0;
@@ -2659,6 +2762,7 @@
     },
     bigben: {
       shape: '<path d="' + BIGBEN + '"/>',
+      hook: [16, 1.6],
       sparkles: [[16, 1.4, 1.5], [10.5, 7.5, 1.4], [22, 17, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(BIGBEN, f, deep, 0.7) +
         '<path d="M12.6 6.2h6.8M11.7 14h8.6" stroke="' + deep + '" stroke-width="0.6"/>' +
@@ -2668,6 +2772,7 @@
     },
     riesenrad: {
       shape: '<circle cx="16" cy="12.5" r="11.6"/><path d="M15 12.5L9.5 27h2L16 15l4.5 12h2L17 12.5z"/>',
+      hook: [16, 1.6],
       sparkles: [[26.5, 3.2, 1.6], [5.5, 4, 1.4], [26, 24, 1.4]],
       art: (f, rim, [, , lo, deep]) => '<path d="M16 12.5L10.5 27M16 12.5L21.5 27M12.3 21.5h7.4" stroke="' + deep + '" stroke-width="1.2" stroke-linecap="round" fill="none"/>' +
         '<path d="' + WHEEL.map(([x, y]) => 'M16 12.5L' + x.toFixed(2) + ' ' + y.toFixed(2)).join('') + '" stroke="' + lo + '" stroke-width="0.5"/>' +
@@ -2678,6 +2783,7 @@
     },
     brandenburg: {
       shape: '<path d="' + BRANDENBURG + QUADRIGA + '"/>',
+      hook: [16, 3.3],
       sparkles: [[16, 1.8, 1.7], [4, 8.5, 1.5], [28, 8.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(BRANDENBURG, f, deep, 0.5) +
         '<path d="M3.5 12h25" stroke="' + lo + '" stroke-width="0.4"/>' +
@@ -2685,6 +2791,7 @@
     },
     tram: {
       shape: '<path d="' + TRAM + '"/>',
+      hook: [16, 7.5],
       sparkles: [[16, 5.6, 1.5], [3.5, 10.2, 1.4], [28.5, 10.2, 1.4]],
       art: (f, rim, [, , lo, deep]) => '<path d="M14 10.8L16 7.5 18 10.8M13 7.5h6" stroke="' + deep + '" stroke-width="0.6" fill="none"/>' +
         path('M5.5 13Q5.5 10.8 8 10.8H24Q26.5 10.8 26.5 13z', '#f4efe2', deep, 0.5) +
@@ -2696,6 +2803,7 @@
     },
     atomium: {
       shape: ATOMS.map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="2.5"/>').join(''),
+      hook: [16, 1.1],
       sparkles: [[27, 4.5, 1.6], [4.5, 13, 1.5], [21, 25, 1.3]],
       art: (f, rim, [, , lo, deep]) => '<path d="' +
         ATOMS.slice(1).map(([x, y]) => 'M16 13L' + x + ' ' + y).join('') +
@@ -2704,6 +2812,7 @@
     },
     colosseum: {
       shape: '<path d="' + COLOSSEUM + '"/>',
+      hook: [16, 10.4],
       sparkles: [[21.5, 8.2, 1.6], [3.8, 10.3, 1.5], [28.2, 13, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(COLOSSEUM, f, deep, 0.7) +
         '<path d="M3.5 17h25M3.5 21.2h25" stroke="' + lo + '" stroke-width="0.6"/>' +
@@ -2712,12 +2821,14 @@
     },
     parthenon: {
       shape: '<path d="' + PARTHENON + '"/>',
+      hook: [16, 4.6],
       sparkles: [[16, 3, 1.7], [3.8, 8.2, 1.5], [28.2, 8.2, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(PARTHENON, f, deep, 0.5) +
         '<path d="M8 9.1L16 5.5l8 3.6M4.5 11.3h23" stroke="' + lo + '" stroke-width="0.5" fill="none"/>',
     },
     whitehouse: {
       shape: '<path d="' + WHITEHOUSE + '"/>',
+      hook: [16, 4],
       sparkles: [[21, 2.6, 1.4], [3, 11.5, 1.5], [29, 11.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(WHITEHOUSE, f, deep, 0.5) +
         '<path d="M11 13.8h10v10.7H11z" fill="' + lo + '" fill-opacity="0.55"/>' +
@@ -2730,6 +2841,7 @@
     },
     torii: {
       shape: '<path d="' + TORII + '"/>',
+      hook: [16, 8.5],
       sparkles: [[3, 5.2, 1.5], [29, 5.2, 1.5], [16, 4.2, 1.6]],
       art: (f, rim, [, , , deep]) => path('M4.2 9.9h23.6v1.5H4.2zM5 14.2h22v1.6H5zM15.2 11.4h1.6v2.8h-1.6zM8.2 11.4h2V25h-2zM21.8 11.4h2V25h-2z', f, deep, 0.5) +
         path('M2.5 9.6Q16 11.4 29.5 9.6L29 7.4Q16 9.4 3 7.4zM7.9 25h2.6V27H7.9zM21.5 25h2.6V27h-2.6z', '#2b2b2b', '#111', 0.4) +
@@ -2737,6 +2849,7 @@
     },
     petronas: {
       shape: '<path d="' + PETRONAS + '"/>',
+      hook: [16, 15.4],
       sparkles: [[7, 3, 1.4], [25, 3, 1.4], [16, 9, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(tower(10.5) + tower(21.5), f, deep, 0.5) +
         '<path d="M9.3 8.5V26M10.5 6V26M11.7 8.5V26M20.3 8.5V26M21.5 6V26M22.7 8.5V26" stroke="' + lo + '" stroke-width="0.35"/>' +
@@ -2745,6 +2858,7 @@
     },
     lotus: {
       shape: '<path d="' + LOTUS.join('') + 'M4 24.2h24V27H4z"/>',
+      hook: [16, 5.5],
       sparkles: [[16, 3.2, 1.7], [5, 11.5, 1.5], [27, 11.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path('M4 24.2h24V27H4z', f, deep, 0.5) +
         '<path d="M5 25.3h22v.9H5z" fill="#9fd3ee"/>' +
@@ -2753,6 +2867,7 @@
     },
     brasilia: {
       shape: '<path d="M7.6 26C10.8 20 10.8 14 8.6 7.4L7 3.6h18L23.4 7.4C21.2 14 21.2 20 24.4 26z"/>',
+      hook: [16, 0.9],
       sparkles: [[6, 2.8, 1.5], [26, 2.8, 1.5], [16, 15, 1.4]],
       art: (f, rim, [, , , deep]) => '<path d="M3.5 25.6h25V27h-25z" fill="#bfe3f2"/>' +
         path(BRASILIA, '#8cc4ec', deep, 0.4) + '<path d="' + BRASILIA + '" fill="url(#sheen)"/>' +
@@ -2762,6 +2877,7 @@
     },
     mosque: {
       shape: '<path d="' + MOSQUE + 'M2.4 10L3.3 7l.9 3zM27.8 10l.9-3 .9 3z"/>',
+      hook: [16, 6.2],
       sparkles: [[16, 4.4, 1.6], [6, 9, 1.3], [26, 9, 1.3]],
       art: (f, rim, [, , lo, deep]) => path(MOSQUE, f, deep, 0.5) +
         '<path d="' + arches(21.5, 26, [6.5, 9.5, 12.5, 17.5, 20.5, 23.5]) + 'M14.6 27v-4a1.4 1.4 0 0 1 2.8 0v4z" fill="' + lo + '" fill-opacity="0.8"/>' +
@@ -2772,23 +2888,22 @@
     },
     bear: {
       shape: BEAR,
-      sparkles: [[21, 2.6, 1.6], [7.5, 10, 1.5], [27.5, 16.5, 1.4]],
-      art: (f, rim, [, , lo, deep]) => path('M8 23.5h16V27H8z', '#ddd3c4', deep, 0.5) +
-        path('M18.8 23.5C19.4 19 19 16 18 13h2c1 3 1.6 6 1.4 10.5z', f, deep, 0.5) +
+      hook: [23.8, 3.4],
+      sparkles: [[23.8, 2.4, 1.6], [6, 9.5, 1.5], [29.5, 16, 1.4]],
+      art: (f, rim, [, , lo, deep]) => path(PLINTH, '#ddd3c4', deep, 0.5) +
+        path(TRUNK, rim, deep, 0.5) +
         TREE_CROWN.map(([x, y, r]) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="#3f8f52" stroke="#22562f" stroke-width="0.5"/>').join('') +
         BERRIES.map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="0.6" fill="#e2453c"/>').join('') +
-        path('M10.6 21.5l-.4 2h2l.2-1.7zM14 21.8l.4 1.7h1.8l-.4-2.1z', lo, deep, 0.4) +
-        '<ellipse cx="13" cy="18" rx="3.6" ry="5" transform="rotate(15 13 18)" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
-        '<path d="M15 15l3.9.5M15 17.2l4 1" stroke="' + deep + '" stroke-width="2.3" stroke-linecap="round"/>' +
-        '<path d="M15 15l3.9.5M15 17.2l4 1" stroke="' + lo + '" stroke-width="1.5" stroke-linecap="round"/>' +
-        '<circle cx="14.1" cy="9.5" r="0.95" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.4"/>' +
-        '<circle cx="16.9" cy="9.4" r="0.95" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.4"/>' +
-        '<circle cx="15.6" cy="11.6" r="2.6" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
-        '<ellipse cx="18" cy="12.4" rx="1.3" ry="0.95" fill="' + f + '" stroke="' + deep + '" stroke-width="0.4"/>' +
-        '<circle cx="19.1" cy="12.2" r="0.38" fill="' + deep + '"/><circle cx="16.4" cy="11" r="0.32" fill="' + deep + '"/>',
+        path(BEAR_FAR, lo, deep, 0.5) + path(BEAR_BODY, f, deep, 0.5) + path(BEAR_NEAR, f, deep, 0.5) +
+        '<circle cx="13.3" cy="5.7" r="1.05" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        '<circle cx="13.4" cy="5.8" r="0.5" fill="' + lo + '"/>' +
+        '<circle cx="15.2" cy="7.8" r="2.6" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        path(BEAR_MUZZLE, f, deep, 0.45) +
+        '<circle cx="19.8" cy="7.9" r="0.5" fill="' + deep + '"/><circle cx="16.4" cy="7" r="0.36" fill="' + deep + '"/>',
     },
     azadi: {
       shape: '<path d="' + AZADI + '"/>',
+      hook: [16, 4.9],
       sparkles: [[16, 2.2, 1.6], [4.5, 18.5, 1.5], [27.5, 18.5, 1.5]],
       art: (f, rim, [, , lo, deep]) => path(AZADI, f, deep, 0.6) +
         '<path d="M7 25C10 20 12 14 12.6 9.6M25 25C22 20 20 14 19.4 9.6M11 26C12 21 13.8 16 16 13.4C18.2 16 20 21 21 26M12.2 10.2Q16 8 19.8 10.2" stroke="' + lo + '" stroke-width="0.45" fill="none"/>' +
@@ -2797,6 +2912,7 @@
     },
     pyramids: {
       shape: '<path d="' + PYRAMIDS + '"/>',
+      hook: [14, 7],
       sparkles: [[14, 4.8, 1.8], [23.5, 12.2, 1.5], [28, 21, 1.3]],
       art: (f, rim, [, , lo, deep]) => '<circle cx="6.5" cy="7" r="2.6" fill="#ffe27a" stroke="' + lo + '" stroke-width="0.5"/>' +
         path('M17.5 27L23.5 14.5 24.8 27z', f, deep) + path('M24.8 27L23.5 14.5 30 27z', lo, deep) +
@@ -2805,6 +2921,7 @@
     },
     forbidden: {
       shape: '<path d="' + FORBIDDEN + '"/>',
+      hook: [16, 8],
       sparkles: [[16, 5.6, 1.6], [2.5, 14.5, 1.5], [29.5, 14.5, 1.5]],
       art: (f, rim, [, , , deep]) => path('M4.5 23.5h23V27h-23z', '#efe2cf', deep) +
         path('M7.5 16.2h17v7.3h-17z', f, deep) +
@@ -2825,19 +2942,26 @@
       'z" fill="#fffdf0" stroke="#f5b700" stroke-width="0.3"/>';
   };
 
-  // A model on a stand: a souvenir, or a city symbol of JęzykiMax.
+  // A model: a souvenir as a keychain (art.hook is where the chain holds
+  // it, and the model is made smaller to leave room for the chain), or a
+  // city symbol of JęzykiMax on a stand.
+  const CHARM = [3.2, 7.4, 0.8]; // x, y, scale
   function modelIcon(id, list, arts) {
     const { colors } = list.find((r) => r.id === id) || list[0];
     const art = arts[id];
     const rim = 'url(#rim-' + id + ')';
+    const [x, y, scale] = art.hook ? CHARM : [0, 0, 1];
     return '<svg class="trophy-icon shiny" viewBox="0 0 32 32" aria-hidden="true">' +
-      '<rect x="3" y="27" width="26" height="3" rx="1.2" fill="' + rim + '" stroke="' + colors[3] + '" stroke-width="0.7"/>' +
+      (art.hook
+        ? keyChain(x + art.hook[0] * scale, y + art.hook[1] * scale)
+        : '<rect x="3" y="27" width="26" height="3" rx="1.2" fill="' + rim + '" stroke="' + colors[3] + '" stroke-width="0.7"/>') +
+      '<g transform="translate(' + x + ' ' + y + ') scale(' + scale + ')">' +
       art.art('url(#face-' + id + ')', rim, colors) +
       // Glitter: two layers of tiny dots that shimmer in turn.
       '<g clip-path="url(#clip-' + id + ')"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/></g>' +
       glint('clip-' + id) +
-      art.sparkles.map(([x, y, s], i) => sparkle(x, y, s, i)).join('') +
-      '</svg>';
+      art.sparkles.map(([sx, sy, s], i) => sparkle(sx, sy, s, i)).join('') +
+      '</g></svg>';
   }
   const souvenirIcon = (id) => modelIcon(id, SOUVENIRS, SOUVENIR_ART);
 
@@ -3028,12 +3152,15 @@
 
   // LiteraturaMax: each prize as a glittering medal on a ribbon or a
   // statuette, as for the souvenirs: "shape" is its outline (for the glitter
-  // and the beam of light), "art" draws it and "sparkles" are the stars.
+  // and the beam of light), "art" draws it, "sparkles" are the stars and
+  // "stars" the places [x, y, size] of the white stars that shine on it.
   // A medal of radius r hangs on a ribbon in the given stripes; emblem draws
   // the sign on its face, given the colours highlight, shadow and outline.
+  const MEDAL_STARS = [[-3.6, -3.2, 1.6], [3.8, 3, 1.4], [2.6, -4.6, 1], [-5.2, 3.8, 1]];
   const medal = (stripes, emblem, sparkles, r = 7.6) => ({
     shape: '<circle cx="16" cy="20" r="' + r + '"/>',
     sparkles,
+    stars: MEDAL_STARS.map(([dx, dy, size]) => [16 + (dx * r) / 7.6, 20 + (dy * r) / 7.6, size]),
     art: (f, rim, [hi, , lo, deep]) => {
       const bottom = (20 - Math.sqrt(r * r - 12.25) + 1).toFixed(2); // hidden behind the medal
       const n = stripes.length;
@@ -3100,6 +3227,7 @@
       [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
     kafka: {
       shape: '<circle cx="16" cy="7.4" r="1.9"/><path d="' + KAFKA + BOWLER + '"/>',
+      stars: [[14.4, 13, 1.4], [17.8, 18.4, 1.2], [16.9, 6.6, 1], [19.8, 26.2, 1]],
       sparkles: [[21.5, 6, 1.5], [10.5, 14, 1.3], [21.5, 21, 1.3]],
       art: (f, rim, [, , lo, deep]) => plinth(rim) +
         '<circle cx="16" cy="7.4" r="1.9" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
@@ -3121,6 +3249,7 @@
     [[22.5, 14, 1.5], [9.5, 25, 1.3], [24, 4, 1.2]]),
     jalal: {
       shape: '<path d="' + QUILL + INKWELL + '"/>',
+      stars: [[21.4, 7.6, 1.3], [12.6, 22.4, 1.5], [19.6, 24.6, 1.1], [24.4, 3.8, 1]],
       sparkles: [[25, 9, 1.4], [8, 17, 1.4], [23.5, 22.5, 1.3]],
       art: (f, rim, [, , lo, deep]) => path(QUILL, f, deep, 0.5) +
         '<path d="M15.8 17.5L24.6 2.6" stroke="' + deep + '" stroke-width="0.6" stroke-linecap="round"/>' +
@@ -3132,6 +3261,7 @@
     },
     griffel: {
       shape: '<path d="' + GRIFFEL + '" transform="' + GRIFFEL_TILT + '"/>',
+      stars: [[9.4, 9.6, 1.4], [22.4, 21.6, 1.3], [17, 15.6, 1.1], [25.4, 6.6, 1]],
       sparkles: [[24.5, 6, 1.5], [6.5, 26, 1.3], [27, 18, 1.2]],
       art: (f, rim, [, , lo, deep]) => '<rect x="4" y="27" width="24" height="3" rx="1" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.6"/>' +
         '<rect x="5.5" y="5.5" width="21" height="21.5" rx="1.4" fill="#b07a45" stroke="#6b4423" stroke-width="0.6"/>' +
@@ -3142,6 +3272,7 @@
     },
     hugo: {
       shape: '<path d="' + ROCKET + FINS + '"/>',
+      stars: [[14.6, 7.8, 1.2], [17.4, 15.6, 1.4], [12.4, 21.6, 1], [19.6, 26.4, 1]],
       sparkles: [[22.5, 5, 1.5], [9, 12, 1.3], [24.5, 18, 1.3]],
       art: (f, rim, [, , lo, deep]) => plinth(rim) + path(FINS, rim, deep, 0.5) +
         path('M13.8 21h4.4l.9 3.6h-6.2z', lo, deep, 0.4) + path(ROCKET, f, deep, 0.6) +
@@ -3150,6 +3281,7 @@
     },
     arabic: {
       shape: '<path d="' + ARCH + '"/>',
+      stars: [[12, 12, 1.3], [20.6, 20, 1.4], [16, 6.6, 1], [9.8, 24.6, 1]],
       sparkles: [[16, 1.8, 1.5], [6.5, 16, 1.3], [25.5, 21, 1.3]],
       art: (f, rim, [hi, , , deep]) => '<rect x="6" y="27" width="20" height="3" rx="1" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.6"/>' +
         path(ARCH, f, deep, 0.7) +
@@ -3159,6 +3291,7 @@
     },
     nike: {
       shape: '<path d="' + WING + '"/><path d="' + WING + '" transform="' + MIRROR + '"/><path d="' + NIKE + '"/><circle cx="16" cy="9.2" r="1.3"/>',
+      stars: [[9, 8, 1.3], [23.4, 10.6, 1.2], [16, 17.6, 1.3], [13, 26.4, 1]],
       sparkles: [[5.4, 4.2, 1.5], [26.6, 4.2, 1.5], [21.5, 19, 1.3]],
       art: (f, rim, [, , lo, deep]) => plinth(rim) +
         path(WING, f, deep, 0.5) + '<g transform="' + MIRROR + '">' + path(WING, f, deep, 0.5) + '</g>' +
@@ -3168,6 +3301,7 @@
     },
     booker: {
       shape: BOOKS_STACK.map((b) => '<rect ' + bookBox(b) + '/>').join(''),
+      stars: [[10, 16, 1.3], [21.6, 20.6, 1.4], [14, 24.6, 1.1], [24, 15, 1]],
       sparkles: [[24.5, 12, 1.5], [6.5, 19, 1.3], [27.5, 21, 1.2]],
       art: (f, rim, [, , lo, deep]) => '<rect x="3.5" y="27" width="25" height="2.8" rx="1" fill="#6b4a2b"/>' +
         BOOKS_STACK.map((b, i) => {
@@ -3191,6 +3325,18 @@
     [[24.5, 12.5, 1.7], [7.5, 26, 1.5], [24, 4, 1.3], [8, 9, 1.2]], 8.8)),
   };
 
+  // A white star with a soft glow, bigger and brighter than the sparkles;
+  // i staggers the twinkling.
+  const whiteStar = (x, y, size, i) => {
+    const s = size * 1.4;
+    const q = 'Q' + x + ' ' + y + ' ';
+    const at = (dx, dy) => (x + dx).toFixed(2) + ' ' + (y + dy).toFixed(2);
+    return '<g class="sparkle white" style="animation-delay:' + (i * 0.55).toFixed(2) + 's">' +
+      '<circle cx="' + x + '" cy="' + y + '" r="' + (s * 1.3).toFixed(2) + '" fill="url(#star-glow)"/>' +
+      '<path d="M' + at(0, -s * 1.3) + q + at(s, 0) + q + at(0, s * 1.3) + q + at(-s, 0) + q + at(0, -s * 1.3) +
+      'z" fill="#fff" stroke="#c9d3e0" stroke-width="0.15"/></g>';
+  };
+
   function prizeIcon(id) {
     const { colors } = PRIZES.find((r) => r.id === id) || PRIZES[0];
     const art = PRIZE_ART[id];
@@ -3199,6 +3345,7 @@
       '<g clip-path="url(#clip-' + id + ')"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/></g>' +
       glint('clip-' + id) +
       art.sparkles.map(([x, y, s], i) => sparkle(x, y, s, i)).join('') +
+      art.stars.map(([x, y, s], i) => whiteStar(x, y, s, i)).join('') +
       '</svg>';
   }
 
@@ -3435,9 +3582,9 @@
       // explosion, a literary prize a rain of letters, a city symbol
       // thought bubbles.
       if (isTimes()) confetti(CELEBRATION_MS);
-      else if (app.id === 'capitals') fireworks(CELEBRATION_MS);
+      else if (app.id === 'capitals') fireworks(CELEBRATION_MS, fireworksSound());
       else if (app.id === 'chemistry') explosion(CELEBRATION_MS, colors[1]);
-      else if (app.id === 'literature') letterRain(CELEBRATION_MS);
+      else if (app.id === 'literature') letterRain(RAIN_MAX_MS);
       else speechBubbles(CELEBRATION_MS);
     }
   }
@@ -3576,9 +3723,92 @@
     requestAnimationFrame(frame);
   }
 
+  // StoliceMax: quiet sounds for the fireworks, made by the browser (Web
+  // Audio) rather than played from files: a whistle and a hiss as a rocket
+  // rises, a bang with a low thump and a crackle as it bursts, each from the
+  // side of the screen where it is. Browsers only start sound in a tap, so
+  // this is called in the tap that buys the souvenir. Returns null when the
+  // sound is switched off or the browser has no Web Audio.
+  let audio = null;
+  let noiseBuffer = null;
+  function fireworksSound() {
+    if (state.settings.sound === false) return null;
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!Context) return null;
+    try {
+      if (!audio) {
+        audio = new Context();
+        // A second of white noise, for the hiss, the bangs and the crackle.
+        noiseBuffer = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      }
+      // A refused start is not an error to show; the fireworks stay silent.
+      if (audio.state !== 'running') Promise.resolve(audio.resume()).catch(() => {});
+    } catch (e) {
+      return null;
+    }
+    const ctx = audio;
+    const out = ctx.createGain();
+    out.gain.value = 0.4; // a little sound, not a loud one
+    out.connect(ctx.destination);
+    // pan: -1 for the left edge of the screen, 1 for the right.
+    const side = (pan) => {
+      if (!ctx.createStereoPanner) return out;
+      const node = ctx.createStereoPanner();
+      node.pan.value = Math.max(-1, Math.min(1, pan));
+      node.connect(out);
+      return node;
+    };
+    // A sound that rises to peak at once and dies away over seconds.
+    const envelope = (to, at, seconds, peak) => {
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(peak, at + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + seconds);
+      gain.connect(to);
+      return gain;
+    };
+    const noise = (to, at, seconds, type, frequency, peak) => {
+      const source = ctx.createBufferSource();
+      source.buffer = noiseBuffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = type;
+      filter.frequency.value = frequency;
+      source.connect(filter);
+      filter.connect(envelope(to, at, seconds, peak));
+      source.start(at, Math.random() * 0.5);
+      source.stop(at + seconds + 0.05);
+    };
+    const tone = (to, at, seconds, from, till, peak) => {
+      const osc = ctx.createOscillator();
+      osc.frequency.setValueAtTime(from, at);
+      osc.frequency.exponentialRampToValueAtTime(till, at + seconds);
+      osc.connect(envelope(to, at, seconds, peak));
+      osc.start(at);
+      osc.stop(at + seconds + 0.05);
+    };
+    return {
+      launch(pan, seconds) {
+        const to = side(pan);
+        const at = ctx.currentTime;
+        tone(to, at, seconds, 900, 2000, 0.03);
+        noise(to, at, seconds, 'bandpass', 1500, 0.05);
+      },
+      burst(pan) {
+        const to = side(pan);
+        const at = ctx.currentTime;
+        noise(to, at, 0.9, 'lowpass', 900, 0.5);
+        tone(to, at, 0.35, 110, 40, 0.35);
+        for (let i = 0; i < 14; i++) noise(to, at + 0.25 + Math.random() * 1.1, 0.04, 'highpass', 3000, 0.05 + Math.random() * 0.06);
+      },
+    };
+  }
+
   // StoliceMax: fireworks for a souvenir. Rockets rise from the bottom of the
-  // screen and burst into sparks, over a darkened screen.
-  function fireworks(ms) {
+  // screen and burst into sparks, over a darkened screen. sound, if given,
+  // plays a sound for each rocket and burst (see fireworksSound).
+  function fireworks(ms, sound) {
     const canvas = document.createElement('canvas');
     canvas.className = 'confetti';
     canvas.setAttribute('aria-hidden', 'true');
@@ -3593,11 +3823,14 @@
     const rockets = [];
     const sparks = [];
     // A rocket rises to its peak in 0.6 to 0.85 seconds, slowing down evenly.
+    const pan = (x) => (x / innerWidth) * 1.4 - 0.7;
     const launch = () => {
       const rise = innerHeight + 10 - innerHeight * (0.15 + Math.random() * 0.45);
       const time = 0.6 + Math.random() * 0.25;
+      const x = innerWidth * (0.15 + Math.random() * 0.7);
+      if (sound) sound.launch(pan(x), time);
       rockets.push({
-        x: innerWidth * (0.15 + Math.random() * 0.7),
+        x,
         y: innerHeight + 10,
         vx: (Math.random() - 0.5) * 60,
         vy: (-2 * rise) / time,
@@ -3606,6 +3839,7 @@
       });
     };
     const burst = (r) => {
+      if (sound) sound.burst(pan(r.x));
       const n = 70 + Math.floor(Math.random() * 40);
       const ring = Math.random() < 0.35; // some bursts are a ring, the others a ball
       const second = pick();
@@ -3787,6 +4021,13 @@
   ].map((letters) => [...letters]);
   const RAIN_COLORS = ['#e63946', '#f4a261', '#ffbe0b', '#06d6a0', '#2a9d8f', '#00bbf9', '#457b9d', '#9b5de5', '#f15bb5'];
 
+  // Each letter falls to the bottom of the screen, lands there and only
+  // then fades. New letters come for RAIN_SPAWN_MS, and even the slowest
+  // reaches the bottom within 2.4 seconds, so the rain is over after about
+  // 5 seconds; ms only stops it if the page is too slow to finish.
+  const RAIN_SPAWN_MS = 2200;
+  const RAIN_FADE_MS = 500;
+  const RAIN_MAX_MS = 7000;
   function letterRain(ms) {
     const canvas = document.createElement('canvas');
     canvas.className = 'confetti';
@@ -3799,17 +4040,19 @@
     const spawn = (count) => {
       for (let i = 0; i < count; i++) {
         const size = 18 + Math.random() * 28;
+        // Seconds to the bottom: big letters fall a little faster, as if nearer.
+        const time = 2.4 - ((size - 18) / 28) * 0.8 - Math.random() * 0.4;
         letters.push({
           ch: pick(pick(ALPHABETS)),
           x: Math.random() * innerWidth,
           y: -size - Math.random() * 80,
           size,
-          // Big letters fall a little faster, as if nearer.
-          vy: 120 + size * 3 + Math.random() * 80,
+          vy: (innerHeight + 2 * size + 80) / time,
           angle: (Math.random() - 0.5) * 0.8,
           spin: (Math.random() - 0.5) * 2.5,
           sway: Math.random() * Math.PI * 2,
           color: pick(RAIN_COLORS),
+          landed: null, // the time it reached the bottom
         });
       }
     };
@@ -3820,25 +4063,36 @@
       const elapsed = Math.max(0, now - start);
       const dt = Math.min(0.05, Math.max(0, now - last) / 1000);
       last = now;
-      // New letters keep coming until shortly before the end, so the last
-      // ones are still falling when the rain fades out.
-      if (elapsed < ms - 1500) spawn(Math.round(70 * dt + Math.random() * 0.6));
+      if (elapsed < RAIN_SPAWN_MS) spawn(Math.round(70 * dt + Math.random() * 0.6));
       if (canvas.width !== Math.round(innerWidth * ratio)) {
         canvas.width = Math.round(innerWidth * ratio);
         canvas.height = Math.round(innerHeight * ratio);
       }
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.clearRect(0, 0, innerWidth, innerHeight);
-      ctx.globalAlpha = elapsed > ms - 600 ? Math.max(0, (ms - elapsed) / 600) : 1;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.lineJoin = 'round';
-      for (const l of letters) {
-        l.y += l.vy * dt;
-        l.angle += l.spin * dt;
-        if (l.y > innerHeight + l.size) continue;
+      for (let i = letters.length - 1; i >= 0; i--) {
+        const l = letters[i];
+        if (l.landed === null) {
+          l.y += l.vy * dt;
+          l.angle += l.spin * dt;
+          l.dx = Math.sin(l.sway + elapsed / 400) * 18;
+          const floor = innerHeight - l.size * 0.45;
+          if (l.y >= floor) {
+            l.y = floor;
+            l.landed = elapsed;
+          }
+        }
+        const alpha = l.landed === null ? 1 : 1 - (elapsed - l.landed) / RAIN_FADE_MS;
+        if (alpha <= 0) {
+          letters.splice(i, 1);
+          continue;
+        }
         ctx.save();
-        ctx.translate(l.x + Math.sin(l.sway + elapsed / 400) * 18, l.y);
+        ctx.globalAlpha = alpha;
+        ctx.translate(l.x + l.dx, l.y);
         ctx.rotate(l.angle);
         ctx.font = '700 ' + l.size.toFixed(1) + 'px system-ui, sans-serif';
         // A thin dark edge keeps light letters visible on a light page.
@@ -3849,7 +4103,7 @@
         ctx.fillText(l.ch, 0, 0);
         ctx.restore();
       }
-      if (elapsed < ms) requestAnimationFrame(frame);
+      if ((elapsed < RAIN_SPAWN_MS || letters.length) && elapsed < ms) requestAnimationFrame(frame);
       else canvas.remove();
     };
     requestAnimationFrame(frame);
@@ -4006,14 +4260,14 @@
 
   // ---------- panels ----------
 
-  const panels = [$('settings'), $('shop'), $('apps')];
+  const panels = [$('settings'), $('shop'), $('apps'), $('showcase')];
   const panelOpen = () => panels.some((p) => !p.hidden);
 
   // Open the panel first, so it opens even if filling it in fails: the
   // settings are the only way to change the language or reload the app.
   // Opening a panel adds a step to the page history, so Android's Back
   // gesture closes the panel instead of leaving the app.
-  // which: 'settings', 'shop' or 'apps'.
+  // which: 'settings', 'shop', 'apps' or 'showcase' (filled in by openShowcase).
   function openPanel(which) {
     pauseTimers();
     if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
@@ -4023,7 +4277,7 @@
     try {
       if (which === 'settings') syncSettings();
       else if (which === 'shop') renderShop();
-      else renderApps();
+      else if (which === 'apps') renderApps();
     } catch (e) {
       noteError(e);
     }
@@ -4031,13 +4285,21 @@
 
   function closePanel() {
     if (!panelOpen()) return false;
+    if (!$('showcase').hidden && showcaseFrom === 'shop') {
+      // Back to the shop. After the Back gesture the shop needs its step in
+      // the page history again.
+      showcaseFrom = null;
+      if (!(history.state && history.state.panel)) history.pushState({ panel: true }, '');
+      openPanel('shop');
+      return true;
+    }
     if (!$('apps').hidden && appsUnseen()) {
       prefs.appsSeen = Object.keys(APPS).length;
       savePrefs();
     }
     for (const p of panels) p.hidden = true;
     document.body.classList.remove('panel-open');
-    for (const id of ['open-settings', 'open-shop', 'open-apps']) $(id).blur();
+    for (const id of ['open-settings', 'open-shop', 'open-apps', 'trophies']) $(id).blur();
     if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
     else {
       render();
@@ -4056,6 +4318,7 @@
   $('close-settings').addEventListener('click', closePanel);
   $('close-shop').addEventListener('click', closePanel);
   $('close-apps').addEventListener('click', closePanel);
+  $('close-showcase').addEventListener('click', closePanel);
   // A tap on the dimmed area around a panel closes it.
   for (const p of panels) {
     p.addEventListener('click', (e) => {
@@ -4133,8 +4396,9 @@
           : '<button type="button" class="primary-btn" data-reward="' + id + '">' + esc(t.buy) + '</button>') +
         '</div>';
     }).join('');
+    $('shelf-hint').hidden = state.trophies.length === 0;
     $('trophy-shelf').innerHTML = state.trophies.length
-      ? state.trophies.map((tr) => '<span title="' + esc(t.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal) + '</span>').join('')
+      ? state.trophies.map((tr, i) => '<button type="button" data-owned="' + i + '" title="' + esc(t.trophyName(tr.metal)) + '" aria-label="' + esc(t.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal) + '</button>').join('')
       : '<p class="hint">' + esc(t.noTrophies) + '</p>';
   }
 
@@ -4162,6 +4426,32 @@
     render();
     celebrate(id);
   });
+
+  // A reward bought, shown large. Opened from the shelf in the shop it
+  // goes back to the shop when closed; opened from the header, to the cards.
+  let showcaseFrom = null;
+  function openShowcase(index, from) {
+    const bought = state.trophies[index];
+    if (!bought) return;
+    const t = T();
+    const { id, colors } = reward(bought.metal);
+    showcaseFrom = from;
+    openPanel('showcase');
+    const art = $('showcase-art');
+    art.style.setProperty('--metal', colors[1]);
+    art.classList.toggle('swing', app.id === 'times' || app.id === 'capitals'); // the keychains
+    art.innerHTML = rewardIcon(id);
+    $('showcase-name').textContent = t.trophyName(id);
+    const place = rewardPlace(id);
+    $('showcase-place').textContent = place;
+    $('showcase-place').hidden = !place;
+    $('showcase-bought').textContent = t.boughtOn(new Date(bought.at).toLocaleDateString(lang(), { dateStyle: 'long' }));
+  }
+  $('trophy-shelf').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-owned]');
+    if (btn) openShowcase(Number(btn.dataset.owned), 'shop');
+  });
+  $('trophies').addEventListener('click', () => openShowcase(state.trophies.length - 1, null));
 
   // ---------- settings ----------
 
@@ -4214,6 +4504,7 @@
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
     $('next-after').value = String(s.nextAfter);
+    $('sound').checked = s.sound !== false;
     $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
@@ -4300,6 +4591,11 @@
 
   $('next-after').addEventListener('change', (e) => {
     state.settings.nextAfter = Number(e.target.value);
+    save();
+  });
+
+  $('sound').addEventListener('change', (e) => {
+    state.settings.sound = e.target.checked;
     save();
   });
 

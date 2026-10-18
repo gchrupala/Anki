@@ -114,20 +114,22 @@ Coins reward what the child remembers, not the number of cards done. In spaced r
 
 Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
 
-Coins are spent in the shop ("Sklep" in the header) on trophies of the child's choice. Prices rise with the material:
+Coins are spent in the shop ("Sklep" in the header) on rewards of the child's choice. In MnożenieMax these are keychains with the prime numbers from 2 to 19, each hanging from a key ring on a short chain. Prices rise with the number and its material:
 
-| Trophy | Coins |
+| Keychain | Coins |
 | --- | --- |
-| Bronze | 50 |
-| Silver | 100 |
-| Gold | 150 |
-| Platinum | 250 |
-| Diamond | 350 |
-| Ruby | 500 |
-| Emerald | 650 |
-| Sapphire | 800 |
+| Bronze 2 | 50 |
+| Silver 3 | 100 |
+| Gold 5 | 150 |
+| Platinum 7 | 250 |
+| Diamond 11 | 350 |
+| Ruby 13 | 500 |
+| Emerald 17 | 650 |
+| Sapphire 19 | 800 |
 
-Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the trophy and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the trophy is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of trophies and the latest one bought. The shop lists all trophies bought, and the settings show the coins collected and spent. Prices and materials are set in `TROPHIES` in `index.html`, the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each trophy as soon as possible, bronze comes on day 1, gold on day 5, diamond on day 13 and sapphire on day 29.
+Until October 2026 these were trophies in the same materials. A trophy bought then now shows as the keychain of its material.
+
+Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the keychain and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the keychain is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of keychains and the latest one bought. The shop lists all keychains bought, and the settings show the coins collected and spent. Tapping a reward on that list, or the latest one in the header, shows it large, glowing in its colour, with its name and the date it was bought; a keychain swings gently on its ring. This works the same in all four apps. Done, Back or a tap around it goes back to where it was opened from. Prices, numbers and materials are set in `TROPHIES` in `index.html` (the code still calls all rewards trophies), the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each keychain as soon as possible, the bronze 2 comes on day 1, the gold 5 on day 5, the diamond 11 on day 13 and the sapphire 19 on day 29.
 
 ### Order of cards
 
@@ -143,6 +145,7 @@ The settings panel (the gear button, "Ustawienia" in Polish) lets you:
 
 - choose the size of the table (10 × 10 or 12 × 12), which tables to practise and which extra numbers to add (13 to 20, and 25);
 - change the number of new facts per day and the target recall;
+- switch the sound of the fireworks on or off (StoliceMax only; on by default);
 - move the app clock ahead by a day, to see how reviews come back;
 - copy the review log as CSV.
 
@@ -156,13 +159,13 @@ StoliceMax teaches the capitals of countries. It runs in the same page and at th
 
 ### Switching apps
 
-The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
+The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. Inside the app the icons are black and white; the home-screen icon of MaxApki keeps its colours. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
 
 The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura` or `#jezyki` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
 
 The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
-Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax a flask, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble. The language is shared.
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
 
 ### Cards
 
@@ -174,7 +177,7 @@ Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have 
 
 ### Rewards
 
-Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per finished day). The shop sells souvenirs instead of trophies: small glittering models of famous sights in capitals.
+Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per finished day). The shop sells souvenirs: keychains with small glittering models of famous sights in capitals, hanging from a key ring on a short chain.
 
 | Souvenir | Capital | Coins |
 | --- | --- | --- |
@@ -199,9 +202,9 @@ Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per 
 | Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 750 |
 | Forbidden City | Beijing | 800 |
 
-All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. Trophies in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
+All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. A quiet sound goes with them: a whistle and a hiss as each rocket rises, and a bang with a crackle as it bursts, from the side of the screen where it is. The browser makes the sounds itself (Web Audio), so there are no sound files. The sound can be switched off in the settings ("Dźwięk fajerwerków"). Keychains in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
 
-The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings and the places of their stars in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
+The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings, the places of their stars and the point where the chain holds them in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
 
 ### Names of countries and capitals
 
@@ -218,7 +221,7 @@ ChemiaMax teaches the formulas of elements and common chemical compounds. It run
 - Each card is an element or a compound: 28 elements and 53 compounds a child meets at home, in nature and in school chemistry, from oxygen, iron and gold to water, table salt, caffeine and vitamin C. Elements are written as they occur: gases such as oxygen as molecules (O₂, N₂, Cl₂), noble gases and metals as single atoms (He, Fe, Au), and sulfur, carbon and phosphorus by their symbol. The card shows the name, as in school chemistry ("Tlenek węgla(IV)" in Polish), with the everyday name below it if there is one ("dwutlenek węgla"). The child picks the formula from four, written with small numbers (H₂O).
 - One wrong answer is always the formula most like the right one, and two more come from the next five most like it. For a compound, alike means the most of its elements and the fewest others: carbon monoxide always gets CO₂, and nitrogen dioxide N₂O and maybe HNO₃. For an element, it means another form of the same element or a symbol with the same first letter: oxygen always gets O₃, iron F₂, silver Au, Ar or Al.
 - As in StoliceMax, a right answer the first time is never Easy. Easy needs a right answer within 6 seconds. The default time limit is 20 seconds, and 5 new compounds a day, because formulas are harder to learn than capitals.
-- The settings choose the groups: elements, oxides, acids, bases, salts and organic compounds. All are on by default; the elements, added later, were switched on for progress saved before them. The progress view has a square with each formula, by group.
+- The settings choose the groups: elements, oxides, acids, bases, salts and organic compounds. All are on by default; the elements, added later, were switched on for progress saved before them. The progress view has a square with each formula, by group. Since the square shows the answer, the card being asked is only marked on it once it has been answered, and the label that shows when the mouse is over a square gives only when it comes back, not the name of the compound.
 - The review log uses the number of the element or compound in `chemistry.js` as `card_id`, and has the formula and the formula picked.
 
 The shop sells laboratory glassware with coloured liquid that bubbles and glitters:
@@ -250,10 +253,10 @@ LiteraturaMax teaches who wrote well-known books. It runs in the same page as th
 - The card shows the title in the language of the page where the book has a well-known title in it, and below it the original title and the language the book was written in, such as "Крокодил Гена и его друзья · język rosyjski". Language names come from the browser (`Intl.DisplayNames`). Without a title in the language of the page, the card shows the original title if it is in the Latin alphabet, or else the English title.
 - The child picks the author from four. One wrong answer is always the author most like the right one, and two more come from the next five most like it. Alike means writing in the same language (3 points), coming from the same country (2) or writing in the same category (2), so a Persian poem gets other Persian poets and a Polish adventure book other Polish authors. Each author appears once among the answers.
 - As in StoliceMax, a right answer the first time is never Easy. Easy needs a right answer within 6 seconds. The default time limit is 20 seconds, and 5 new books a day. All categories are on by default.
-- The progress view has a square for each book, with the flag of the country of its author, by category.
+- The progress view has a square for each book, with the flag of the country of its author, by category. As in ChemiaMax, the book being asked is only marked once it has been answered, and the label over a square leaves out the title, since the flag hints at the author.
 - The review log uses the number of the book in `literature.js` as `card_id`, and has the book and the book whose author was picked (as `b1`, `b2` and so on).
 
-The shop sells literary prizes from many countries and international ones, each a glittering medal on a ribbon or a statuette:
+The shop sells literary prizes from many countries and international ones, each a glittering medal on a ribbon or a statuette. Four white stars with a soft glow twinkle on each prize, besides the small golden ones the souvenirs have:
 
 | Prize | Country | Coins |
 | --- | --- | --- |
@@ -272,7 +275,7 @@ The shop sells literary prizes from many countries and international ones, each 
 | Hans Christian Andersen Award | international | 450 |
 | Nobel Prize in Literature | Sweden | 700 |
 
-All 14 together cost 3020 coins; learning all 126 books to the mastered level pays 2142, plus 10 for each finished day. The Nobel medal is the largest and has golden rays around it. Buying a prize sets off a rain of letters for 4 seconds: letters of the Latin, Cyrillic, Greek, Hebrew, Arabic and Persian, Georgian, Armenian, Devanagari, Thai, Chinese, Japanese and Korean scripts fall and turn. With reduced motion switched on in the device settings, only the prize is shown. The prizes and their prices are set in `PRIZES` in `index.html`, the drawings in `PRIZE_ART`, the names in `i18n-literature.js`.
+All 14 together cost 3020 coins; learning all 126 books to the mastered level pays 2142, plus 10 for each finished day. The Nobel medal is the largest and has golden rays around it. Buying a prize sets off a rain of letters: letters of the Latin, Cyrillic, Greek, Hebrew, Arabic and Persian, Georgian, Armenian, Devanagari, Thai, Chinese, Japanese and Korean scripts fall and turn. Each letter lands at the bottom of the screen and only fades there; new letters come for just over 2 seconds, and the last ones have faded about 5 seconds after the purchase. With reduced motion switched on in the device settings, only the prize is shown. The prizes and their prices are set in `PRIZES` in `index.html`, the drawings and the places of the white stars in `PRIZE_ART`, the names in `i18n-literature.js`.
 
 The books and authors and their names in the five languages are in `literature.js`. Titles were chosen from published translations where they are well known; where a book has no known title in a language, the field is left empty and the rule above applies.
 
@@ -291,7 +294,7 @@ JęzykiMax teaches French, Spanish, Dutch and Italian at the levels A1, A2 and B
 - New cards come level by level: first A1, then A2, then B1, at random within a level. Within a level the cards that show a word and ask for the picture come after the others, once the pictures are known. The levels can be switched off in the settings. As in StoliceMax, a right answer the first time is never Easy. Easy needs a right answer within 6 seconds. The default time limit is 30 seconds, and 10 new cards a day per language.
 - Once a sentence with a gap is answered, the whole sentence is shown with the gap filled in, and below it what it means in the language of the interface (unless that is the language of the sentence, as with Dutch sentences in the Dutch interface). After a right answer the card then stays at least 3.5 seconds, to leave time to read it. The translations are in `languages-translations.js`.
 - The speaker button reads the word or sentence aloud with a voice of the device for that language (the browser's `speechSynthesis`). It does not read what would give the answer away: a picture card is read only once answered, a gap only once filled in. Where the device has no voice for the language (or in the Android app, whose web view has none), the button is not shown.
-- The progress view has a square for each card of the language being learned, by level: the picture for picture and word cards, `_` for a gap, `?` for a question and `⇄` for opposites.
+- The progress view has a square for each card of the language being learned, by level: the picture for picture and word cards, `_` for a gap, `?` for a question and `⇄` for opposites. As in ChemiaMax, the card being asked is only marked once it has been answered, and the label over a square leaves out the word, since the picture or the word can be the answer.
 - The review log uses the number of the card as `card_id`, and has the card id (such as `fr.p.apple`) and the answer picked (the card id for the right answer, with `#1` to `#3` for the wrong ones).
 
 The shop sells symbols of cities where these languages are spoken, drawn as glittering models like the souvenirs of StoliceMax:
