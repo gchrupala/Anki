@@ -160,7 +160,7 @@ The app that was open last opens on the next start. The address can also name th
 
 The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
-Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax a flask, those of LiteraturaMax an open book. The language is shared.
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
 
 ### Cards
 
