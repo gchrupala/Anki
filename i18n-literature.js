@@ -55,7 +55,8 @@
       rightIs: (author) => 'Prawidłowa odpowiedź: ' + author + '.',
       typeToGoOn: () => 'Dotknij poprawnej odpowiedzi, żeby iść dalej.',
       choicesAria: 'Autorzy do wyboru',
-      inLanguage: (name) => 'język\u00a0' + name,
+      // "język angielski", but just "sanskryt" or "urdu" for names that are nouns.
+      inLanguage: (name) => (/ki$/.test(name) ? 'język\u00a0' + name : name),
       moreNew: 'Jeszcze 5 nowych książek',
       progressTitle: 'Twoje książki',
       progressSub: 'Każde pole to jedna książka, z flagą kraju autora. Pola wypełniają się, gdy autor książki trafia do pamięci długotrwałej.',

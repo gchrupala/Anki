@@ -125,6 +125,27 @@
     szymborska: ['PL', 'Wisława Szymborska', '', '', '', 'ویسواوا شیمبورسکا'],
     tagore: ['IN', 'Rabindranath Tagore', '', '', '', 'رابیندرانات تاگور'],
     whitman: ['US', 'Walt Whitman', '', '', '', 'والت ویتمن'],
+    bruna: ['NL', 'Dick Bruna', '', '', '', 'دیک برونا'],
+    dragt: ['NL', 'Tonke Dragt', '', '', '', 'تونکه دراخت'],
+    kuijer: ['NL', 'Guus Kuijer', '', '', '', 'خوس کاوِر'],
+    beckman: ['NL', 'Thea Beckman', '', '', '', 'تئا بکمان'],
+    vishnusharma: ['IN', 'Vishnu Sharma', '', '', '', 'ویشنو شرما'],
+    narayan: ['IN', 'R. K. Narayan', '', '', '', 'آر. کی. نارایان'],
+    valmiki: ['IN', 'Valmiki', 'Walmiki', '', '', 'والمیکی'],
+    iqbal: ['PK', 'Muhammad Iqbal', '', '', '', 'محمد اقبال لاهوری'],
+    roy: ['IN', 'Arundhati Roy', '', '', '', 'آرونداتی روی'],
+    wu: ['CN', 'Wu Cheng’en', '', '', '', 'وو چنگ‌ئن'],
+    kuroyanagi: ['JP', 'Tetsuko Kuroyanagi', '', '', '', 'تتسوکو کورویاناگی'],
+    hwang: ['KR', 'Hwang Sun-mi', '', '', '', 'هوانگ سون‌می'],
+    murasaki: ['JP', 'Murasaki Shikibu', '', '', '', 'موراساکی شیکیبو'],
+    quino: ['AR', 'Quino', '', '', '', 'کینو'],
+    quiroga: ['UY', 'Horacio Quiroga', '', '', '', 'اوراسیو کیروگا'],
+    amado: ['BR', 'Jorge Amado', '', '', '', 'ژورژ آمادو'],
+    borges: ['AR', 'Jorge Luis Borges', '', '', '', 'خورخه لوئیس بورخس'],
+    diop: ['SN', 'Birago Diop', '', '', '', 'بیراگو دیوپ'],
+    adichie: ['NG', 'Chimamanda Ngozi Adichie', '', '', '', 'چیماماندا انگوزی آدیچی'],
+    ngugi: ['KE', 'Ngũgĩ wa Thiong’o', '', '', '', 'انگوگی وا تیانگو'],
+    achebe: ['NG', 'Chinua Achebe', '', '', '', 'چینوا آچه‌به'],
   };
 
   const ROWS = [
@@ -150,6 +171,15 @@
     [19, 'KID', 'baum', 'en', 'The Wonderful Wizard of Oz', 'Czarnoksiężnik z Krainy Oz', 'The Wonderful Wizard of Oz', 'De tovenaar van Oz', 'El maravilloso mago de Oz', 'جادوگر شهر اوز'],
     [20, 'KID', 'seuss', 'en', 'The Cat in the Hat', 'Kot Prot', 'The Cat in the Hat', '', '', ''],
     [21, 'KID', 'jimenez', 'es', 'Platero y yo', 'Platero i ja', 'Platero and I', 'Platero en ik', 'Platero y yo', ''],
+    [106, 'KID', 'bruna', 'nl', 'Nijntje', 'Miffy', 'Miffy', 'Nijntje', 'Miffy', ''],
+    [107, 'KID', 'dragt', 'nl', 'De brief voor de koning', 'List do króla', 'The Letter for the King', 'De brief voor de koning', '', ''],
+    [108, 'KID', 'kuijer', 'nl', 'Het boek van alle dingen', 'Księga wszystkich rzeczy', 'The Book of Everything', 'Het boek van alle dingen', 'El libro de todas las cosas', ''],
+    [110, 'KID', 'vishnusharma', 'sa', 'पञ्चतन्त्र', 'Pańczatantra', 'Panchatantra', '', 'Panchatantra', 'پنچاتنترا'],
+    [116, 'KID', 'kuroyanagi', 'ja', '窓ぎわのトットちゃん', '', 'Totto-chan: The Little Girl at the Window', '', 'Totto-chan, la niña de la ventana', ''],
+    [117, 'KID', 'hwang', 'ko', '마당을 나온 암탉', '', 'The Hen Who Dreamed She Could Fly', '', 'La gallina que soñaba con volar', ''],
+    [119, 'KID', 'quino', 'es', 'Mafalda', 'Mafalda', 'Mafalda', 'Mafalda', 'Mafalda', ''],
+    [120, 'KID', 'quiroga', 'es', 'Cuentos de la selva', '', 'South American Jungle Tales', '', 'Cuentos de la selva', ''],
+    [123, 'KID', 'diop', 'fr', 'Les Contes d’Amadou Koumba', '', 'Tales of Amadou Koumba', '', '', ''],
 
     // Books for young people
     [22, 'YA', 'rowling', 'en', 'Harry Potter and the Philosopher’s Stone', 'Harry Potter i Kamień Filozoficzny', 'Harry Potter and the Philosopher’s Stone', 'Harry Potter en de Steen der Wijzen', 'Harry Potter y la piedra filosofal', 'هری پاتر و سنگ جادو'],
@@ -168,6 +198,11 @@
     [35, 'YA', 'boyne', 'en', 'The Boy in the Striped Pyjamas', 'Chłopiec w pasiastej piżamie', 'The Boy in the Striped Pyjamas', 'De jongen in de gestreepte pyjama', 'El niño con el pijama de rayas', 'پسری با پیژامهٔ راه‌راه'],
     [36, 'YA', 'grin', 'ru', 'Алые паруса', 'Szkarłatne żagle', 'Scarlet Sails', '', 'Velas escarlata', ''],
     [37, 'YA', 'porter', 'en', 'Pollyanna', 'Pollyanna', 'Pollyanna', 'Pollyanna', 'Pollyanna', 'پولیانا'],
+    [109, 'YA', 'beckman', 'nl', 'Kruistocht in spijkerbroek', 'Krucjata w dżinsach', 'Crusade in Jeans', 'Kruistocht in spijkerbroek', '', ''],
+    [111, 'YA', 'narayan', 'en', 'Swami and Friends', '', 'Swami and Friends', '', '', ''],
+    [121, 'YA', 'amado', 'pt', 'Capitães da Areia', 'Kapitanowie piasku', 'Captains of the Sands', '', 'Capitanes de la arena', ''],
+    [124, 'YA', 'adichie', 'en', 'Purple Hibiscus', 'Fioletowy hibiskus', 'Purple Hibiscus', 'Paarse hibiscus', 'La flor púrpura', ''],
+    [125, 'YA', 'ngugi', 'en', 'Weep Not, Child', '', 'Weep Not, Child', '', '', ''],
 
     // Fantasy and science fiction
     [38, 'FAN', 'tolkien', 'en', 'The Hobbit', 'Hobbit, czyli tam i z powrotem', 'The Hobbit', 'De hobbit', 'El hobbit', 'هابیت'],
@@ -184,6 +219,7 @@
     [49, 'FAN', 'asimov', 'en', 'I, Robot', 'Ja, robot', 'I, Robot', 'Ik, robot', 'Yo, robot', 'من، روبات'],
     [50, 'FAN', 'pratchett', 'en', 'The Colour of Magic', 'Kolor magii', 'The Colour of Magic', 'De kleur van toverij', 'El color de la magia', ''],
     [51, 'FAN', 'bradbury', 'en', 'Fahrenheit 451', 'Fahrenheit 451', 'Fahrenheit 451', 'Fahrenheit 451', 'Fahrenheit 451', 'فارنهایت ۴۵۱'],
+    [122, 'FAN', 'borges', 'es', 'Ficciones', 'Fikcje', 'Ficciones', 'Ficties', 'Ficciones', ''],
 
     // Crime and detective stories
     [52, 'CRI', 'doyle', 'en', 'The Hound of the Baskervilles', 'Pies Baskerville’ów', 'The Hound of the Baskervilles', 'De hond van de Baskervilles', 'El sabueso de los Baskerville', 'سگ باسکرویل‌ها'],
@@ -212,6 +248,7 @@
     [73, 'ADV', 'coelho', 'pt', 'O Alquimista', 'Alchemik', 'The Alchemist', 'De alchemist', 'El alquimista', 'کیمیاگر'],
     [74, 'ADV', 'battuta', 'ar', 'الرحلة', 'Podróże', 'The Travels', '', '', 'سفرنامهٔ ابن بطوطه'],
     [75, 'ADV', 'nienacki', 'pl', 'Pan Samochodzik i templariusze', 'Pan Samochodzik i templariusze', '', '', '', ''],
+    [115, 'ADV', 'wu', 'zh', '西游记', 'Wędrówka na Zachód', 'Journey to the West', 'De reis naar het westen', 'Viaje al Oeste', 'سفر به غرب'],
 
     // Classic novels and plays
     [76, 'CLA', 'prus', 'pl', 'Lalka', 'Lalka', 'The Doll', 'De pop', 'La muñeca', ''],
@@ -230,6 +267,9 @@
     [89, 'CLA', 'hedayat', 'fa', 'بوف کور', 'Ślepa sowa', 'The Blind Owl', 'De blinde uil', 'La lechuza ciega', 'بوف کور'],
     [90, 'CLA', 'vazov', 'bg', 'Под игото', 'Pod jarzmem', 'Under the Yoke', '', 'Bajo el yugo', ''],
     [91, 'CLA', 'chekhov', 'ru', 'Вишнёвый сад', 'Wiśniowy sad', 'The Cherry Orchard', 'De kersentuin', 'El jardín de los cerezos', 'باغ آلبالو'],
+    [114, 'CLA', 'roy', 'en', 'The God of Small Things', 'Bóg rzeczy małych', 'The God of Small Things', 'De god van kleine dingen', 'El dios de las pequeñas cosas', 'خدای چیزهای کوچک'],
+    [118, 'CLA', 'murasaki', 'ja', '源氏物語', 'Opowieść o księciu Genjim', 'The Tale of Genji', 'Het verhaal van Genji', '', ''],
+    [126, 'CLA', 'achebe', 'en', 'Things Fall Apart', 'Wszystko rozpada się', 'Things Fall Apart', 'Alles valt uiteen', 'Todo se desmorona', ''],
 
     // Poetry and epics
     [92, 'POE', 'mickiewicz', 'pl', 'Pan Tadeusz', 'Pan Tadeusz', 'Pan Tadeusz', 'Pan Tadeusz', 'Pan Tadeusz', 'پان تادئوش'],
@@ -246,6 +286,8 @@
     [103, 'POE', 'szymborska', 'pl', 'Koniec i początek', 'Koniec i początek', 'The End and the Beginning', '', '', ''],
     [104, 'POE', 'tagore', 'bn', 'গীতাঞ্জলি', 'Gitanjali', 'Gitanjali', 'Gitanjali', 'Gitanjali', 'گیتانجلی'],
     [105, 'POE', 'whitman', 'en', 'Leaves of Grass', 'Źdźbła trawy', 'Leaves of Grass', 'Grashalmen', 'Hojas de hierba', 'برگ‌های علف'],
+    [112, 'POE', 'valmiki', 'sa', 'रामायण', 'Ramajana', 'Ramayana', 'Ramayana', 'Ramayana', 'رامایانا'],
+    [113, 'POE', 'iqbal', 'ur', 'بانگ درا', 'Bang-e-Dra', 'The Call of the Marching Bell', 'Bang-e-Dra', 'Bang-e-Dra', 'بانگ درا'],
   ];
 
   const LATIN = /^[\p{Script=Latin}\p{N}\p{P}\p{Zs}]+$/u;
