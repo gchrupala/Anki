@@ -1770,9 +1770,8 @@
       },
       answer: (formula) => formulaHtml(formula),
       tile: (formula) => formulaHtml(formula),
-      // The tile shows the answer itself, so the grid marks the card being
-      // asked only once it has been answered.
-      markWhenAnswered: true,
+      // The tile shows the answer itself (see tileHints in renderProgress).
+      tileHints: true,
       label: (formula) => BY_FORMULA[formula].name[lang()],
       number: (formula) => BY_FORMULA[formula].number,
       logColumns: 'compound,picked',
@@ -1796,8 +1795,8 @@
       },
       answer: (id) => esc(AUTHORS[BY_BOOK[id].author].name[lang()]),
       tile: (id) => flag(AUTHORS[BY_BOOK[id].author].country),
-      // The flag on the tile hints at the author: mark it once answered.
-      markWhenAnswered: true,
+      // The flag on the tile hints at the author.
+      tileHints: true,
       label: (id) => BY_BOOK[id].title[lang()],
       number: (id) => BY_BOOK[id].number,
       logColumns: 'book,picked',
@@ -1839,6 +1838,9 @@
         const card = BY_LANG[id];
         return { p: card.show, w: card.answer, g: '_', q: '?', o: '⇄' }[card.kind];
       },
+      // The tile or the label can be the answer: a picture, a word or an
+      // opposite.
+      tileHints: true,
       label: (id) => BY_LANG[id].label,
       number: (id) => BY_LANG[id].number,
       logColumns: 'card,picked',
@@ -2255,7 +2257,12 @@
     const n = { new: 0, learning: 0, young: 0, mature: 0 };
     const learned = {};
     const els = isTimes() ? cells : tiles;
-    const marked = mode === 'ask' && !isTimes() && choice().markWhenAnswered ? null : currentId;
+    // Where a tile shows the answer or a hint to it (tileHints), the card
+    // being asked is marked only once it has been answered, and the hover
+    // labels leave out the name of the card, so neither can be looked up on
+    // the grid.
+    const hints = !isTimes() && choice().tileHints;
+    const marked = hints && mode === 'ask' ? null : currentId;
     for (const [id, el] of Object.entries(els)) {
       let c;
       let label;
@@ -2283,7 +2290,7 @@
       else if (s === 'new') tip = t.tipNew;
       else if (s === 'learning') tip = t.tipLearning(whenText(c.due));
       else tip = t.tipReview(whenText(c.due));
-      el.title = label + ': ' + tip;
+      el.title = hints ? tip.charAt(0).toLocaleUpperCase(lang()) + tip.slice(1) : label + ': ' + tip;
     }
     if (!isTimes()) {
       // Cards learned out of all the cards of each continent or group.
