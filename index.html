@@ -4260,7 +4260,6 @@
     }
     for (const opt of $('next-after').options) {
       opt.textContent = opt.value === '0' ? t.nextOnTap : opt.value === '-1' ? t.nextNow : seconds.format(Number(opt.value));
-      if (Number(opt.value) === NEXT_CLASSIC) opt.textContent += ' (' + t.nextClassic + ')';
     }
     // Text of the other app's parts may be missing; those parts are hidden.
     document.querySelectorAll('[data-t]').forEach((el) => {

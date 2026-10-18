@@ -80,6 +80,6 @@ test('every language has the JęzykiMax text', () => {
       assert.ok(t.cityName(id), `${lang} city ${id}`);
     }
     assert.ok(I18N.STRINGS[lang].appWhat.languages, `${lang} appWhat`);
-    assert.ok(I18N.STRINGS[lang].hold && I18N.STRINGS[lang].goOn && I18N.STRINGS[lang].nextNow && I18N.STRINGS[lang].nextClassic, `${lang} hold`);
+    assert.ok(I18N.STRINGS[lang].hold && I18N.STRINGS[lang].goOn && I18N.STRINGS[lang].nextNow, `${lang} hold`);
   }
 });
