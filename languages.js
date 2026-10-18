@@ -468,6 +468,7 @@
 
   // The cards of each language. number is the card_id in the review log.
   const KINDS = ['p', 'w', 'g', 'q', 'o'];
+  const UI_LANGS = ['pl', 'en', 'nl', 'es', 'fa'];
   const CARDS = {};
   TARGETS.forEach((lang, l) => {
     const cards = [];
@@ -483,8 +484,11 @@
       add('p', key, i, { level, theme, show: picture, answer: word, label: word });
       add('w', key, i, { level, theme, show: word, answer: picture, label: word });
     });
+    // What the sentence means in the interface languages (languages-translations.js).
+    const meanings = (root.GAP_TRANSLATIONS || {})[lang] || [];
     GAPS[lang].forEach(([level, sentence, answer, ...wrong], i) => {
-      add('g', i + 1, i, { level, show: tidy(lang, sentence), answer, wrong, label: tidy(lang, sentence) });
+      const meaning = meanings[i] ? Object.fromEntries(UI_LANGS.map((l, k) => [l, meanings[i][k]])) : {};
+      add('g', i + 1, i, { level, show: tidy(lang, sentence), answer, wrong, label: tidy(lang, sentence), meaning });
     });
     QUESTIONS[lang].forEach(([level, question, answer, ...wrong], i) => {
       add('q', i + 1, i, { level, show: tidy(lang, question), answer: tidy(lang, answer), wrong: wrong.map((w) => tidy(lang, w)), label: tidy(lang, question) });

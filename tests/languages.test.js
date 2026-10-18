@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 require('../i18n.js');
 require('../i18n-languages.js');
+require('../languages-translations.js');
 require('../languages.js');
 
 const { LANGUAGE_CARDS, LANGUAGE_TARGETS, LANGUAGE_LEVELS, I18N } = globalThis;
@@ -51,6 +52,15 @@ test('pictures and words are not repeated, so the four answers always differ', (
   for (const [theme, n] of Object.entries(themes)) assert.ok(n >= 4, theme);
 });
 
+test('every sentence with a gap has its meaning in the other interface languages', () => {
+  for (const c of all.filter((x) => x.kind === 'g')) {
+    for (const lang of I18N.LANGS) {
+      if (lang === c.lang) assert.equal(c.meaning[lang], '', `${c.id} ${lang}`);
+      else assert.ok(c.meaning[lang], `${c.id} ${lang}`);
+    }
+  }
+});
+
 test('every language has the JęzykiMax text', () => {
   const cities = ['tilburg', 'paris', 'bocca', 'pisa', 'venezia', 'firenze', 'sevilla', 'amsterdamarms', 'bruxelles', 'buenosaires', 'antwerpen', 'geneve', 'habana',
     'utrecht', 'quebec', 'mexico', 'marseille', 'rotterdam', 'barcelona'];
@@ -70,5 +80,6 @@ test('every language has the JęzykiMax text', () => {
       assert.ok(t.cityName(id), `${lang} city ${id}`);
     }
     assert.ok(I18N.STRINGS[lang].appWhat.languages, `${lang} appWhat`);
+    assert.ok(I18N.STRINGS[lang].hold && I18N.STRINGS[lang].goOn, `${lang} hold`);
   }
 });
