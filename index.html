@@ -1134,6 +1134,15 @@
         </select>
       </label>
       <p class="hint" data-t="answerTimeHint"></p>
+      <label class="field" for="next-after"><span data-t="nextAfter">Next card after</span>
+        <select id="next-after">
+          <option value="2">2 s</option>
+          <option value="5">5 s</option>
+          <option value="10">10 s</option>
+          <option value="0">-</option>
+        </select>
+      </label>
+      <p class="hint" data-t="nextAfterHint"></p>
     </section>
 
     <section>
@@ -1260,6 +1269,7 @@
     if (c.interval >= 7) return 2;
     return 1;
   }
+  const NEXT_AFTER = 5; // seconds a card stays after a right answer, unless set otherwise
   const IDLE_SUBMIT_MS = 3000; // MnożenieMax: check a shorter answer after this pause
   const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
   // The Android app serves its own copy of these files under this address.
@@ -1536,8 +1546,10 @@
     return {
       cards: {},
       // newPerDay, retention, answerTime (seconds without an answer before a
-      // card counts as not known; 0 = no limit), and the cards to practise.
-      settings: { ...app.settings(), layout: app.layout },
+      // card counts as not known; 0 = no limit), nextAfter (seconds a card
+      // stays after a right answer; 0 = until Next is tapped), and the cards
+      // to practise.
+      settings: { nextAfter: NEXT_AFTER, ...app.settings(), layout: app.layout },
       daily: null,
       coins: 0,
       spent: 0, // coins spent in the shop; coins minus spent can still be spent
@@ -1977,15 +1989,19 @@
   // Coins that can still be spent in the shop.
   const balance = () => (state.coins || 0) - (state.spent || 0);
 
-  // After an answer: the next card comes after ms, unless the child holds
-  // this one with the button under it.
-  function advanceIn(ms) {
+  // After an answer: the next card comes after the time set (at least
+  // least ms), unless the child holds this one with the button under it.
+  // With no time set, the card stays until Next is tapped.
+  function advanceIn(least) {
     clearTimeout(advanceTimer);
-    held = false;
-    advanceTimer = setTimeout(next, ms);
+    const wait = state.settings.nextAfter;
+    held = wait === 0;
     const btn = $('hold');
-    btn.style.setProperty('--wait', ms + 'ms');
     btn.classList.remove('counting');
+    if (held) return;
+    const ms = Math.max(wait * 1000, least);
+    advanceTimer = setTimeout(next, ms);
+    btn.style.setProperty('--wait', ms + 'ms');
     void btn.offsetWidth; // restart the line
     btn.classList.add('counting');
   }
@@ -2067,8 +2083,8 @@
         ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
         : '');
       feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
-      // JęzykiMax: a little longer when there is a translation to read.
-      advanceIn(Math.max(reward.coins ? 2200 : 1400, meaningOf(c) ? 3500 : 0));
+      // Time to read the coins, and in JęzykiMax a translation.
+      advanceIn(Math.max(reward.coins ? 2200 : 0, meaningOf(c) ? 3500 : 0));
     } else {
       mode = 'wrong';
       let answer;
@@ -2093,7 +2109,7 @@
   function moveOn(c) {
     mode = 'right';
     feedback = () => '<strong>' + esc(T().thatsIt) + '</strong><br>' + esc(T().comesBack(whenText(c.due)));
-    advanceIn(900);
+    advanceIn(0);
   }
 
   // MnożenieMax: in "wrong" mode the child copies the right answer to move on.
@@ -3962,6 +3978,9 @@
     for (const opt of $('answer-time').options) {
       opt.textContent = opt.value === '0' ? t.noLimit : seconds.format(Number(opt.value));
     }
+    for (const opt of $('next-after').options) {
+      opt.textContent = opt.value === '0' ? t.nextOnTap : seconds.format(Number(opt.value));
+    }
     // Text of the other app's parts may be missing; those parts are hidden.
     document.querySelectorAll('[data-t]').forEach((el) => {
       el.textContent = t[el.dataset.t] || '';
@@ -4194,6 +4213,7 @@
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
+    $('next-after').value = String(s.nextAfter);
     $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
@@ -4275,6 +4295,11 @@
 
   $('answer-time').addEventListener('change', (e) => {
     state.settings.answerTime = Number(e.target.value);
+    save();
+  });
+
+  $('next-after').addEventListener('change', (e) => {
+    state.settings.nextAfter = Number(e.target.value);
     save();
   });
 
