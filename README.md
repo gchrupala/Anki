@@ -112,20 +112,22 @@ Coins reward what the child remembers, not the number of cards done. In spaced r
 
 Each fact pays each reward once, so forgetting and relearning earns nothing. Coins never change the schedule. Facts learned before coins were added counted towards the starting balance.
 
-Coins are spent in the shop ("Sklep" in the header) on trophies of the child's choice. Prices rise with the material:
+Coins are spent in the shop ("Sklep" in the header) on rewards of the child's choice. In MnożenieMax these are keychains with the prime numbers from 2 to 19, each hanging from a key ring on a short chain. Prices rise with the number and its material:
 
-| Trophy | Coins |
+| Keychain | Coins |
 | --- | --- |
-| Bronze | 50 |
-| Silver | 100 |
-| Gold | 150 |
-| Platinum | 250 |
-| Diamond | 350 |
-| Ruby | 500 |
-| Emerald | 650 |
-| Sapphire | 800 |
+| Bronze 2 | 50 |
+| Silver 3 | 100 |
+| Gold 5 | 150 |
+| Platinum 7 | 250 |
+| Diamond 11 | 350 |
+| Ruby 13 | 500 |
+| Emerald 17 | 650 |
+| Sapphire 19 | 800 |
 
-Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the trophy and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the trophy is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of trophies and the latest one bought. The shop lists all trophies bought, and the settings show the coins collected and spent. Prices and materials are set in `TROPHIES` in `index.html`, the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each trophy as soon as possible, bronze comes on day 1, gold on day 5, diamond on day 13 and sapphire on day 29.
+Until October 2026 these were trophies in the same materials. A trophy bought then now shows as the keychain of its material.
+
+Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the keychain and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the keychain is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of keychains and the latest one bought. The shop lists all keychains bought, and the settings show the coins collected and spent. Prices, numbers and materials are set in `TROPHIES` in `index.html` (the code still calls all rewards trophies), the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each keychain as soon as possible, the bronze 2 comes on day 1, the gold 5 on day 5, the diamond 11 on day 13 and the sapphire 19 on day 29.
 
 ### Order of cards
 
@@ -172,7 +174,7 @@ Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have 
 
 ### Rewards
 
-Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per finished day). The shop sells souvenirs instead of trophies: keychains with small glittering models of famous sights in capitals, hanging from a key ring on a short chain.
+Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per finished day). The shop sells souvenirs: keychains with small glittering models of famous sights in capitals, hanging from a key ring on a short chain.
 
 | Souvenir | Capital | Coins |
 | --- | --- | --- |
@@ -197,7 +199,7 @@ Coins follow the same rules as in MnożenieMax (2, 5 and 10 per country, 10 per 
 | Pyramids of Giza | Cairo (Giza is part of greater Cairo) | 750 |
 | Forbidden City | Beijing | 800 |
 
-All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. Trophies in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
+All 20 together cost 7700 coins. Learning all 194 capitals to the mastered level pays 3298 coins, and each finished day adds 10, so the full collection is a long-term goal. Each souvenir glitters: two layers of tiny coloured dots shimmer in turn, three stars twinkle on it, and a beam of light passes over it now and then. In the header the glitter stays still, so it does not distract from the cards. Buying a souvenir shows fireworks for 4 seconds: the screen darkens and rockets rise from the bottom and burst into sparks. Keychains in MnożenieMax keep their confetti. With reduced motion switched on in the device settings, the glitter stands still and only the souvenir is shown when one is bought.
 
 The souvenirs and their prices are set in `SOUVENIRS` in `index.html`, their drawings, the places of their stars and the point where the chain holds them in `SOUVENIR_ART`, and their names in `i18n-capitals.js`.
 

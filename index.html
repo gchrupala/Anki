@@ -900,7 +900,6 @@
       <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
       <stop offset="0.55" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <clipPath id="trophy-clip"><path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z"/></clipPath>
   </defs>
 </svg>
 <div class="app">
@@ -1232,17 +1231,18 @@
   // Rewards in the shops, cheapest first: id, price, then the colours
   // highlight, middle, shadow, outline. The price range is also named in the
   // coin rules text.
-  // MnożenieMax: trophies in rising materials.
+  // MnożenieMax: keychains with the prime numbers in rising materials. The
+  // ids are the materials, as when they were trophies.
   const TROPHIES = [
-    ['bronze', 50, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
-    ['silver', 100, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
-    ['gold', 150, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
-    ['platinum', 250, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
-    ['diamond', 350, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
-    ['ruby', 500, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
-    ['emerald', 650, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
-    ['sapphire', 800, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
-  ].map(([id, price, ...colors]) => ({ id, price, colors }));
+    ['bronze', 50, 2, '#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'],
+    ['silver', 100, 3, '#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'],
+    ['gold', 150, 5, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['platinum', 250, 7, '#ffffff', '#dfe9f2', '#a9bccb', '#5b7083'],
+    ['diamond', 350, 11, '#ffffff', '#bff3ff', '#6fd3ee', '#2b8aa8'],
+    ['ruby', 500, 13, '#ffc6d0', '#e3245f', '#a10a3f', '#5c0423'],
+    ['emerald', 650, 17, '#ccffe2', '#2ecc71', '#17924c', '#0b5a2d'],
+    ['sapphire', 800, 19, '#d3e3ff', '#3a78e8', '#1c47a6', '#0d2a66'],
+  ].map(([id, price, prime, ...colors]) => ({ id, price, prime, colors }));
   // StoliceMax: souvenirs of famous sights, each with the country whose
   // capital it stands in (the pyramids stand in Giza, part of greater Cairo).
   const SOUVENIRS = [
@@ -2166,7 +2166,7 @@
     $('trophy-total').textContent = num(owned);
     $('trophies').setAttribute('aria-label', t.trophiesAria(owned));
     const slot = $('trophy-slot');
-    const latest = owned ? app.id + owned + state.trophies[owned - 1].metal : '';
+    const latest = owned ? app.id + owned + state.trophies[owned - 1].metal + lang() : '';
     if (slot.dataset.k !== latest) {
       slot.dataset.k = latest;
       slot.innerHTML = owned ? rewardIcon(state.trophies[owned - 1].metal) : '';
@@ -2278,6 +2278,11 @@
       if (within) clip.setAttribute('clip-path', 'url(#' + within + ')');
       defs.appendChild(clip);
     };
+    // The numbers, in the digits 0-9 and in Persian digits.
+    for (const { id, prime } of TROPHIES) {
+      clipPath('clip-' + id, primeText(String(prime)));
+      clipPath('clip-' + id + '-fa', primeText(I18N.STRINGS.fa.digits(prime)));
+    }
     for (const { id } of SOUVENIRS) clipPath('clip-' + id, SOUVENIR_ART[id].shape);
     for (const { id } of GLASSWARE) {
       clipPath('clip-' + id, GLASS_ART[id].shape);
@@ -2289,16 +2294,43 @@
   // The beam of light that passes over a reward now and then.
   const glint = (clip) => '<g clip-path="url(#' + clip + ')"><g transform="rotate(25 16 16)"><rect class="glint" x="12" y="-6" width="5" height="44" fill="#fff" opacity="0.6"/></g></g>';
 
-  // MnożenieMax: a trophy drawn in the given material.
+  // A key ring at the top and a chain down to an eyelet at (x, y), where
+  // the charm of a keychain hangs.
+  const KEY_METAL = 'fill="none" stroke="#7f8a96" stroke-linecap="round"';
+  function keyChain(x, y) {
+    const top = 5.9; // the bottom of the ring
+    const dx = x - 16;
+    const dy = y - 0.9 - top;
+    const n = Math.max(1, Math.round(Math.hypot(dx, dy) / 1.5));
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    let links = '';
+    for (let i = 0; i < n; i++) {
+      const cx = (16 + (dx * (i + 0.5)) / n).toFixed(2);
+      const cy = (top + (dy * (i + 0.5)) / n).toFixed(2);
+      // The links alternate: one seen from the side, the next edge-on.
+      links += i % 2
+        ? '<path d="M-0.8 0h1.6" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.6"/>'
+        : '<ellipse rx="1" ry="0.55" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.45"/>';
+    }
+    return '<circle cx="16" cy="3.5" r="2.4" ' + KEY_METAL + ' stroke-width="1.1"/>' +
+      '<circle cx="16" cy="3.5" r="2.4" fill="none" stroke="#eef2f6" stroke-width="0.45"/>' +
+      '<path d="M13.9 2.3a2.4 2.4 0 0 1 2.1-1.2" ' + KEY_METAL + ' stroke-width="0.5"/>' +
+      links + '<circle cx="' + x + '" cy="' + (y - 0.6).toFixed(2) + '" r="0.75" ' + KEY_METAL + ' stroke-width="0.45"/>';
+  }
+
+  // MnożenieMax: a prime number on a keychain, in the given material. A
+  // number with two digits is smaller, and hangs by its first digit.
+  const primeText = (digits, attrs = '') => '<text x="16" y="29" font-size="' + (digits.length > 1 ? 17 : 22) +
+    '" font-family="Grandstander, Vazirmatn, sans-serif" font-weight="800" text-anchor="middle" letter-spacing="-0.6" direction="ltr"' + attrs + '>' + digits + '</text>';
   function trophyIcon(name) {
-    const [hi, , lo, deep] = reward(name).colors;
+    const { prime, colors: [hi, , , deep] } = reward(name);
+    const digits = num(prime);
+    const two = digits.length > 1;
     return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
-      '<path d="M9.5 8.5C4 8.5 4 16.5 10.5 16.5M22.5 8.5C28 8.5 28 16.5 21.5 16.5" fill="none" stroke="' + lo + '" stroke-width="2.4" stroke-linecap="round"/>' +
-      '<rect x="10.5" y="25" width="11" height="4" rx="1.2" fill="url(#rim-' + name + ')" stroke="' + deep + '" stroke-width="0.8"/>' +
-      '<path d="M14.3 19.5h3.4l.9 5.5h-5.2z" fill="url(#rim-' + name + ')"/>' +
-      '<path d="M8 4.5h16v6.5c0 5.4-3.6 9-8 9s-8-3.6-8-9z" fill="url(#face-' + name + ')" stroke="' + deep + '" stroke-width="0.9"/>' +
-      '<path d="M16 7.4l1.2 2.5 2.7.4-2 1.9.5 2.7-2.4-1.3-2.4 1.3.5-2.7-2-1.9 2.7-.4z" fill="' + hi + '" stroke="' + deep + '" stroke-width="0.5"/>' +
-      glint('trophy-clip') +
+      keyChain(two ? 12.2 : 16, two ? 17.4 : 13.8) +
+      primeText(digits, ' fill="' + deep + '" stroke="' + deep + '" stroke-width="2.2" stroke-linejoin="round"') +
+      primeText(digits, ' fill="url(#face-' + name + ')" stroke="' + hi + '" stroke-width="0.35"') +
+      glint('clip-' + name + (T().digits ? '-fa' : '')) +
       '</svg>';
   }
 
@@ -2575,30 +2607,6 @@
       q + (x + s) + ' ' + y + q + x + ' ' + (y + s) + q + (x - s) + ' ' + y + q + x + ' ' + (y - s) +
       'z" fill="#fffdf0" stroke="#f5b700" stroke-width="0.3"/>';
   };
-
-  // A key ring at the top and a chain down to an eyelet at (x, y), where
-  // the charm of a keychain hangs.
-  const KEY_METAL = 'fill="none" stroke="#7f8a96" stroke-linecap="round"';
-  function keyChain(x, y) {
-    const top = 5.9; // the bottom of the ring
-    const dx = x - 16;
-    const dy = y - 0.9 - top;
-    const n = Math.max(1, Math.round(Math.hypot(dx, dy) / 1.5));
-    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-    let links = '';
-    for (let i = 0; i < n; i++) {
-      const cx = (16 + (dx * (i + 0.5)) / n).toFixed(2);
-      const cy = (top + (dy * (i + 0.5)) / n).toFixed(2);
-      // The links alternate: one seen from the side, the next edge-on.
-      links += i % 2
-        ? '<path d="M-0.8 0h1.6" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.6"/>'
-        : '<ellipse rx="1" ry="0.55" transform="translate(' + cx + ' ' + cy + ') rotate(' + angle.toFixed(1) + ')" ' + KEY_METAL + ' stroke-width="0.45"/>';
-    }
-    return '<circle cx="16" cy="3.5" r="2.4" ' + KEY_METAL + ' stroke-width="1.1"/>' +
-      '<circle cx="16" cy="3.5" r="2.4" fill="none" stroke="#eef2f6" stroke-width="0.45"/>' +
-      '<path d="M13.9 2.3a2.4 2.4 0 0 1 2.1-1.2" ' + KEY_METAL + ' stroke-width="0.5"/>' +
-      links + '<circle cx="' + x + '" cy="' + (y - 0.6).toFixed(2) + '" r="0.75" ' + KEY_METAL + ' stroke-width="0.45"/>';
-  }
 
   // The model of a souvenir, made smaller to leave room for the chain.
   const CHARM = [3.2, 7.4, 0.8]; // x, y, scale
