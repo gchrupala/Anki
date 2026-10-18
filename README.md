@@ -89,7 +89,7 @@ Easy is only given when the card is shown for the first time or as a review. Dur
 
 After a wrong answer the app shows the right one, and the child types it to continue.
 
-After a right answer the card stays on the screen for 5 seconds, then the next one comes by itself. A "Zatrzymaj" (Wait) button under the card shows the time left as a shrinking line. Tapping it keeps the card on the screen to look at it; the button then reads "Dalej" (Next), and tapping it, an answer or a key moves on. Tapping the card before it is held moves on at once. The setting "Następna karta po" (Next card after) sets the time to 2, 5 or 10 seconds, or keeps every card until "Dalej" is tapped. Each app has its own setting.
+After a right answer the card stays on the screen for 5 seconds, then the next one comes by itself. A "Zatrzymaj" (Wait) button under the card shows the time left as a shrinking line. Tapping it keeps the card on the screen to look at it; the button then reads "Dalej" (Next), and tapping it, an answer or a key moves on. Tapping the card before it is held moves on at once. The setting "Następna karta po" (Next card after) sets the time to 2, 5 or 10 seconds, or to "natychmiast" (at once: the next card comes after 0.4 seconds, just long enough to see the answer turn green, with no time for the coin message or a translation), or keeps every card until "Dalej" is tapped. Each app has its own setting.
 
 ### Scheduling
 
