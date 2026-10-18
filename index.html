@@ -307,11 +307,33 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--coin-edge) 35%, transparent);
+    border: 0;
+    font-family: inherit;
+    cursor: pointer;
   }
   .trophy-icon { width: 1.7rem; height: 1.7rem; flex: none; filter: drop-shadow(0 1px 1px rgb(60 40 20 / 0.35)); }
   #trophy-slot { display: inline-flex; }
   .trophy-shelf { display: flex; flex-wrap: wrap; gap: 0.35rem; }
   .trophy-shelf .trophy-icon { width: 2.4rem; height: 2.4rem; }
+  .trophy-shelf button { display: inline-flex; padding: 0.2rem; border: 0; border-radius: 10px; background: none; cursor: pointer; }
+  .trophy-shelf button:hover, .trophy-shelf button:focus-visible { background: var(--coin-soft); }
+  /* A reward bought, shown large: it glows in its colour, and a keychain
+     swings gently on its ring. */
+  .showcase-sheet { align-items: center; text-align: center; gap: 0.6rem; }
+  .showcase-art {
+    display: grid;
+    place-items: center;
+    width: min(16rem, 70vw);
+    aspect-ratio: 1;
+    margin-block: 0.4rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--metal, var(--gold)) 40%, transparent) 0%, transparent 70%);
+  }
+  .showcase-art .trophy-icon { width: 85%; height: 85%; }
+  .showcase-art.swing .trophy-icon { transform-origin: 50% 11%; animation: swing 3s ease-in-out infinite alternate; }
+  @keyframes swing { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+  .showcase-sheet .place { margin: -0.4rem 0 0; color: var(--ink-soft); }
+  .showcase-sheet .sheet-foot { align-self: stretch; }
   /* Shop */
   .shop-balance { display: flex; align-items: center; gap: 0.2rem; margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--coin-ink); }
   .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.75rem; }
@@ -392,7 +414,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .trophy-banner { animation: none; }
-    .trophy-icon .glint, .shiny .glitter, .shiny .sparkle, .shiny .bubble, .shiny .flame { animation: none; }
+    .trophy-icon .glint, .shiny .glitter, .shiny .sparkle, .shiny .bubble, .shiny .flame, .showcase-art.swing .trophy-icon { animation: none; }
     .shiny .sparkle { opacity: 0.85; transform: none; }
     .shiny .bubble { opacity: 0.7; }
   }
@@ -922,10 +944,10 @@
       <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
       <span class="coin-plus" id="coin-plus" hidden></span>
     </span>
-    <span class="trophies" id="trophies" role="img" hidden>
+    <button type="button" class="trophies" id="trophies" hidden>
       <span id="trophy-slot"></span>
       <b id="trophy-total">0</b>
-    </span>
+    </button>
     <button type="button" class="ghost-btn settings-btn" id="open-shop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg>
       <span data-t="shopButton">Shop</span>
@@ -1159,10 +1181,22 @@
     <div class="shop-grid" id="shop-grid"></div>
     <section>
       <h3 data-t="yourTrophies">Your trophies</h3>
+      <p class="hint" id="shelf-hint" data-t="shelfHint" hidden></p>
       <div class="trophy-shelf" id="trophy-shelf"></div>
     </section>
     <div class="sheet-foot">
       <button type="button" class="primary-btn" id="close-shop" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+<div class="panel" id="showcase" role="dialog" aria-modal="true" aria-labelledby="showcase-name" hidden>
+  <div class="sheet showcase-sheet" id="showcase-sheet" tabindex="-1">
+    <div class="showcase-art" id="showcase-art"></div>
+    <h2 id="showcase-name"></h2>
+    <p class="place" id="showcase-place" hidden></p>
+    <p class="hint" id="showcase-bought"></p>
+    <div class="sheet-foot">
+      <button type="button" class="primary-btn" id="close-showcase" data-t="close">Done</button>
     </div>
   </div>
 </div>
@@ -3476,14 +3510,14 @@
 
   // ---------- panels ----------
 
-  const panels = [$('settings'), $('shop'), $('apps')];
+  const panels = [$('settings'), $('shop'), $('apps'), $('showcase')];
   const panelOpen = () => panels.some((p) => !p.hidden);
 
   // Open the panel first, so it opens even if filling it in fails: the
   // settings are the only way to change the language or reload the app.
   // Opening a panel adds a step to the page history, so Android's Back
   // gesture closes the panel instead of leaving the app.
-  // which: 'settings', 'shop' or 'apps'.
+  // which: 'settings', 'shop', 'apps' or 'showcase' (filled in by openShowcase).
   function openPanel(which) {
     pauseTimers();
     if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
@@ -3493,7 +3527,7 @@
     try {
       if (which === 'settings') syncSettings();
       else if (which === 'shop') renderShop();
-      else renderApps();
+      else if (which === 'apps') renderApps();
     } catch (e) {
       noteError(e);
     }
@@ -3501,13 +3535,21 @@
 
   function closePanel() {
     if (!panelOpen()) return false;
+    if (!$('showcase').hidden && showcaseFrom === 'shop') {
+      // Back to the shop. After the Back gesture the shop needs its step in
+      // the page history again.
+      showcaseFrom = null;
+      if (!(history.state && history.state.panel)) history.pushState({ panel: true }, '');
+      openPanel('shop');
+      return true;
+    }
     if (!$('apps').hidden && appsUnseen()) {
       prefs.appsSeen = Object.keys(APPS).length;
       savePrefs();
     }
     for (const p of panels) p.hidden = true;
     document.body.classList.remove('panel-open');
-    for (const id of ['open-settings', 'open-shop', 'open-apps']) $(id).blur();
+    for (const id of ['open-settings', 'open-shop', 'open-apps', 'trophies']) $(id).blur();
     if (mode === 'done' || !activeCards().some((c) => c.id === currentId)) next();
     else {
       render();
@@ -3526,6 +3568,7 @@
   $('close-settings').addEventListener('click', closePanel);
   $('close-shop').addEventListener('click', closePanel);
   $('close-apps').addEventListener('click', closePanel);
+  $('close-showcase').addEventListener('click', closePanel);
   // A tap on the dimmed area around a panel closes it.
   for (const p of panels) {
     p.addEventListener('click', (e) => {
@@ -3603,8 +3646,9 @@
           : '<button type="button" class="primary-btn" data-reward="' + id + '">' + esc(t.buy) + '</button>') +
         '</div>';
     }).join('');
+    $('shelf-hint').hidden = state.trophies.length === 0;
     $('trophy-shelf').innerHTML = state.trophies.length
-      ? state.trophies.map((tr) => '<span title="' + esc(t.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal) + '</span>').join('')
+      ? state.trophies.map((tr, i) => '<button type="button" data-owned="' + i + '" title="' + esc(t.trophyName(tr.metal)) + '" aria-label="' + esc(t.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal) + '</button>').join('')
       : '<p class="hint">' + esc(t.noTrophies) + '</p>';
   }
 
@@ -3632,6 +3676,32 @@
     render();
     celebrate(id);
   });
+
+  // A reward bought, shown large. Opened from the shelf in the shop it
+  // goes back to the shop when closed; opened from the header, to the cards.
+  let showcaseFrom = null;
+  function openShowcase(index, from) {
+    const bought = state.trophies[index];
+    if (!bought) return;
+    const t = T();
+    const { id, colors } = reward(bought.metal);
+    showcaseFrom = from;
+    openPanel('showcase');
+    const art = $('showcase-art');
+    art.style.setProperty('--metal', colors[1]);
+    art.classList.toggle('swing', app.id === 'times' || app.id === 'capitals'); // the keychains
+    art.innerHTML = rewardIcon(id);
+    $('showcase-name').textContent = t.trophyName(id);
+    const place = rewardPlace(id);
+    $('showcase-place').textContent = place;
+    $('showcase-place').hidden = !place;
+    $('showcase-bought').textContent = t.boughtOn(new Date(bought.at).toLocaleDateString(lang(), { dateStyle: 'long' }));
+  }
+  $('trophy-shelf').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-owned]');
+    if (btn) openShowcase(Number(btn.dataset.owned), 'shop');
+  });
+  $('trophies').addEventListener('click', () => openShowcase(state.trophies.length - 1, null));
 
   // ---------- settings ----------
 
