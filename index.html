@@ -445,6 +445,20 @@
     cursor: pointer;
   }
   .ghost-btn:hover { border-color: var(--pen); }
+  /* After an answer: a button to stay on the card, with the time left before
+     the next card as a shrinking line */
+  .hold-btn { position: relative; overflow: hidden; align-self: center; }
+  .hold-btn.counting::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 3px;
+    background: var(--pen);
+    transform-origin: left;
+    animation: wait var(--wait, 1400ms) linear forwards;
+  }
+  [dir="rtl"] .hold-btn.counting::after { transform-origin: right; }
+  @keyframes wait { to { transform: scaleX(0); } }
   .settings-btn { display: inline-flex; align-items: center; gap: 0.4rem; }
   .settings-btn svg { width: 1.15rem; height: 1.15rem; flex: none; }
   .icon-btn { display: inline-grid; place-items: center; width: 2.35rem; height: 2.35rem; padding: 0; }
@@ -656,6 +670,7 @@
   .target.sentence { font-size: clamp(1.2rem, 5.4cqi, 2rem); line-height: 1.3; }
   .gap { display: inline-block; min-width: 3.2em; margin: 0 0.15em; border-bottom: 3px dashed var(--ink-soft); line-height: 1; }
   .gap.filled { min-width: 0; border-bottom-style: solid; border-color: var(--good); color: var(--good); }
+  .gap.joined { margin-inline-end: 0; }
   #lang-pic:empty { display: none; }
   .say { border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); padding: 0.15rem 0.75rem; font-size: 1.2rem; cursor: pointer; }
   .choices.pics .choice { font-size: clamp(1.8rem, 9vw, 2.4rem); line-height: 1; }
@@ -1032,9 +1047,11 @@
           <div class="place" data-app="languages" aria-live="polite">
             <span class="flag" id="lang-pic"></span>
             <span class="country target" id="lang-text" dir="ltr"></span>
+            <span class="nick" id="lang-meaning" dir="auto"></span>
             <button type="button" class="say" id="say" data-t-aria="listen" hidden>🔊</button>
           </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
+          <button type="button" class="ghost-btn hold-btn" id="hold" hidden></button>
         </div>
       </div>
 
@@ -1260,6 +1277,7 @@
 <script src="countries.js"></script>
 <script src="chemistry.js"></script>
 <script src="literature.js"></script>
+<script src="languages-translations.js"></script>
 <script src="languages.js"></script>
 <script>
 (function () {
@@ -1941,6 +1959,7 @@
   let picked = null; // the apps with four answers: the wrong answer picked
   let shownAt = 0;
   let advanceTimer = null;
+  let held = false; // the child stopped at the card after answering
   let idleTimer = null;
   let giveUpTimer = null;
   // Builds the feedback line, so that it follows a change of language.
@@ -2013,8 +2032,30 @@
   // Coins that can still be spent in the shop.
   const balance = () => (state.coins || 0) - (state.spent || 0);
 
+  // After an answer: the next card comes after ms, unless the child holds
+  // this one with the button under it.
+  function advanceIn(ms) {
+    clearTimeout(advanceTimer);
+    held = false;
+    advanceTimer = setTimeout(next, ms);
+    const btn = $('hold');
+    btn.style.setProperty('--wait', ms + 'ms');
+    btn.classList.remove('counting');
+    void btn.offsetWidth; // restart the line
+    btn.classList.add('counting');
+  }
+  function hold() {
+    if (mode !== 'right') return;
+    if (held) return next();
+    clearTimeout(advanceTimer);
+    held = true;
+    $('hold').classList.remove('counting');
+    renderCard();
+  }
+
   function next() {
     clearTimeout(advanceTimer);
+    held = false;
     pauseTimers();
     const c = SRS.pickNext(queues(), avoidList());
     typed = '';
@@ -2081,7 +2122,8 @@
         ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
         : '');
       feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
-      advanceTimer = setTimeout(next, reward.coins ? 2200 : 1400);
+      // JęzykiMax: a little longer when there is a translation to read.
+      advanceIn(Math.max(reward.coins ? 2200 : 1400, meaningOf(c) ? 3500 : 0));
     } else {
       mode = 'wrong';
       let answer;
@@ -2106,7 +2148,7 @@
   function moveOn(c) {
     mode = 'right';
     feedback = () => '<strong>' + esc(T().thatsIt) + '</strong><br>' + esc(T().comesBack(whenText(c.due)));
-    advanceTimer = setTimeout(next, 900);
+    advanceIn(900);
   }
 
   // MnożenieMax: in "wrong" mode the child copies the right answer to move on.
@@ -2351,6 +2393,7 @@
         text.classList.toggle('sentence', card.kind === 'g' || card.kind === 'q');
         text.innerHTML = card.kind === 'p' ? '' : card.kind === 'g' ? gapHtml(card, mode !== 'ask') : esc(card.show);
         $('say').hidden = !sayText(card, mode !== 'ask') || !voiceFor(card.lang);
+        $('lang-meaning').textContent = mode !== 'ask' ? meaningOf(c) : '';
       }
       // JęzykiMax: big pictures as answers, and long answers one under another.
       const word = app.id === 'languages' && BY_LANG[c.id];
@@ -2366,6 +2409,9 @@
       });
     }
     $('feedback').innerHTML = feedback();
+    const holdBtn = $('hold');
+    holdBtn.hidden = mode !== 'right';
+    holdBtn.textContent = held ? T().goOn + (T().dir === 'rtl' ? ' ◀' : ' ▶') : '⏸ ' + T().hold;
   }
 
   function render() {
@@ -2465,7 +2511,16 @@
   function gapHtml(card, filled) {
     const [before, after] = card.show.split('___');
     const rest = filled && card.answer.endsWith('’') ? after.replace(/^ /, '') : after;
-    return esc(before) + '<span class="gap' + (filled ? ' filled' : '') + '">' + (filled ? esc(card.answer) : '') + '</span>' + esc(rest);
+    const joined = filled && card.answer.endsWith('’') ? ' joined' : '';
+    return esc(before) + '<span class="gap' + (filled ? ' filled' : '') + joined + '">' + (filled ? esc(card.answer) : '') + '</span>' + esc(rest);
+  }
+
+  // JęzykiMax: what a sentence with a gap means in the language of the page,
+  // unless that is the language of the sentence.
+  function meaningOf(c) {
+    const card = app.id === 'languages' && BY_LANG[c.id];
+    if (!card || card.kind !== 'g' || card.lang === lang()) return '';
+    return card.meaning[lang()] || '';
   }
 
   // JęzykiMax: what the speaker button reads aloud, with a voice of the
@@ -4679,7 +4734,11 @@
   });
 
   $('card-body').addEventListener('click', () => {
-    if (mode === 'right') next();
+    if (mode === 'right' && !held) next();
+  });
+  $('hold').addEventListener('click', (e) => {
+    e.stopPropagation();
+    hold();
   });
 
   // JęzykiMax: the speaker button, and the language to learn.
