@@ -3084,7 +3084,7 @@
       if (isTimes()) confetti(CELEBRATION_MS);
       else if (app.id === 'capitals') fireworks(CELEBRATION_MS);
       else if (app.id === 'chemistry') explosion(CELEBRATION_MS, colors[1]);
-      else letterRain(CELEBRATION_MS);
+      else letterRain(RAIN_MAX_MS);
     }
   }
 
@@ -3433,6 +3433,13 @@
   ].map((letters) => [...letters]);
   const RAIN_COLORS = ['#e63946', '#f4a261', '#ffbe0b', '#06d6a0', '#2a9d8f', '#00bbf9', '#457b9d', '#9b5de5', '#f15bb5'];
 
+  // Each letter falls to the bottom of the screen, lands there and only
+  // then fades. New letters come for RAIN_SPAWN_MS, and even the slowest
+  // reaches the bottom within 2.4 seconds, so the rain is over after about
+  // 5 seconds; ms only stops it if the page is too slow to finish.
+  const RAIN_SPAWN_MS = 2200;
+  const RAIN_FADE_MS = 500;
+  const RAIN_MAX_MS = 7000;
   function letterRain(ms) {
     const canvas = document.createElement('canvas');
     canvas.className = 'confetti';
@@ -3445,17 +3452,19 @@
     const spawn = (count) => {
       for (let i = 0; i < count; i++) {
         const size = 18 + Math.random() * 28;
+        // Seconds to the bottom: big letters fall a little faster, as if nearer.
+        const time = 2.4 - ((size - 18) / 28) * 0.8 - Math.random() * 0.4;
         letters.push({
           ch: pick(pick(ALPHABETS)),
           x: Math.random() * innerWidth,
           y: -size - Math.random() * 80,
           size,
-          // Big letters fall a little faster, as if nearer.
-          vy: 120 + size * 3 + Math.random() * 80,
+          vy: (innerHeight + 2 * size + 80) / time,
           angle: (Math.random() - 0.5) * 0.8,
           spin: (Math.random() - 0.5) * 2.5,
           sway: Math.random() * Math.PI * 2,
           color: pick(RAIN_COLORS),
+          landed: null, // the time it reached the bottom
         });
       }
     };
@@ -3466,25 +3475,36 @@
       const elapsed = Math.max(0, now - start);
       const dt = Math.min(0.05, Math.max(0, now - last) / 1000);
       last = now;
-      // New letters keep coming until shortly before the end, so the last
-      // ones are still falling when the rain fades out.
-      if (elapsed < ms - 1500) spawn(Math.round(70 * dt + Math.random() * 0.6));
+      if (elapsed < RAIN_SPAWN_MS) spawn(Math.round(70 * dt + Math.random() * 0.6));
       if (canvas.width !== Math.round(innerWidth * ratio)) {
         canvas.width = Math.round(innerWidth * ratio);
         canvas.height = Math.round(innerHeight * ratio);
       }
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.clearRect(0, 0, innerWidth, innerHeight);
-      ctx.globalAlpha = elapsed > ms - 600 ? Math.max(0, (ms - elapsed) / 600) : 1;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.lineJoin = 'round';
-      for (const l of letters) {
-        l.y += l.vy * dt;
-        l.angle += l.spin * dt;
-        if (l.y > innerHeight + l.size) continue;
+      for (let i = letters.length - 1; i >= 0; i--) {
+        const l = letters[i];
+        if (l.landed === null) {
+          l.y += l.vy * dt;
+          l.angle += l.spin * dt;
+          l.dx = Math.sin(l.sway + elapsed / 400) * 18;
+          const floor = innerHeight - l.size * 0.45;
+          if (l.y >= floor) {
+            l.y = floor;
+            l.landed = elapsed;
+          }
+        }
+        const alpha = l.landed === null ? 1 : 1 - (elapsed - l.landed) / RAIN_FADE_MS;
+        if (alpha <= 0) {
+          letters.splice(i, 1);
+          continue;
+        }
         ctx.save();
-        ctx.translate(l.x + Math.sin(l.sway + elapsed / 400) * 18, l.y);
+        ctx.globalAlpha = alpha;
+        ctx.translate(l.x + l.dx, l.y);
         ctx.rotate(l.angle);
         ctx.font = '700 ' + l.size.toFixed(1) + 'px system-ui, sans-serif';
         // A thin dark edge keeps light letters visible on a light page.
@@ -3495,7 +3515,7 @@
         ctx.fillText(l.ch, 0, 0);
         ctx.restore();
       }
-      if (elapsed < ms) requestAnimationFrame(frame);
+      if ((elapsed < RAIN_SPAWN_MS || letters.length) && elapsed < ms) requestAnimationFrame(frame);
       else canvas.remove();
     };
     requestAnimationFrame(frame);
