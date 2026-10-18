@@ -129,7 +129,7 @@ Coins are spent in the shop ("Sklep" in the header) on rewards of the child's ch
 
 Until October 2026 these were trophies in the same materials. A trophy bought then now shows as the keychain of its material.
 
-Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the keychain and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the keychain is shown. The coin counter in the header shows the coins that can still be spent; next to it are the number of keychains and the latest one bought. The shop lists all keychains bought, and the settings show the coins collected and spent. Tapping a reward on that list, or the latest one in the header, shows it large, glowing in its colour, with its name and the date it was bought; a keychain swings gently on its ring. This works the same in all four apps. Done, Back or a tap around it goes back to where it was opened from. Prices, numbers and materials are set in `TROPHIES` in `index.html` (the code still calls all rewards trophies), the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each keychain as soon as possible, the bronze 2 comes on day 1, the gold 5 on day 5, the diamond 11 on day 13 and the sapphire 19 on day 29.
+Buying takes two taps (buy, then confirm), so a mis-tap does not spend coins. A purchase shows the keychain and lets confetti fall from the top of the screen for 4 seconds; with reduced motion switched on in the device settings, only the keychain is shown. The coin counter in the header shows the coins that can still be spent; next to it is the button of the [collection](#collection-and-gifts), with the number of rewards in all the apps and the latest one bought in this app. The shop lists all keychains bought, and the settings show the coins collected and spent. Tapping a reward on that list, or in the collection, shows it large, glowing in its colour, with its name and the date it was bought; a keychain swings gently on its ring. This works the same in all the apps. Done, Back or a tap around it goes back to where it was opened from. Prices, numbers and materials are set in `TROPHIES` in `index.html` (the code still calls all rewards trophies), the rewards in `LEVEL_COINS` and `DAY_BONUS`. In a simulation of a child practising daily with 10 new facts a day, buying each keychain as soon as possible, the bronze 2 comes on day 1, the gold 5 on day 5, the diamond 11 on day 13 and the sapphire 19 on day 29.
 
 ### Order of cards
 
@@ -325,9 +325,20 @@ All 19 together cost 4755 coins; learning all the cards of one language to the m
 
 The cards are in `languages.js`. They were written for this app; the French, Spanish, Dutch and Italian have not been checked by a teacher.
 
+## Collection and gifts
+
+The button with the latest reward in the header opens the collection: the rewards of all the apps, by app, with the number in each. A reward in the collection, or on the list in the shop, opens large, and from there it can be given away.
+
+- **Giving.** "Podaruj" (give away), then a second tap to confirm, opens the share menu of the device with a gift link, for example to send it in a message. Without a share menu, the link is copied. Once the link is out, the reward leaves the collection and the link stays on show, to copy again. Closing the share menu without sharing keeps the reward. Coins are not given back.
+- **Receiving.** Opening a gift link starts the app of the gift and puts the reward among its rewards, with the same celebration as buying it and "Prezent dla Ciebie!" (a gift for you). Shown large, it says when it was received. One link is received only once on a device.
+- **Pasting a link.** A link opens in the browser, which keeps its own progress, separate from the Android app and from the app added to the iPad home screen. The collection therefore has a field "Odbierz prezent" (receive a gift) where a gift link can be pasted.
+- **Trading** is two gifts, one each way.
+
+A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`, for example `#gift/capitals/eiffel/k3f9q`. The code is random; it only keeps the same link from being received twice on one device. Nothing checks that a link comes from a real gift, so anyone can write one for any reward: gifts are for fun, not safe against cheating.
+
 ## How the page holds several apps
 
-`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax, the apps where the child picks one of four answers. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`, `languages`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js`, `i18n-literature.js` and `i18n-languages.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened and the number of apps the menu was last seen with are saved under their own key (`max-apps`).
+`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax, the apps where the child picks one of four answers. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`, `languages`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js`, `i18n-literature.js` and `i18n-languages.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened, the number of apps the menu was last seen with and the codes of the gift links received are saved under their own key (`max-apps`). The collection reads the rewards of the other apps from what they saved.
 
 ## Tests
 

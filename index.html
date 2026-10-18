@@ -332,9 +332,31 @@
   }
   .showcase-art .trophy-icon { width: 85%; height: 85%; }
   .showcase-art.swing .trophy-icon { transform-origin: 50% 11%; animation: swing 3s ease-in-out infinite alternate; }
+  /* Given away: the reward flies off and fades. */
+  .showcase-art.given .trophy-icon { opacity: 0; transform: translateY(-3rem) scale(0.6); transition: opacity 0.8s ease-in, transform 0.8s ease-in; animation: none; }
   @keyframes swing { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
   .showcase-sheet .place { margin: -0.4rem 0 0; color: var(--ink-soft); }
   .showcase-sheet .sheet-foot { align-self: stretch; }
+  /* Giving a reward away, and the link of a gift. */
+  .give { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; max-width: 26rem; }
+  .give p { margin: 0; }
+  .link-field {
+    width: 100%;
+    min-width: 0;
+    padding: 0.5rem 0.6rem;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 0.85rem/1.3 var(--font-body);
+  }
+  .receive { display: flex; gap: 0.5rem; }
+  .receive .primary-btn { flex: none; min-height: 2.4rem; padding: 0.4rem 0.9rem; font-size: 0.9rem; }
+  /* The collection: the rewards of all the apps, by app. */
+  .collection { display: flex; flex-direction: column; gap: 1rem; }
+  .collection h3 { display: flex; align-items: center; gap: 0.45rem; }
+  .collection h3 .app-icon { width: 1.4rem; height: 1.4rem; }
+  .collection h3 .tally { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
   /* Shop */
   .shop-balance { display: flex; align-items: center; gap: 0.2rem; margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--coin-ink); }
   .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.75rem; }
@@ -422,6 +444,7 @@
   @media (prefers-reduced-motion: reduce) {
     .trophy-banner { animation: none; }
     .trophy-icon .glint, .shiny .glitter, .shiny .sparkle, .shiny .bubble, .shiny .flame, .showcase-art.swing .trophy-icon { animation: none; }
+    .showcase-art.given .trophy-icon { transition: none; }
     .shiny .sparkle { opacity: 0.85; transform: none; }
     .shiny .bubble { opacity: 0.7; }
   }
@@ -1275,8 +1298,35 @@
     <h2 id="showcase-name"></h2>
     <p class="place" id="showcase-place" hidden></p>
     <p class="hint" id="showcase-bought"></p>
+    <div class="give" id="give-box">
+      <button type="button" class="ghost-btn" id="give" data-t="give">Give away</button>
+      <p class="hint" data-t="giveHint"></p>
+    </div>
+    <div class="give" id="given-box" hidden>
+      <p id="given-text" data-t="given"></p>
+      <input type="text" class="link-field" id="given-link" readonly aria-labelledby="given-text">
+    </div>
     <div class="sheet-foot">
       <button type="button" class="primary-btn" id="close-showcase" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+<div class="panel" id="collection" role="dialog" aria-modal="true" aria-labelledby="collection-title" hidden>
+  <div class="sheet" id="collection-sheet" tabindex="-1">
+    <h2 id="collection-title" data-t="collectionTitle">Collection</h2>
+    <p class="hint" id="collection-hint"></p>
+    <div class="collection" id="collection-list"></div>
+    <section>
+      <h3 id="receive-title" data-t="receiveTitle">Receive a gift</h3>
+      <p class="hint" data-t="receiveHint"></p>
+      <form class="receive" id="receive-form">
+        <input type="text" class="link-field" id="receive-link" placeholder="https://…#gift/…" autocomplete="off" aria-labelledby="receive-title">
+        <button type="submit" class="primary-btn" data-t="receiveButton">Receive</button>
+      </form>
+      <p class="hint" id="receive-status" role="status"></p>
+    </section>
+    <div class="sheet-foot">
+      <button type="button" class="primary-btn" id="close-collection" data-t="close">Done</button>
     </div>
   </div>
 </div>
@@ -1557,6 +1607,7 @@
         // had been there to open.
         if (p.appsSeen === undefined) p.appsSeen = p.seenApps ? 2 : 0;
         if (!Array.isArray(p.opened)) p.opened = ['times', 'capitals'];
+        if (!Array.isArray(p.gifts)) p.gifts = [];
         delete p.seenApps;
         return p;
       }
@@ -1571,8 +1622,9 @@
       /* none saved */
     }
     // appsSeen: how many apps there were when the menu of apps was last
-    // closed; opened: the apps opened at least once (others are marked new).
-    return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', appsSeen: 0, opened: Object.keys(APPS) };
+    // closed; opened: the apps opened at least once (others are marked new);
+    // gifts: the codes of the gift links received.
+    return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', appsSeen: 0, opened: Object.keys(APPS), gifts: [] };
   }
   function savePrefs() {
     try {
@@ -1582,6 +1634,17 @@
     }
   }
   const prefs = loadPrefs();
+
+  // A gift is shared as a link to the app ending in #gift/<app>/<reward>/<code>,
+  // such as #gift/capitals/eiffel/k3f9q. The code is random; it only keeps one
+  // link from being received twice on the same device. Nothing checks that a
+  // link comes from a real gift: anyone can write one.
+  const GIFT = /gift\/([a-z]+)\/([a-z0-9]+)\/([a-z0-9]+)/i;
+  function parseGift(text) {
+    const m = GIFT.exec(text || '');
+    const a = m && Object.prototype.hasOwnProperty.call(APPS, m[1]) ? APPS[m[1]] : null;
+    return a && a.rewards.some((r) => r.id === m[2]) ? { app: a.id, id: m[2], code: m[3] } : null;
+  }
   // The address can name the app: #mnozenie or #stolice. The first address
   // of StoliceMax (stolice/) leads here.
   for (const a of Object.values(APPS)) {
@@ -1590,6 +1653,10 @@
       savePrefs();
     }
   }
+  // A gift link (see parseGift) opens the app of the gift, which is received
+  // once the page has started.
+  const arrivingGift = parseGift(location.hash);
+  if (arrivingGift) prefs.app = arrivingGift.app;
   if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
   let app = APPS[prefs.app];
   if (!prefs.opened.includes(app.id)) prefs.opened.push(app.id);
@@ -1695,7 +1762,8 @@
   const lang = () => (I18N.STRINGS[prefs.lang] ? prefs.lang : deviceLang());
   // The text of MnożenieMax, with the text of the open app over it. English
   // fills in any text a language lacks, so a missing entry can't break the page.
-  const T = () => ({ ...I18N.STRINGS.en, ...I18N.STRINGS[lang()], ...app.strings('en'), ...app.strings(lang()) });
+  const appT = (id) => ({ ...I18N.STRINGS.en, ...I18N.STRINGS[lang()], ...APPS[id].strings('en'), ...APPS[id].strings(lang()) });
+  const T = () => appT(app.id);
 
   function daily() {
     if (!state.daily || state.daily.day !== today()) {
@@ -2456,17 +2524,25 @@
     const n = counts();
     $('coin-total').textContent = num(balance());
     $('coins').setAttribute('aria-label', t.coinsAria(balance()));
-    // The number of rewards bought, with the latest one; redrawn only when
-    // it changes, so its shine keeps running.
-    const owned = state.trophies.length;
+    // The button of the collection: the number of rewards in all the apps,
+    // with the latest one of this app (or of all, if this one has none);
+    // redrawn only when it changes, so its shine keeps running.
+    const all = collection();
+    const owned = all.reduce((sum, [, list]) => sum + list.length, 0);
     $('trophies').hidden = owned === 0;
     $('trophy-total').textContent = num(owned);
-    $('trophies').setAttribute('aria-label', t.trophiesAria(owned));
+    $('trophies').setAttribute('aria-label', t.collectionAria(owned));
+    let shownApp = app.id;
+    let latest = state.trophies[state.trophies.length - 1];
+    for (const [appId, list] of all) {
+      const last = list[list.length - 1];
+      if (!state.trophies.length && last && (!latest || last.at > latest.at)) [shownApp, latest] = [appId, last];
+    }
     const slot = $('trophy-slot');
-    const latest = owned ? app.id + owned + state.trophies[owned - 1].metal + lang() : '';
-    if (slot.dataset.k !== latest) {
-      slot.dataset.k = latest;
-      slot.innerHTML = owned ? rewardIcon(state.trophies[owned - 1].metal) : '';
+    const key = latest ? shownApp + owned + latest.metal + lang() : '';
+    if (slot.dataset.k !== key) {
+      slot.dataset.k = key;
+      slot.innerHTML = latest ? rewardIcon(latest.metal, shownApp) : '';
     }
     $('count-new').textContent = num(n.new);
     $('count-learn').textContent = num(n.learn);
@@ -2605,7 +2681,8 @@
 
   // ---------- rewards ----------
 
-  const reward = (id) => app.rewards.find((r) => r.id === id) || app.rewards[0];
+  const rewardOf = (appId, id) => APPS[appId].rewards.find((r) => r.id === id) || APPS[appId].rewards[0];
+  const reward = (id) => rewardOf(app.id, id);
 
   // A gradient pair for each reward, next to the coin's gradients, and the
   // outlines of the souvenirs, glassware, prizes and city symbols for their
@@ -2683,7 +2760,7 @@
   const primeText = (digits, attrs = '') => '<text x="16" y="29" font-size="' + (digits.length > 1 ? 17 : 22) +
     '" font-family="Grandstander, Vazirmatn, sans-serif" font-weight="800" text-anchor="middle" letter-spacing="-0.6" direction="ltr"' + attrs + '>' + digits + '</text>';
   function trophyIcon(name) {
-    const { prime, colors: [hi, , , deep] } = reward(name);
+    const { prime, colors: [hi, , , deep] } = rewardOf('times', name);
     const digits = num(prime);
     const two = digits.length > 1;
     return '<svg class="trophy-icon" viewBox="0 0 32 32" aria-hidden="true">' +
@@ -3579,18 +3656,19 @@
   const cityIcon = (id) => modelIcon(id, CITIES, CITY_ART);
 
   const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon };
-  const rewardIcon = (id) => REWARD_ICONS[app.id](id);
+  const rewardIcon = (id, appId = app.id) => REWARD_ICONS[appId](id);
   // StoliceMax: the capital a souvenir comes from. LiteraturaMax: the
   // country that gives a prize. JęzykiMax: the city, with its flag.
-  function rewardPlace(id) {
-    const { iso } = reward(id);
-    if (app.id === 'literature') return iso ? countryName(iso) : T().international;
-    if (app.id === 'languages') return flag(iso) + ' ' + T().cityName(id);
+  function rewardPlace(id, appId = app.id) {
+    const { iso } = rewardOf(appId, id);
+    if (appId === 'literature') return iso ? countryName(iso) : appT(appId).international;
+    if (appId === 'languages') return flag(iso) + ' ' + appT(appId).cityName(id);
     return iso ? capitalName(iso) : '';
   }
 
-  // Shows the reward just bought and lets confetti fall from the top of the screen.
-  function celebrate(id) {
+  // Shows the reward just bought, or received as a gift, and lets confetti
+  // fall from the top of the screen.
+  function celebrate(id, gift = false) {
     const t = T();
     const { price, colors } = reward(id);
     const place = rewardPlace(id);
@@ -3600,7 +3678,7 @@
     banner.setAttribute('role', 'status');
     banner.innerHTML = rewardIcon(id) + '<strong>' + esc(t.trophyTitle(id)) + '</strong>' +
       (place ? '<span class="place">' + esc(place) + '</span>' : '') +
-      '<span>' + esc(t.trophyFor(price)) + '</span>';
+      '<span>' + esc(gift ? t.giftReceived : t.trophyFor(price)) + '</span>';
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -4286,14 +4364,15 @@
 
   // ---------- panels ----------
 
-  const panels = [$('settings'), $('shop'), $('apps'), $('showcase')];
+  const panels = [$('settings'), $('shop'), $('apps'), $('showcase'), $('collection')];
   const panelOpen = () => panels.some((p) => !p.hidden);
 
   // Open the panel first, so it opens even if filling it in fails: the
   // settings are the only way to change the language or reload the app.
   // Opening a panel adds a step to the page history, so Android's Back
   // gesture closes the panel instead of leaving the app.
-  // which: 'settings', 'shop', 'apps' or 'showcase' (filled in by openShowcase).
+  // which: 'settings', 'shop', 'apps', 'collection' or 'showcase' (filled in
+  // by openShowcase).
   function openPanel(which) {
     pauseTimers();
     if (!panelOpen() && !(history.state && history.state.panel)) history.pushState({ panel: true }, '');
@@ -4304,6 +4383,7 @@
       if (which === 'settings') syncSettings();
       else if (which === 'shop') renderShop();
       else if (which === 'apps') renderApps();
+      else if (which === 'collection') renderCollection();
     } catch (e) {
       noteError(e);
     }
@@ -4311,12 +4391,13 @@
 
   function closePanel() {
     if (!panelOpen()) return false;
-    if (!$('showcase').hidden && showcaseFrom === 'shop') {
-      // Back to the shop. After the Back gesture the shop needs its step in
-      // the page history again.
+    if (!$('showcase').hidden && showcaseFrom) {
+      // Back to the shop or the collection. After the Back gesture it needs
+      // its step in the page history again.
+      const from = showcaseFrom;
       showcaseFrom = null;
       if (!(history.state && history.state.panel)) history.pushState({ panel: true }, '');
-      openPanel('shop');
+      openPanel(from);
       return true;
     }
     if (!$('apps').hidden && appsUnseen()) {
@@ -4345,6 +4426,7 @@
   $('close-shop').addEventListener('click', closePanel);
   $('close-apps').addEventListener('click', closePanel);
   $('close-showcase').addEventListener('click', closePanel);
+  $('close-collection').addEventListener('click', closePanel);
   // A tap on the dimmed area around a panel closes it.
   for (const p of panels) {
     p.addEventListener('click', (e) => {
@@ -4386,6 +4468,7 @@
     if (!prefs.opened.includes(id)) prefs.opened.push(id);
     savePrefs();
     state = load() || defaultState();
+    othersOwned = null;
     currentId = null;
     lastId = null;
     shown = null;
@@ -4453,31 +4536,184 @@
     celebrate(id);
   });
 
-  // A reward bought, shown large. Opened from the shelf in the shop it
-  // goes back to the shop when closed; opened from the header, to the cards.
-  let showcaseFrom = null;
-  function openShowcase(index, from) {
-    const bought = state.trophies[index];
-    if (!bought) return;
+  // ---------- collection and gifts ----------
+
+  // The rewards owned in each app, in the order of the apps: those of the
+  // open app from its state, the others as they were saved (read once, and
+  // again when the app changes or a gift leaves them).
+  let othersOwned = null;
+  function savedState(appId) {
+    try {
+      return JSON.parse(localStorage.getItem(APPS[appId].storeKey));
+    } catch (e) {
+      return null;
+    }
+  }
+  function collection() {
+    if (!othersOwned) {
+      othersOwned = {};
+      for (const id of Object.keys(APPS)) {
+        const s = id === app.id ? null : savedState(id);
+        othersOwned[id] = s && Array.isArray(s.trophies) ? s.trophies : [];
+      }
+    }
+    return Object.keys(APPS).map((id) => [id, id === app.id ? state.trophies : othersOwned[id]]);
+  }
+  const ownedIn = (appId) => collection().find(([id]) => id === appId)[1];
+  // Takes the reward at index out of what an app owns.
+  function removeOwned(appId, index) {
+    if (appId === app.id) {
+      state.trophies.splice(index, 1);
+      save();
+      return;
+    }
+    const s = savedState(appId);
+    if (!s || !Array.isArray(s.trophies)) return;
+    s.trophies.splice(index, 1);
+    try {
+      localStorage.setItem(APPS[appId].storeKey, JSON.stringify(s));
+    } catch (e) {
+      /* storage unavailable */
+    }
+    othersOwned = null;
+  }
+
+  // The collection: the rewards of all the apps, each opening large.
+  function renderCollection() {
     const t = T();
-    const { id, colors } = reward(bought.metal);
+    const all = collection().filter(([, list]) => list.length);
+    $('collection-hint').textContent = all.length ? t.collectionHint : t.collectionEmpty;
+    $('collection-list').innerHTML = all.map(([appId, list]) => {
+      const at = appT(appId);
+      return '<section><h3><span class="app-icon">' + APP_ICONS[appId] + '</span>' + esc(APPS[appId].name) +
+        '<span class="tally">' + esc(num(list.length)) + '</span></h3>' +
+        '<div class="trophy-shelf" role="group" aria-label="' + esc(at.trophiesAria(list.length)) + '">' + list.map((tr, i) => '<button type="button" data-of="' + appId + '" data-owned="' + i + '" title="' + esc(at.trophyName(tr.metal)) +
+          '" aria-label="' + esc(at.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal, appId) + '</button>').join('') + '</div></section>';
+    }).join('');
+    $('receive-status').textContent = '';
+  }
+  $('collection-list').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-owned]');
+    if (btn) openShowcase(btn.dataset.of, Number(btn.dataset.owned), 'collection');
+  });
+  $('trophies').addEventListener('click', () => openPanel('collection'));
+
+  // A reward owned, shown large, with a button to give it away. Closed, it
+  // goes back to the shop or the collection it was opened from.
+  let showcaseFrom = null;
+  let showcased = null; // { appId, index }
+  function openShowcase(appId, index, from) {
+    const owned = ownedIn(appId)[index];
+    if (!owned) return;
+    const t = appT(appId);
+    const { id, colors } = rewardOf(appId, owned.metal);
     showcaseFrom = from;
+    showcased = { appId, index };
     openPanel('showcase');
     const art = $('showcase-art');
     art.style.setProperty('--metal', colors[1]);
-    art.classList.toggle('swing', app.id === 'times' || app.id === 'capitals'); // the keychains
-    art.innerHTML = rewardIcon(id);
+    art.classList.toggle('swing', appId === 'times' || appId === 'capitals'); // the keychains
+    art.classList.remove('given');
+    art.innerHTML = rewardIcon(id, appId);
     $('showcase-name').textContent = t.trophyName(id);
-    const place = rewardPlace(id);
+    const place = rewardPlace(id, appId);
     $('showcase-place').textContent = place;
     $('showcase-place').hidden = !place;
-    $('showcase-bought').textContent = t.boughtOn(new Date(bought.at).toLocaleDateString(lang(), { dateStyle: 'long' }));
+    const date = new Date(owned.at).toLocaleDateString(lang(), { dateStyle: 'long' });
+    $('showcase-bought').textContent = owned.gift ? t.giftOn(date) : t.boughtOn(date);
+    disarmGive();
+    $('give-box').hidden = false;
+    $('given-box').hidden = true;
   }
   $('trophy-shelf').addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-owned]');
-    if (btn) openShowcase(Number(btn.dataset.owned), 'shop');
+    if (btn) openShowcase(app.id, Number(btn.dataset.owned), 'shop');
   });
-  $('trophies').addEventListener('click', () => openShowcase(state.trophies.length - 1, null));
+
+  // Gives the reward shown away: after a second tap, the device's share menu
+  // opens with a gift link, or else the link is copied. Once the link is
+  // out, the reward leaves the collection and the link stays on show; if the
+  // share menu is closed without sharing, it stays.
+  let giveTimer = null;
+  function disarmGive() {
+    clearTimeout(giveTimer);
+    delete $('give').dataset.armed;
+    $('give').textContent = T().give;
+  }
+  const giftLink = (appId, id) => shareUrl() + '#gift/' + appId + '/' + id + '/' + Math.random().toString(36).slice(2, 8);
+  $('give').addEventListener('click', async () => {
+    const btn = $('give');
+    if (!showcased) return;
+    if (!btn.dataset.armed) {
+      btn.dataset.armed = '1';
+      btn.textContent = T().giveConfirm;
+      giveTimer = setTimeout(disarmGive, 4000);
+      return;
+    }
+    disarmGive();
+    const { appId, index } = showcased;
+    const owned = ownedIn(appId)[index];
+    if (!owned) return;
+    const t = appT(appId);
+    const url = giftLink(appId, owned.metal);
+    let out = false;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'MaxApki', text: t.giftText(t.trophyName(owned.metal)), url });
+        out = true;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return; // closed without sharing
+      }
+    }
+    if (!out) {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast(t.giftCopied);
+      } catch (e) {
+        /* the link is on show to copy by hand */
+      }
+    }
+    removeOwned(appId, index);
+    showcased = null;
+    $('showcase-art').classList.add('given');
+    $('give-box').hidden = true;
+    $('given-box').hidden = false;
+    $('given-link').value = url;
+    render();
+  });
+  $('given-link').addEventListener('focus', (e) => e.target.select());
+
+  // Puts a gift among the rewards of its app, which opens for it. Returns
+  // false for a link that was received on this device before.
+  function receiveGift(gift) {
+    if (prefs.gifts.includes(gift.code)) return false;
+    prefs.gifts.push(gift.code);
+    savePrefs();
+    if (gift.app !== app.id) switchApp(gift.app);
+    state.trophies.push({ metal: gift.id, at: now(), gift: true });
+    save();
+    render();
+    celebrate(gift.id, true);
+    return true;
+  }
+  // A gift link that opened in the browser, rather than in the installed
+  // app, can be pasted into the collection.
+  $('receive-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const t = T();
+    const gift = parseGift($('receive-link').value);
+    if (!gift) {
+      $('receive-status').textContent = t.giftBad;
+      return;
+    }
+    if (prefs.gifts.includes(gift.code)) {
+      $('receive-status').textContent = t.giftClaimed;
+      return;
+    }
+    $('receive-link').value = '';
+    closePanel();
+    receiveGift(gift);
+  });
 
   // ---------- settings ----------
 
@@ -4906,6 +5142,7 @@
   // The menu of apps opens by itself the first time, and again when a new
   // app has been added, to show what there is.
   if (appsUnseen()) openPanel('apps');
+  if (arrivingGift && !receiveGift(arrivingGift)) toast(T().giftClaimed);
 })();
 </script>
 </body>
