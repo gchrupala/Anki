@@ -154,7 +154,7 @@ StoliceMax teaches the capitals of countries. It runs in the same page and at th
 
 ### Switching apps
 
-The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
+The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. Inside the app the icons are black and white; the home-screen icon of MaxApki keeps its colours. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
 
 The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia` or `#literatura` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
 
