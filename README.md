@@ -253,7 +253,7 @@ LiteraturaMax teaches who wrote well-known books. It runs in the same page as th
 - The progress view has a square for each book, with the flag of the country of its author, by category.
 - The review log uses the number of the book in `literature.js` as `card_id`, and has the book and the book whose author was picked (as `b1`, `b2` and so on).
 
-The shop sells literary prizes from many countries and international ones, each a glittering medal on a ribbon or a statuette:
+The shop sells literary prizes from many countries and international ones, each a glittering medal on a ribbon or a statuette. Four white stars with a soft glow twinkle on each prize, besides the small golden ones the souvenirs have:
 
 | Prize | Country | Coins |
 | --- | --- | --- |
@@ -272,7 +272,7 @@ The shop sells literary prizes from many countries and international ones, each 
 | Hans Christian Andersen Award | international | 450 |
 | Nobel Prize in Literature | Sweden | 700 |
 
-All 14 together cost 3020 coins; learning all 126 books to the mastered level pays 2142, plus 10 for each finished day. The Nobel medal is the largest and has golden rays around it. Buying a prize sets off a rain of letters for 4 seconds: letters of the Latin, Cyrillic, Greek, Hebrew, Arabic and Persian, Georgian, Armenian, Devanagari, Thai, Chinese, Japanese and Korean scripts fall and turn. With reduced motion switched on in the device settings, only the prize is shown. The prizes and their prices are set in `PRIZES` in `index.html`, the drawings in `PRIZE_ART`, the names in `i18n-literature.js`.
+All 14 together cost 3020 coins; learning all 126 books to the mastered level pays 2142, plus 10 for each finished day. The Nobel medal is the largest and has golden rays around it. Buying a prize sets off a rain of letters for 4 seconds: letters of the Latin, Cyrillic, Greek, Hebrew, Arabic and Persian, Georgian, Armenian, Devanagari, Thai, Chinese, Japanese and Korean scripts fall and turn. With reduced motion switched on in the device settings, only the prize is shown. The prizes and their prices are set in `PRIZES` in `index.html`, the drawings and the places of the white stars in `PRIZE_ART`, the names in `i18n-literature.js`.
 
 The books and authors and their names in the five languages are in `literature.js`. Titles were chosen from published translations where they are well known; where a book has no known title in a language, the field is left empty and the rule above applies.
 
