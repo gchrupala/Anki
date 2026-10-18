@@ -1,8 +1,8 @@
-# MaxApki: MnożenieMax, StoliceMax, ChemiaMax and LiteraturaMax
+# MaxApki: MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds three sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, and [LiteraturaMax](#literaturamax), which teaches who wrote well-known books. The four apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all four.
+The same page also holds four sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, and [JęzykiMax](#językimax), which teaches French, Spanish, Dutch and Italian. The five apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all five.
 
 ## Running it
 
@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MaxApki", and its icon shows the cards of the four apps. MnożenieMax, StoliceMax, ChemiaMax and LiteraturaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+The home-screen name is "MaxApki", and its icon shows the cards of the five apps. MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -159,11 +159,11 @@ StoliceMax teaches the capitals of countries. It runs in the same page and at th
 
 The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. Inside the app the icons are black and white; the home-screen icon of MaxApki keeps its colours. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
 
-The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia` or `#literatura` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
+The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura` or `#jezyki` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
 
 The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
-Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
 
 ### Cards
 
@@ -277,15 +277,60 @@ All 14 together cost 3020 coins; learning all 126 books to the mastered level pa
 
 The books and authors and their names in the five languages are in `literature.js`. Titles were chosen from published translations where they are well known; where a book has no known title in a language, the field is left empty and the rule above applies.
 
+## JęzykiMax
+
+JęzykiMax teaches French, Spanish, Dutch and Italian at the levels A1, A2 and B1 of the Common European Framework of Reference for Languages. It runs in the same page as the other apps and has the same options. The language to learn is separate from the language of the interface: four buttons above the card choose it, and each language has its own cards and its own number of new cards a day. The coins of the four languages go into one purse.
+
+- The cards are only in the language being learned, with pictures (emoji), so they need no translation into the five interface languages. The instruction ("Co to jest?", "Which word is missing?") is in the interface language. There are five kinds of card, each with four answers:
+  - a picture, and the child picks the word or phrase ("la pomme", "Il pleut.", "Tengo frío.");
+  - a word or phrase, and the child picks the picture;
+  - a sentence with a gap, and the child picks the missing word ("Je vais ___ école." with "à l’", "au", "à la", "aux");
+  - a question, and the child picks the answer that fits ("¿Por qué llegas tarde?" with "Porque perdí el autobús.", "Con mi hermano.", "A las nueve.", "En la cocina.");
+  - a word, and the child picks its opposite.
+- Each language has 330 cards: 127 pictures (vocabulary with articles, everyday phrases, a few idioms at B1), each as a picture card and a word card, 36 sentences with a gap, 24 questions and 16 pairs of opposites. Gaps and questions were written for each language and test its grammar: articles and gender, verb forms, past and future tenses, pronouns, and at B1 the subjunctive, the conditional and relative clauses.
+- The wrong answers of gaps and questions are written with them. Those of picture, word and opposite cards are other cards of the same kind, of the same theme (food, animals, weather, jobs and so on) where it has enough, then of the same level.
+- New cards come level by level: first A1, then A2, then B1, at random within a level. Within a level the cards that show a word and ask for the picture come after the others, once the pictures are known. The levels can be switched off in the settings. As in StoliceMax, a right answer the first time is never Easy. Easy needs a right answer within 6 seconds. The default time limit is 30 seconds, and 10 new cards a day per language.
+- The speaker button reads the word or sentence aloud with a voice of the device for that language (the browser's `speechSynthesis`). It does not read what would give the answer away: a picture card is read only once answered, a gap only once filled in. Where the device has no voice for the language (or in the Android app, whose web view has none), the button is not shown.
+- The progress view has a square for each card of the language being learned, by level: the picture for picture and word cards, `_` for a gap, `?` for a question and `⇄` for opposites.
+- The review log uses the number of the card as `card_id`, and has the card id (such as `fr.p.apple`) and the answer picked (the card id for the right answer, with `#1` to `#3` for the wrong ones).
+
+The shop sells symbols of cities where these languages are spoken, drawn as glittering models like the souvenirs of StoliceMax:
+
+| Symbol | City | Coins |
+| --- | --- | --- |
+| Linden tree (from its coat of arms) | Tilburg | 30 |
+| Arc de Triomphe | Paris | 50 |
+| Mouth of Truth | Rome | 60 |
+| Giralda | Seville | 75 |
+| Coat of arms | Amsterdam | 100 |
+| Manneken Pis | Brussels | 125 |
+| Leaning Tower | Pisa | 140 |
+| Obelisk | Buenos Aires | 150 |
+| Antwerp hand | Antwerp | 175 |
+| Jet d’Eau | Geneva | 200 |
+| Classic car | Havana | 250 |
+| Gondola | Venice | 275 |
+| Dom Tower | Utrecht | 300 |
+| Château Frontenac | Quebec City | 350 |
+| Angel of Independence | Mexico City | 400 |
+| Notre-Dame de la Garde | Marseille | 450 |
+| Cathedral dome | Florence | 500 |
+| Erasmus Bridge | Rotterdam | 525 |
+| Sagrada Família | Barcelona | 600 |
+
+All 19 together cost 4755 coins; learning all the cards of one language to the mastered level pays 5610. Buying one makes thought bubbles (💭) pop up and rise for 4 seconds, with words such as "Bonjour !", "¡Hola!", "Goed zo!", "Evviva!" and greetings in many other languages and scripts. With reduced motion switched on in the device settings, only the symbol is shown. The symbols and their prices are set in `CITIES` in `index.html`, the drawings in `CITY_ART`, the names of the symbols and cities in `i18n-languages.js`.
+
+The cards are in `languages.js`. They were written for this app; the French, Spanish, Dutch and Italian have not been checked by a teacher.
+
 ## How the page holds several apps
 
-`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax and LiteraturaMax, the apps where the child picks one of four answers. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js` and `i18n-literature.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened and the number of apps the menu was last seen with are saved under their own key (`max-apps`).
+`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax, the apps where the child picks one of four answers. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`, `languages`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js`, `i18n-literature.js` and `i18n-languages.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened and the number of apps the menu was last seen with are saved under their own key (`max-apps`).
 
 ## Tests
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
 
-`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text. `tests/literature.test.js` checks the LiteraturaMax data and text: one number per book, every author known and from a country with a flag, names and titles in every language with no two alike, books by at least four authors in each category, and the LiteraturaMax text.
+`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text. `tests/literature.test.js` checks the LiteraturaMax data and text: one number per book, every author known and from a country with a flag, names and titles in every language with no two alike, books by at least four authors in each category, and the LiteraturaMax text. `tests/languages.test.js` checks the JęzykiMax data and text: one id and number per card, every kind of card at every level in every language, three different wrong answers for each gap and question and one gap per sentence, no picture or word twice, at least four pictures per theme, and the JęzykiMax text.
 
 ## Limitations
 
@@ -295,7 +340,7 @@ The books and authors and their names in the five languages are in `literature.j
 
 ## Files
 
-- `index.html`: the four apps (layout, styles and interface code).
+- `index.html`: the five apps (layout, styles and interface code).
 - `i18n.js`: the interface text in Polish, English, Dutch, Spanish and Persian.
 - `i18n-capitals.js`: the text that differs in StoliceMax.
 - `countries.js`: the countries and capitals of StoliceMax.
@@ -303,9 +348,11 @@ The books and authors and their names in the five languages are in `literature.j
 - `chemistry.js`: the compounds of ChemiaMax.
 - `i18n-literature.js`: the text that differs in LiteraturaMax.
 - `literature.js`: the books and authors of LiteraturaMax.
+- `i18n-languages.js`: the text that differs in JęzykiMax.
+- `languages.js`: the French, Spanish, Dutch and Italian cards of JęzykiMax.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `android/`: the Android app.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
-- `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax, ChemiaMax and LiteraturaMax data.
+- `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax data.
 - `stolice/`: the first address of StoliceMax, which now leads to the app, and a service worker that removes the old offline copy.
