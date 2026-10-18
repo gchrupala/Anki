@@ -3244,7 +3244,8 @@
         const data = noiseBuffer.getChannelData(0);
         for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
       }
-      if (audio.state !== 'running') audio.resume();
+      // A refused start is not an error to show; the fireworks stay silent.
+      if (audio.state !== 'running') Promise.resolve(audio.resume()).catch(() => {});
     } catch (e) {
       return null;
     }
