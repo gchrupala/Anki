@@ -1566,10 +1566,11 @@
       name: 'JęzykiMax',
       hash: 'jezyki',
       storeKey: 'languages-cards-v1',
-      layout: 1,
+      // Version of the settings layout; 2 added the level B2.
+      layout: 2,
       // Reading a sentence and four answers takes a while: Easy within 6 seconds.
       fastSeconds: 6,
-      // target: the language learned (fr, es, nl or it); levels: A1, A2, B1;
+      // target: the language learned (fr, es, nl or it); levels: A1, A2, B1, B2;
       // autoSay: read the cards aloud without the speaker button.
       settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, autoSay: false }),
       groupKey: 'levels',
@@ -1692,6 +1693,11 @@
       if (app.id === 'chemistry' && (s.settings.layout || 1) < 2) {
         // The elements came after the compounds: practise them too.
         s.settings.groups = COMPOUND_GROUPS.filter((g) => g === 'EL' || (s.settings.groups || []).includes(g));
+      }
+      if (app.id === 'languages' && (s.settings.layout || 1) < 2 && !s.settings.levels.includes('B2')) {
+        // B2 came after A1 to B1: practise it too. New cards come level by
+        // level, so its cards wait until the easier levels are done.
+        s.settings.levels = s.settings.levels.concat('B2');
       }
       if (s.settings.nextAfter === 5 && !s.settings.nextAfterChosen) {
         // Saved while 5 seconds was the default: the default is now as before.
@@ -1916,7 +1922,7 @@
         return LANG_IDS[state.settings.target];
       },
       group: (id) => BY_LANG[id].level,
-      // A1, then A2, then B1; within a level the cards that ask for the
+      // A1, then A2, B1 and B2; within a level the cards that ask for the
       // picture of a word come after the others.
       rank: (id) => LANGUAGE_LEVELS.indexOf(BY_LANG[id].level) * 2 + (BY_LANG[id].kind === 'w' ? 1 : 0),
       prompt: (id) => T().prompts[BY_LANG[id].kind],
