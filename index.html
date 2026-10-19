@@ -1606,6 +1606,7 @@
         if (p.appsSeen === undefined) p.appsSeen = p.seenApps ? 2 : 0;
         if (!Array.isArray(p.opened)) p.opened = ['times', 'capitals'];
         if (!Array.isArray(p.gifts)) p.gifts = [];
+        if (!Array.isArray(p.given)) p.given = [];
         delete p.seenApps;
         return p;
       }
@@ -1621,8 +1622,9 @@
     }
     // appsSeen: how many apps there were when the menu of apps was last
     // closed; opened: the apps opened at least once (others are marked new);
-    // gifts: the codes of the gift links received.
-    return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', appsSeen: 0, opened: Object.keys(APPS), gifts: [] };
+    // gifts: the codes of the gift links received; given: those of the links
+    // given away from here.
+    return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', appsSeen: 0, opened: Object.keys(APPS), gifts: [], given: [] };
   }
   function savePrefs() {
     try {
@@ -1635,8 +1637,9 @@
 
   // A gift is shared as a link to the app ending in #gift/<app>/<reward>/<code>,
   // such as #gift/capitals/eiffel/k3f9q. The code is random; it only keeps one
-  // link from being received twice on the same device. Nothing checks that a
-  // link comes from a real gift: anyone can write one.
+  // link from being received twice on the same device, or on the device that
+  // gave it. Nothing checks that a link comes from a real gift: anyone can
+  // write one.
   const GIFT = /gift\/([a-z]+)\/([a-z0-9]+)\/([a-z0-9]+)/i;
   function parseGift(text) {
     const m = GIFT.exec(text || '');
@@ -4836,7 +4839,7 @@
     delete $('give').dataset.armed;
     $('give').textContent = T().give;
   }
-  const giftLink = (appId, id) => shareUrl() + '#gift/' + appId + '/' + id + '/' + Math.random().toString(36).slice(2, 8);
+  const giftLink = (appId, id, code) => shareUrl() + '#gift/' + appId + '/' + id + '/' + code;
   $('give').addEventListener('click', async () => {
     const btn = $('give');
     if (!showcased) return;
@@ -4851,7 +4854,8 @@
     const owned = ownedIn(appId)[index];
     if (!owned) return;
     const t = appT(appId);
-    const url = giftLink(appId, owned.metal);
+    const code = Math.random().toString(36).slice(2, 8);
+    const url = giftLink(appId, owned.metal, code);
     let out = false;
     if (navigator.share) {
       try {
@@ -4870,6 +4874,8 @@
       }
     }
     removeOwned(appId, index);
+    prefs.given.push(code);
+    savePrefs();
     showcased = null;
     $('showcase-art').classList.add('given');
     $('give-box').hidden = true;
@@ -4879,10 +4885,16 @@
   });
   $('given-link').addEventListener('focus', (e) => e.target.select());
 
-  // Puts a gift among the rewards of its app, which opens for it. Returns
-  // false for a link that was received on this device before.
+  // Why a gift link cannot be received here: it was received on this device
+  // before, or given away from it. Null when it can be.
+  function giftRefusal(gift) {
+    const t = T();
+    if (prefs.given.includes(gift.code)) return t.giftOwn || t.giftClaimed;
+    if (prefs.gifts.includes(gift.code)) return t.giftClaimed;
+    return null;
+  }
+  // Puts a gift among the rewards of its app, which opens for it.
   function receiveGift(gift) {
-    if (prefs.gifts.includes(gift.code)) return false;
     prefs.gifts.push(gift.code);
     savePrefs();
     if (gift.app !== app.id) switchApp(gift.app);
@@ -4902,8 +4914,8 @@
       $('receive-status').textContent = t.giftBad;
       return;
     }
-    if (prefs.gifts.includes(gift.code)) {
-      $('receive-status').textContent = t.giftClaimed;
+    if (giftRefusal(gift)) {
+      $('receive-status').textContent = giftRefusal(gift);
       return;
     }
     $('receive-link').value = '';
@@ -5337,7 +5349,10 @@
   // The menu of apps opens by itself the first time, and again when a new
   // app has been added, to show what there is.
   if (appsUnseen()) openPanel('apps');
-  if (arrivingGift && !receiveGift(arrivingGift)) toast(T().giftClaimed);
+  if (arrivingGift) {
+    if (giftRefusal(arrivingGift)) toast(giftRefusal(arrivingGift));
+    else receiveGift(arrivingGift);
+  }
 })();
 </script>
 </body>
