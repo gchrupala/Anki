@@ -20,7 +20,8 @@
 <style>
   /* MaxApki, a family of apps in one page: MnożenieMax (times tables),
      StoliceMax (capitals), ChemiaMax (chemical formulas), LiteraturaMax
-     (authors of books) and JęzykiMax (French, Spanish, Dutch and Italian).
+     (authors of books), JęzykiMax (French, Spanish, Dutch and Italian) and
+     MapkiMax (places on the map).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -127,7 +128,8 @@
   body[data-app="capitals"] [data-app]:not([data-app~="capitals"]),
   body[data-app="chemistry"] [data-app]:not([data-app~="chemistry"]),
   body[data-app="literature"] [data-app]:not([data-app~="literature"]),
-  body[data-app="languages"] [data-app]:not([data-app~="languages"]) { display: none !important; }
+  body[data-app="languages"] [data-app]:not([data-app~="languages"]),
+  body[data-app="maps"] [data-app]:not([data-app~="maps"]) { display: none !important; }
 
   body {
     margin: 0;
@@ -704,6 +706,93 @@
     .slot.empty::after, .card.shake .question, .card.enter .question, .card.shake .place, .card.enter .place { animation: none; }
   }
 
+  /* MapkiMax: the kind and name of the place on a low card, and below it
+     the map of its continent, as wide as the page. */
+  body[data-app="maps"] .layout { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+  body[data-app="maps"] .card::before { aspect-ratio: auto; }
+  body[data-app="maps"] .card-body { gap: 0.3rem; padding-block: 0.6rem 0.7rem; }
+  body[data-app="maps"] .country { font-size: clamp(1.4rem, 5.5cqi, 2.4rem); }
+  body[data-app="maps"] .feedback { max-width: 52ch; min-height: 2.6em; }
+  .kind { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+  .kind .icon { font-size: 1.3rem; letter-spacing: 0; vertical-align: -0.15em; margin-inline-end: 0.3rem; }
+  .atlas {
+    position: relative;
+    /* as much of the screen as is left under the header and the card */
+    height: clamp(18rem, 62vh, 44rem);
+    height: clamp(18rem, calc(100dvh - 24rem), 46rem);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    background: #cfe6f5;
+  }
+  .atlas canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+  .atlas canvas:focus-visible { outline: 3px solid var(--pen); outline-offset: -3px; }
+  .atlas canvas.dragging { cursor: grabbing; }
+  .atlas-tools { position: absolute; top: 0.6rem; inset-inline-end: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .atlas-tools button, .atlas-ok {
+    min-width: 2.6rem;
+    height: 2.6rem;
+    border: 1.5px solid var(--key-edge);
+    border-radius: 12px;
+    background: var(--key);
+    color: var(--ink);
+    box-shadow: 0 2px 0 var(--key-edge);
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .atlas-tools svg { width: 1.2rem; height: 1.2rem; vertical-align: middle; }
+  .atlas-ok {
+    position: absolute;
+    bottom: 0.9rem;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 7rem;
+    height: 3rem;
+    background: var(--pen);
+    border-color: var(--pen);
+    color: var(--pen-ink);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--pen) 55%, #000);
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+  }
+  .atlas-ok:active { transform: translate(-50%, 2px); box-shadow: 0 1px 0 color-mix(in srgb, var(--pen) 55%, #000); }
+  .atlas-hint {
+    position: absolute;
+    top: 0.6rem;
+    inset-inline-start: 0.6rem;
+    max-width: calc(100% - 4.5rem);
+    margin: 0;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.85);
+    color: #1d2742;
+    font-size: 0.85rem;
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .atlas-hint:empty { display: none; }
+  /* The progress map: the places answered, coloured as in the legend. */
+  .progress-map { position: relative; height: clamp(14rem, 40vh, 26rem); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #cfe6f5; }
+  .progress-map canvas { display: block; width: 100%; height: 100%; }
+  .map-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .map-tabs button {
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--ink);
+    padding: 0.25rem 0.75rem;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .map-tabs button[aria-pressed="true"] { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
+  .map-tabs .tally { font-weight: 500; opacity: 0.8; margin-inline-start: 0.35rem; font-variant-numeric: tabular-nums; }
+
   /* Done card */
   .done-body { gap: 0.8rem; text-align: center; }
   .done-title {
@@ -954,6 +1043,7 @@
     font-variant-numeric: tabular-nums;
   }
   .field #lang { width: auto; }
+  .field select { width: auto; min-width: 5rem; }
   .rules { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
   .rules th, .rules td { text-align: start; padding-block: 0.35rem; padding-inline: 0 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
   .rules th { font-weight: 600; color: var(--ink-soft); }
@@ -1073,6 +1163,10 @@
             <span class="nick" id="lang-meaning" dir="auto"></span>
             <button type="button" class="say" id="say" data-t-aria="listen" hidden>🔊</button>
           </div>
+          <div class="place" data-app="maps" aria-live="polite">
+            <span class="kind" id="place-kind"></span>
+            <span class="country" id="place-name"></span>
+          </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
           <button type="button" class="ghost-btn hold-btn" id="hold" hidden></button>
         </div>
@@ -1113,6 +1207,19 @@
         <button type="button" class="choice" data-i="2"></button>
         <button type="button" class="choice" data-i="3"></button>
       </div>
+
+      <div class="atlas" id="atlas" data-app="maps">
+        <canvas id="atlas-map" tabindex="0" data-t-aria="mapAria"></canvas>
+        <p class="atlas-hint" id="atlas-hint" aria-live="polite"></p>
+        <div class="atlas-tools">
+          <button type="button" id="zoom-in" data-t-aria="zoomIn">+</button>
+          <button type="button" id="zoom-out" data-t-aria="zoomOut">−</button>
+          <button type="button" id="zoom-home" data-t-aria="zoomHome">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+        <button type="button" class="atlas-ok" id="atlas-ok" hidden>OK</button>
+      </div>
     </section>
 
     <aside class="progress" data-t-aria="progressAria">
@@ -1120,6 +1227,8 @@
       <p class="sub" data-t="progressSub">Each square is one fact: row × column. Squares fill in as facts move into long-term memory.</p>
       <div class="square" id="square" role="img" data-app="times" data-t-aria="squareAria"></div>
       <div class="map" id="map" role="img" data-app="capitals chemistry literature languages" data-t-aria="squareAria"></div>
+      <div class="map-tabs" id="map-tabs" role="group" data-app="maps" data-t-aria="continentsAria"></div>
+      <div class="progress-map" data-app="maps"><canvas id="progress-map" role="img" data-t-aria="squareAria"></canvas></div>
       <ul class="legend">
         <li><span class="sw cell"></span><b id="n-new">0</b> <span data-t="legendNew">not started</span></li>
         <li><span class="sw cell is-learning"></span><b id="n-learning">0</b> <span data-t="legendLearning">practising</span></li>
@@ -1161,10 +1270,15 @@
       <div class="chips" id="extra-chips"></div>
     </section>
 
-    <section data-app="capitals chemistry literature languages">
+    <section data-app="capitals chemistry literature languages maps">
       <h3 data-t="groupsTitle">Groups</h3>
       <div class="chips" id="group-chips"></div>
       <p class="hint" data-t="groupsHint" style="margin-top:0.5rem"></p>
+    </section>
+
+    <section data-app="maps">
+      <h3 data-t="kindsTitle">Kinds of places</h3>
+      <div class="chips" id="kind-chips"></div>
     </section>
 
     <section class="fields">
@@ -1332,16 +1446,20 @@
 </div>
 
 <script src="srs.js"></script>
+<script src="geo.js"></script>
 <script src="i18n.js"></script>
 <script src="i18n-capitals.js"></script>
 <script src="i18n-chemistry.js"></script>
 <script src="i18n-literature.js"></script>
 <script src="i18n-languages.js"></script>
+<script src="i18n-maps.js"></script>
 <script src="countries.js"></script>
 <script src="chemistry.js"></script>
 <script src="literature.js"></script>
 <script src="languages-translations.js"></script>
 <script src="languages.js"></script>
+<script src="places.js"></script>
+<script src="maps.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1496,6 +1614,26 @@
     ['rotterdam', 525, 'NL', '#ffffff', '#e3edf6', '#a7bccf', '#46586b'],
     ['barcelona', 600, 'ES', '#fff3dc', '#e7cb96', '#b89458', '#5e4626'],
   ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
+  // MapkiMax: atlases, maps and globes, the colours being those of the
+  // paper, the cover or the globe. Where the famous ones were made is in
+  // i18n-maps.js (madeIn).
+  const ATLASES = [
+    ['treasuremap', 30, '#fff6dc', '#e8cf95', '#b8954f', '#6b4f1f'],
+    ['schoolglobe', 50, '#d9f0ff', '#3a9be8', '#1c5fb0', '#0d2f66'],
+    ['citymap', 70, '#fffaf0', '#f1e6cc', '#c9b88f', '#6b5c3e'],
+    ['schoolatlas', 100, '#d6e6ff', '#3d6fd1', '#22479a', '#0f2557'],
+    ['starglobe', 125, '#c9d4ff', '#2a3a8c', '#18245e', '#0b1236'],
+    ['peutinger', 150, '#fff3d6', '#e6c98d', '#b59251', '#5e4519'],
+    ['idrisi', 175, '#fff1cc', '#e9c46a', '#b88b2c', '#6a4a0b'],
+    ['catalan', 200, '#fff4e0', '#ead2a5', '#bd9a5e', '#6b4f22'],
+    ['pirireis', 250, '#ffefd6', '#e3bd84', '#b08745', '#5e4013'],
+    ['mercator', 300, '#ffe0d6', '#b5462f', '#7e2a19', '#45130a'],
+    ['blaeu', 350, '#fff6c4', '#ffc928', '#e09a00', '#7a5200'],
+    ['lightglobe', 400, '#fffbd6', '#ffe066', '#e6b400', '#7a5c00'],
+    ['behaim', 475, '#f7e6c4', '#c9a46a', '#94703a', '#4f3814'],
+    ['jagiellonian', 550, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
+    ['goldglobe', 650, '#fffbe6', '#ffd84a', '#e2a400', '#8a5a00'],
+  ].map(([id, price, ...colors]) => ({ id, price, colors }));
 
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
@@ -1577,10 +1715,26 @@
       rewards: CITIES,
       strings: (l) => I18N.LANGUAGES[l] || {},
     },
+    maps: {
+      id: 'maps',
+      name: 'MapkiMax',
+      hash: 'mapki',
+      storeKey: 'maps-cards-v1',
+      layout: 1,
+      // Not used: the distance from the place gives the rating (mapGrade).
+      fastSeconds: SRS.DEFAULTS.fastSeconds,
+      // continents and kinds: the places to practise. No time limit, as
+      // finding a place on the map takes a while.
+      settings: () => ({ continents: ['EU'], kinds: PLACE_KINDS.slice(), newPerDay: 10, retention: 0.9, answerTime: 0 }),
+      groupKey: 'continents',
+      rewards: ATLASES,
+      strings: (l) => I18N.MAPS[l] || {},
+    },
   };
   // The icons of the apps, for the app menu and the header: a card with a
   // drawing in black and white, on the colour of the app.
   const APP_ICONS = {
+    maps: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0d8a86"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#075c59"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M180 240l50-15 50 15 50-15v84l-50 15-50-15-50 15z" fill="#fff" stroke="#000" stroke-width="9" stroke-linejoin="round"/><path d="M230 225v84M280 240v84" stroke="#000" stroke-width="7"/><path d="M196 300c16-6 22-24 40-26s30 14 46 4" fill="none" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 12"/><path d="M306 304c-15-17-26-30-26-43a26 26 0 0 1 52 0c0 13-11 26-26 43z" fill="#000"/><circle cx="306" cy="261" r="10" fill="#fff"/></g></svg>',
     languages: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#e8710a"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#9c4a05"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M190 222h90a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-58l-28 22 6-22h-10a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#000"/><path d="M196 244h78M196 264h50" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M252 262h86a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-6l6 20-28-20h-58a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#fff" stroke="#000" stroke-width="8" stroke-linejoin="round"/><path d="M258 284h74M258 304h44" stroke="#000" stroke-width="9" stroke-linecap="round"/></g></svg>',
     times: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#2a4fc2"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#1b3a99"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M226 238 L286 298 M286 238 L226 298" stroke="#000" stroke-width="22" stroke-linecap="round"/></g></svg>',
     chemistry: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#1f9d55"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#126b37"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><g fill="none" stroke="#000" stroke-width="10"><ellipse cx="256" cy="277" rx="68" ry="24" transform="rotate(0 256 277)"/><ellipse cx="256" cy="277" rx="68" ry="24" transform="rotate(60 256 277)"/><ellipse cx="256" cy="277" rx="68" ry="24" transform="rotate(120 256 277)"/></g><circle cx="256" cy="277" r="17" fill="#000" stroke="#000" stroke-width="8"/><g fill="#fff" stroke="#000" stroke-width="7"><circle cx="188" cy="277" r="11"/><circle cx="290" cy="336" r="11"/><circle cx="290" cy="218" r="11"/></g></g></svg>',
@@ -1589,6 +1743,7 @@
   };
   // The sign embossed on the coins of each app.
   const EMBLEMS = {
+    maps: '<path d="M16.4 8.4l1.7 6.3 6.3 1.7-6.3 1.7-1.7 6.3-1.7-6.3-6.3-1.7 6.3-1.7z" style="fill: var(--gold-hi)"/><path d="M16 8l1.7 6.3L24 16l-6.3 1.7L16 24l-1.7-6.3L8 16l6.3-1.7z" style="fill: var(--gold-deep)" fill-opacity="0.85"/><path d="M16 12.6l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1z" style="fill: var(--gold-hi)" fill-opacity="0.9"/>',
     languages: '<path d="M10.4 9.4h11.6a2 2 0 0 1 2 2v6.4a2 2 0 0 1-2 2h-5.6l-4 3.2v-3.2h-2a2 2 0 0 1-2-2v-6.4a2 2 0 0 1 2-2z" style="fill: var(--gold-hi)"/><path d="M10 9h11.6a2 2 0 0 1 2 2v6.4a2 2 0 0 1-2 2H16l-4 3.2v-3.2h-2a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     literature: '<path d="M16.4 11.6c-1.8-1.1-4-1.3-6-.8v8.6c2-.5 4.2-.3 6 .8zM16.4 11.6c1.8-1.1 4-1.3 6-.8v8.6c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-hi)"/><path d="M16 11.2c-1.8-1.1-4-1.3-6-.8V19c2-.5 4.2-.3 6 .8zM16 11.2c1.8-1.1 4-1.3 6-.8V19c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     times: '<path d="M12.3 12.8l7.4 7.4M19.7 12.8l-7.4 7.4" style="stroke: var(--gold-hi)" stroke-width="2.8" stroke-linecap="round"/><path d="M12 12l8 8M20 12l-8 8" style="stroke: var(--gold-deep)" stroke-width="2.6" stroke-linecap="round"/>',
@@ -1826,6 +1981,7 @@
   const BY_FORMULA = Object.fromEntries(COMPOUNDS.map((c) => [c.formula, c]));
   const BY_BOOK = Object.fromEntries(BOOKS.map((b) => [b.id, b]));
   const BY_LANG = Object.fromEntries(Object.values(LANGUAGE_CARDS).flat().map((c) => [c.id, c]));
+  const BY_PLACE = Object.fromEntries(PLACES.map((p) => [p.id, p]));
   const LANG_IDS = Object.fromEntries(LANGUAGE_TARGETS.map((l) => [l, LANGUAGE_CARDS[l].map((c) => c.id)]));
   // JęzykiMax: the text of each answer on offer for the card shown. The
   // right answer has the id of the card, the wrong ones the id with #1, #2
@@ -1963,8 +2119,36 @@
       number: (id) => BY_LANG[id].number,
       logColumns: 'card,picked',
     },
+    // MapkiMax has no answers to pick from: the child places a pin on the map.
+    maps: {
+      groups: PLACE_CONTINENTS,
+      ids: PLACES.map((p) => p.id),
+      group: (id) => BY_PLACE[id].continent,
+      label: (id) => BY_PLACE[id].name[lang()],
+      number: (id) => BY_PLACE[id].number,
+      // The pin, and its distance from the place in km.
+      logColumns: 'place,lat,lon,km',
+    },
   };
   const choice = () => CHOICE[app.id];
+
+  // ---------- MapkiMax: finding places on the map ----------
+
+  const isMaps = () => app.id === 'maps';
+  // The rating from the distance to the place: Easy within 50 km, Good
+  // within 150, Hard within 400, and Again farther away. Keep the rules
+  // text in i18n-maps.js in step.
+  const MAP_GRADES = [[50, SRS.EASY], [150, SRS.GOOD], [400, SRS.HARD]];
+  const mapGrade = (km) => (MAP_GRADES.find(([most]) => km <= most) || [0, SRS.AGAIN])[1];
+  const KIND_ICONS = { city: '🏙️', peak: '⛰️', range: '🏔️', lake: '🏞️', river: '🛶', sea: '🌊', island: '🏝️', desert: '🏜️' };
+  // The shape of a place, decoded once (see geo.js).
+  const shapes = {};
+  function placeShape(id) {
+    if (!shapes[id]) shapes[id] = { type: BY_PLACE[id].type, lines: BY_PLACE[id].shape.map(GEO.decode) };
+    return shapes[id];
+  }
+  let pin = null; // [lon, lat] of the pin, until OK is tapped
+  let mapAnswer = null; // once answered: { pin, km, at: the point of the place nearest the pin }
 
   // One card per country or compound.
   function choiceCard(id) {
@@ -1983,8 +2167,10 @@
       }
     } else {
       const on = new Set(state.settings[app.groupKey]);
+      // MapkiMax: also the kinds of places switched on.
+      const kinds = isMaps() ? new Set(state.settings.kinds) : null;
       for (const id of choice().ids) {
-        if (on.has(choice().group(id))) list.push(choiceCard(id));
+        if (on.has(choice().group(id)) && (!kinds || kinds.has(BY_PLACE[id].kind))) list.push(choiceCard(id));
       }
     }
     // JęzykiMax introduces new cards in steps (rank), at random within a step.
@@ -2084,7 +2270,8 @@
     clearTimeout(giveUpTimer);
     const seconds = state.settings.answerTime;
     if (mode === 'ask' && typed === '' && seconds > 0 && !panelOpen() && document.visibilityState !== 'hidden') {
-      giveUpTimer = setTimeout(() => submit(null), seconds * 1000);
+      // MapkiMax: a pin placed but not confirmed is the answer.
+      giveUpTimer = setTimeout(() => submit(isMaps() && pin ? pin : null), seconds * 1000);
     }
   }
 
@@ -2169,6 +2356,8 @@
     const c = SRS.pickNext(queues(), avoidList());
     typed = '';
     picked = null;
+    pin = null;
+    mapAnswer = null;
     if (!c) {
       currentId = null;
       mode = 'done';
@@ -2182,7 +2371,7 @@
       currentId = c.id;
       shown = { type: c.type, reps: c.reps };
       mode = 'ask';
-      if (!isTimes()) options = choice().options(c.id);
+      if (!isTimes() && !isMaps()) options = choice().options(c.id);
       shownAt = performance.now();
       const first = c.reps === 0;
       const ask = !isTimes() && choice().prompt;
@@ -2192,6 +2381,8 @@
       flash('enter');
     }
     render();
+    // MapkiMax: the whole continent of the place.
+    if (isMaps() && c) atlas.home(BY_PLACE[c.id].continent);
     armGiveUp();
     if (mode === 'ask') sayByItself();
   }
@@ -2205,17 +2396,30 @@
     const c = current();
     if (mode !== 'ask' || !c) return;
     const timedOut = value === null;
-    const right = !timedOut && value === (isTimes() ? c.a * c.b : c.id);
     const ms = performance.now() - shownAt;
-    let grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
-    // StoliceMax and ChemiaMax: with four answers to choose from, a right
-    // answer the first time may be a guess. It is never Easy, so the country goes through the
-    // learning steps.
-    if (!isTimes() && c.type === 'new' && grade === SRS.EASY) grade = SRS.GOOD;
+    let right;
+    let grade;
+    let logged = value;
+    if (isMaps()) {
+      // MapkiMax: the distance from the pin to the place gives the rating,
+      // even on the first showing, since a pin close to a place is no guess.
+      mapAnswer = timedOut ? { pin: null, km: null } : { pin: value, ...GEO.toPlace(placeShape(c.id), value[0], value[1]) };
+      grade = timedOut ? SRS.AGAIN : mapGrade(mapAnswer.km);
+      right = grade !== SRS.AGAIN;
+      const round = (x) => Math.round(x * 100) / 100;
+      logged = timedOut ? null : [round(value[1]), round(value[0]), Math.round(mapAnswer.km)];
+    } else {
+      right = !timedOut && value === (isTimes() ? c.a * c.b : c.id);
+      grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
+      // StoliceMax and ChemiaMax: with four answers to choose from, a right
+      // answer the first time may be a guess. It is never Easy, so the country goes through the
+      // learning steps.
+      if (!isTimes() && c.type === 'new' && grade === SRS.EASY) grade = SRS.GOOD;
+    }
     const wasNew = c.type === 'new';
     const updated = SRS.answer(c, grade, now(), cfg());
     state.cards[c.id] = updated;
-    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), value]);
+    state.log.push([now(), c.id, grade, STATE_CODES[c.type], Math.round(ms), logged]);
 
     const d = daily();
     d.answered += 1;
@@ -2231,9 +2435,18 @@
       const coinNote = () => (reward.coins
         ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
         : '');
-      feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong><br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
-      // Time to read the coins, and in JęzykiMax a translation.
-      advanceIn(Math.max(reward.coins ? 2200 : 0, meaningOf(c) ? 3500 : 0));
+      const away = () => (isMaps() ? ' ' + esc(distanceText()) : '');
+      feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong>' + away() + '<br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
+      // Time to read the coins, in JęzykiMax a translation, and in MapkiMax
+      // to see the place on the map.
+      advanceIn(Math.max(reward.coins ? 2200 : 0, meaningOf(c) ? 3500 : 0, isMaps() ? 3000 : 0));
+    } else if (isMaps()) {
+      // MapkiMax: the place is shown in green, and the child taps it to move on.
+      mode = 'wrong';
+      feedback = timedOut
+        ? () => '<strong>' + esc(T().timeUp) + '</strong> ' + esc(T().typeToGoOn())
+        : () => '<strong>' + esc(T().tooFar) + '</strong> ' + esc(distanceText()) + '<br>' + esc(T().typeToGoOn());
+      flash('shake');
     } else {
       mode = 'wrong';
       let answer;
@@ -2251,9 +2464,14 @@
       flash('shake');
     }
     render();
+    if (isMaps()) atlas.focus(c.id, mapAnswer.pin);
     sayByItself();
   }
   const submitTyped = () => submit(Number(typed));
+  // MapkiMax: how far the pin is from the place, such as "312 km away".
+  const distanceText = () => (mapAnswer.km < 0.5
+    ? T().onTheSpot
+    : T().kmAway(new Intl.NumberFormat(lang(), { maximumFractionDigits: 0 }).format(Math.max(1, mapAnswer.km))));
 
   // After a wrong answer the child gives the right one to move on.
   function moveOn(c) {
@@ -2395,7 +2613,7 @@
 
   function buildProgress() {
     if (isTimes()) buildSquare();
-    else buildMap();
+    else if (!isMaps()) buildMap();
   }
 
   function stage(c) {
@@ -2405,6 +2623,7 @@
   }
 
   function renderProgress() {
+    if (isMaps()) return renderMapProgress();
     const t = T();
     const active = new Set(activeCards().map((c) => c.id));
     const n = { new: 0, learning: 0, young: 0, mature: 0 };
@@ -2484,6 +2703,11 @@
         slot.textContent = num(typed);
       }
       slot.classList.toggle('empty', mode === 'ask' && typed === '');
+    } else if (isMaps()) {
+      const place = BY_PLACE[c.id];
+      $('place-kind').innerHTML = '<span class="icon" aria-hidden="true">' + KIND_ICONS[place.kind] + '</span>' + esc(T().kinds[place.kind]);
+      $('place-name').textContent = place.name[lang()];
+      renderAtlas();
     } else {
       if (app.id === 'capitals') {
         $('flag').textContent = flag(c.id);
@@ -2561,6 +2785,7 @@
     $('card').hidden = done;
     $('keypad').hidden = done;
     $('choices').hidden = done;
+    $('atlas').hidden = done;
     $('done').hidden = !done;
 
     if (shown && !done) {
@@ -2685,13 +2910,567 @@
     });
   }
 
+  // ---------- MapkiMax: the map ----------
+
+  // The map of a continent: its land coloured by height, as in a school
+  // atlas, other land grey, with lakes, rivers, ice and borders, but no
+  // names. It is drawn on a canvas in the kilometres of the projection of
+  // the continent (geo.js), with y pointing down.
+  const MAP_COLORS = {
+    sea: '#cfe6f5',
+    coast: '#7ea9c8',
+    other: '#e7e4dc',
+    // below 200 m, then from 200, 500, 1500 and 3000 m (MAP.heights)
+    heights: ['#d5e8bf', '#e5ebbc', '#eedfb0', '#dcc29c', '#c4a386'],
+    ice: '#fafcff',
+    river: '#6aa1d2',
+    border: '#9e8d78',
+    place: '#14804a', // the place, once answered
+    pin: '#2a4fc2',
+    miss: '#c63d32', // the pin, too far away
+  };
+  // A segment along the edge of the data (180 degrees, or the South Pole),
+  // where Natural Earth cuts the land: no coast is drawn there.
+  const isSeam = (x0, y0, x1, y1) => (Math.abs(x0) === 180 && x0 === x1) || (y0 <= -89.99 && y1 <= -89.99);
+  const layersOf = {};
+  function mapLayers(code) {
+    if (layersOf[code]) return layersOf[code];
+    const cont = MAP.continents[code];
+    const proj = GEO.projection(cont.center);
+    // Lines more than about 100 degrees from the centre are left out, and
+    // the map is cut there (rim): farther away, the projection squeezes the
+    // land into thin slivers along its edge.
+    const near = (pts) => {
+      for (let i = 0; i < pts.length; i += 2) if (proj.angle(pts[i], pts[i + 1]) > -0.2) return true;
+      return false;
+    };
+    const rim = new Path2D();
+    rim.arc(0, 0, 2 * GEO.R * Math.sin((100 / 2) * (Math.PI / 180)), 0, Math.PI * 2);
+    // The rings or lines as one path; edge: the rings without the cut edges.
+    const build = (list, closed, edge) => {
+      const path = new Path2D();
+      for (const text of list) {
+        const pts = typeof text === 'string' ? GEO.decode(text) : text;
+        if (!near(pts)) continue;
+        for (let i = 0; i < pts.length; i += 2) {
+          const [x, y] = proj.forward(pts[i], pts[i + 1]);
+          if (i === 0 || (edge && isSeam(pts[i - 2], pts[i - 1], pts[i], pts[i + 1]))) path.moveTo(x, -y);
+          else path.lineTo(x, -y);
+        }
+        if (closed) path.closePath();
+      }
+      return path;
+    };
+    // Lakes and rivers that are places are drawn from their shapes in places.js.
+    const placeLines = (kind) => PLACES.filter((p) => p.kind === kind && p.type !== 'point').flatMap((p) => p.shape);
+    const fit = GEO.decode(cont.fit).reduce((xy, v, i, a) => (i % 2 ? xy : xy.concat([proj.forward(v, a[i + 1])])), []);
+    const xs = fit.map(([x]) => x);
+    const ys = fit.map(([, y]) => -y);
+    layersOf[code] = {
+      code,
+      proj,
+      rim,
+      land: build(MAP.land, true),
+      coast: build(MAP.land, false, true),
+      mask: build([cont.mask], true),
+      heights: MAP.heights.map(([, rings]) => build(rings, true)),
+      ice: build(MAP.ice, true),
+      lakes: build(MAP.lakes.concat(placeLines('lake')), true),
+      rivers: build(MAP.rivers.concat(placeLines('river')), false),
+      borders: build(MAP.borders, false),
+      home: { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) },
+      // Antarctica is all ice.
+      lowland: code === 'AN' ? MAP_COLORS.ice : MAP_COLORS.heights[0],
+    };
+    return layersOf[code];
+  }
+
+  // A map on a canvas. With onTap, it can be moved with a finger or the
+  // mouse, zoomed with two fingers, the wheel or the buttons, and tapped.
+  // overlay(ctx, view) draws on top, in pixels.
+  function atlasView(canvas, { onTap, overlay }) {
+    const ctx = canvas.getContext('2d');
+    // atHome: showing the whole continent, until it is moved or zoomed.
+    const v = { L: null, s: 0, cx: 0, cy: 0, w: 0, h: 0, anim: 0, queued: false, atHome: false };
+    const ratio = () => Math.min(2, window.devicePixelRatio || 1);
+    const view = {};
+
+    // The first view: the whole continent. Zoom from a little less than
+    // that to 0.4 km a pixel; the middle stays near the continent.
+    function homeOf() {
+      const b = v.L.home;
+      const s = Math.min(v.w / (b.x1 - b.x0), v.h / (b.y1 - b.y0)) * 0.94;
+      return { s, cx: (b.x0 + b.x1) / 2, cy: (b.y0 + b.y1) / 2 };
+    }
+    function clamp(t) {
+      const home = homeOf();
+      const b = v.L.home;
+      t.s = Math.min(Math.max(t.s, home.s * 0.7), Math.max(2.5, home.s * 4));
+      const mx = (b.x1 - b.x0) * 0.4;
+      const my = (b.y1 - b.y0) * 0.4;
+      t.cx = Math.min(Math.max(t.cx, b.x0 - mx), b.x1 + mx);
+      t.cy = Math.min(Math.max(t.cy, b.y0 - my), b.y1 + my);
+      return t;
+    }
+    function set(t) {
+      Object.assign(v, clamp({ s: t.s, cx: t.cx, cy: t.cy }));
+      request();
+    }
+    // Moves to t over ms milliseconds, zooming at an even pace.
+    function goTo(t, ms, home = false) {
+      cancelAnimationFrame(v.anim);
+      v.atHome = home;
+      t = clamp({ ...t });
+      if (!ms || matchMedia('(prefers-reduced-motion: reduce)').matches || !v.s) return set(t);
+      const from = { s: v.s, cx: v.cx, cy: v.cy };
+      const start = performance.now();
+      const step = (now) => {
+        const k = Math.min(1, (now - start) / ms);
+        const e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+        const s = from.s * (t.s / from.s) ** e;
+        set({ s, cx: from.cx + (t.cx - from.cx) * e, cy: from.cy + (t.cy - from.cy) * e });
+        if (k < 1) v.anim = requestAnimationFrame(step);
+      };
+      v.anim = requestAnimationFrame(step);
+    }
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      v.w = rect.width;
+      v.h = rect.height;
+      canvas.width = Math.round(v.w * ratio());
+      canvas.height = Math.round(v.h * ratio());
+      if (v.L && (v.atHome || !v.s)) {
+        v.atHome = true;
+        set(homeOf());
+      } else if (v.L) {
+        set(v);
+      } else {
+        request();
+      }
+    }
+    function request() {
+      if (v.queued) return;
+      v.queued = true;
+      requestAnimationFrame(() => {
+        v.queued = false;
+        draw();
+      });
+    }
+    // The map is drawn into a picture one and a half times the size of the
+    // canvas (base), which is only moved and stretched while the map moves;
+    // it is drawn again, sharp, once the map stops (or when it no longer
+    // covers the canvas). Its pixels are kept under 8 million, well below
+    // what Safari allows a canvas.
+    const BASE = 1.5;
+    const base = document.createElement('canvas');
+    let baseView = null; // { code, s, cx, cy, w, h } the picture was drawn for
+    let baseAt = 0;
+    let sharpen = 0;
+    function drawBase() {
+      const L = v.L;
+      const s = v.s;
+      const w = v.w * BASE;
+      const h = v.h * BASE;
+      const r = Math.min(ratio(), Math.sqrt(8e6 / (w * h)));
+      base.width = Math.round(w * r);
+      base.height = Math.round(h * r);
+      const b = base.getContext('2d');
+      b.setTransform(r * s, 0, 0, r * s, r * (w / 2 - s * v.cx), r * (h / 2 - s * v.cy));
+      b.save();
+      b.clip(L.rim);
+      b.fillStyle = MAP_COLORS.other;
+      b.fill(L.land);
+      b.save();
+      b.clip(L.mask);
+      b.fillStyle = L.lowland;
+      b.fill(L.land);
+      if (L.code !== 'AN') {
+        L.heights.forEach((path, i) => {
+          b.fillStyle = MAP_COLORS.heights[i + 1];
+          b.fill(path, 'evenodd');
+        });
+      }
+      b.restore();
+      b.fillStyle = MAP_COLORS.ice;
+      b.fill(L.ice);
+      b.fillStyle = MAP_COLORS.sea;
+      b.fill(L.lakes, 'evenodd');
+      b.lineJoin = 'round';
+      b.lineCap = 'round';
+      b.strokeStyle = MAP_COLORS.river;
+      b.lineWidth = 1.1 / s;
+      b.stroke(L.rivers);
+      b.strokeStyle = MAP_COLORS.coast;
+      b.lineWidth = 0.8 / s;
+      b.stroke(L.lakes);
+      b.stroke(L.coast);
+      b.strokeStyle = MAP_COLORS.border;
+      b.lineWidth = 0.9 / s;
+      b.setLineDash([4 / s, 3 / s]);
+      b.stroke(L.borders);
+      b.restore();
+      baseView = { code: L.code, s, cx: v.cx, cy: v.cy, w, h };
+      baseAt = performance.now();
+    }
+    function draw() {
+      const r = ratio();
+      ctx.setTransform(r, 0, 0, r, 0, 0);
+      ctx.fillStyle = MAP_COLORS.sea;
+      ctx.fillRect(0, 0, v.w, v.h);
+      if (!v.L || !v.s) return;
+      // Where the picture lands on the canvas, k times its size.
+      const place = () => {
+        const k = v.s / baseView.s;
+        const x = v.w / 2 + (baseView.cx - v.cx) * v.s - (baseView.w / 2) * k;
+        const y = v.h / 2 + (baseView.cy - v.cy) * v.s - (baseView.h / 2) * k;
+        return { k, x, y, covers: x <= 0.5 && y <= 0.5 && x + baseView.w * k >= v.w - 0.5 && y + baseView.h * k >= v.h - 0.5 };
+      };
+      let at = baseView && baseView.code === v.L.code && baseView.w === v.w * BASE && baseView.h === v.h * BASE ? place() : null;
+      // A gap at the edge is filled at once, and a picture stretched or shrunk
+      // a lot is drawn again, but at most a few times a second.
+      const stale = at && (!at.covers || at.k > 1.6 || at.k < 0.6) && performance.now() - baseAt > 250;
+      if (!at || stale) {
+        drawBase();
+        at = place();
+      }
+      ctx.drawImage(base, at.x, at.y, baseView.w * at.k, baseView.h * at.k);
+      clearTimeout(sharpen);
+      if (Math.abs(at.k - 1) > 1e-6 || !at.covers) sharpen = setTimeout(() => { drawBase(); request(); }, 150);
+      if (overlay) overlay(ctx, view);
+    }
+
+    // [x, y] in pixels of a place on the Earth, and back.
+    view.toScreen = (lon, lat) => {
+      const [x, y] = v.L.proj.forward(lon, lat);
+      return [v.w / 2 + (x - v.cx) * v.s, v.h / 2 + (-y - v.cy) * v.s];
+    };
+    view.fromScreen = (px, py) => v.L.proj.inverse(v.cx + (px - v.w / 2) / v.s, -(v.cy + (py - v.h / 2) / v.s));
+    view.kmPerPixel = () => 1 / v.s;
+    view.redraw = request;
+    view.code = () => v.L && v.L.code;
+    // Shows the map of a continent, if it is not shown already.
+    view.show = (code) => {
+      if (v.L && v.L.code === code) return;
+      v.L = mapLayers(code);
+      v.s = 0;
+      v.atHome = true;
+      if (v.w) set(homeOf());
+    };
+    // The whole continent, moving there if it is shown already.
+    view.home = (code) => {
+      const same = v.L && v.L.code === code;
+      view.show(code);
+      if (v.w) goTo(homeOf(), same ? 450 : 0, true);
+      else v.atHome = true;
+    };
+    // Shows a place and the pin, as large as they fit.
+    view.focus = (id, at) => {
+      if (!v.w) return;
+      const xs = [];
+      const ys = [];
+      const add = (lon, lat) => {
+        const [x, y] = v.L.proj.forward(lon, lat);
+        xs.push(x);
+        ys.push(-y);
+      };
+      for (const line of placeShape(id).lines) {
+        const step = Math.max(2, Math.floor(line.length / 400) * 2);
+        for (let i = 0; i < line.length; i += step) add(line[i], line[i + 1]);
+      }
+      if (at) add(at[0], at[1]);
+      const pad = 70;
+      const w = Math.max(...xs) - Math.min(...xs);
+      const h = Math.max(...ys) - Math.min(...ys);
+      const s = Math.min((v.w - 2 * pad) / Math.max(w, 1), (v.h - 2 * pad) / Math.max(h, 1), homeOf().s * 5);
+      goTo({ s: Math.max(s, homeOf().s * 0.7), cx: (Math.max(...xs) + Math.min(...xs)) / 2, cy: (Math.max(...ys) + Math.min(...ys)) / 2 }, 600);
+    };
+    // Zooms by f around the middle, or around [px, py].
+    view.zoom = (f, px = v.w / 2, py = v.h / 2, ms = 0) => {
+      if (!v.s) return;
+      const kx = v.cx + (px - v.w / 2) / v.s;
+      const ky = v.cy + (py - v.h / 2) / v.s;
+      const s = clamp({ s: v.s * f, cx: v.cx, cy: v.cy }).s;
+      goTo({ s, cx: kx - (px - v.w / 2) / s, cy: ky - (py - v.h / 2) / s }, ms);
+    };
+    view.pan = (dx, dy) => goTo({ s: v.s, cx: v.cx + dx / v.s, cy: v.cy + dy / v.s }, 200);
+
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resize).observe(canvas);
+    else window.addEventListener('resize', resize);
+
+    if (onTap) {
+      // One finger moves the map, two zoom it; a short touch without moving is a tap.
+      const pointers = new Map();
+      let gesture = null;
+      const at = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        return [e.clientX - rect.left, e.clientY - rect.top];
+      };
+      canvas.addEventListener('pointerdown', (e) => {
+        if (!v.s) return;
+        cancelAnimationFrame(v.anim);
+        canvas.setPointerCapture(e.pointerId);
+        pointers.set(e.pointerId, at(e));
+        v.atHome = false;
+        if (pointers.size === 1) gesture = { start: at(e), time: performance.now(), moved: false, many: false };
+        else if (gesture) gesture.many = true;
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!pointers.has(e.pointerId) || !gesture) return;
+        const before = [...pointers.values()];
+        pointers.set(e.pointerId, at(e));
+        const after = [...pointers.values()];
+        if (after.length === 1) {
+          const [x, y] = after[0];
+          if (!gesture.moved && Math.hypot(x - gesture.start[0], y - gesture.start[1]) > 8) {
+            gesture.moved = true;
+            canvas.classList.add('dragging');
+          }
+          if (gesture.moved) set({ s: v.s, cx: v.cx - (x - before[0][0]) / v.s, cy: v.cy - (y - before[0][1]) / v.s });
+        } else {
+          // Two fingers: the point under the middle of them follows it, and
+          // the map grows as they spread.
+          const mid = (p) => [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2];
+          const gap = (p) => Math.max(1, Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]));
+          const [mx0, my0] = mid(before);
+          const [mx1, my1] = mid(after);
+          const kx = v.cx + (mx0 - v.w / 2) / v.s;
+          const ky = v.cy + (my0 - v.h / 2) / v.s;
+          const s = clamp({ s: v.s * (gap(after) / gap(before)), cx: v.cx, cy: v.cy }).s;
+          set({ s, cx: kx - (mx1 - v.w / 2) / s, cy: ky - (my1 - v.h / 2) / s });
+          gesture.moved = true;
+        }
+      });
+      const up = (e) => {
+        if (!pointers.has(e.pointerId)) return;
+        pointers.delete(e.pointerId);
+        if (pointers.size || !gesture) return;
+        canvas.classList.remove('dragging');
+        const g = gesture;
+        gesture = null;
+        if (e.type === 'pointerup' && !g.moved && !g.many && performance.now() - g.time < 800) {
+          const [x, y] = at(e);
+          const [lon, lat] = view.fromScreen(x, y);
+          onTap(lon, lat);
+        }
+      };
+      canvas.addEventListener('pointerup', up);
+      canvas.addEventListener('pointercancel', up);
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const [x, y] = at(e);
+        view.zoom(Math.exp(-e.deltaY * (e.deltaMode ? 0.05 : 0.0015)), x, y);
+      }, { passive: false });
+    }
+    return view;
+  }
+
+  // The pin: a round head on a needle whose tip is at (x, y).
+  function drawPin(ctx, x, y, color) {
+    ctx.save();
+    ctx.shadowColor = 'rgb(0 0 0 / 0.35)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 2;
+    ctx.strokeStyle = '#4a5160';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - 16);
+    ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y - 22, 8.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = 'rgb(255 255 255 / 0.75)';
+    ctx.beginPath();
+    ctx.arc(x - 2.8, y - 24.8, 2.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Text with a white edge, readable on any colour of the map.
+  function drawLabel(ctx, text, x, y, size = 15) {
+    ctx.font = '700 ' + size + 'px ' + getComputedStyle(document.body).getPropertyValue('--font-body');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.direction = T().dir === 'rtl' ? 'rtl' : 'ltr';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgb(255 255 255 / 0.92)';
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = '#1d2742';
+    ctx.fillText(text, x, y);
+  }
+  // The place in green: an area filled, a river along its course, a city
+  // or peak as a dot in a ring.
+  function drawPlace(ctx, view, id) {
+    const shape = placeShape(id);
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    if (shape.type === 'point') {
+      const [x, y] = view.toScreen(shape.lines[0][0], shape.lines[0][1]);
+      ctx.fillStyle = MAP_COLORS.place;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = MAP_COLORS.place;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(x, y, 14, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      const path = new Path2D();
+      for (const line of shape.lines) {
+        for (let i = 0; i < line.length; i += 2) {
+          const [x, y] = view.toScreen(line[i], line[i + 1]);
+          if (i) path.lineTo(x, y);
+          else path.moveTo(x, y);
+        }
+        if (shape.type === 'area') path.closePath();
+      }
+      if (shape.type === 'area') {
+        ctx.fillStyle = 'rgb(20 128 74 / 0.28)';
+        ctx.fill(path, 'evenodd');
+        ctx.strokeStyle = MAP_COLORS.place;
+        ctx.lineWidth = 2.5;
+        ctx.stroke(path);
+      } else {
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 7;
+        ctx.stroke(path);
+        ctx.strokeStyle = MAP_COLORS.place;
+        ctx.lineWidth = 4;
+        ctx.stroke(path);
+      }
+    }
+    ctx.restore();
+  }
+
+  // The main map: the pin, and once answered the place, its name, and a
+  // dashed line from the pin to the nearest point of the place.
+  function atlasOverlay(ctx, view) {
+    const c = current();
+    if (!c || !isMaps() || mode === 'done') return;
+    const place = BY_PLACE[c.id];
+    if (mode !== 'ask') {
+      drawPlace(ctx, view, c.id);
+      if (mapAnswer && mapAnswer.pin && mapAnswer.km >= 0.5) {
+        const [x0, y0] = view.toScreen(...mapAnswer.pin);
+        const [x1, y1] = view.toScreen(...mapAnswer.at);
+        ctx.save();
+        ctx.setLineDash([6, 5]);
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#1d2742';
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+        ctx.restore();
+      }
+      // Above a city or peak, or below it when the pin is just above.
+      const [lx, ly] = view.toScreen(place.at[0], place.at[1]);
+      let dy = place.type === 'point' ? -26 : 0;
+      if (dy && mapAnswer && mapAnswer.pin) {
+        const [px, py] = view.toScreen(...mapAnswer.pin);
+        if (Math.abs(px - lx) < 70 && py <= ly && ly - py < 60) dy = 28;
+      }
+      drawLabel(ctx, place.name[lang()], lx, ly + dy, 16);
+    }
+    const shown = mode === 'ask' ? pin : mapAnswer && mapAnswer.pin;
+    if (shown) {
+      const [x, y] = view.toScreen(...shown);
+      drawPin(ctx, x, y, mode === 'wrong' ? MAP_COLORS.miss : MAP_COLORS.pin);
+    }
+  }
+
+  // MapkiMax: the pin goes where the map is tapped. After a wrong answer, a
+  // tap on (or near) the place moves on.
+  function atlasTap(lon, lat) {
+    const c = current();
+    if (!c || !isMaps()) return;
+    if (mode === 'ask') {
+      pin = [lon, lat];
+      renderAtlas();
+    } else if (mode === 'wrong') {
+      const { km } = GEO.toPlace(placeShape(c.id), lon, lat);
+      if (km <= Math.max(25, 30 * atlas.kmPerPixel())) {
+        moveOn(c);
+        renderCard();
+      } else {
+        flash('shake');
+      }
+    }
+  }
+  function renderAtlas() {
+    const c = current();
+    if (c) atlas.show(BY_PLACE[c.id].continent);
+    $('atlas-ok').hidden = !(mode === 'ask' && pin);
+    $('atlas-hint').textContent = mode === 'ask' ? (pin ? T().pinHint : T().mapHint) : '';
+    atlas.redraw();
+  }
+  const atlas = atlasView($('atlas-map'), { onTap: atlasTap, overlay: atlasOverlay });
+
+  // The progress map: a dot for each place of the continent asked at least
+  // once, in the colour of the legend. The place being asked is left out
+  // until it is answered.
+  let progressContinent = null;
+  function progressOverlay(ctx, view) {
+    if (!isMaps()) return;
+    const css = getComputedStyle(document.documentElement);
+    const colors = { learning: css.getPropertyValue('--learn'), young: '#5cb57f', mature: '#14804a' };
+    for (const place of PLACES) {
+      const c = state.cards[place.id];
+      if (place.continent !== view.code() || !c || c.type === 'new') continue;
+      if (place.id === currentId && mode === 'ask') continue;
+      const [x, y] = view.toScreen(place.at[0], place.at[1]);
+      ctx.fillStyle = colors[stage(c)];
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(x, y, place.id === currentId ? 6 : 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+  const progressMap = atlasView($('progress-map'), { overlay: progressOverlay });
+
+  function renderMapProgress() {
+    const t = T();
+    const active = new Set(activeCards().map((c) => c.id));
+    const n = { new: 0, learning: 0, young: 0, mature: 0 };
+    const learned = {};
+    const total = {};
+    for (const place of PLACES) {
+      const c = state.cards[place.id];
+      const s = c ? stage(c) : 'new';
+      if (active.has(place.id)) n[s] += 1;
+      total[place.continent] = (total[place.continent] || 0) + 1;
+      if (s === 'young' || s === 'mature') learned[place.continent] = (learned[place.continent] || 0) + 1;
+    }
+    // The continent of the card, unless another one was chosen above the map.
+    const on = PLACE_CONTINENTS.filter((code) => state.settings.continents.includes(code));
+    if (!on.includes(progressContinent)) progressContinent = currentId ? BY_PLACE[currentId].continent : on[0] || 'EU';
+    $('map-tabs').innerHTML = on.map((code) => '<button type="button" data-continent="' + code + '" aria-pressed="' + (code === progressContinent) + '"' +
+      ' title="' + esc(t.learnedOf(num(learned[code] || 0), num(total[code]))) + '">' + esc(t.groups[code]) +
+      '<span class="tally">' + esc(num(learned[code] || 0) + '/' + num(total[code])) + '</span></button>').join('');
+    progressMap.show(progressContinent);
+    progressMap.redraw();
+    $('n-new').textContent = num(n.new);
+    $('n-learning').textContent = num(n.learning);
+    $('n-young').textContent = num(n.young);
+    $('n-mature').textContent = num(n.mature);
+  }
+
   // ---------- rewards ----------
 
   const rewardOf = (appId, id) => APPS[appId].rewards.find((r) => r.id === id) || APPS[appId].rewards[0];
   const reward = (id) => rewardOf(app.id, id);
 
   // A gradient pair for each reward, next to the coin's gradients, and the
-  // outlines of the souvenirs, glassware, prizes and city symbols for their
+  // outlines of the souvenirs, glassware, prizes, city symbols and maps for their
   // beam of light, glitter and bubbles.
   function makeRewardGradients() {
     const NS = 'http://www.w3.org/2000/svg';
@@ -2708,7 +3487,7 @@
       }
       defs.appendChild(g);
     };
-    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE, PRIZES, CITIES)) {
+    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE, PRIZES, CITIES, ATLASES)) {
       gradient('linearGradient', 'rim-' + id, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
       gradient('radialGradient', 'face-' + id, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
     }
@@ -2732,6 +3511,7 @@
     }
     for (const { id } of PRIZES) clipPath('clip-' + id, PRIZE_ART[id].shape);
     for (const { id } of CITIES) clipPath('clip-' + id, CITY_ART[id].shape);
+    for (const { id } of ATLASES) clipPath('clip-' + id, ATLAS_ART[id].shape);
   }
 
   // The beam of light that passes over a reward now and then.
@@ -3661,14 +4441,211 @@
   });
   const cityIcon = (id) => modelIcon(id, CITIES, CITY_ART);
 
-  const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon };
+  // MapkiMax: atlases, maps and globes, glittering like the souvenirs and
+  // standing on a stand like the city symbols. "shape" is the outline for
+  // the glitter and the beam of light, "art" draws it, and "sparkles" are
+  // the twinkling stars, as for the souvenirs.
+  // A globe at (16, 13.5) with radius 9: the land seen from over Africa and
+  // Europe, with South America at the edge.
+  const GLOBE = '<circle cx="16" cy="13.5" r="9"/>';
+  const GLOBE_LAND = 'M13.6 6.4c1.3-.8 3-1 4.5-.5 1.1.4 2.3.3 3.1-.3l.7 1.5c-.7.8-1.8 1.2-2.8 1.3l-.4 1.3c-1.2.3-2.4.1-3.4-.5-.8-.6-1.5-1.5-1.7-2.5z' +
+    'M14.6 11c1.7-.6 3.6-.5 5.2.1.9.4 1.5 1.3 1.4 2.3-.1 1.3-.8 2.4-1.5 3.5-.7 1.3-1.2 2.8-2.2 3.9-.6.6-1.5.5-1.9-.3-.5-1.1-.3-2.4-.7-3.5-.4-.9-1.4-1.5-1.7-2.5-.3-1.2.2-2.7 1.4-3.5z' +
+    'M8.4 13.2c1.1-.2 2.3.3 3 1.2.6.8.4 1.9-.1 2.8-.6 1.1-1.5 2-2 3.1-.3-.1-.5-.3-.7-.6-.6-1.4-.8-3-.6-4.6.1-.7.2-1.4.4-1.9z';
+  const GLOBE_GRID = '<g fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="0.4"><ellipse cx="16" cy="13.5" rx="4.4" ry="9"/>' +
+    '<path d="M16 4.5v18M7.9 9.5h16.2M7 13.5h18M7.9 17.5h16.2"/></g>';
+  // The stand: a foot, and a half ring that holds the globe at its poles.
+  const globeStand = (metal, deep) => '<path d="M10.6 26.8h10.8l-1.6-2.5h-7.6z" fill="' + metal + '" stroke="' + deep + '" stroke-width="0.5" stroke-linejoin="round"/>' +
+    '<path d="M16 24.3v-1.5" stroke="' + deep + '" stroke-width="1.5"/>' +
+    '<path d="M16 3.1a10.4 10.4 0 0 1 0 20.8" fill="none" stroke="' + deep + '" stroke-width="2"/>' +
+    '<path d="M16 3.1a10.4 10.4 0 0 1 0 20.8" fill="none" stroke="' + metal + '" stroke-width="1.2"/>' +
+    '<circle cx="16" cy="3.1" r="0.9" fill="' + metal + '" stroke="' + deep + '" stroke-width="0.3"/>';
+  const globeArt = (ocean, land, landEdge, metal, deep, extra = '') => globeStand(metal, deep) +
+    '<circle cx="16" cy="13.5" r="9" fill="' + ocean + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+    '<path d="' + GLOBE_LAND + '" fill="' + land + '" stroke="' + landEdge + '" stroke-width="0.35" stroke-linejoin="round"/>' +
+    GLOBE_GRID + extra +
+    '<path d="M10.2 8.4a7.2 7.2 0 0 1 4.6-3.6" stroke="#fff" stroke-width="0.9" stroke-linecap="round" stroke-opacity="0.7" fill="none"/>';
+  const BRASS = '#d4a743';
+  const BRASS_DEEP = '#7a5a12';
+  // Paper with a wavy edge, for the treasure map.
+  const PARCHMENT = 'M4.5 6.2c2.4-.9 4.6.6 7 0s4.4-1.1 6.8-.3 4.4.6 6.8 0l.6.3-.5 4.6.6 4.4-.6 4.6.5 4.6c-2.4.9-4.6-.6-7 0s-4.4 1.1-6.8.3-4.4-.6-6.8 0l-.6-.3.5-4.6-.6-4.4.6-4.6z';
+  // A map folded in three.
+  const FOLDED = ['M4 6.2l8-1.6v19.6l-8 1.6z', 'M12 4.6l8 1.6v19.6l-8-1.6z', 'M20 6.2l8-1.6v19.6l-8 1.6z'];
+  // A book seen from the front, and two open pages.
+  const BOOK = 'M7 4h17.2a1.6 1.6 0 0 1 1.6 1.6v19.6a1.6 1.6 0 0 1-1.6 1.6H7z';
+  const PAGES = 'M3.4 9c4.2-1.7 8.4-1.7 12.6 0v15.6c-4.2-1.7-8.4-1.7-12.6 0zM28.6 9c-4.2-1.7-8.4-1.7-12.6 0v15.6c4.2-1.7 8.4-1.7 12.6 0z';
+  // A scroll between two rollers.
+  const SCROLL = 'M6 9.5h20v12H6z';
+  // A torn piece of parchment, like the map of Piri Reis.
+  const TORN = 'M5 5.5h22.5v20.2H13.2l-1.4-1.6-1.6.9-1.3-2-1.7.6-.9-2.4-1.6-.2.4-2.6-1.4-1.4z';
+  // A compass rose with eight points at (x, y).
+  const rose = (x, y, r, a, b) => [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+    const t = (i * Math.PI) / 4;
+    const len = i % 2 ? r * 0.6 : r;
+    const tip = [x + len * Math.sin(t), y - len * Math.cos(t)];
+    const side = (k) => [x + r * 0.18 * Math.sin(t + k * Math.PI / 2), y - r * 0.18 * Math.cos(t + k * Math.PI / 2)];
+    const fmt = (pt) => pt.map((n) => n.toFixed(2)).join(' ');
+    return '<path d="M' + fmt(side(-1)) + 'L' + fmt(tip) + 'L' + fmt(side(1)) + 'z" fill="' + (i % 2 ? b : a) + '" stroke="#5e4519" stroke-width="0.2"/>';
+  }).join('') + '<circle cx="' + x + '" cy="' + y + '" r="' + (r * 0.16).toFixed(2) + '" fill="#fff" stroke="#5e4519" stroke-width="0.2"/>';
+  // Lines from a compass rose, as on old sea charts, kept within the map.
+  const rhumbs = (x, y, len, color, id) => '<g clip-path="url(#clip-' + id + ')" stroke="' + color + '" stroke-width="0.3" stroke-opacity="0.75">' +
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => {
+      const t = (i * Math.PI) / 6;
+      return '<path d="M' + x + ' ' + y + 'l' + (len * Math.cos(t)).toFixed(2) + ' ' + (len * Math.sin(t)).toFixed(2) + '"/>';
+    }).join('') + '</g>';
+  const ATLAS_ART = {
+    treasuremap: {
+      shape: '<path d="' + PARCHMENT + '"/>',
+      sparkles: [[26, 5.4, 1.6], [5, 24, 1.4], [20.6, 17.6, 1.2]],
+      art: (f, rim, [, , lo, deep]) => path(PARCHMENT, f, deep, 0.6) +
+        '<path d="M6.6 9.8c1.6-1.6 4-1.4 5.4.2 1.2 1.4 3.4 1.6 4.6.6 1.6-1.4 4-1.2 5.4.6 1.4 1.8.8 4.4-1.2 5.6-2.6 1.6-5 3.6-7.4 4.4-2.4.8-5.2-.2-6.4-2.4-1.2-2.4-1-6.6-.4-9z" fill="#c8b06a" fill-opacity="0.55" stroke="' + lo + '" stroke-width="0.4"/>' +
+        '<path d="M7.6 20.4c1.8-1.6 3-3.6 5.2-4.2 2-.6 3.2 1.6 5.4.8" fill="none" stroke="#c63d32" stroke-width="0.8" stroke-dasharray="1.2 1" stroke-linecap="round"/>' +
+        '<path d="M19.4 16.2l2.4 2.4M21.8 16.2l-2.4 2.4" stroke="#c63d32" stroke-width="1.1" stroke-linecap="round"/>' +
+        '<path d="M9 13.6v-3M9 10.6c-.9-.6-1.9-.5-2.6.2M9 10.6c.9-.7 2-.6 2.6.1M9 10.6c-.3-.9-1-1.4-1.9-1.4M9 10.6c.4-.9 1.2-1.3 2-1.2" stroke="#2f7d32" stroke-width="0.55" stroke-linecap="round" fill="none"/>' +
+        rose(23.4, 9.6, 2.6, '#5e4519', '#b59251'),
+    },
+    schoolglobe: {
+      shape: GLOBE,
+      sparkles: [[23.4, 5.4, 1.5], [8.2, 20.2, 1.3], [25.4, 17.6, 1.2]],
+      art: (f) => globeArt(f, '#62c25a', '#2f7d32', '#c9d1da', '#5f6874'),
+    },
+    citymap: {
+      shape: '<path d="' + FOLDED.join('') + '"/>',
+      sparkles: [[27, 4, 1.5], [4.6, 24.8, 1.3], [16.4, 15, 1.1]],
+      art: (f, rim, [, , lo, deep]) => path(FOLDED[0], f, deep, 0.5) + path(FOLDED[1], lo, deep, 0.5) + path(FOLDED[2], f, deep, 0.5) +
+        '<path d="M5.6 12.2l20.8-1.6M5.6 18.6l20.8-1.6M8.4 6v18.8M16 5.6v19M23.6 5.2v18.8" stroke="#fff" stroke-width="1.1"/>' +
+        '<path d="M4 21.4c3.4-1.6 6-.4 8.6-2.4s5.2-5.2 8.4-4.8 4.6-1.4 7-2.4" fill="none" stroke="#5aa0dc" stroke-width="1.3"/>' +
+        '<path d="M18.2 7.6h3.4v2.6h-3.4z" fill="#7cc46b"/>' +
+        '<path d="M11.4 13.4c-1.4-1.6-2.2-2.6-2.2-3.6a2.2 2.2 0 0 1 4.4 0c0 1-.8 2-2.2 3.6z" fill="#e2453c" stroke="#8a1e18" stroke-width="0.3"/><circle cx="11.4" cy="9.8" r="0.8" fill="#fff"/>',
+    },
+    schoolatlas: {
+      shape: '<path d="' + BOOK + '"/>',
+      sparkles: [[24.6, 3.6, 1.5], [6, 25, 1.3], [20.4, 22, 1.1]],
+      art: (f, rim, [hi, , , deep]) => '<path d="M24 5.2h2.4v20.4H24z" fill="#fffaf0" stroke="#c9b88f" stroke-width="0.4"/>' +
+        path(BOOK, f, deep, 0.6) + '<path d="M7 4h2.6v22.8H7z" fill="' + deep + '" fill-opacity="0.45"/>' +
+        '<circle cx="17.2" cy="13.4" r="5" fill="#d9f0ff" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<path d="M15.6 10c.9-.4 1.9-.2 2.6.4.6.6 1.6.4 2-.2M15.4 12.4c1.4-.5 2.8 0 3.2 1.4.3 1.2-.6 2.4-.8 3.6M13.4 13.6c.6.5.8 1.4.4 2.2" stroke="#2f9a3a" stroke-width="1.1" fill="none" stroke-linecap="round"/>' +
+        '<path d="M12.4 21h9.6M13.6 23h7.2" stroke="' + hi + '" stroke-width="0.9" stroke-linecap="round"/>',
+    },
+    starglobe: {
+      shape: GLOBE,
+      sparkles: [[23.6, 5.2, 1.5], [7.8, 20.6, 1.3], [25.6, 18, 1.2]],
+      art: (f, rim, [hi, , , deep]) => globeStand(BRASS, BRASS_DEEP) +
+        '<circle cx="16" cy="13.5" r="9" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<path d="M10.6 9.4l3 1.6 2.8-1 2.6 2.6 3.4-.6M12.4 17l2.4-1.8 2.2 2.4 2.6-.4" fill="none" stroke="#ffe9a8" stroke-width="0.4" stroke-opacity="0.8"/>' +
+        [[10.6, 9.4], [13.6, 11], [16.4, 10], [19, 12.6], [22.4, 12], [12.4, 17], [14.8, 15.2], [17, 17.6], [19.6, 17.2], [11.2, 13.2], [20.2, 7.6], [15, 20.2]]
+          .map(([x, y], i) => '<circle cx="' + x + '" cy="' + y + '" r="' + (i % 3 ? 0.45 : 0.7) + '" fill="#fff6c4"/>').join('') +
+        '<path d="M7 13.5h18" stroke="' + hi + '" stroke-width="0.5" stroke-opacity="0.6"/>',
+    },
+    peutinger: {
+      shape: '<path d="' + SCROLL + '"/><circle cx="5" cy="15.5" r="2.4"/><circle cx="27" cy="15.5" r="2.4"/>',
+      sparkles: [[16, 7.6, 1.5], [3.6, 11.4, 1.3], [28.6, 20.2, 1.2]],
+      art: (f, rim, [, , , deep]) => path(SCROLL, f, deep, 0.5) +
+        '<path d="M6 10.4h20v1.8H6zM6 18.8h20v1.8H6z" fill="#7fb7c9"/>' +
+        '<path d="M6 15.2c3-.6 5 .6 8 0s5.4-.8 8 0 3 .2 4 0" fill="none" stroke="#c63d32" stroke-width="0.7"/>' +
+        '<path d="M6 17c4-.4 6.6-1.4 10.2-1.6M16.4 13.6c3 .2 6 1 9.6.6" fill="none" stroke="#c63d32" stroke-width="0.45"/>' +
+        [[9.4, 14.2], [15.4, 13.4], [21.8, 14.8]].map(([x, y]) => '<path d="M' + x + ' ' + y + 'h1.6v1.2h-1.6zM' + x + ' ' + y + 'l.8-.8.8.8z" fill="#b5462f"/>').join('') +
+        '<ellipse cx="5" cy="15.5" rx="1.6" ry="6.6" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.5"/><ellipse cx="27" cy="15.5" rx="1.6" ry="6.6" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        '<path d="M5 8.4v-1.4M5 22.6V24M27 8.4v-1.4M27 22.6V24" stroke="' + deep + '" stroke-width="1.2" stroke-linecap="round"/>',
+    },
+    idrisi: {
+      shape: '<circle cx="16" cy="14.6" r="10.4"/>',
+      sparkles: [[24.6, 5.2, 1.5], [6.2, 22.6, 1.3], [16, 3.6, 1.1]],
+      art: (f, rim, [, , , deep]) => '<circle cx="16" cy="14.6" r="10.4" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<circle cx="16" cy="14.6" r="8.6" fill="#4f8fb8"/>' +
+        // Al-Idrisi drew the south at the top: Africa above, Europe and Asia below.
+        '<path d="M8.4 15.2c1.6-.8 2.8-2.6 4.6-3.2 2.4-.8 3.6-3.2 6-3.4 1.8-.2 3.4.8 4.4 2.2.6 1.2.6 2.6.2 3.8l1.2 1.6c-.6 2.4-2.2 4.4-4.4 5.4-2.6 1.2-5.6 1.4-8.2.6-1.8-.6-3.4-1.8-4-3.6-.4-1.2-.2-2.4.2-3.4z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<path d="M10.6 16.6c2.2.6 4.4-.4 6.6 0s3.6 1.2 5.6.4" fill="none" stroke="#4f8fb8" stroke-width="0.9"/>' +
+        '<path d="M12.4 12.4c1-.4 1.6-1.2 2.6-1.4M18.4 19.6c1.2-.2 2.2-.8 3-1.6" stroke="#8a5a2b" stroke-width="0.6" fill="none" stroke-linecap="round"/>',
+    },
+    catalan: {
+      shape: '<path d="M4 6h24v19.6H4z"/>',
+      sparkles: [[27.4, 5.2, 1.5], [4.4, 24.6, 1.3], [12.6, 10.4, 1.1]],
+      art: (f, rim, [, , lo, deep]) => path('M4 6h24v19.6H4z', f, deep, 0.6) +
+        '<path d="M12 6v19.6M20 6v19.6" stroke="' + lo + '" stroke-width="0.4"/>' +
+        rhumbs(11, 16, 9, '#8a5a2b', 'catalan') +
+        '<path d="M14.4 21.6c2.2-1.6 3.6-3.6 5.8-4.2 2.4-.6 3.8-2.6 6.2-3 .6 0 1 .2 1.6.4v11h-14z" fill="#d8c48e" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<path d="M22.4 18.6h.8v-2.4l1.6.6-1.6.6" fill="#c63d32" stroke="#c63d32" stroke-width="0.3"/>' +
+        rose(11, 16, 4.6, '#3a5fb0', '#ffc928'),
+    },
+    pirireis: {
+      shape: '<path d="' + TORN + '"/>',
+      sparkles: [[27, 4.6, 1.5], [6.6, 6.4, 1.3], [22, 23, 1.1]],
+      art: (f, rim, [, , , deep]) => path(TORN, f, deep, 0.6) +
+        rhumbs(20.4, 11.6, 9, '#b5462f', 'pirireis') +
+        '<path d="M27.5 13.2c-1.8.6-3.6 0-5 1.2-1.2 1-1 2.8-2.2 3.8-1.4 1.2-3.4.8-4.6 2.2-.8.8-.8 2.2-1.4 3.2l-.4 2.1h13.6z" fill="#9cbf6c" stroke="#55702e" stroke-width="0.4"/>' +
+        '<path d="M9.6 9.6c1.2-1 3-.8 4.2.2" stroke="#55702e" stroke-width="0.6" fill="none" stroke-linecap="round"/>' +
+        '<path d="M8.6 16.4h3.6l-.6 1h-2.4zM10.4 16.4v-3l1.8 2.2z" fill="#8a5a2b"/>' +
+        rose(20.4, 11.6, 2.8, '#b5462f', '#e3bd84'),
+    },
+    mercator: {
+      shape: '<path d="M2.6 8.2c4.4-1.8 8.8-1.8 13.4 0 4.6-1.8 9-1.8 13.4 0v17.4H2.6z"/>',
+      sparkles: [[16, 5.6, 1.5], [3.4, 6.6, 1.2], [28.4, 22.4, 1.2]],
+      art: (f, rim, [, , , deep]) => path('M2.6 8.2c4.4-1.8 8.8-1.8 13.4 0 4.6-1.8 9-1.8 13.4 0v17.4c-4.4-1.6-8.8-1.6-13.4 0-4.6-1.6-9-1.6-13.4 0z', f, deep, 0.6) +
+        '<path d="' + PAGES + '" fill="#fffaf0" stroke="#c9b88f" stroke-width="0.4"/>' +
+        '<path d="M16 9v15.6" stroke="#c9b88f" stroke-width="0.6"/>' +
+        // The two halves of the world, one on each page.
+        '<circle cx="9.7" cy="16.4" r="4.8" fill="#bfe0f2" stroke="#6b5c3e" stroke-width="0.4"/><circle cx="22.3" cy="16.4" r="4.8" fill="#bfe0f2" stroke="#6b5c3e" stroke-width="0.4"/>' +
+        '<path d="M8 12.8c1.4-.4 2.6.4 3 1.6.4 1-.6 1.8-.8 2.8-.2 1.2.4 2.4-.2 3.4M7.4 15.4c-.6.6-.6 1.6-.2 2.4" stroke="#6aa84f" stroke-width="1.2" fill="none" stroke-linecap="round"/>' +
+        '<path d="M20.4 13c1.2-.6 2.8-.2 3.8.6s2.4.6 3 .4M21.6 15.2c.8 1 .6 2.4 1.2 3.4M25.4 16.6c.4.8.2 1.8-.4 2.4" stroke="#6aa84f" stroke-width="1.2" fill="none" stroke-linecap="round"/>',
+    },
+    blaeu: {
+      shape: '<path d="' + BOOK + '"/>',
+      sparkles: [[24.8, 3.4, 1.6], [6, 25.2, 1.3], [16.6, 9.8, 1.1]],
+      art: (f, rim, [, , , deep]) => '<path d="M24 5.2h2.4v20.4H24z" fill="#fffaf0" stroke="#c9b88f" stroke-width="0.4"/>' +
+        path(BOOK, '#8e2b1d', '#45130a', 0.6) +
+        '<path d="M9.8 6h13.6v18.8H9.8z" fill="none" stroke="' + f + '" stroke-width="0.9"/>' +
+        '<path d="M9.8 6l2.6 2.4M23.4 6l-2.6 2.4M9.8 24.8l2.6-2.4M23.4 24.8l-2.6-2.4" stroke="' + f + '" stroke-width="1.1" stroke-linecap="round"/>' +
+        '<ellipse cx="16.6" cy="15.4" rx="4.4" ry="5.4" fill="' + f + '" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<circle cx="16.6" cy="15.4" r="2.8" fill="#bfe0f2" stroke="' + deep + '" stroke-width="0.3"/><path d="M15.6 14c.8-.4 1.8 0 2 .8M15.2 16.2c.6.6 1.6.8 2.4.4" stroke="#6aa84f" stroke-width="0.8" fill="none" stroke-linecap="round"/>' +
+        '<path d="M7 4h2.6v22.8H7z" fill="#5e1a10"/><path d="M8.3 7v17" stroke="' + f + '" stroke-width="0.5" stroke-dasharray="1 1.2"/>' +
+        '<path d="M24.4 14h2.6v3h-2.6z" fill="' + f + '" stroke="' + deep + '" stroke-width="0.4"/>',
+    },
+    lightglobe: {
+      shape: GLOBE,
+      sparkles: [[23.6, 5, 1.5], [8, 20.6, 1.3], [25.6, 17.8, 1.2]],
+      art: (f, rim, [, mid]) => '<circle cx="16" cy="13.5" r="12.4" fill="' + mid + '" fill-opacity="0.25"/>' +
+        globeArt(f, '#f4a640', '#b8691c', '#3b3f47', '#1f2228',
+          '<circle cx="13" cy="10.6" r="4.6" fill="#fff" fill-opacity="0.35"/>') +
+        '<path d="M16 26.8c0 1.2 3 1 6.6 1.4" stroke="#1f2228" stroke-width="0.6" fill="none"/>',
+    },
+    behaim: {
+      shape: GLOBE,
+      sparkles: [[23.6, 5.4, 1.5], [8.2, 20.4, 1.3], [25.6, 17.6, 1.2]],
+      art: (f, rim, [, , , deep]) => globeArt('#2f5f66', f, deep, BRASS, BRASS_DEEP,
+        [[18.4, 7], [16.8, 13], [19, 15.6], [10, 16]].map(([x, y]) => '<path d="M' + x + ' ' + y + 'v-1.6h1.2l-.4.4.4.4h-1.2" stroke="#c63d32" stroke-width="0.35" fill="#c63d32"/>').join('') +
+        '<path d="M21.4 18.6l.8-.6.8.6-.8.6zM9.6 8.6l.6-.4.6.4-.6.4z" fill="#ffc928"/>'),
+    },
+    jagiellonian: {
+      shape: '<circle cx="16" cy="13.5" r="11"/>',
+      sparkles: [[25, 4.4, 1.6], [7, 21.6, 1.3], [16, 2.2, 1.1]],
+      art: (f, rim, [hi, , , deep]) => globeStand(f, deep) +
+        '<circle cx="16" cy="13.5" r="9" fill="' + rim + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+        '<path d="' + GLOBE_LAND + '" fill="' + f + '" stroke="' + deep + '" stroke-width="0.45" stroke-linejoin="round"/>' +
+        // The rings of the armillary sphere around it.
+        '<ellipse cx="16" cy="13.5" rx="11" ry="3.6" transform="rotate(-24 16 13.5)" fill="none" stroke="' + deep + '" stroke-width="1.4"/>' +
+        '<ellipse cx="16" cy="13.5" rx="11" ry="3.6" transform="rotate(-24 16 13.5)" fill="none" stroke="' + hi + '" stroke-width="0.7"/>' +
+        '<path d="M7.9 9.5h16.2M7 13.5h18M7.9 17.5h16.2" stroke="' + deep + '" stroke-width="0.3" stroke-opacity="0.6"/>',
+    },
+    goldglobe: {
+      shape: GLOBE,
+      sparkles: [[23.6, 4.6, 1.7], [7.6, 20.8, 1.4], [25.8, 17.8, 1.3]],
+      art: (f, rim, [hi, , , deep]) => globeArt(f, hi, deep, 'url(#face-goldglobe)', deep,
+        '<circle cx="16" cy="13.5" r="9" fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="0.4"/>') +
+        '<path d="M16 1.6l.9 1.5-.9 1.5-.9-1.5z" fill="#d6f6ff" stroke="#2b8aa8" stroke-width="0.3"/>',
+    },
+  };
+  const atlasIcon = (id) => modelIcon(id, ATLASES, ATLAS_ART);
+
+  const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon, maps: atlasIcon };
   const rewardIcon = (id, appId = app.id) => REWARD_ICONS[appId](id);
   // StoliceMax: the capital a souvenir comes from. LiteraturaMax: the
   // country that gives a prize. JęzykiMax: the city, with its flag.
+  // MapkiMax: where and when a famous map, atlas or globe was made.
   function rewardPlace(id, appId = app.id) {
     const { iso } = rewardOf(appId, id);
     if (appId === 'literature') return iso ? countryName(iso) : appT(appId).international;
     if (appId === 'languages') return flag(iso) + ' ' + appT(appId).cityName(id);
+    if (appId === 'maps') return appT(appId).madeIn(id);
     return iso ? capitalName(iso) : '';
   }
 
@@ -3690,11 +4667,12 @@
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       // A trophy gets confetti, a souvenir fireworks, glassware an
       // exploding elixir, a literary prize a rain of letters, a city symbol
-      // thought bubbles.
+      // thought bubbles, a map a paper plane.
       if (isTimes()) confetti(CELEBRATION_MS);
       else if (app.id === 'capitals') fireworks(CELEBRATION_MS, fireworksSound());
       else if (app.id === 'chemistry') elixirBurst(CELEBRATION_MS);
       else if (app.id === 'literature') letterRain(RAIN_MAX_MS);
+      else if (app.id === 'maps') planeRoute(CELEBRATION_MS);
       else speechBubbles(CELEBRATION_MS);
     }
   }
@@ -4520,6 +5498,114 @@
     requestAnimationFrame(frame);
   }
 
+  // MapkiMax: a paper plane flies across the screen along a winding route
+  // and leaves it behind as a dashed line; pins drop onto the route one
+  // after another, and everything fades at the end.
+  const PIN_COLORS = ['#e2453c', '#2a4fc2', '#14804a', '#f5b800', '#9b5de5'];
+  function planeRoute(ms) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const fly = ms * 0.6; // the time the plane takes to cross
+    const rtl = document.documentElement.dir === 'rtl';
+    const y0 = 0.3 + Math.random() * 0.15;
+    const waves = 1.2 + Math.random() * 0.8;
+    const phase = Math.random() * Math.PI;
+    // The route from one side to the other, t from 0 to 1, in pixels.
+    const route = (t) => {
+      const x = innerWidth * (-0.08 + 1.16 * t);
+      return [rtl ? innerWidth - x : x, innerHeight * (y0 + 0.25 * t + 0.1 * Math.sin(phase + t * waves * Math.PI * 2))];
+    };
+    const pins = [0.16, 0.36, 0.56, 0.76].map((t, i) => ({ t, color: PIN_COLORS[i], at: t * fly }));
+    const bounce = (k) => (k < 0.7 ? (k / 0.7) ** 2 : 1 - 0.12 * Math.sin(((k - 0.7) / 0.3) * Math.PI));
+    const start = performance.now();
+    const frame = (now) => {
+      const elapsed = Math.max(0, now - start);
+      if (canvas.width !== Math.round(innerWidth * ratio)) {
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      const fade = Math.max(0, Math.min(1, (ms - elapsed) / 700));
+      ctx.globalAlpha = fade;
+      const done = Math.min(1, elapsed / fly);
+      // The dashed route behind the plane.
+      ctx.setLineDash([9, 8]);
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgb(29 39 66 / 0.6)';
+      ctx.beginPath();
+      for (let i = 0; i <= 80; i++) {
+        const [x, y] = route((done * i) / 80);
+        if (i) ctx.lineTo(x, y);
+        else ctx.moveTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      for (const p of pins) {
+        const age = elapsed - p.at;
+        if (age < 0) continue;
+        const [x, y] = route(p.t);
+        const k = Math.min(1, age / 450);
+        if (age < 900) {
+          // A ring spreads where the pin lands.
+          const r = 6 + (age / 900) * 26;
+          ctx.globalAlpha = fade * (1 - age / 900);
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(x, y, r, r * 0.4, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = fade;
+        }
+        drawPin(ctx, x, y - 60 * (1 - bounce(k)), p.color);
+      }
+      if (done < 1) {
+        const [x, y] = route(done);
+        const [x2, y2] = route(Math.min(1, done + 0.01));
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.atan2(y2 - y, x2 - x));
+        ctx.scale(1.4, 1.4);
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#5b6680';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-30, -12);
+        ctx.lineTo(-21, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#dfe6f2';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-21, 0);
+        ctx.lineTo(-28, 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#b9c4d6';
+        ctx.beginPath();
+        ctx.moveTo(-21, 0);
+        ctx.lineTo(-16, 5);
+        ctx.lineTo(-9, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      if (elapsed < ms) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  }
+
   // ---------- language ----------
 
   function applyLanguage() {
@@ -4942,6 +6028,7 @@
     } else {
       fill($('group-chips'), choice().groups, (g) => t.groups[g], 'group-');
     }
+    if (isMaps()) fill($('kind-chips'), PLACE_KINDS, (k) => t.kindChips[k], 'kind-');
   }
 
   function buildLanguageMenu() {
@@ -4970,6 +6057,7 @@
     } else {
       for (const g of choice().groups) $('group-' + g).checked = s[app.groupKey].includes(g);
     }
+    if (isMaps()) for (const k of PLACE_KINDS) $('kind-' + k).checked = s.kinds.includes(k);
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
@@ -5041,6 +6129,12 @@
     save();
     renderProgress();
   });
+  // MapkiMax: the kinds of places to practise.
+  $('kind-chips').addEventListener('change', () => {
+    state.settings.kinds = PLACE_KINDS.filter((k) => $('kind-' + k).checked);
+    save();
+    renderProgress();
+  });
 
   $('new-per-day').addEventListener('change', (e) => {
     const v = Math.round(Number(e.target.value));
@@ -5080,7 +6174,8 @@
   // 3 relearning), review_duration (ms). The optimizer wants a number as
   // card_id: 7 × 8 is 708; for a country or compound see CHOICE. Extra
   // columns are for people: the fact and the number typed, or the card and
-  // the card whose answer was picked (an ISO code or a formula).
+  // the card whose answer was picked (an ISO code or a formula); in
+  // MapkiMax the place, where the pin was and how far from the place (km).
   function logCsv() {
     const rows = ['card_id,review_time,review_rating,review_state,review_duration,' +
       (isTimes() ? 'fact,typed' : choice().logColumns)];
@@ -5088,6 +6183,8 @@
       if (isTimes()) {
         const [a, b] = id.split('x').map(Number);
         rows.push([a * 100 + b, t, rating, st, ms, a + 'x' + b, answer].join(','));
+      } else if (isMaps()) {
+        rows.push([choice().number(id), t, rating, st, ms, id, ...(answer || ['', '', ''])].join(','));
       } else {
         rows.push([choice().number(id), t, rating, st, ms, id, answer || ''].join(','));
       }
@@ -5267,6 +6364,20 @@
     next();
   });
 
+  // MapkiMax: the buttons on the map, and the continents of the progress map.
+  $('atlas-ok').addEventListener('click', () => {
+    if (mode === 'ask' && pin) submit(pin);
+  });
+  $('zoom-in').addEventListener('click', () => atlas.zoom(1.6, undefined, undefined, 200));
+  $('zoom-out').addEventListener('click', () => atlas.zoom(1 / 1.6, undefined, undefined, 200));
+  $('zoom-home').addEventListener('click', () => current() && atlas.home(BY_PLACE[currentId].continent));
+  $('map-tabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-continent]');
+    if (!btn) return;
+    progressContinent = btn.dataset.continent;
+    renderProgress();
+  });
+
   $('more-new').addEventListener('click', () => {
     newDay().extraNew += 5;
     save();
@@ -5289,6 +6400,24 @@
     if (t.closest && t.closest('input, textarea, select')) return;
     const onButton = t.closest && t.closest('button') && !t.closest('#keypad, #choices');
     const digit = e.key.length === 1 ? '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩0123456789'.indexOf(e.key) % 10 : -1;
+    if (isMaps()) {
+      // MapkiMax: Enter confirms the pin, or moves on after a right answer;
+      // + and - zoom, and the arrows move the map while it has the focus.
+      const keys = { ArrowLeft: [-80, 0], ArrowRight: [80, 0], ArrowUp: [0, -80], ArrowDown: [0, 80] };
+      if (e.key === 'Enter' && !onButton) {
+        e.preventDefault();
+        if (mode === 'ask' && pin) submit(pin);
+        else if (mode === 'right') next();
+      } else if (e.key === '+' || e.key === '=') {
+        atlas.zoom(1.6, undefined, undefined, 200);
+      } else if (e.key === '-') {
+        atlas.zoom(1 / 1.6, undefined, undefined, 200);
+      } else if (keys[e.key] && t === $('atlas-map')) {
+        e.preventDefault();
+        atlas.pan(...keys[e.key]);
+      }
+      return;
+    }
     if (!isTimes()) {
       // StoliceMax: keys 1 to 4 pick an answer, in reading order; Enter or
       // space moves on after a right answer.

@@ -1,0 +1,524 @@
+# The places of MapkiMax, read by tools/make_maps.py.
+#
+# Each line: id, number, kind, continent, source, separated by spaces (the
+# source may contain spaces). The id is the card id and the number its
+# card_id in the review log; neither may change once published, since
+# progress is saved under the id. A new place takes the next free number.
+#
+# Kinds: city, peak, range, lake, river, sea, island, desert.
+# Continents: EU, AS, AF, NA, SA, OC, AN. A place belongs to the continent it
+# lies on, with the border between Europe and Asia along the Ural, the Ural
+# river, the Caspian Sea and the Kuma-Manych Depression, as in Polish schools.
+#
+# Sources:
+#   pop:NAME@COUNTRY  a city of Natural Earth's populated places
+#   elv:NAME          a peak of Natural Earth's elevation points
+#   reg:NAME          an area of Natural Earth's geographic regions
+#                     (mountain ranges, deserts, islands)
+#   mar:NAME          a sea, gulf or strait of Natural Earth's marine areas
+#   lak:NAME          a lake of Natural Earth's lakes
+#   riv:NAME          a river of Natural Earth's rivers
+#   land:QID          an island: the land around the place on the base map;
+#                     land:QID~D joins all land within D degrees (island groups)
+#   trace:LON,LAT;... a river not in Natural Earth, traced by hand through the
+#                     towns on its banks (accurate to some 10 km)
+#   QID               a point at the coordinates in Wikidata
+# NAME is matched with the name or English name in Natural Earth; NAME|NAME
+# joins several. All parts of a lake, river or area with the Wikidata id of
+# the place are joined. The names in the five languages come from Wikidata;
+# QID=... after a source sets the Wikidata id where Natural Earth has none, a
+# wrong one, or more than one.
+
+# ---------- Europe ----------
+warsaw 1 city EU pop:Warsaw@Poland
+krakow 2 city EU pop:Kraków@Poland
+gdansk 3 city EU pop:Gdańsk@Poland
+wroclaw 4 city EU pop:Wroclaw@Poland
+poznan 5 city EU pop:Poznań@Poland
+lodz 6 city EU pop:Łódź@Poland
+szczecin 7 city EU pop:Szczecin@Poland
+lublin 8 city EU pop:Lublin@Poland
+bialystok 9 city EU pop:Białystok@Poland
+katowice 10 city EU pop:Katowice@Poland
+rzeszow 11 city EU pop:Rzeszów@Poland
+torun 12 city EU Q47554
+olsztyn 13 city EU pop:Olsztyn@Poland
+zakopane 14 city EU Q144786
+amsterdam 15 city EU pop:Amsterdam@Netherlands
+rotterdam 16 city EU pop:Rotterdam@Netherlands
+thehague 17 city EU pop:The Hague@Netherlands
+utrecht 18 city EU pop:Utrecht@Netherlands
+eindhoven 19 city EU pop:Eindhoven@Netherlands
+groningen 20 city EU pop:Groningen@Netherlands
+maastricht 21 city EU pop:Maastricht@Netherlands
+tilburg 22 city EU Q9871
+berlin 23 city EU pop:Berlin@Germany
+hamburg 24 city EU pop:Hamburg@Germany
+munich 25 city EU pop:Munich@Germany
+paris 26 city EU pop:Paris@France
+marseille 27 city EU pop:Marseille@France
+london 28 city EU pop:London@United Kingdom
+edinburgh 29 city EU pop:Edinburgh@United Kingdom
+dublin 30 city EU pop:Dublin@Ireland
+madrid 31 city EU pop:Madrid@Spain
+barcelona 32 city EU pop:Barcelona@Spain
+lisbon 33 city EU pop:Lisbon@Portugal
+rome 34 city EU pop:Rome@Italy
+milan 35 city EU pop:Milan@Italy
+venice 36 city EU pop:Venice@Italy
+naples 37 city EU pop:Naples@Italy
+vienna 38 city EU pop:Vienna@Austria
+prague 39 city EU pop:Prague@Czechia
+budapest 40 city EU pop:Budapest@Hungary
+brussels 41 city EU pop:Brussels@Belgium
+copenhagen 42 city EU pop:København@Denmark
+stockholm 43 city EU pop:Stockholm@Sweden
+oslo 44 city EU pop:Oslo@Norway
+helsinki 45 city EU pop:Helsinki@Finland
+reykjavik 46 city EU pop:Reykjavík@Iceland
+vilnius 47 city EU pop:Vilnius@Lithuania
+riga 48 city EU pop:Riga@Latvia
+kyiv 49 city EU pop:Kiev@Ukraine
+lviv 50 city EU pop:Lviv@Ukraine
+minsk 51 city EU pop:Minsk@Belarus
+moscow 52 city EU pop:Moscow@Russia
+stpetersburg 53 city EU pop:St. Petersburg@Russia
+athens 54 city EU pop:Athens@Greece
+istanbul 55 city EU pop:Istanbul@Turkey
+bucharest 56 city EU pop:Bucharest@Romania
+belgrade 57 city EU pop:Belgrade@Republic of Serbia
+sofia 58 city EU pop:Sofia@Bulgaria
+zagreb 59 city EU pop:Zagreb@Croatia
+geneva 60 city EU pop:Geneva@Switzerland
+rysy 61 peak EU Q672936
+sniezka 62 peak EU elv:Sněžka
+babiagora 63 peak EU Q595780
+montblanc 64 peak EU elv:Mont Blanc
+matterhorn 65 peak EU Q1374
+zugspitze 66 peak EU Q3375
+etna 67 peak EU Q16990
+vesuvius 68 peak EU Q524
+olympus 69 peak EU Q80344
+vaalserberg 70 peak EU Q159860
+hekla 71 peak EU Q184975
+alps 72 range EU reg:ALPS
+carpathians 73 range EU reg:CARPATHIAN MOUNTAINS
+tatras 74 range EU reg:Tatra Mts. QID=Q194263
+sudetes 75 range EU reg:Sudetes Mts.
+bieszczady 76 range EU Q125529
+pyrenees 77 range EU reg:PYRENEES
+apennines 78 range EU reg:APPENNINI QID=Q1285
+balkans 79 range EU reg:Balkan Mts.
+scandinavian 80 range EU reg:KJØLEN MOUNTAINS
+ural 81 range EU reg:URAL MOUNTAINS
+dinaric 82 range EU reg:Dinaric Alps
+sniardwy 83 lake EU Q387256
+mamry 84 lake EU Q11766953
+ijsselmeer 85 lake EU lak:IJsselmeer
+geneva_lake 86 lake EU lak:Lake Geneva
+constance 87 lake EU lak:Bodensee
+balaton 88 lake EU lak:Lake Balaton
+ladoga 89 lake EU lak:Lake Ladoga
+onega 90 lake EU lak:Lake Onega
+garda 91 lake EU lak:Lago di Garda
+vanern 92 lake EU lak:Vänern
+lochness 93 lake EU lak:Loch Ness
+vistula 94 river EU riv:Vistula
+oder 95 river EU riv:Oder
+warta 96 river EU riv:Warta
+bug 97 river EU riv:Bug
+rhine 98 river EU riv:Rhine
+meuse 99 river EU riv:Maas
+danube 100 river EU riv:Danube
+elbe 101 river EU riv:Elbe
+seine 102 river EU riv:Seine
+loire 103 river EU riv:Loire
+thames 104 river EU riv:Thames
+volga 105 river EU riv:Volga
+dnieper 106 river EU riv:Dnepr
+tagus 107 river EU riv:Tajo
+po 108 river EU riv:Po
+baltic 109 sea EU mar:Baltic Sea
+northsea 110 sea EU mar:North Sea
+mediterranean 111 sea EU mar:Mediterranean Sea
+blacksea 112 sea EU mar:Black Sea
+adriatic 113 sea EU mar:Adriatic Sea
+aegean 114 sea EU mar:Aegean Sea
+norwegian 115 sea EU mar:Norwegian Sea
+barents 116 sea EU mar:Barents Sea
+wadden 117 sea EU mar:Waddenzee
+biscay 118 sea EU mar:Bay of Biscay
+channel 119 sea EU mar:English Channel
+tyrrhenian 120 sea EU mar:Tyrrhenian Sea
+bothnia 121 sea EU mar:Gulf of Bothnia
+gdanskbay 122 sea EU Q213367
+rugen 123 island EU land:Q3237
+texel 124 island EU land:Q47009672
+sicily 125 island EU land:Q1460
+sardinia 126 island EU land:Q1462
+corsica 127 island EU land:Q14112
+crete 128 island EU land:Q34374
+iceland 129 island EU land:Q3740828
+ireland 130 island EU land:Q22890
+greatbritain 131 island EU land:Q23666
+mallorca 132 island EU land:Q8828
+gotland 133 island EU land:Q1027830
+bornholm 134 island EU land:Q769680
+spitsbergen 135 island EU land:Q21162
+bledow 136 desert EU Q117750
+tabernas 137 desert EU Q939811
+
+# ---------- Asia ----------
+tehran 138 city AS pop:Tehran@Iran
+isfahan 139 city AS pop:Isfahan@Iran
+shiraz 140 city AS pop:Shiraz@Iran
+tabriz 141 city AS pop:Tabriz@Iran
+mashhad 142 city AS pop:Mashhad@Iran
+yazd 143 city AS pop:Yazd@Iran
+kerman 144 city AS pop:Kerman@Iran
+ahvaz 145 city AS pop:Ahvaz@Iran
+qom 146 city AS pop:Qom@Iran
+bandarabbas 147 city AS pop:Bandar-e-Abbas@Iran
+kermanshah 148 city AS pop:Kermanshah@Iran
+hamadan 149 city AS pop:Hamadan@Iran
+rasht 150 city AS pop:Rasht@Iran
+urmia 151 city AS pop:Urmia@Iran
+persepolis 152 city AS Q129072
+tokyo 153 city AS pop:Tokyo@Japan
+kyoto 154 city AS pop:Kyoto@Japan
+beijing 155 city AS pop:Beijing@China
+shanghai 156 city AS pop:Shanghai@China
+hongkong 157 city AS pop:Hong Kong@Hong Kong S.A.R.
+lhasa 158 city AS pop:Lhasa@China
+seoul 159 city AS pop:Seoul@South Korea
+taipei 160 city AS pop:Taipei@Taiwan
+delhi 161 city AS pop:New Delhi@India
+mumbai 162 city AS pop:Mumbai@India
+kolkata 163 city AS pop:Kolkata@India
+karachi 164 city AS pop:Karachi@Pakistan
+kathmandu 165 city AS pop:Kathmandu@Nepal
+bangkok 166 city AS pop:Bangkok@Thailand
+hanoi 167 city AS pop:Hanoi@Vietnam
+kualalumpur 168 city AS pop:Kuala Lumpur@Malaysia
+singapore 169 city AS pop:Singapore@Singapore
+jakarta 170 city AS pop:Jakarta@Indonesia
+manila 171 city AS pop:Manila@Philippines
+kabul 172 city AS pop:Kabul@Afghanistan
+baghdad 173 city AS pop:Baghdad@Iraq
+riyadh 174 city AS pop:Riyadh@Saudi Arabia
+mecca 175 city AS pop:Mecca@Saudi Arabia
+dubai 176 city AS pop:Dubai@United Arab Emirates
+jerusalem 177 city AS pop:Jerusalem@Israel
+damascus 178 city AS pop:Damascus@Syria
+beirut 179 city AS pop:Beirut@Lebanon
+ankara 180 city AS pop:Ankara@Turkey
+baku 181 city AS pop:Baku@Azerbaijan
+tbilisi 182 city AS pop:Tbilisi@Georgia
+yerevan 183 city AS pop:Yerevan@Armenia
+tashkent 184 city AS pop:Tashkent@Uzbekistan
+samarkand 185 city AS pop:Samarqand@Uzbekistan
+ulaanbaatar 186 city AS pop:Ulaanbaatar@Mongolia
+novosibirsk 187 city AS pop:Novosibirsk@Russia
+vladivostok 188 city AS pop:Vladivostok@Russia
+damavand 189 peak AS elv:Mount Damavand
+alamkuh 190 peak AS Q3696208
+sabalan 191 peak AS Q1364168
+everest 192 peak AS elv:Mount Everest
+k2 193 peak AS elv:K2
+fuji 194 peak AS elv:Fuji
+elbrus 195 peak AS elv:Gora Elbrus
+ararat 196 peak AS elv:Mount Ararat
+alborz 197 range AS reg:ELBURZ MTS.
+zagros 198 range AS reg:ZAGROS MOUNTAINS
+himalayas 199 range AS reg:HIMALAYAS
+karakoram 200 range AS reg:KARAKORAM RA.
+hindukush 201 range AS reg:HINDU KUSH
+pamir 202 range AS reg:PAMIRS
+tianshan 203 range AS reg:TIAN SHAN
+altai 204 range AS reg:ALTAY MOUNTAINS
+caucasus 205 range AS reg:CAUCASUS MTS.
+kunlun 206 range AS reg:KUNLUN MOUNTAINS
+urmia_lake 207 lake AS lak:Lake Urmia
+baikal 208 lake AS lak:Lake Baikal
+aral 209 lake AS lak:North Aral Sea|South Aral Sea QID=Q35883
+balkhash 210 lake AS lak:Lake Balkhash
+issykkul 211 lake AS lak:Issyk-Kul
+deadsea 212 lake AS lak:Dead Sea
+van 213 lake AS lak:Lake Van
+karun 214 river AS trace:50.05,32.4;50.55,31.95;50.65,31.62;50.35,31.6;50.05,31.8;49.6,32.05;49.25,32.15;48.93,32.25;48.85,32.05;48.75,31.7;48.68,31.32;48.4,30.9;48.18,30.44 QID=Q461557
+zayandeh 215 river AS trace:50.15,32.65;50.62,32.75;51.05,32.6;51.4,32.5;51.67,32.65;52.1,32.45;52.65,32.42;52.85,32.3 QID=Q167814
+yangtze 216 river AS riv:Yangtze
+yellowriver 217 river AS riv:Huang
+mekong 218 river AS riv:Mekong
+ganges 219 river AS riv:Ganges
+indus 220 river AS riv:Indus
+euphrates 221 river AS riv:Euphrates
+tigris 222 river AS riv:Tigris
+ob 223 river AS riv:Ob
+yenisei 224 river AS riv:Yenisey
+lena 225 river AS riv:Lena
+amur 226 river AS riv:Amur
+amudarya 227 river AS riv:Amu Darya
+persiangulf 228 sea AS mar:Persian Gulf
+gulfofoman 229 sea AS mar:Gulf of Oman
+hormuz 230 sea AS Q79883
+caspian 231 sea AS mar:Caspian Sea
+arabiansea 232 sea AS mar:Arabian Sea
+bengal 233 sea AS mar:Bay of Bengal
+southchina 234 sea AS mar:South China Sea
+japansea 235 sea AS mar:Sea of Japan
+okhotsk 236 sea AS mar:Sea of Okhotsk
+yellowsea 237 sea AS mar:Yellow Sea
+qeshm 238 island AS land:Q240719
+kish 239 island AS land:Q221883
+honshu 240 island AS land:Q13989
+hokkaido 241 island AS land:Q35581
+borneo 242 island AS land:Q36117
+sumatra 243 island AS land:Q3492
+java 244 island AS land:Q3757
+srilanka 245 island AS land:Q854
+taiwan 246 island AS land:Q22502
+sakhalin 247 island AS land:Q7792
+cyprus 248 island AS land:Q644636
+sulawesi 249 island AS land:Q3812
+kavir 250 desert AS reg:Kavir Desert
+lut 251 desert AS reg:LUT DESERT
+gobi 252 desert AS reg:GOBI DESERT
+taklamakan 253 desert AS reg:TAKLIMAKAN DESERT
+rubalkhali 254 desert AS reg:RUB’ AL KHALI
+thar 255 desert AS reg:THAR DESERT
+karakum 256 desert AS reg:GARAGUM DESERT
+kyzylkum 257 desert AS reg:QIZILQUM DESERT
+syrian 258 desert AS reg:SYRIAN DESERT
+negev 259 desert AS reg:Negev Desert
+
+# ---------- Africa ----------
+cairo 260 city AF pop:Cairo@Egypt
+alexandria 261 city AF pop:Alexandria@Egypt
+lagos 262 city AF pop:Lagos@Nigeria
+kinshasa 263 city AF pop:Kinshasa@Congo (Kinshasa)
+nairobi 264 city AF pop:Nairobi@Kenya
+addisababa 265 city AF pop:Addis Ababa@Ethiopia
+johannesburg 266 city AF pop:Johannesburg@South Africa
+capetown 267 city AF pop:Cape Town@South Africa
+casablanca 268 city AF pop:Casablanca@Morocco
+marrakesh 269 city AF pop:Marrakesh@Morocco
+dakar 270 city AF pop:Dakar@Senegal
+accra 271 city AF pop:Accra@Ghana
+algiers 272 city AF pop:Algiers@Algeria
+tunis 273 city AF pop:Tunis@Tunisia
+khartoum 274 city AF pop:Khartoum@Sudan
+daressalaam 275 city AF pop:Dar es Salaam@Tanzania
+luanda 276 city AF pop:Luanda@Angola
+timbuktu 277 city AF pop:Timbuktu@Mali
+antananarivo 278 city AF pop:Antananarivo@Madagascar
+kilimanjaro 279 peak AF elv:Mount Kilimanjaro
+mountkenya 280 peak AF elv:Mount Kenya
+toubkal 281 peak AF elv:Jebel Toubkal
+cameroon 282 peak AF Q190562
+atlas 283 range AF reg:ATLAS MOUNTAINS
+drakensberg 284 range AF reg:DRAKENSBERG
+ethiopian 285 range AF reg:ETHIOPIAN HIGHLANDS
+ahaggar 286 range AF reg:AHAGGAR MTS. QID=Q26399
+tibesti 287 range AF reg:TIBESTI MTS.
+victoria 288 lake AF lak:Lake Victoria
+tanganyika 289 lake AF lak:Lake Tanganyika
+malawi 290 lake AF lak:Lake Malawi
+chad 291 lake AF lak:Lake Chad
+turkana 292 lake AF lak:Lake Turkana
+volta 293 lake AF lak:Lake Volta
+tana 294 lake AF lak:Lake Tana
+nile 295 river AF riv:Nile
+congo 296 river AF riv:Congo
+niger 297 river AF riv:Niger
+zambezi 298 river AF riv:Zambezi
+orange 299 river AF riv:Orange
+limpopo 300 river AF riv:Limpopo
+redsea 301 sea AF mar:Red Sea
+guinea 302 sea AF mar:Gulf of Guinea
+mozambique 303 sea AF mar:Mozambique Channel
+aden 304 sea AF mar:Gulf of Aden
+madagascar 305 island AF land:Q1019
+zanzibar 306 island AF land:Q1774
+tenerife 307 island AF land:Q40846
+madeira 308 island AF land:Q26253
+mauritius 309 island AF land:Q1027
+sahara 310 desert AF reg:SAHARA
+kalahari 311 desert AF reg:KALAHARI DESERT
+namib 312 desert AF reg:NAMIB DESERT
+libyan 313 desert AF reg:LIBYAN DESERT
+nubian 314 desert AF reg:NUBIAN DESERT
+
+# ---------- North America ----------
+newyork 315 city NA pop:New York@United States of America
+washington 316 city NA pop:Washington, D.C.@United States of America
+losangeles 317 city NA pop:Los Angeles@United States of America
+sanfrancisco 318 city NA pop:San Francisco@United States of America
+chicago 319 city NA pop:Chicago@United States of America
+miami 320 city NA pop:Miami@United States of America
+seattle 321 city NA pop:Seattle@United States of America
+houston 322 city NA pop:Houston@United States of America
+neworleans 323 city NA pop:New Orleans@United States of America
+boston 324 city NA pop:Boston@United States of America
+lasvegas 325 city NA pop:Las Vegas@United States of America
+anchorage 326 city NA pop:Anchorage@United States of America
+toronto 327 city NA pop:Toronto@Canada
+montreal 328 city NA pop:Montréal@Canada
+vancouver 329 city NA pop:Vancouver@Canada
+ottawa 330 city NA pop:Ottawa@Canada
+mexicocity 331 city NA pop:Mexico City@Mexico
+havana 332 city NA pop:Havana@Cuba
+panama 333 city NA pop:Panama City@Panama
+nuuk 334 city NA pop:Nuuk@Greenland
+denali 335 peak NA elv:Denali
+orizaba 336 peak NA elv:Pico de Orizaba
+popocatepetl 337 peak NA elv:Volcán Popocatépetl QID=Q181157
+rainier 338 peak NA Q194057
+whitney 339 peak NA Q235539
+logan 340 peak NA Q120306
+rockies 341 range NA reg:ROCKY MOUNTAINS
+appalachians 342 range NA reg:APPALACHIAN MTS.
+sierranevada 343 range NA reg:SIERRA NEVADA
+sierramadre 344 range NA reg:SIERRA MADRE OCCIDENTAL
+cascades 345 range NA reg:CASCADE RANGE
+alaskarange 346 range NA reg:ALASKA RANGE
+superior 347 lake NA lak:Lake Superior
+michigan 348 lake NA lak:Lake Michigan
+huron 349 lake NA lak:Lake Huron
+erie 350 lake NA lak:Lake Erie
+ontario 351 lake NA lak:Lake Ontario
+greatbear 352 lake NA lak:Great Bear Lake
+greatslave 353 lake NA lak:Great Slave Lake
+greatsalt 354 lake NA lak:Great Salt Lake
+nicaragua 355 lake NA lak:Lago de Nicaragua
+winnipeg 356 lake NA lak:Lake Winnipeg
+mississippi 357 river NA riv:Mississippi
+missouri 358 river NA riv:Missouri
+colorado 359 river NA riv:Colorado QID=Q1265
+yukon 360 river NA riv:Yukon
+stlawrence 361 river NA riv:Saint Lawrence
+riogrande 362 river NA riv:Rio Grande
+mackenzie 363 river NA riv:Mackenzie QID=Q3411
+columbia 364 river NA riv:Columbia
+gulfofmexico 365 sea NA mar:Gulf of Mexico
+caribbean 366 sea NA mar:Caribbean Sea
+hudsonbay 367 sea NA mar:Hudson Bay
+bering 368 sea NA mar:Bering Sea
+california 369 sea NA mar:Golfo de California
+labrador 370 sea NA mar:Labrador Sea
+greenland 371 island NA land:Q223
+cuba 372 island NA land:Q241
+newfoundland 373 island NA land:Q48335
+baffin 374 island NA land:Q81178
+jamaica 375 island NA land:Q766
+hispaniola 376 island NA land:Q25277
+vancouverisland 377 island NA land:Q170479
+mojave 378 desert NA Q184355
+sonoran 379 desert NA reg:SONORAN DESERT
+chihuahuan 380 desert NA reg:CHIHUAHUAN DESERT
+
+# ---------- South America ----------
+riodejaneiro 381 city SA pop:Rio de Janeiro@Brazil
+saopaulo 382 city SA pop:São Paulo@Brazil
+brasilia 383 city SA pop:Brasília@Brazil
+manaus 384 city SA pop:Manaus@Brazil
+salvador 385 city SA pop:Salvador@Brazil
+buenosaires 386 city SA pop:Buenos Aires@Argentina
+ushuaia 387 city SA pop:Ushuaia@Argentina
+lima 388 city SA pop:Lima@Peru
+cusco 389 city SA pop:Cusco@Peru
+bogota 390 city SA pop:Bogota@Colombia
+medellin 391 city SA pop:Medellín@Colombia
+santiago 392 city SA pop:Santiago@Chile
+caracas 393 city SA pop:Caracas@Venezuela
+quito 394 city SA pop:Quito@Ecuador
+lapaz 395 city SA pop:La Paz@Bolivia
+montevideo 396 city SA pop:Montevideo@Uruguay
+asuncion 397 city SA pop:Asunción@Paraguay
+aconcagua 398 peak SA elv:Cerro Aconcagua
+chimborazo 399 peak SA elv:Chimborazo
+cotopaxi 400 peak SA Q181476
+ojosdelsalado 401 peak SA elv:Nevado Ojos del Salado
+fitzroy 402 peak SA Q215138
+andes 403 range SA reg:ANDES
+guiana 404 range SA reg:GUIANA HIGHLANDS
+titicaca 405 lake SA lak:Lago Titicaca
+maracaibo 406 lake SA mar:Lago de Maracaibo
+amazon 407 river SA riv:Amazonas
+parana 408 river SA riv:Paraná QID=Q127892
+orinoco 409 river SA riv:Orinoco
+uruguay 410 river SA riv:Uruguay
+saofrancisco 411 river SA riv:São Francisco
+madeira_river 412 river SA riv:Madeira
+magellan 413 sea SA mar:Estrecho de Magellanes
+drake 414 sea SA mar:Drake Passage
+laplata 415 sea SA mar:Río de la Plata
+tierradelfuego 416 island SA land:Q1674067
+falklands 417 island SA land:Q9648~1.2
+galapagos 418 island SA reg:ARCHIPIÉLAGO DE COLÓN
+chiloe 419 island SA land:Q504449
+marajo 420 island SA land:Q193264
+atacama 421 desert SA reg:DESIERTO DE ATACAMA
+patagonian 422 desert SA Q1061324
+sechura 423 desert SA Q939994
+
+# ---------- Australia and Oceania ----------
+sydney 424 city OC pop:Sydney@Australia
+melbourne 425 city OC pop:Melbourne@Australia
+canberra 426 city OC pop:Canberra@Australia
+perth 427 city OC pop:Perth@Australia
+brisbane 428 city OC pop:Brisbane@Australia
+adelaide 429 city OC pop:Adelaide@Australia
+darwin 430 city OC pop:Darwin@Australia
+alicesprings 431 city OC pop:Alice Springs@Australia
+hobart 432 city OC pop:Hobart@Australia
+auckland 433 city OC pop:Auckland@New Zealand
+wellington 434 city OC pop:Wellington@New Zealand
+portmoresby 435 city OC pop:Port Moresby@Papua New Guinea
+suva 436 city OC pop:Suva@Fiji
+honolulu 437 city OC pop:Honolulu@United States of America
+kosciuszko 438 peak OC elv:Mount Kosciuszko
+aoraki 439 peak OC elv:Aoraki (Mount Cook)
+puncakjaya 440 peak OC elv:Puncak Jaya
+maunakea 441 peak OC elv:Mauna Kea
+uluru 442 peak OC Q33910
+greatdividing 443 range OC reg:GREAT DIVIDING RANGE
+southernalps 444 range OC reg:SOUTHERN ALPS
+newguineahighlands 445 range OC reg:NEW GUINEA HIGHLANDS
+eyre 446 lake OC lak:Lake Eyre North|Lake Eyre South QID=Q179970
+taupo 447 lake OC lak:Lake Taupo
+murray 448 river OC riv:Murray
+darling 449 river OC riv:Darling
+waikato 450 river OC riv:Waikato
+coral 451 sea OC mar:Coral Sea
+tasman 452 sea OC mar:Tasman Sea
+carpentaria 453 sea OC mar:Gulf of Carpentaria
+arafura 454 sea OC mar:Arafura Sea
+bass 455 sea OC mar:Bass Strait
+tasmania 456 island OC land:Q34366
+newguinea 457 island OC land:Q40285
+northisland 458 island OC land:Q118863
+southisland 459 island OC land:Q120755
+vitilevu 460 island OC land:Q208198
+tahiti 461 island OC land:Q42000
+hawaii 462 island OC land:Q192626~4.5
+newcaledonia 463 island OC land:Q256293
+greatsandy 464 desert OC reg:GREAT SANDY DESERT
+greatvictoria 465 desert OC reg:GREAT VICTORIA DESERT
+gibson 466 desert OC reg:Gibson Desert
+simpson 467 desert OC reg:Simpson Desert
+
+# ---------- Antarctica ----------
+vinson 468 peak AN elv:Vinson Massif
+erebus 469 peak AN elv:Mount Erebus
+transantarctic 470 range AN reg:Transantarctic Mountains
+ellsworth 471 range AN reg:Ellsworth Mountains
+vostok 472 lake AN Q152044
+ross 473 sea AN mar:Ross Sea
+weddell 474 sea AN mar:Weddell Sea
+bellingshausen 475 sea AN mar:Bellingshausen Sea
+amundsen 476 sea AN mar:Amundsen Sea
+kinggeorge 477 island AN land:Q859440
+rossisland 478 island AN land:Q209899
+alexanderisland 479 island AN land:Q200223
+dryvalleys 480 desert AN Q571433

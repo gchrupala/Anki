@@ -1,8 +1,8 @@
-# MaxApki: MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax
+# MaxApki: MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax and MapkiMax
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds four sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, and [JęzykiMax](#językimax), which teaches French, Spanish, Dutch and Italian. The five apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all five.
+The same page also holds five sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, [JęzykiMax](#językimax), which teaches French, Spanish, Dutch and Italian, and [MapkiMax](#mapkimax), which teaches where cities, mountains, lakes, rivers, seas, islands and deserts are on the map. The six apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all six.
 
 ## Running it
 
@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MaxApki", and its icon shows the cards of the five apps. MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+The home-screen name is "MaxApki", and its icon shows the cards of the six apps. MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax and MapkiMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -124,11 +124,11 @@ StoliceMax teaches the capitals of countries. It runs in the same page and at th
 
 The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. Inside the app each icon has the colour of its app, with a card and a drawing in black and white; the home-screen icon of MaxApki is in full colour. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
 
-The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura` or `#jezyki` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
+The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura`, `#jezyki` or `#mapki` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
 
 The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
-Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble, those of MapkiMax a compass rose. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
 
 ### Cards
 
@@ -288,6 +288,64 @@ All 19 together cost 4755 coins; learning all the cards of one language to the m
 
 The cards are in `languages.js`. They were written for this app; the French, Spanish, Dutch and Italian have not been checked by a teacher.
 
+## MapkiMax
+
+MapkiMax teaches where places are: cities, peaks, mountain ranges, lakes, rivers, seas, islands and deserts on all seven continents. It runs in the same page as the other apps and has the same options.
+
+- Each place is one card: 480 places, from Warsaw, the Tatras and the Vistula to Lake Baikal, the Sahara and Lake Vostok in Antarctica, with many in Poland, the Netherlands and Iran. The card shows the kind of place and its name. Below it is the map of the continent the place lies on, without names. The map moves with a finger or the mouse and zooms with two fingers, the mouse wheel or the + and − buttons; the button with four corners shows the whole continent again.
+- The child taps the map to place a pin, can place it again, and confirms with OK (or Enter). The distance from the pin to the place gives the Anki rating:
+
+  | Distance | Anki rating |
+  | --- | --- |
+  | More than 400 km, or no answer in time | Again |
+  | Up to 400 km | Hard |
+  | Up to 150 km | Good |
+  | Up to 50 km | Easy |
+
+  The distance is along the surface of the Earth: to a city or peak, to the nearest edge of a lake, sea, island, desert or mountain range (0 km when the pin is inside it), and to the nearest stretch of a river. Unlike in the apps with four answers, a first answer can be Easy, since a pin close to a place is no guess. The time taken does not count, and there is no time limit by default.
+- After OK the map shows the place in green with its name, and a dashed line from the pin to the nearest point of the place, and zooms to show both. After a right answer the card stays at least 3 seconds (except with "natychmiast"). After a wrong answer the pin turns red, and the child taps the green place to continue.
+- The settings choose the continents (Europe by default) and the kinds of places (all by default). A place belongs to the continent it lies on, not to that of its country. Europe and Asia meet along the Ural Mountains, the Ural river, the Caspian Sea and the Kuma-Manych Depression, as taught in Polish schools: Moscow and Istanbul are in Europe; Novosibirsk, the Caucasus, Elbrus and Cyprus are in Asia; Hawaii is in Oceania. A sea on a border belongs to one continent: the Mediterranean and the Black Sea to Europe, the Caspian Sea to Asia, the Red Sea to Africa.
+- The progress view shows the map of one continent, chosen with the buttons above it, which also give the number of places learned on each continent. Each place asked at least once is a dot in the colour of the legend. As in ChemiaMax, the place being asked only shows once it has been answered.
+- The review log uses the number of the place in `places.js` as `card_id`, and has the place, the latitude and longitude of the pin, and its distance from the place in km.
+
+### The map
+
+Each continent has its own map in the Lambert azimuthal equal-area projection, centred on the continent, so areas keep their size. The land of the continent is coloured by height, as in a school atlas (below 200 m, then from 200, 500, 1500 and 3000 m); other land is grey, and ice white. Lakes, rivers and borders are drawn, but no names. More than 100 degrees from the middle of a map the projection squeezes the land into slivers, so the map stops there. The first view shows the whole continent, and the map can be moved 40% of that view beyond it, for places such as Spitsbergen.
+
+The map comes from Natural Earth (public domain): the land at 1:10 million, simplified to about 2 km, and lakes, rivers, ice and borders at 1:50 million. The heights come from ETOPO1 (NOAA, public domain). The shapes of the places come from Natural Earth too: lakes, rivers, seas, mountain ranges, deserts and island groups as outlines, islands as their land on the map. The lakes and rivers that are places are drawn on the map as well. Cities, peaks and a few small places are points, at their coordinates in Wikidata. The Karun and the Zayandeh River are not in Natural Earth: their courses were traced by hand through the towns on their banks and are accurate to some 10 km. The names in the five languages come from Wikidata, some corrected by hand.
+
+`tools/make_maps.py` downloads these data and writes `maps.js` (about 620 KB) and `places.js` (about 190 KB) from the list in `tools/places.txt`:
+
+```
+python3 tools/make_maps.py DATA_DIR
+```
+
+It needs Python with pyshp, shapely, numpy, scipy, scikit-image and requests, and keeps the downloads in `DATA_DIR`. `python3 tools/make_maps.py DATA_DIR check` lists each place with its Wikidata id and names, to check them by eye.
+
+### Rewards
+
+The shop sells atlases, maps and globes, some ordinary and some famous from history:
+
+| Reward | Made | Coins |
+| --- | --- | --- |
+| Treasure map | | 30 |
+| School globe | | 50 |
+| City map | | 70 |
+| School atlas | | 100 |
+| Celestial globe | | 125 |
+| Peutinger Map (Tabula Peutingeriana) | Roman Empire | 150 |
+| Al-Idrisi's map (Tabula Rogeriana) | Palermo, 1154 | 175 |
+| Catalan Atlas | Majorca, 1375 | 200 |
+| Piri Reis map | Gallipoli, 1513 | 250 |
+| Mercator's Atlas | Duisburg, 1595 | 300 |
+| Blaeu's Atlas Maior | Amsterdam, 1662 | 350 |
+| Illuminated globe | | 400 |
+| Behaim's globe (Erdapfel) | Nuremberg, 1492 | 475 |
+| Jagiellonian Globe | Kraków, about 1510 | 550 |
+| Golden globe | | 650 |
+
+All 15 together cost 3875 coins; learning all 480 places to the mastered level pays 8160, plus 10 for each finished day. The Jagiellonian Globe, kept at the Jagiellonian University in Kraków, is one of the oldest globes that show America. Buying one sends a paper plane across the screen for 4 seconds: it leaves its route behind as a dashed line, and pins drop onto the route one after another, each with a ring where it lands. With reduced motion switched on in the device settings, only the reward is shown. The rewards and their prices are set in `ATLASES` in `index.html`, the drawings in `ATLAS_ART`, the names and where the famous ones were made in `i18n-maps.js`.
+
 ## Collection and gifts
 
 The button with the latest reward in the header opens the collection: the rewards of all the apps, by app, with the number in each. A reward in the collection, or on the list in the shop, opens large, and from there it can be given away.
@@ -301,13 +359,13 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 
 ## How the page holds several apps
 
-`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax, the apps where the child picks one of four answers. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`, `languages`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js`, `i18n-literature.js` and `i18n-languages.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened, the number of apps the menu was last seen with and the codes of the gift links received and given are saved under their own key (`max-apps`). The collection reads the rewards of the other apps from what they saved.
+`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax, LiteraturaMax and JęzykiMax, the apps where the child picks one of four answers. MapkiMax has an entry there too, for what it shares with them (the continents and the review log), but no answers to pick from. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`, `languages`, `maps`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js`, `i18n-literature.js`, `i18n-languages.js` and `i18n-maps.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened, the number of apps the menu was last seen with and the codes of the gift links received and given are saved under their own key (`max-apps`). The collection reads the rewards of the other apps from what they saved.
 
 ## Tests
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
 
-`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text. `tests/literature.test.js` checks the LiteraturaMax data and text: one number per book, every author known and from a country with a flag, names and titles in every language with no two alike, books by at least four authors in each category, and the LiteraturaMax text. `tests/languages.test.js` checks the JęzykiMax data and text: one id and number per card, every kind of card at every level in every language, three different wrong answers for each gap and question and one gap per sentence, the meaning of each sentence with a gap in the other interface languages, no picture or word twice, at least four pictures per theme, and the JęzykiMax text.
+`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text. `tests/literature.test.js` checks the LiteraturaMax data and text: one number per book, every author known and from a country with a flag, names and titles in every language with no two alike, books by at least four authors in each category, and the LiteraturaMax text. `tests/languages.test.js` checks the JęzykiMax data and text: one id and number per card, every kind of card at every level in every language, three different wrong answers for each gap and question and one gap per sentence, the meaning of each sentence with a gap in the other interface languages, no picture or word twice, at least four pictures per theme, and the JęzykiMax text. `tests/maps.test.js` checks `geo.js` (decoding, distances, the projection) and the MapkiMax data and text: one id and number per place, names in every language (Persian ones in Persian letters), at least 20 places of each kind and five kinds on each continent, places in Iran, Poland and the Netherlands, every place within reach on the map of its continent (cities and peaks in its first view), every layer of the base map, and the MapkiMax text.
 
 ## Limitations
 
@@ -317,7 +375,7 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 
 ## Files
 
-- `index.html`: the five apps (layout, styles and interface code).
+- `index.html`: the six apps (layout, styles and interface code).
 - `i18n.js`: the interface text in Polish, English, Dutch, Spanish and Persian.
 - `i18n-capitals.js`: the text that differs in StoliceMax.
 - `countries.js`: the countries and capitals of StoliceMax.
@@ -328,6 +386,11 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 - `i18n-languages.js`: the text that differs in JęzykiMax.
 - `languages.js`: the French, Spanish, Dutch and Italian cards of JęzykiMax.
 - `languages-translations.js`: what the sentences with a gap mean, in the languages of the interface.
+- `i18n-maps.js`: the text that differs in MapkiMax.
+- `places.js`: the places of MapkiMax, with their names and shapes.
+- `maps.js`: the base map of MapkiMax: land, heights, ice, lakes, rivers and borders.
+- `geo.js`: the map projection, the encoded lines of `maps.js` and `places.js`, and distances on the Earth. It has no dependencies and works in the browser and in Node.
+- `tools/make_maps.py`, `tools/places.txt`: how `maps.js` and `places.js` are made, and the list of places.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
