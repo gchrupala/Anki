@@ -1281,6 +1281,22 @@
       <div class="chips" id="kind-chips"></div>
     </section>
 
+    <section data-app="maps">
+      <h3 data-t="mapTitle">Map</h3>
+      <div class="fields">
+        <label class="field" for="map-view"><span data-t="mapView">First view</span>
+          <select id="map-view">
+            <option value="continent"></option>
+            <option value="region"></option>
+          </select>
+        </label>
+        <p class="hint" data-t="mapViewHint"></p>
+        <label class="field" for="thick-borders"><span data-t="thickBorders">Thick country borders</span> <input id="thick-borders" type="checkbox"></label>
+        <label class="field" for="country-names"><span data-t="countryNames">Country names</span> <input id="country-names" type="checkbox"></label>
+        <p class="hint" data-t="countryNamesHint"></p>
+      </div>
+    </section>
+
     <section class="fields">
       <label class="field" for="new-per-day"><span data-t="newPerDay">New facts per day</span> <input id="new-per-day" type="number" min="0" max="100" step="1"></label>
       <label class="field" for="retention"><span data-t="retention">Target recall</span>
@@ -1725,7 +1741,10 @@
       fastSeconds: SRS.DEFAULTS.fastSeconds,
       // continents and kinds: the places to practise. No time limit, as
       // finding a place on the map takes a while.
-      settings: () => ({ continents: ['EU'], kinds: PLACE_KINDS.slice(), newPerDay: 10, retention: 0.9, answerTime: 0 }),
+      // mapView: the first view of the map, 'continent' or 'region';
+      // thickBorders and countryNames: how the map is drawn.
+      settings: () => ({ continents: ['EU'], kinds: PLACE_KINDS.slice(), newPerDay: 10, retention: 0.9, answerTime: 0,
+        mapView: 'continent', thickBorders: false, countryNames: false }),
       groupKey: 'continents',
       rewards: ATLASES,
       strings: (l) => I18N.MAPS[l] || {},
@@ -2382,7 +2401,7 @@
     }
     render();
     // MapkiMax: the whole continent of the place.
-    if (isMaps() && c) atlas.home(BY_PLACE[c.id].continent);
+    if (isMaps() && c) atlas.home(BY_PLACE[c.id].continent, regionOf(c.id));
     armGiveUp();
     if (mode === 'ask') sayByItself();
   }
@@ -2925,6 +2944,8 @@
     ice: '#fafcff',
     river: '#6aa1d2',
     border: '#9e8d78',
+    thickBorder: '#7d6a55',
+    countryName: '#5a4632',
     place: '#14804a', // the place, once answered
     pin: '#2a4fc2',
     miss: '#c63d32', // the pin, too far away
@@ -2963,9 +2984,25 @@
     };
     // Lakes and rivers that are places are drawn from their shapes in places.js.
     const placeLines = (kind) => PLACES.filter((p) => p.kind === kind && p.type !== 'point').flatMap((p) => p.shape);
-    const fit = GEO.decode(cont.fit).reduce((xy, v, i, a) => (i % 2 ? xy : xy.concat([proj.forward(v, a[i + 1])])), []);
-    const xs = fit.map(([x]) => x);
-    const ys = fit.map(([, y]) => -y);
+    // The box around the points of an outline, in km with y down.
+    const box = (text) => {
+      const pts = GEO.decode(text);
+      const xs = [];
+      const ys = [];
+      for (let i = 0; i < pts.length; i += 2) {
+        const [x, y] = proj.forward(pts[i], pts[i + 1]);
+        xs.push(x);
+        ys.push(-y);
+      }
+      return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+    };
+    const regions = {};
+    for (const [id, region] of Object.entries(MAP.regions)) if (region.continent === code) regions[id] = box(region.fit);
+    // Where the names of countries go: [ISO code, x, y, size in km].
+    const countries = MAP.countries.filter(([, lon, lat]) => proj.angle(lon, lat) > -0.1).map(([iso, lon, lat, size]) => {
+      const [x, y] = proj.forward(lon, lat);
+      return [iso, x, -y, size];
+    });
     layersOf[code] = {
       code,
       proj,
@@ -2978,7 +3015,9 @@
       lakes: build(MAP.lakes.concat(placeLines('lake')), true),
       rivers: build(MAP.rivers.concat(placeLines('river')), false),
       borders: build(MAP.borders, false),
-      home: { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) },
+      home: box(cont.fit),
+      regions,
+      countries,
       // Antarctica is all ice.
       lowland: code === 'AN' ? MAP_COLORS.ice : MAP_COLORS.heights[0],
     };
@@ -2988,22 +3027,69 @@
   // A map on a canvas. With onTap, it can be moved with a finger or the
   // mouse, zoomed with two fingers, the wheel or the buttons, and tapped.
   // overlay(ctx, view) draws on top, in pixels.
-  function atlasView(canvas, { onTap, overlay }) {
+  // The name of a country in the language of the page: from countries.js,
+  // or for other lands (Greenland, Taiwan) from the browser.
+  function countryLabel(iso) {
+    if (BY_ISO[iso]) return BY_ISO[iso].name[lang()];
+    try {
+      const name = new Intl.DisplayNames([lang()], { type: 'region' }).of(iso);
+      return name && name !== iso ? name : '';
+    } catch (e) {
+      return '';
+    }
+  }
+  // The names of countries large enough on the map, the largest first, each
+  // left out where it would cover a name already written.
+  function drawCountryNames(b, L, s, cx, cy, w, h, r, hide) {
+    b.setTransform(r, 0, 0, r, 0, 0);
+    b.textAlign = 'center';
+    b.textBaseline = 'middle';
+    b.lineJoin = 'round';
+    b.direction = T().dir === 'rtl' ? 'rtl' : 'ltr';
+    const font = getComputedStyle(document.body).getPropertyValue('--font-body');
+    const written = [];
+    for (const [iso, x, y, size] of L.countries) {
+      const px = size * s;
+      if (px < 36 || hide.has(iso)) continue;
+      const sx = w / 2 + (x - cx) * s;
+      const sy = h / 2 + (y - cy) * s;
+      if (sx < -100 || sy < -20 || sx > w + 100 || sy > h + 20) continue;
+      const name = countryLabel(iso).toLocaleUpperCase(lang());
+      if (!name) continue;
+      const fs = px > 400 ? 13.5 : px > 140 ? 12 : 10.5;
+      b.font = '600 ' + fs + 'px ' + font;
+      const half = b.measureText(name).width / 2 + 3;
+      const box = [sx - half, sy - fs / 2 - 2, sx + half, sy + fs / 2 + 2];
+      if (written.some((d) => box[0] < d[2] && box[2] > d[0] && box[1] < d[3] && box[3] > d[1])) continue;
+      written.push(box);
+      b.lineWidth = 3;
+      b.strokeStyle = 'rgb(255 255 255 / 0.8)';
+      b.strokeText(name, sx, sy);
+      b.fillStyle = MAP_COLORS.countryName;
+      b.fillText(name, sx, sy);
+    }
+  }
+
+  // style() gives { thick: country borders drawn thick, labels: the names of
+  // countries shown, hide: a Set of the countries whose names are left out }.
+  function atlasView(canvas, { onTap, overlay, style }) {
     const ctx = canvas.getContext('2d');
-    // atHome: showing the whole continent, until it is moved or zoomed.
-    const v = { L: null, s: 0, cx: 0, cy: 0, w: 0, h: 0, anim: 0, queued: false, atHome: false };
+    // atHome: showing the first view, until it is moved or zoomed. box: the
+    // box of the first view, that of the continent or of a region.
+    const v = { L: null, box: null, s: 0, cx: 0, cy: 0, w: 0, h: 0, anim: 0, queued: false, atHome: false };
     const ratio = () => Math.min(2, window.devicePixelRatio || 1);
     const view = {};
 
-    // The first view: the whole continent. Zoom from a little less than
-    // that to 0.4 km a pixel; the middle stays near the continent.
-    function homeOf() {
-      const b = v.L.home;
+    // The first view: the whole continent, or a region of it. Zoom from a
+    // little less than the whole continent to 0.4 km a pixel; the middle
+    // stays near the continent.
+    function fitTo(b) {
       const s = Math.min(v.w / (b.x1 - b.x0), v.h / (b.y1 - b.y0)) * 0.94;
       return { s, cx: (b.x0 + b.x1) / 2, cy: (b.y0 + b.y1) / 2 };
     }
+    const homeOf = () => fitTo(v.box || v.L.home);
     function clamp(t) {
-      const home = homeOf();
+      const home = fitTo(v.L.home);
       const b = v.L.home;
       t.s = Math.min(Math.max(t.s, home.s * 0.7), Math.max(2.5, home.s * 4));
       const mx = (b.x1 - b.x0) * 0.4;
@@ -3067,9 +3153,14 @@
     let baseView = null; // { code, s, cx, cy, w, h } the picture was drawn for
     let baseAt = 0;
     let sharpen = 0;
+    const styleOf = () => {
+      const st = style ? style() : {};
+      return { thick: !!st.thick, labels: !!st.labels, hide: st.hide || new Set(), key: [st.thick, st.labels, lang(), [...(st.hide || [])]].join('|') };
+    };
     function drawBase() {
       const L = v.L;
       const s = v.s;
+      const st = styleOf();
       const w = v.w * BASE;
       const h = v.h * BASE;
       const r = Math.min(ratio(), Math.sqrt(8e6 / (w * h)));
@@ -3105,12 +3196,18 @@
       b.lineWidth = 0.8 / s;
       b.stroke(L.lakes);
       b.stroke(L.coast);
-      b.strokeStyle = MAP_COLORS.border;
-      b.lineWidth = 0.9 / s;
-      b.setLineDash([4 / s, 3 / s]);
+      if (st.thick) {
+        b.strokeStyle = MAP_COLORS.thickBorder;
+        b.lineWidth = 2.2 / s;
+      } else {
+        b.strokeStyle = MAP_COLORS.border;
+        b.lineWidth = 0.9 / s;
+        b.setLineDash([4 / s, 3 / s]);
+      }
       b.stroke(L.borders);
       b.restore();
-      baseView = { code: L.code, s, cx: v.cx, cy: v.cy, w, h };
+      if (st.labels) drawCountryNames(b, L, s, v.cx, v.cy, w, h, r, st.hide);
+      baseView = { code: L.code, s, cx: v.cx, cy: v.cy, w, h, style: st.key };
       baseAt = performance.now();
     }
     function draw() {
@@ -3126,7 +3223,8 @@
         const y = v.h / 2 + (baseView.cy - v.cy) * v.s - (baseView.h / 2) * k;
         return { k, x, y, covers: x <= 0.5 && y <= 0.5 && x + baseView.w * k >= v.w - 0.5 && y + baseView.h * k >= v.h - 0.5 };
       };
-      let at = baseView && baseView.code === v.L.code && baseView.w === v.w * BASE && baseView.h === v.h * BASE ? place() : null;
+      let at = baseView && baseView.code === v.L.code && baseView.w === v.w * BASE && baseView.h === v.h * BASE &&
+        baseView.style === styleOf().key ? place() : null;
       // A gap at the edge is filled at once, and a picture stretched or shrunk
       // a lot is drawn again, but at most a few times a second.
       const stale = at && (!at.covers || at.k > 1.6 || at.k < 0.6) && performance.now() - baseAt > 250;
@@ -3153,14 +3251,17 @@
     view.show = (code) => {
       if (v.L && v.L.code === code) return;
       v.L = mapLayers(code);
+      v.box = null;
       v.s = 0;
       v.atHome = true;
       if (v.w) set(homeOf());
     };
-    // The whole continent, moving there if it is shown already.
-    view.home = (code) => {
+    // The whole continent, or one of its regions, moving there if the map
+    // of the continent is shown already.
+    view.home = (code, region) => {
       const same = v.L && v.L.code === code;
       view.show(code);
+      v.box = (region && v.L.regions[region]) || null;
       if (v.w) goTo(homeOf(), same ? 450 : 0, true);
       else v.atHome = true;
     };
@@ -3182,8 +3283,8 @@
       const pad = 70;
       const w = Math.max(...xs) - Math.min(...xs);
       const h = Math.max(...ys) - Math.min(...ys);
-      const s = Math.min((v.w - 2 * pad) / Math.max(w, 1), (v.h - 2 * pad) / Math.max(h, 1), homeOf().s * 5);
-      goTo({ s: Math.max(s, homeOf().s * 0.7), cx: (Math.max(...xs) + Math.min(...xs)) / 2, cy: (Math.max(...ys) + Math.min(...ys)) / 2 }, 600);
+      const s = Math.min((v.w - 2 * pad) / Math.max(w, 1), (v.h - 2 * pad) / Math.max(h, 1), fitTo(v.L.home).s * 5);
+      goTo({ s, cx: (Math.max(...xs) + Math.min(...xs)) / 2, cy: (Math.max(...ys) + Math.min(...ys)) / 2 }, 600);
     };
     // Zooms by f around the middle, or around [px, py].
     view.zoom = (f, px = v.w / 2, py = v.h / 2, ms = 0) => {
@@ -3411,7 +3512,30 @@
     $('atlas-hint').textContent = mode === 'ask' ? (pin ? T().pinHint : T().mapHint) : '';
     atlas.redraw();
   }
-  const atlas = atlasView($('atlas-map'), { onTap: atlasTap, overlay: atlasOverlay });
+  // How the maps are drawn (the settings), and the names of countries left
+  // out while a place is asked: those that would give it away, such as
+  // Mexico for Mexico City, or Cuba for the island.
+  function atlasStyle() {
+    if (!isMaps()) return {};
+    const { thickBorders, countryNames } = state.settings;
+    return { thick: thickBorders, labels: countryNames, hide: currentId && countryNames ? givenAway(currentId) : null };
+  }
+  const givenAwayBy = {};
+  function givenAway(id) {
+    const key = id + ' ' + lang();
+    if (!givenAwayBy[key]) {
+      const place = BY_PLACE[id].name[lang()].toLocaleLowerCase(lang());
+      givenAwayBy[key] = new Set(MAP.countries.map(([iso]) => iso).filter((iso) => {
+        const name = countryLabel(iso).toLocaleLowerCase(lang());
+        const [short, long] = name.length < place.length ? [name, place] : [place, name];
+        return short.length >= 4 && long.includes(short);
+      }));
+    }
+    return givenAwayBy[key];
+  }
+  // The region whose map shows a place first, with that setting (or null).
+  const regionOf = (id) => (state.settings.mapView === 'region' ? BY_PLACE[id].region : null);
+  const atlas = atlasView($('atlas-map'), { onTap: atlasTap, overlay: atlasOverlay, style: atlasStyle });
 
   // The progress map: a dot for each place of the continent asked at least
   // once, in the colour of the legend. The place being asked is left out
@@ -3435,7 +3559,10 @@
       ctx.stroke();
     }
   }
-  const progressMap = atlasView($('progress-map'), { overlay: progressOverlay });
+  const progressMap = atlasView($('progress-map'), {
+    overlay: progressOverlay,
+    style: () => (isMaps() ? { thick: state.settings.thickBorders, labels: state.settings.countryNames } : {}),
+  });
 
   function renderMapProgress() {
     const t = T();
@@ -5623,6 +5750,7 @@
     for (const opt of $('answer-time').options) {
       opt.textContent = opt.value === '0' ? t.noLimit : seconds.format(Number(opt.value));
     }
+    for (const opt of $('map-view').options) opt.textContent = t.mapViews ? t.mapViews[opt.value] : '';
     for (const opt of $('next-after').options) {
       opt.textContent = opt.value === '0' ? t.nextOnTap : opt.value === '-1' ? t.nextNow : seconds.format(Number(opt.value));
     }
@@ -6057,7 +6185,12 @@
     } else {
       for (const g of choice().groups) $('group-' + g).checked = s[app.groupKey].includes(g);
     }
-    if (isMaps()) for (const k of PLACE_KINDS) $('kind-' + k).checked = s.kinds.includes(k);
+    if (isMaps()) {
+      for (const k of PLACE_KINDS) $('kind-' + k).checked = s.kinds.includes(k);
+      $('map-view').value = s.mapView;
+      $('thick-borders').checked = !!s.thickBorders;
+      $('country-names').checked = !!s.countryNames;
+    }
     $('new-per-day').value = s.newPerDay;
     $('retention').value = String(s.retention);
     $('answer-time').value = String(s.answerTime);
@@ -6129,11 +6262,28 @@
     save();
     renderProgress();
   });
-  // MapkiMax: the kinds of places to practise.
+  // MapkiMax: the kinds of places to practise, and how the map looks.
   $('kind-chips').addEventListener('change', () => {
     state.settings.kinds = PLACE_KINDS.filter((k) => $('kind-' + k).checked);
     save();
     renderProgress();
+  });
+  $('map-view').addEventListener('change', (e) => {
+    state.settings.mapView = e.target.value;
+    save();
+    if (current() && mode === 'ask') atlas.home(BY_PLACE[currentId].continent, regionOf(currentId));
+  });
+  $('thick-borders').addEventListener('change', (e) => {
+    state.settings.thickBorders = e.target.checked;
+    save();
+    atlas.redraw();
+    progressMap.redraw();
+  });
+  $('country-names').addEventListener('change', (e) => {
+    state.settings.countryNames = e.target.checked;
+    save();
+    atlas.redraw();
+    progressMap.redraw();
   });
 
   $('new-per-day').addEventListener('change', (e) => {
@@ -6370,7 +6520,7 @@
   });
   $('zoom-in').addEventListener('click', () => atlas.zoom(1.6, undefined, undefined, 200));
   $('zoom-out').addEventListener('click', () => atlas.zoom(1 / 1.6, undefined, undefined, 200));
-  $('zoom-home').addEventListener('click', () => current() && atlas.home(BY_PLACE[currentId].continent));
+  $('zoom-home').addEventListener('click', () => current() && atlas.home(BY_PLACE[currentId].continent, regionOf(currentId)));
   $('map-tabs').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-continent]');
     if (!btn) return;

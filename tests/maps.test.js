@@ -130,6 +130,41 @@ test('the base map has every layer and continent', () => {
   assert.ok(!GEO.inRing(32.9, 39.9, europe));
 });
 
+test('every region lies in one continent, has places, and takes in each of its places', () => {
+  const regions = Object.keys(MAP.regions);
+  assert.ok(regions.length >= 25);
+  for (const rid of regions) {
+    const { continent, fit } = MAP.regions[rid];
+    assert.ok(PLACE_CONTINENTS.includes(continent), rid);
+    assert.ok(GEO.decode(fit).length >= 6, rid);
+    assert.ok(PLACES.filter((p) => p.region === rid).length >= 4, `${rid} has too few places`);
+  }
+  for (const p of PLACES.filter((q) => q.region !== null)) {
+    const r = MAP.regions[p.region];
+    assert.ok(r && r.continent === p.continent, p.id);
+    // Rings in the Pacific go past 180 degrees east.
+    const ring = GEO.decode(r.fit);
+    assert.ok(GEO.inRing(p.at[0], p.at[1], ring) || GEO.inRing(p.at[0] + 360, p.at[1], ring), `${p.id} outside ${p.region}`);
+  }
+  const byId = Object.fromEntries(PLACES.map((p) => [p.id, p]));
+  assert.equal(byId.stockholm.region, 'nordic');
+  assert.equal(byId.tehran.region, 'iran');
+  assert.equal(byId.warsaw.region, 'poland');
+  // Places that do not fit in one region, such as the Alps, are asked on the map of the continent.
+  assert.equal(byId.alps.region, null);
+});
+
+test('every country has a label on the map', () => {
+  require('../countries.js');
+  const labels = new Map(MAP.countries.map((c) => [c[0], c]));
+  assert.equal(labels.size, MAP.countries.length);
+  for (const c of globalThis.COUNTRIES) assert.ok(labels.has(c.iso), c.iso);
+  for (const [iso, lon, lat, size] of MAP.countries) {
+    assert.match(iso, /^[A-Z]{2}$/);
+    assert.ok(Math.abs(lon) <= 180 && Math.abs(lat) <= 90 && size > 0, iso);
+  }
+});
+
 test('every language has the MapkiMax text', () => {
   for (const lang of I18N.LANGS) {
     const t = I18N.MAPS[lang];
@@ -137,7 +172,8 @@ test('every language has the MapkiMax text', () => {
     for (const key of ['typeAnswer', 'newOne', 'mapHint', 'pinHint', 'mapAria', 'zoomIn', 'zoomOut', 'zoomHome', 'onTheSpot', 'tooFar',
       'moreNew', 'progressTitle', 'progressSub', 'squareAria', 'continentsAria', 'groupsTitle', 'groupsHint', 'kindsTitle',
       'newPerDay', 'howP1', 'howP2', 'howP3', 'ruleAnswer', 'ruleWrong', 'ruleSlow', 'ruleRight', 'ruleFast', 'coinsRules',
-      'shopHint', 'yourTrophies', 'noTrophies']) {
+      'shopHint', 'yourTrophies', 'noTrophies', 'mapTitle', 'mapView', 'mapViewHint', 'thickBorders', 'countryNames',
+      'countryNamesHint']) {
       assert.ok(t[key], `${lang} ${key}`);
     }
     for (const key of ['kmAway', 'typeToGoOn', 'learnedOf', 'trophyName', 'trophyTitle', 'trophiesAria', 'madeIn']) {
@@ -146,6 +182,7 @@ test('every language has the MapkiMax text', () => {
     for (const kind of PLACE_KINDS) assert.ok(t.kinds[kind] && t.kindChips[kind], `${lang} ${kind}`);
     for (const code of PLACE_CONTINENTS) assert.ok(t.groups[code], `${lang} ${code}`);
     for (const level of ['easy', 'good', 'hard']) assert.ok(t.praise[level], `${lang} ${level}`);
+    for (const view of ['continent', 'region']) assert.ok(t.mapViews[view], `${lang} ${view}`);
     for (const id of ATLASES) assert.ok(t.trophyName(id), `${lang} ${id}`);
     assert.ok(t.madeIn('behaim') && t.madeIn('treasuremap') === '', `${lang} madeIn`);
     assert.ok(I18N.STRINGS[lang].appWhat.maps, `${lang} appWhat`);

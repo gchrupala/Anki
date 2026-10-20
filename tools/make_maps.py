@@ -57,6 +57,7 @@ NE_LAYERS = [
     '50m/physical/ne_50m_glaciated_areas',
     '50m/physical/ne_50m_antarctic_ice_shelves_polys',
     '50m/cultural/ne_50m_admin_0_boundary_lines_land',
+    '50m/cultural/ne_50m_admin_0_countries',
 ]
 ETOPO_URL = ('https://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.nc?'
              'altitude%5B(-90):4:(90)%5D%5B(-180):4:(180)%5D')
@@ -224,6 +225,141 @@ CONTINENT_SHAPES = {
 
 HEIGHTS = [200, 500, 1500, 3000]  # metres; the colours are in index.html
 
+# Regions, for a map of a region instead of the whole continent: the
+# continent, and an outline that roughly follows the borders of its countries
+# (longitudes past 180 continue east). The map of a region shows the box
+# around its outline. A place belongs to the first region in this list whose
+# outline holds the point where its name is written, if the place fits in the
+# box of that region; otherwise (the Danube, the Sahara) its map is that of
+# its continent. Antarctica has no regions.
+REGIONS = {
+    'poland': ('EU', [(14.1, 54.1), (14.6, 51.5), (15.0, 50.9), (18.8, 49.5), (22.9, 49.0), (24.1, 50.8), (23.6, 52.2),
+                      (23.9, 54.2), (19.5, 54.6)]),
+    'lowlands': ('EU', [(2.5, 51.1), (4.2, 49.9), (6.4, 49.5), (6.2, 50.8), (7.2, 53.3), (7.3, 53.7), (4.5, 53.7)]),
+    'british': ('EU', [(-11, 49.5), (-5.5, 49.8), (1.6, 50.95), (2.2, 52.5), (2, 59.5), (-1, 61), (-11, 59.5)]),
+    'nordic': ('EU', [(-25, 62.5), (-12, 62.5), (4, 57.5), (8, 54.8), (14.0, 54.8), (16.5, 54.8), (20.9, 55.3), (21.0, 54.0),
+                      (23.5, 53.9), (26.6, 55.6), (28.2, 56.1), (27.7, 57.5), (28.0, 59.4), (27.8, 60.5), (31.5, 62.9),
+                      (29.5, 67), (29, 69.7), (31, 70.3), (28, 71.6), (-25, 71.6)]),
+    'west': ('EU', [(-10, 43.6), (-1.8, 43.4), (3.2, 42.4), (7.5, 43.7), (7.0, 45.9), (5.9, 46.1), (7.5, 47.6), (8.2, 49.0),
+                    (6.4, 49.5), (4.2, 49.9), (2.5, 51.1), (1.6, 50.95), (-5.5, 49.8), (-10, 49.8)]),
+    'central': ('EU', [(6.0, 50.8), (6.2, 51.9), (7.0, 53.3), (8.6, 55.0), (14.4, 54.8), (14.2, 54.0), (14.6, 51.5), (15.0, 50.9),
+                       (18.8, 49.5), (22.6, 49.1), (22.9, 47.9), (21.0, 46.2), (18.8, 45.8), (16.5, 46.4), (13.7, 46.5),
+                       (10.5, 46.5), (7.0, 45.9), (5.9, 46.1), (7.5, 47.6), (8.2, 49.0), (6.4, 49.5)]),
+    'south': ('EU', [(-10, 35), (29.8, 35), (29.8, 45.2), (28.2, 45.5), (26.6, 48.2), (22.9, 47.9), (21.0, 46.2), (18.8, 45.8),
+                     (16.5, 46.4), (13.7, 46.5), (10.5, 46.5), (7.0, 45.9), (7.5, 43.7), (3.2, 42.4), (-1.8, 43.4), (-10, 43.6)]),
+    'east': ('EU', [(22.1, 48.4), (24.1, 50.8), (23.6, 52.2), (23.5, 53.9), (26.6, 55.6), (28.2, 56.1), (27.7, 57.5),
+                    (28.0, 59.4), (27.8, 60.5), (31.5, 62.9), (29.5, 67), (29, 69.7), (31, 70.3), (45, 71), (67, 70),
+                    (67, 51), (51.4, 46.5), (47.4, 44.7), (39.4, 47.15), (36.6, 45.3), (33, 44.3), (29.8, 45.2),
+                    (28.2, 45.5), (26.6, 48.2)]),
+    'iran': ('AS', [(44.0, 39.4), (44.8, 39.7), (48.0, 39.0), (48.9, 38.4), (49.0, 38.4), (54.0, 37.3), (57.4, 38.2),
+                    (60.5, 36.6), (61.2, 35.6), (60.9, 34.3), (60.8, 31.5), (61.8, 31.0), (63.3, 29.5), (61.6, 25.1),
+                    (57.3, 25.5), (54.6, 26.2), (53.0, 26.7), (51.5, 27.6), (50.0, 29.0), (48.5, 29.9), (47.7, 31.0),
+                    (46.0, 33.0), (45.4, 34.0), (45.8, 35.8), (44.8, 37.2)]),
+    'centralasia': ('AS', [(52.5, 41.8), (53.0, 37.4), (57.4, 38.2), (60.5, 36.6), (61.2, 35.6), (60.9, 34.3), (61.6, 31.4),
+                           (66.0, 29.4), (69.5, 31.6), (71.1, 34.4), (71.6, 36.7), (74.9, 37.2), (75.0, 38.5), (80.2, 42.0),
+                           (80.3, 45.0), (87.3, 49.1), (82.0, 50.8), (76.0, 54.0), (69.0, 55.3), (61.0, 54.0), (55.0, 51.0),
+                           (51.5, 47.0), (53.0, 46.8), (51.2, 45.0)]),
+    'southasia': ('AS', [(61.6, 25.2), (63.3, 29.5), (66.0, 29.4), (69.5, 31.6), (71.1, 34.4), (71.6, 36.7), (74.9, 37.2),
+                         (77.8, 35.5), (79.5, 32.5), (81.1, 30.0), (88.1, 27.9), (89.6, 28.2), (92.1, 27.8), (97.4, 28.3),
+                         (97.1, 25.2), (94.6, 22.0), (92.6, 21.3), (95.0, 15.0), (95.0, 5.0), (78.0, 4.0), (66.0, 20.0)]),
+    'eastasia': ('AS', [(73.5, 39.5), (75.0, 38.5), (80.2, 42.0), (80.3, 45.0), (87.3, 49.1), (90.0, 50.5), (98.0, 52.0),
+                        (108.0, 50.3), (116.0, 50.0), (121.0, 53.3), (127.5, 49.8), (135.0, 48.4), (146.0, 53.0),
+                        (146.0, 30.0), (125.0, 23.0), (122.0, 21.5), (117.0, 22.0), (108.0, 21.5), (106.0, 22.8),
+                        (101.5, 21.2), (98.0, 24.0), (97.4, 28.3), (92.1, 27.8), (88.1, 27.9), (81.1, 30.0), (79.5, 32.5),
+                        (77.8, 35.5), (74.9, 37.2)]),
+    'southeastasia': ('AS', [(92.2, 20.7), (93.5, 24.0), (97.4, 28.3), (98.0, 24.0), (101.5, 21.2), (106.0, 22.8),
+                             (108.0, 21.5), (110.0, 18.0), (121.0, 20.5), (127.0, 18.0), (127.5, 5.0), (129.3, 2.5),
+                             (129.6, -1.2), (129.0, -3.6), (131.0, -4.5), (131.2, -6.5), (130.0, -8.2), (127.5, -9.2),
+                             (125.0, -10.8), (115.0, -11.5), (100.0, -12.0), (94.0, 5.0)]),
+    'mideast': ('AS', [(25.5, 12), (63.5, 12), (63.5, 37.0), (53.0, 37.4), (52.5, 41.8), (51.2, 45.0), (47.4, 44.7),
+                       (39.4, 47.15), (36.6, 45.3), (29.2, 41.25), (25.5, 41.5)]),
+    'northasia': ('AS', [(60, 51), (61, 54), (69, 55.3), (76, 54), (82, 50.8), (87.3, 49.1), (90, 50.5), (98, 52),
+                         (108, 50.3), (116, 50), (121, 53.3), (127.5, 49.8), (135, 48.4), (146, 46), (165, 50),
+                         (191, 64), (191, 78), (58, 78), (58, 68)]),
+    'eastafrica': ('AF', [(22, 22), (38, 22), (38, 18), (43.3, 13.5), (51.5, 13.5), (51.5, 11.9), (51.0, 10.4), (41.6, -1.7),
+                          (40.5, -10.5), (35.9, -9.4), (35.5, -17.1), (32.7, -9.4), (30.7, -8.3), (29.2, -4.5), (29.6, -1.4),
+                          (31.0, 2.2), (27.4, 5.1), (24.0, 8.7), (22.0, 12.0), (22.0, 15.6)]),
+    'northafrica': ('AF', [(-18, 18), (38, 18), (43.3, 13.5), (44, 12.5), (44, 38), (-18, 38)]),
+    'westafrica': ('AF', [(-18, -2), (9.6, -2), (9.8, 3.5), (15.5, 7.5), (15.5, 18), (-18, 18)]),
+    'centralafrica': ('AF', [(8.7, 4.5), (15.5, 7.5), (27.4, 5.1), (31.0, 2.2), (29.6, -1.4), (29.2, -4.5), (30.7, -8.3),
+                             (28.4, -12.5), (22.0, -13.0), (12.0, -17.3), (11.7, -17.0), (11.8, -5.0), (9.6, -2)]),
+    'southernafrica': ('AF', [(11.7, -17.3), (22.0, -13.0), (28.4, -12.5), (30.7, -8.3), (32.7, -9.4), (35.5, -17.1),
+                              (35.9, -9.4), (40.5, -10.5), (58.5, -10), (58.5, -35.5), (11, -35.5)]),
+    'mexico': ('NA', [(-118, 32.7), (-114.8, 32.5), (-111, 31.3), (-108.2, 31.3), (-106.4, 31.8), (-103, 29), (-99.5, 27.5),
+                      (-97.1, 25.9), (-96, 28), (-90, 29.2), (-82, 28), (-82, 25), (-84, 24.0), (-86.7, 21.2), (-83, 15), (-77.4, 8.7), (-77.9, 7.2), (-80, 5),
+                      (-92, 12), (-118, 26)]),
+    'caribbean': ('NA', [(-90, 24), (-59, 24), (-59, 8), (-77, 8), (-83, 15), (-90, 15)]),
+    'usa': ('NA', [(-126, 24), (-66, 24), (-66, 53), (-126, 53)]),
+    'northnorthamerica': ('NA', [(-190, 46), (-10, 46), (-10, 84), (-190, 84)]),
+    'northsouthamerica': ('SA', [(-92, -21), (-34, -21), (-34, 13), (-92, 13)]),
+    'southsouthamerica': ('SA', [(-76, -56.5), (-50, -56.5), (-34, -21), (-34, -16), (-76, -16)]),
+    'australia': ('OC', [(112, -44.5), (155, -44.5), (155, -10.5), (112, -10.5)]),
+    'newzealand': ('OC', [(165.5, -47.5), (179, -47.5), (179, -34), (165.5, -34)]),
+    'melanesia': ('OC', [(128, -24), (181, -24), (181, 0), (128, 0)]),
+    'polynesia': ('OC', [(188, -20), (212, -20), (212, 23), (188, 23)]),
+}
+
+
+def projection(center):
+    """The Lambert azimuthal equal-area projection of geo.js, in km."""
+    l0, p0 = math.radians(center[0]), math.radians(center[1])
+    s0, c0 = math.sin(p0), math.cos(p0)
+
+    def forward(lon, lat):
+        dl = math.radians(lon) - l0
+        p = math.radians(lat)
+        c = s0 * math.sin(p) + c0 * math.cos(p) * math.cos(dl)
+        k = math.sqrt(2 / max(1e-12, 1 + c))
+        return 6371 * k * math.cos(p) * math.sin(dl), 6371 * k * (c0 * math.sin(p) - s0 * math.cos(p) * math.cos(dl))
+    return forward
+
+
+def bounds(points, forward):
+    xy = [forward(x, y) for x, y in points]
+    return min(x for x, _ in xy), min(y for _, y in xy), max(x for x, _ in xy), max(y for _, y in xy)
+
+
+def in_ring(lon, lat, ring):
+    inside = False
+    for (x0, y0), (x1, y1) in zip(ring, ring[1:] + ring[:1]):
+        if (y0 > lat) != (y1 > lat) and lon < (x1 - x0) * (lat - y0) / (y1 - y0) + x0:
+            inside = not inside
+    return inside
+
+
+def region_of(continent, g, at):
+    """The region of a place (see REGIONS), or None."""
+    forward = projection(CONTINENT_SHAPES[continent][0])
+    points = [pt for line in lines_of(g) for pt in line] if g.geom_type != 'Point' else [(g.x, g.y)]
+    x0, y0, x1, y1 = bounds(points, forward)
+    for rid, (cont, ring) in REGIONS.items():
+        if cont != continent or not (in_ring(at.x, at.y, ring) or in_ring(at.x + 360, at.y, ring)):
+            continue
+        rx0, ry0, rx1, ry1 = bounds(densify(ring, 2.0), forward)
+        tol = 0.02 * max(rx1 - rx0, ry1 - ry0)
+        if x0 >= rx0 - tol and x1 <= rx1 + tol and y0 >= ry0 - tol and y1 <= ry1 + tol:
+            return rid
+    return None
+
+
+def country_labels(data):
+    """[ISO code, lon, lat, size in km] of each country: where Natural Earth
+    writes its name, and the square root of the area of its largest part. The
+    countries of countries.js, and other lands of at least about 8000 km²."""
+    with open(os.path.join(ROOT, 'countries.js'), encoding='utf-8') as f:
+        members = set(re.findall(r"\['(?:EU|AS|AF|NA|SA|OC)', '([A-Z]{2})', \[", f.read()))
+    best = {}
+    for fields, g in records(data, 'ne_50m_admin_0_countries'):
+        iso = fields.get('iso_a2_eh')
+        if not iso or iso == '-99':
+            continue
+        part = max(getattr(g, 'geoms', [g]), key=lambda x: x.area)
+        lat = part.centroid.y
+        size = math.sqrt(part.area * math.cos(math.radians(lat))) * 111.32
+        if iso not in best or size > best[iso][3]:
+            best[iso] = [iso, round(fields['label_x'], 2), round(fields['label_y'], 2), round(size)]
+    return sorted((c for c in best.values() if c[0] in members or c[3] >= 90), key=lambda c: -c[3])
+
 
 def densify(points, step=1.0):
     """Points every step degrees along each segment, so the outline follows the projection."""
@@ -276,6 +412,9 @@ def base_map(data, skip_lakes=(), skip_rivers=()):
     m['ice'] = [e for name in ('ne_50m_glaciated_areas', 'ne_50m_antarctic_ice_shelves_polys')
                 for _, g in records(data, name) for e in encode_all(g)]
     m['heights'] = elevation_bands(data)
+    m['regions'] = {rid: {'continent': cont, 'fit': encode(densify(ring, 2.0) + ring[:1])}
+                    for rid, (cont, ring) in REGIONS.items()}
+    m['countries'] = country_labels(data)
     return m
 
 
@@ -552,7 +691,8 @@ def place_rows(places):
         else:
             kind, lines = 'area', encode_all(g, 0.02)
         at = label_point(g)
-        rows.append([p['id'], p['number'], p['kind'], p['continent'], kind, [round(at.x, 2), round(at.y, 2)], names_of(p), lines])
+        rows.append([p['id'], p['number'], p['kind'], p['continent'], region_of(p['continent'], g, at), kind,
+                     [round(at.x, 2), round(at.y, 2)], names_of(p), lines])
     return rows
 
 
@@ -566,7 +706,8 @@ def write_places(rows):
  * shapes from Natural Earth (public domain), names and coordinates from
  * Wikidata (CC0), names corrected by hand where needed. Do not edit by hand.
  *
- * Each row: id, number (card_id in the review log), kind, continent,
+ * Each row: id, number (card_id in the review log), kind, continent, the
+ * region of maps.js whose map shows it (or null: the map of its continent),
  * type ('point', 'line' or 'area'), where the name is written [lon, lat],
  * the names in Polish, English, Dutch, Spanish and Persian (the order of
  * LANGS), and the shape as encoded lines (see geo.js).
@@ -579,11 +720,12 @@ def write_places(rows):
 %s,
   ];
 
-  root.PLACES = ROWS.map(([id, number, kind, continent, type, at, names, shape]) => ({
+  root.PLACES = ROWS.map(([id, number, kind, continent, region, type, at, names, shape]) => ({
     id,
     number,
     kind,
     continent,
+    region,
     type,
     at,
     name: Object.fromEntries(LANGS.map((l, i) => [l, names[i]])),
@@ -606,6 +748,10 @@ def write_map(m):
  * than each height. Every line or ring is an encoded line (see geo.js).
  * continents: for each continent the centre of its map, the points its
  * first view shows, and the outline of the land coloured as that continent.
+ * regions: for each region its continent, and its outline, whose box is the
+ * first view of its map. countries: [ISO code, lon, lat, size in km] for the name of each
+ * country, largest first (the names are those of countries.js, or else of
+ * the browser).
  */
 (function (root) {
   'use strict';
