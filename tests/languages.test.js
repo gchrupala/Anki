@@ -7,6 +7,7 @@ require('../languages.js');
 
 const { LANGUAGE_CARDS, LANGUAGE_TARGETS, LANGUAGE_LEVELS, I18N } = globalThis;
 const all = Object.values(LANGUAGE_CARDS).flat();
+const BY_ID = Object.fromEntries(all.map((c) => [c.id, c]));
 
 test('each card has its own id and number, a level and a kind', () => {
   assert.deepEqual(LANGUAGE_TARGETS, ['fr', 'es', 'nl', 'it']);
@@ -81,5 +82,30 @@ test('every language has the JęzykiMax text', () => {
     }
     assert.ok(I18N.STRINGS[lang].appWhat.languages, `${lang} appWhat`);
     assert.ok(I18N.STRINGS[lang].hold && I18N.STRINGS[lang].goOn && I18N.STRINGS[lang].nextNow, `${lang} hold`);
+  }
+});
+
+test('the concepts a gap or question uses are pictures of its language', () => {
+  for (const c of all) {
+    if (c.kind !== 'g' && c.kind !== 'q') assert.equal(c.uses, undefined, c.id);
+    else {
+      assert.equal(new Set(c.uses).size, c.uses.length, c.id);
+      for (const id of c.uses) assert.ok(BY_ID[`${c.lang}.p.${id}`], `${c.id} ${id}`);
+    }
+  }
+});
+
+// The themes whose words come back on other cards: each concept is used by
+// at least two gaps or questions. Add a theme once its cards are written.
+const LINKED_THEMES = { nl: ['jobs'] };
+
+test('the words of the linked themes come back in gaps and questions', () => {
+  for (const [lang, themes] of Object.entries(LINKED_THEMES)) {
+    const cards = LANGUAGE_CARDS[lang];
+    for (const p of cards.filter((c) => c.kind === 'p' && themes.includes(c.theme))) {
+      const concept = p.id.split('.')[2];
+      const users = cards.filter((c) => (c.uses || []).includes(concept));
+      assert.ok(users.length >= 2, `${p.id}: ${users.map((c) => c.id).join(' ')}`);
+    }
   }
 });
