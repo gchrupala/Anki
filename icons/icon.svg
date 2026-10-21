@@ -1,23 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- MaxApki: the cards of the six apps in steps, MapkiMax (folded map
-       with a pin) at the back, then JęzykiMax (speech bubbles),
+  <!-- MaxApki: the cards of the seven apps in steps, AstronomiaMax
+       (Saturn) at the back, then MapkiMax (folded map with a pin),
+       JęzykiMax (speech bubbles),
        LiteraturaMax (book), ChemiaMax (flask), StoliceMax (globe) and
        MnożenieMax (×) in front. Each symbol sits on the part of its card the
        next card leaves free. -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0d8a86"/>
-      <stop offset="0.2" stop-color="#e8710a"/>
-      <stop offset="0.4" stop-color="#c0392b"/>
-      <stop offset="0.6" stop-color="#7b3fc4"/>
-      <stop offset="0.8" stop-color="#2a4fc2"/>
+      <stop offset="0" stop-color="#1d2766"/>
+      <stop offset="0.17" stop-color="#0d8a86"/>
+      <stop offset="0.33" stop-color="#e8710a"/>
+      <stop offset="0.5" stop-color="#c0392b"/>
+      <stop offset="0.67" stop-color="#7b3fc4"/>
+      <stop offset="0.83" stop-color="#2a4fc2"/>
       <stop offset="1" stop-color="#12806c"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
-  <!-- Six cards fill more room than five: all are made smaller to stay in
+  <!-- Seven cards fill more room than six: all are made smaller to stay in
        the middle, where a round icon mask leaves them whole. -->
-  <g transform="translate(9.3 47) scale(0.882)">
+  <g transform="translate(24 88.4) scale(0.769)">
+  <rect x="375.5" y="51" width="120" height="70" rx="8" fill="#0f1640"/>
+  <rect x="372" y="45" width="120" height="70" rx="8" fill="#ffffff"/>
+  <line x1="372" y1="62" x2="492" y2="62" stroke="#e2645a" stroke-width="3"/>
+  <g transform="rotate(-16 470 88)" fill="none" stroke="#1d2742" stroke-width="2.4">
+    <path d="M452 88a18 5 0 0 1 36 0"/>
+    <circle cx="470" cy="88" r="9" fill="#f2c96b"/>
+    <path d="M462.5 85.5c5 1.6 10 1.6 15 0" stroke="#c98f2c" stroke-width="2"/>
+    <path d="M488 88a18 5 0 0 1-36 0"/>
+  </g>
+  <path d="M483 66l1.6 3.4 3.4 1.6-3.4 1.6-1.6 3.4-1.6-3.4-3.4-1.6 3.4-1.6z" fill="#ffc928" stroke="#1d2742" stroke-width="1"/>
   <rect x="331.5" y="95" width="120" height="70" rx="8" fill="#075c59"/>
   <rect x="328" y="89" width="120" height="70" rx="8" fill="#ffffff"/>
   <line x1="328" y1="106" x2="448" y2="106" stroke="#e2645a" stroke-width="3"/>
