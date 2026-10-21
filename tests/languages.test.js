@@ -95,14 +95,14 @@ test('the concepts a gap or question uses are pictures of its language', () => {
   }
 });
 
-// The themes whose words come back on other cards: each concept is used by
-// at least two gaps or questions. Add a theme once its cards are written.
-const LINKED_THEMES = { nl: ['jobs'] };
+// The languages whose picture words all come back on other cards: each
+// concept is used by at least two gaps or questions.
+const LINKED = ['nl'];
 
-test('the words of the linked themes come back in gaps and questions', () => {
-  for (const [lang, themes] of Object.entries(LINKED_THEMES)) {
+test('the picture words of the linked languages come back in gaps and questions', () => {
+  for (const lang of LINKED) {
     const cards = LANGUAGE_CARDS[lang];
-    for (const p of cards.filter((c) => c.kind === 'p' && themes.includes(c.theme))) {
+    for (const p of cards.filter((c) => c.kind === 'p')) {
       const concept = p.id.split('.')[2];
       const users = cards.filter((c) => (c.uses || []).includes(concept));
       assert.ok(users.length >= 2, `${p.id}: ${users.map((c) => c.id).join(' ')}`);
