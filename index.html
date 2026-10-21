@@ -2202,8 +2202,39 @@
     return state.settings.newPerDay + d.extraNew - d.newSeen;
   }
 
+  // JęzykiMax: the words (picture concepts) of a card: its own for a picture
+  // or word card, those it uses for a gap or question.
+  const LANG_CONCEPTS = Object.fromEntries(Object.values(BY_LANG).map((c) => [c.id,
+    c.kind === 'p' || c.kind === 'w' ? [c.id.split('.')[2]] : c.uses || []]));
+
+  // JęzykiMax holds a new card back
+  //  - while the picture card of a word it uses is new or being learned, so
+  //    the child meets a word with its picture before meeting it in sentences;
+  //  - on a day another card with one of its words is being learned or was
+  //    answered, so the same word is not asked twice in a few minutes (as
+  //    Anki buries siblings). It comes on a later day.
+  // A picture of a level switched off holds nothing back.
+  function heldBack(cards) {
+    if (app.id !== 'languages') return () => false;
+    const byId = Object.fromEntries(cards.map((c) => [c.id, c]));
+    const busy = new Set();
+    for (const c of cards) {
+      if (SRS.isLearning(c) || (c.last !== null && SRS.dayIndex(c.last, ROLLOVER) === today())) {
+        LANG_CONCEPTS[c.id].forEach((k) => busy.add(k));
+      }
+    }
+    const unlearned = (k) => {
+      const picture = byId[state.settings.target + '.p.' + k];
+      return !!picture && (picture.type === 'new' || SRS.isLearning(picture));
+    };
+    return (c) => c.type === 'new' && LANG_CONCEPTS[c.id].some((k) => busy.has(k)
+      || ((BY_LANG[c.id].kind === 'g' || BY_LANG[c.id].kind === 'q') && unlearned(k)));
+  }
+
   function queues() {
-    return SRS.buildQueues(activeCards(), now(), newLeft(), cfg());
+    const cards = activeCards();
+    const held = heldBack(cards);
+    return SRS.buildQueues(cards.filter((c) => !held(c)), now(), newLeft(), cfg());
   }
 
   // The numbers of cards left today, as in the header.
