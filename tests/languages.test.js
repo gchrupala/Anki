@@ -95,12 +95,8 @@ test('the concepts a gap or question uses are pictures of its language', () => {
   }
 });
 
-// The languages whose picture words all come back on other cards: each
-// concept is used by at least two gaps or questions.
-const LINKED = ['nl'];
-
-test('the picture words of the linked languages come back in gaps and questions', () => {
-  for (const lang of LINKED) {
+test('every picture word comes back in at least two gaps or questions', () => {
+  for (const lang of LANGUAGE_TARGETS) {
     const cards = LANGUAGE_CARDS[lang];
     for (const p of cards.filter((c) => c.kind === 'p')) {
       const concept = p.id.split('.')[2];
