@@ -20,8 +20,9 @@
 <style>
   /* MaxApki, a family of apps in one page: MnożenieMax (times tables),
      StoliceMax (capitals), ChemiaMax (chemical formulas), LiteraturaMax
-     (authors of books), JęzykiMax (French, Spanish, Dutch and Italian) and
-     MapkiMax (places on the map).
+     (authors of books), JęzykiMax (French, Spanish, Dutch and Italian),
+     MapkiMax (places on the map) and AstronomiaMax (the Solar System and
+     space).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -129,7 +130,8 @@
   body[data-app="chemistry"] [data-app]:not([data-app~="chemistry"]),
   body[data-app="literature"] [data-app]:not([data-app~="literature"]),
   body[data-app="languages"] [data-app]:not([data-app~="languages"]),
-  body[data-app="maps"] [data-app]:not([data-app~="maps"]) { display: none !important; }
+  body[data-app="maps"] [data-app]:not([data-app~="maps"]),
+  body[data-app="astronomy"] [data-app]:not([data-app~="astronomy"]) { display: none !important; }
 
   body {
     margin: 0;
@@ -411,6 +413,14 @@
   .trophies .shiny .sparkle { animation: none; opacity: 0.85; transform: scale(0.8); }
   .trophies .shiny .bubble { animation: none; opacity: 0.7; }
   .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+  /* AstronomiaMax: the rocket's dust covers the new trophy, which is gone
+     when the dust clears. */
+  .confetti.dust { z-index: 32; }
+  .trophy-banner.vanish { animation: vanish 0.4s ease-in forwards; }
+  @keyframes vanish {
+    from { opacity: 1; transform: translateX(-50%) scale(1); }
+    to { opacity: 0; transform: translateX(-50%) scale(0.9); }
+  }
   .trophy-banner {
     position: fixed;
     top: max(14vh, env(safe-area-inset-top, 0px));
@@ -673,6 +683,8 @@
   }
   /* LiteraturaMax: titles are longer than country names */
   .country.book { font-size: clamp(1.3rem, 6.2cqi, 2.5rem); }
+  /* AstronomiaMax: a whole question, under its picture */
+  .country.ask { font-size: clamp(1.15rem, 5cqi, 1.9rem); line-height: 1.3; }
   /* JęzykiMax: the language to learn, the card in that language and its answers */
   .targets { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
   .targets button {
@@ -1088,6 +1100,12 @@
       <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
       <stop offset="0.55" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
+    <!-- The night side of the planets on the trophies of AstronomiaMax -->
+    <radialGradient id="orb-shade" cx="0.32" cy="0.3" r="0.85">
+      <stop offset="0.45" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.5"/>
+    </radialGradient>
+    <clipPath id="orb-clip"><circle r="10"/></clipPath>
   </defs>
 </svg>
 <div class="app">
@@ -1167,6 +1185,10 @@
             <span class="kind" id="place-kind"></span>
             <span class="country" id="place-name"></span>
           </div>
+          <div class="place" data-app="astronomy" aria-live="polite">
+            <span class="flag" id="astro-pic" aria-hidden="true"></span>
+            <span class="country ask" id="astro-question"></span>
+          </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
           <button type="button" class="ghost-btn hold-btn" id="hold" hidden></button>
         </div>
@@ -1201,7 +1223,7 @@
         <button type="button" class="key ok" data-key="ok" tabindex="-1">OK</button>
       </div>
 
-      <div class="choices" id="choices" data-app="capitals chemistry literature languages" data-t-aria="choicesAria">
+      <div class="choices" id="choices" data-app="capitals chemistry literature languages astronomy" data-t-aria="choicesAria">
         <button type="button" class="choice" data-i="0"></button>
         <button type="button" class="choice" data-i="1"></button>
         <button type="button" class="choice" data-i="2"></button>
@@ -1226,7 +1248,7 @@
       <h2 data-t="progressTitle">Your times table</h2>
       <p class="sub" data-t="progressSub">Each square is one fact: row × column. Squares fill in as facts move into long-term memory.</p>
       <div class="square" id="square" role="img" data-app="times" data-t-aria="squareAria"></div>
-      <div class="map" id="map" role="img" data-app="capitals chemistry literature languages" data-t-aria="squareAria"></div>
+      <div class="map" id="map" role="img" data-app="capitals chemistry literature languages astronomy" data-t-aria="squareAria"></div>
       <div class="map-tabs" id="map-tabs" role="group" data-app="maps" data-t-aria="continentsAria"></div>
       <div class="progress-map" data-app="maps"><canvas id="progress-map" role="img" data-t-aria="squareAria"></canvas></div>
       <ul class="legend">
@@ -1270,7 +1292,7 @@
       <div class="chips" id="extra-chips"></div>
     </section>
 
-    <section data-app="capitals chemistry literature languages maps">
+    <section data-app="capitals chemistry literature languages maps astronomy">
       <h3 data-t="groupsTitle">Groups</h3>
       <div class="chips" id="group-chips"></div>
       <p class="hint" data-t="groupsHint" style="margin-top:0.5rem"></p>
@@ -1469,6 +1491,7 @@
 <script src="i18n-literature.js"></script>
 <script src="i18n-languages.js"></script>
 <script src="i18n-maps.js"></script>
+<script src="i18n-astronomy.js"></script>
 <script src="countries.js"></script>
 <script src="chemistry.js"></script>
 <script src="literature.js"></script>
@@ -1476,6 +1499,7 @@
 <script src="languages.js"></script>
 <script src="places.js"></script>
 <script src="maps.js"></script>
+<script src="astronomy.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1489,8 +1513,8 @@
   // relearning earns nothing), and coins never change the schedule.
   // Level 1: learned (left the first-day steps); 2: next review a week or
   // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js,
-  // i18n-capitals.js, i18n-chemistry.js, i18n-literature.js and
-  // i18n-languages.js in step.
+  // i18n-capitals.js, i18n-chemistry.js, i18n-literature.js,
+  // i18n-languages.js and i18n-astronomy.js in step.
   const LEVEL_COINS = [0, 2, 5, 10];
   const OLD_LEVEL_COINS = [0, 1, 2, 5]; // MnożenieMax before settings layout 6
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
@@ -1650,6 +1674,25 @@
     ['jagiellonian', 550, '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
     ['goldglobe', 650, '#fffbe6', '#ffd84a', '#e2a400', '#8a5a00'],
   ].map(([id, price, ...colors]) => ({ id, price, colors }));
+  // AstronomiaMax: trophies with the Moon, a planet or the Sun on top, from
+  // the Moon, then the planets outwards from the Sun, to the Sun itself.
+  // The colours are those of the metal: bronze, silver, then gold.
+  const BRONZE = ['#ffd9b0', '#cd7f32', '#9a5a1e', '#6b3a10'];
+  const SILVER = ['#ffffff', '#cfd5dc', '#9aa3ad', '#5f6874'];
+  const GOLDEN = ['#fff6c4', '#ffc928', '#e09a00', '#9c6200'];
+  const PLANET_TROPHIES = [
+    ['moon', 30, BRONZE],
+    ['mercury', 50, BRONZE],
+    ['venus', 75, BRONZE],
+    ['earth', 100, SILVER],
+    ['mars', 125, SILVER],
+    ['jupiter', 175, SILVER],
+    ['saturn', 225, GOLDEN],
+    ['uranus', 275, GOLDEN],
+    ['neptune', 325, GOLDEN],
+    ['pluto', 400, GOLDEN],
+    ['sun', 600, ['#fffbe6', '#ffd84a', '#e2a400', '#8a5a00']],
+  ].map(([id, price, colors]) => ({ id, price, colors }));
 
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
@@ -1749,10 +1792,26 @@
       rewards: ATLASES,
       strings: (l) => I18N.MAPS[l] || {},
     },
+    astronomy: {
+      id: 'astronomy',
+      name: 'AstronomiaMax',
+      hash: 'astronomia',
+      storeKey: 'astronomy-cards-v1',
+      layout: 1,
+      // A whole question and four answers take a while to read: Easy
+      // within 8 seconds, Hard after 15.
+      fastSeconds: 8,
+      slowSeconds: 15,
+      settings: () => ({ groups: ASTRO_GROUPS.slice(), newPerDay: 5, retention: 0.9, answerTime: 30 }),
+      groupKey: 'groups', // the setting with the topics to practise
+      rewards: PLANET_TROPHIES,
+      strings: (l) => I18N.ASTRONOMY[l] || {},
+    },
   };
   // The icons of the apps, for the app menu and the header: a card with a
   // drawing in black and white, on the colour of the app.
   const APP_ICONS = {
+    astronomy: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#1d2766"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#0f1640"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><g transform="rotate(-16 256 280)" fill="none" stroke="#000" stroke-width="9" stroke-linecap="round"><path d="M172 280a84 21 0 0 1 168 0"/><circle cx="256" cy="280" r="40" fill="#fff"/><path d="M220 266c24 7 48 7 72 0" stroke-width="6"/><path d="M340 280a84 21 0 0 1-168 0"/></g><path d="M170 222l4.5 10.5 10.5 4.5-10.5 4.5-4.5 10.5-4.5-10.5-10.5-4.5 10.5-4.5z" fill="#000"/><path d="M350 300l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#000"/><circle cx="336" cy="232" r="5" fill="#000"/></g></svg>',
     maps: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0d8a86"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#075c59"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M180 240l50-15 50 15 50-15v84l-50 15-50-15-50 15z" fill="#fff" stroke="#000" stroke-width="9" stroke-linejoin="round"/><path d="M230 225v84M280 240v84" stroke="#000" stroke-width="7"/><path d="M196 300c16-6 22-24 40-26s30 14 46 4" fill="none" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 12"/><path d="M306 304c-15-17-26-30-26-43a26 26 0 0 1 52 0c0 13-11 26-26 43z" fill="#000"/><circle cx="306" cy="261" r="10" fill="#fff"/></g></svg>',
     languages: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#e8710a"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#9c4a05"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M190 222h90a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-58l-28 22 6-22h-10a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#000"/><path d="M196 244h78M196 264h50" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M252 262h86a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-6l6 20-28-20h-58a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#fff" stroke="#000" stroke-width="8" stroke-linejoin="round"/><path d="M258 284h74M258 304h44" stroke="#000" stroke-width="9" stroke-linecap="round"/></g></svg>',
     times: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#2a4fc2"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#1b3a99"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M226 238 L286 298 M286 238 L226 298" stroke="#000" stroke-width="22" stroke-linecap="round"/></g></svg>',
@@ -1762,6 +1821,9 @@
   };
   // The sign embossed on the coins of each app.
   const EMBLEMS = {
+    astronomy: '<g transform="rotate(-20 16.4 16.4)"><ellipse cx="16.4" cy="16.4" rx="8.4" ry="2.5" fill="none" style="stroke: var(--gold-hi)" stroke-width="1.2"/></g><circle cx="16.4" cy="16.4" r="4.4" style="fill: var(--gold-hi)"/>' +
+      '<g transform="rotate(-20 16 16)" fill="none" stroke-width="1.2"><path d="M7.6 16a8.4 2.5 0 0 1 16.8 0" style="stroke: var(--gold-deep)" opacity="0.85"/></g><circle cx="16" cy="16" r="4.4" style="fill: var(--gold-deep)" fill-opacity="0.85"/>' +
+      '<g transform="rotate(-20 16 16)" fill="none"><path d="M24.4 16a8.4 2.5 0 0 1-16.8 0" style="stroke: var(--gold-hi)" stroke-width="2.2"/><path d="M24.4 16a8.4 2.5 0 0 1-16.8 0" style="stroke: var(--gold-deep)" stroke-width="1.2" opacity="0.85"/></g>',
     maps: '<path d="M16.4 8.4l1.7 6.3 6.3 1.7-6.3 1.7-1.7 6.3-1.7-6.3-6.3-1.7 6.3-1.7z" style="fill: var(--gold-hi)"/><path d="M16 8l1.7 6.3L24 16l-6.3 1.7L16 24l-1.7-6.3L8 16l6.3-1.7z" style="fill: var(--gold-deep)" fill-opacity="0.85"/><path d="M16 12.6l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1z" style="fill: var(--gold-hi)" fill-opacity="0.9"/>',
     languages: '<path d="M10.4 9.4h11.6a2 2 0 0 1 2 2v6.4a2 2 0 0 1-2 2h-5.6l-4 3.2v-3.2h-2a2 2 0 0 1-2-2v-6.4a2 2 0 0 1 2-2z" style="fill: var(--gold-hi)"/><path d="M10 9h11.6a2 2 0 0 1 2 2v6.4a2 2 0 0 1-2 2H16l-4 3.2v-3.2h-2a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
     literature: '<path d="M16.4 11.6c-1.8-1.1-4-1.3-6-.8v8.6c2-.5 4.2-.3 6 .8zM16.4 11.6c1.8-1.1 4-1.3 6-.8v8.6c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-hi)"/><path d="M16 11.2c-1.8-1.1-4-1.3-6-.8V19c2-.5 4.2-.3 6 .8zM16 11.2c1.8-1.1 4-1.3 6-.8V19c-2-.5-4.2-.3-6 .8z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
@@ -1929,7 +1991,8 @@
 
   const now = () => Date.now() + state.clockOffset;
   const today = () => SRS.dayIndex(now(), ROLLOVER);
-  const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention, fastSeconds: app.fastSeconds });
+  const cfg = () => ({ ...SRS.DEFAULTS, desiredRetention: state.settings.retention, fastSeconds: app.fastSeconds,
+    slowSeconds: app.slowSeconds || SRS.DEFAULTS.slowSeconds });
   // The first device language the app has, e.g. 'nl' for nl-BE; Polish if none.
   function deviceLang() {
     const wanted = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
@@ -2001,6 +2064,17 @@
   const BY_BOOK = Object.fromEntries(BOOKS.map((b) => [b.id, b]));
   const BY_LANG = Object.fromEntries(Object.values(LANGUAGE_CARDS).flat().map((c) => [c.id, c]));
   const BY_PLACE = Object.fromEntries(PLACES.map((p) => [p.id, p]));
+  const BY_QUESTION = Object.fromEntries(ASTRO_QUESTIONS.map((q) => [q.id, q]));
+  // AstronomiaMax: the answers of each kind (planets, moons), from which
+  // a question without wrong answers of its own gets three.
+  const ASTRO_KINDS = {};
+  for (const a of Object.values(ASTRO_ANSWERS)) (ASTRO_KINDS[a.kind] = ASTRO_KINDS[a.kind] || []).push(a.id);
+  // An answer on offer: the id of the question for the right one, or the
+  // id with the wrong answer after # (a17#venus).
+  const astroAnswer = (key) => {
+    const [id, wrong] = key.split('#');
+    return ASTRO_TEXT(wrong || BY_QUESTION[id].answer, lang());
+  };
   const LANG_IDS = Object.fromEntries(LANGUAGE_TARGETS.map((l) => [l, LANGUAGE_CARDS[l].map((c) => c.id)]));
   // JęzykiMax: the text of each answer on offer for the card shown. The
   // right answer has the id of the card, the wrong ones the id with #1, #2
@@ -2018,7 +2092,8 @@
   const formulaHtml = (formula) => '<span class="formula">' + esc(formula).replace(/(\d+)/g, '<sub>$1</sub>') + '</span>';
 
   // What differs between these apps. A card id is the ISO code of a
-  // country, the formula of a compound or the id of a book (b1).
+  // country, the formula of a compound, or the id of a book (b1) or a
+  // question (a17).
   //   groups: the continents or groups of compounds, each can be switched off
   //   ids: all cards, and group(id) the group of one
   //   options(id): the right answer and three wrong ones, in a random order
@@ -2137,6 +2212,23 @@
       label: (id) => BY_LANG[id].label,
       number: (id) => BY_LANG[id].number,
       logColumns: 'card,picked',
+    },
+    astronomy: {
+      groups: ASTRO_GROUPS,
+      ids: ASTRO_QUESTIONS.map((q) => q.id),
+      group: (id) => BY_QUESTION[id].group,
+      // The right answer and three wrong ones: those written with the
+      // question, or else three other answers of the same kind.
+      options: (id) => {
+        const q = BY_QUESTION[id];
+        const wrong = q.wrong || shuffle(ASTRO_KINDS[ASTRO_ANSWERS[q.answer].kind].filter((a) => a !== q.answer)).slice(0, 3);
+        return shuffle([id, ...wrong.map((a) => id + '#' + a)]);
+      },
+      answer: (key) => esc(astroAnswer(key)),
+      tile: (id) => BY_QUESTION[id].pic,
+      label: (id) => BY_QUESTION[id].text[lang()],
+      number: (id) => BY_QUESTION[id].number,
+      logColumns: 'question,picked',
     },
     // MapkiMax has no answers to pick from: the child places a pin on the map.
     maps: {
@@ -2770,6 +2862,9 @@
         const title = book.title[lang()];
         $('book-title').textContent = title;
         $('book-original').innerHTML = originalLine(book, title);
+      } else if (app.id === 'astronomy') {
+        $('astro-pic').textContent = BY_QUESTION[c.id].pic;
+        $('astro-question').textContent = BY_QUESTION[c.id].text[lang()];
       } else {
         const card = BY_LANG[c.id];
         const text = $('lang-text');
@@ -2780,10 +2875,13 @@
         $('say').hidden = !sayText(card, mode !== 'ask') || !voiceFor(card.lang);
         $('lang-meaning').textContent = mode !== 'ask' ? meaningOf(c) : '';
       }
-      // JęzykiMax: big pictures as answers, and long answers one under another.
+      // JęzykiMax: big pictures as answers. JęzykiMax and AstronomiaMax:
+      // long answers one under another.
       const word = app.id === 'languages' && BY_LANG[c.id];
       $('choices').classList.toggle('pics', !!word && word.kind === 'w');
-      $('choices').classList.toggle('long', !!word && options.some((k) => (langOffered[k] || '').length > 18));
+      $('choices').classList.toggle('long', app.id === 'astronomy'
+        ? options.some((k) => astroAnswer(k).length > 26)
+        : !!word && options.some((k) => (langOffered[k] || '').length > 18));
       // Once answered, the right answer turns green and a wrong pick is marked.
       $('choices').classList.toggle('answered', mode !== 'ask');
       $('choices').querySelectorAll('.choice').forEach((btn, i) => {
@@ -3645,7 +3743,7 @@
       }
       defs.appendChild(g);
     };
-    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE, PRIZES, CITIES, ATLASES)) {
+    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE, PRIZES, CITIES, ATLASES, PLANET_TROPHIES)) {
       gradient('linearGradient', 'rim-' + id, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
       gradient('radialGradient', 'face-' + id, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
     }
@@ -3670,6 +3768,14 @@
     for (const { id } of PRIZES) clipPath('clip-' + id, PRIZE_ART[id].shape);
     for (const { id } of CITIES) clipPath('clip-' + id, CITY_ART[id].shape);
     for (const { id } of ATLASES) clipPath('clip-' + id, ATLAS_ART[id].shape);
+    // AstronomiaMax: the body on top of each trophy, lit from the top left,
+    // and the metal of the trophy for its glitter.
+    for (const { id } of PLANET_TROPHIES) {
+      const [light, middle, dark] = PLANET_ART[id].ball;
+      gradient('radialGradient', 'ball-' + id, { cx: 0.35, cy: 0.3, r: 0.8 }, [[0, light], [0.55, middle], [1, dark]]);
+      clipPath('clip-' + id, TROPHY_METAL + '<circle cx="16" cy="' + (PLANET_REST - PLANET_ART[id].r) + '" r="' + PLANET_ART[id].r + '"/>');
+    }
+    clipPath('trophy-metal', TROPHY_METAL);
   }
 
   // The beam of light that passes over a reward now and then.
@@ -4794,13 +4900,141 @@
   };
   const atlasIcon = (id) => modelIcon(id, ATLASES, ATLAS_ART);
 
-  const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon, maps: atlasIcon };
+  // AstronomiaMax: trophies with a planet, the Moon or the Sun on top
+  // instead of a cup. The foot, stem and dish are metal in the colours of
+  // the reward; the body on top has its own: "ball" is its gradient (light,
+  // middle, dark), "r" its radius, and "marks" draws its markings, in a
+  // space where the body is a circle of radius 10 around (0, 0). "back" and
+  // "front" draw what goes behind and in front of it, such as rings.
+  const PLANET_REST = 18; // the bottom of the body, sitting in the dish
+  const TROPHY_DISH = 'M12.2 16.6c.2 2 1.8 3 3.8 3s3.6-1 3.8-3z';
+  const TROPHY_STEM = 'M15.3 19.5h1.4l-.2 1.5h-1zM15.4 22h1.2l.8 2.6h-2.8z';
+  const TROPHY_KNOB = 'M14.4 21.5a1.6 .7 0 1 0 3.2 0a1.6 .7 0 1 0-3.2 0z';
+  const TROPHY_FOOT = 'M11.8 26.8c.4-1.5 1.8-2.2 4.2-2.2s3.8.7 4.2 2.2z';
+  const TROPHY_METAL = '<path d="' + TROPHY_DISH + TROPHY_STEM + TROPHY_KNOB + TROPHY_FOOT + '"/>';
+  const craters = (list, fill, edge) => list.map(([x, y, r]) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + fill + '" stroke="' + edge + '" stroke-width="0.5"/>').join('');
+  const bands = (list) => list.map(([y1, y2, color]) => '<rect x="-10" y="' + y1 + '" width="20" height="' + (y2 - y1).toFixed(1) + '" fill="' + color + '"/>').join('');
+  // Rings round a body, tilted by deg: the half behind it and the half in
+  // front, each a list of [rx, ry, colour, width].
+  const ringHalf = (rings, deg, front) => '<g transform="rotate(' + deg + ')" fill="none">' + rings.map(([rx, ry, color, width]) =>
+    '<path d="M' + (front ? rx : -rx) + ' 0A' + rx + ' ' + ry + ' 0 0 1 ' + (front ? -rx : rx) + ' 0" stroke="' + color + '" stroke-width="' + width + '"/>').join('') + '</g>';
+  const SATURN_RINGS = [[19, 4.6, '#e9d6a4', 3.2], [17.5, 4.2, '#8f7a50', 0.5], [15.5, 3.7, '#d0b47a', 2.4]];
+  const URANUS_RINGS = [[13.5, 5, '#5f9ea6', 1.5], [13.5, 5, '#d8f6f7', 0.8]];
+  const PLANET_ART = {
+    moon: {
+      r: 5.4,
+      ball: ['#f6f6f3', '#cfcfca', '#8c8c87'],
+      marks: '<path d="M-6.5-2.5c1.5-3 5.5-3.5 7-1 1 2-1.5 4.5-4.5 4-2.2-.4-3.4-1.4-2.5-3zM1.5 2.5c2-1 5-.5 5.5 1.5s-1.5 3.5-3.5 3.5-3-1.5-2-5zM2-6c1.5-1 3.5-.6 3.8.8s-1.2 2.2-2.6 1.8-2-1.6-1.2-2.6z" fill="#9d9d98" fill-opacity="0.75"/>' +
+        craters([[-3, 5, 1.6], [5.5, -2.2, 1.2], [-6.6, 3.4, 1], [0.4, -7.6, 0.9], [6.4, 5.6, 0.8]], '#c2c2bd', '#8c8c87'),
+    },
+    mercury: {
+      r: 5.4,
+      ball: ['#ebe5de', '#b3aaa1', '#756c64'],
+      marks: craters([[-4, -4, 2], [3, -6, 1.3], [5, 1, 2.2], [-2, 4, 1.5], [-7, 1, 1.1], [1.5, 7, 1.2], [6.5, -4.5, 0.9], [-5.5, 7, 0.8]], '#a1988f', '#7a7169'),
+    },
+    venus: {
+      r: 6.2,
+      ball: ['#fff7dc', '#f0d08a', '#c4913b'],
+      marks: '<path d="M-10-4c4-2 8 1 12-1s6-2 8 0M-10 2c3 2 7-1 11 1s6 2 9 0M-8 7.5c3-1 6 1 9 0s4-1 6 0M-7-8c3 1 6-1 9 0" fill="none" stroke="#e2b660" stroke-width="1.6" stroke-opacity="0.75" stroke-linecap="round"/>' +
+        '<path d="M-9-1c3 .8 6-.6 9 .2M0 4.8c2.4-.6 4.6.4 7-.2" fill="none" stroke="#fff3cf" stroke-width="1.1" stroke-opacity="0.8" stroke-linecap="round"/>',
+    },
+    earth: {
+      r: 6.4,
+      ball: ['#cdeeff', '#3b8fe0', '#1b4d99'],
+      marks: '<path d="M-7-5c2-2 5-2 6 0 1 1.5-.5 3.2.4 4.6.8 1.3 2.6 1.4 2.4 3-.3 2.2-2.6 3.4-3.2 5.6-.4 1.4-1.8 1.6-2.4.2-.8-1.8-.4-4-1.8-5.2-1.4-1.2-3-2.2-2.8-4.2.1-1.6 1.4-2.8 3.4-4z' +
+        'M2-7c2-1 5-.6 6.4 1 1 1.2.4 2.8-.8 3.4-1.4.6-1.6 2.2-.6 3.2 1.2 1.2 2.6 2.4 2 4.2-.6 1.8-2.6 2.6-4 3.8-1 .8-2.4.4-2.6-.8-.3-1.6.6-3.2-.2-4.6-.8-1.4-2.6-2.2-2.4-3.8.2-1.6 1.6-2.4 2.2-4.4z" fill="#5cbf57" stroke="#2f7d32" stroke-width="0.5" stroke-linejoin="round"/>' +
+        '<ellipse cx="0" cy="-9.6" rx="4.5" ry="1.5" fill="#fff"/>' +
+        '<path d="M-9 1.5c3-1.5 5 0 8-1M1-9c2 .8 4 0 6 .6M-3 8.4c2-1 5 0 7-1" fill="none" stroke="#fff" stroke-width="1.3" stroke-opacity="0.85" stroke-linecap="round"/>',
+    },
+    mars: {
+      r: 5.8,
+      ball: ['#ffd0ad', '#e0703a', '#983815'],
+      marks: '<path d="M-8.5-1c2.5-2 5.5-1.5 7 0 1.6 1.5 4 1 6 .4s3.6 0 4.2 1.6c.5 1.4-1 2.6-2.8 2.6-2.2 0-3.8-1.4-6-1-2.4.4-4.4 1.8-6.6.6-1.6-.9-2.6-2.6-1.8-4.2zM-2 5c1.5-1 4-1 5 .4s-.6 2.6-2.4 2.6-3.4-1.6-2.6-3z" fill="#a9461f" fill-opacity="0.6"/>' +
+        '<ellipse cx="0" cy="-8.9" rx="4.4" ry="1.7" fill="#fff" fill-opacity="0.95"/>',
+    },
+    jupiter: {
+      r: 7.2,
+      ball: ['#fff4e2', '#e2c29a', '#a1784f'],
+      marks: bands([[-10, -7.2, '#c99c70'], [-5.4, -3.2, '#b98257'], [-1.2, 0.6, '#f6e7cf'], [1.8, 4.4, '#c4895c'], [6.2, 7.8, '#d6b38a']]) +
+        '<ellipse cx="3.6" cy="3.1" rx="2.7" ry="1.6" fill="#c8553d" stroke="#8f3524" stroke-width="0.4"/>',
+    },
+    saturn: {
+      r: 5.6,
+      ball: ['#fff7de', '#ecd49b', '#b39255'],
+      marks: bands([[-6, -4.6, '#dcbf82'], [-1.4, 0, '#f7e8c4'], [2.6, 4, '#d4b273']]),
+      back: ringHalf(SATURN_RINGS, -16, false),
+      front: ringHalf(SATURN_RINGS, -16, true),
+    },
+    uranus: {
+      r: 6.4,
+      ball: ['#effffe', '#9fe2e4', '#56aab5'],
+      // Lying on its side, with its pole towards us and its rings upright.
+      marks: '<circle cx="-2.5" cy="-1" r="5.5" fill="#dcfbfb" fill-opacity="0.55"/>',
+      back: ringHalf(URANUS_RINGS, 104, false),
+      front: ringHalf(URANUS_RINGS, 104, true),
+    },
+    neptune: {
+      r: 6.4,
+      ball: ['#d6e6ff', '#3e6fe0', '#18338a'],
+      marks: bands([[-4.4, -2.8, '#5a86ea'], [5, 6.2, '#3462cf']]) +
+        '<ellipse cx="-2.5" cy="2.5" rx="2.4" ry="1.4" fill="#16296b" fill-opacity="0.85"/>' +
+        '<path d="M1-1.5c2-.8 4-.6 5.5 0M-5 5.8c1.4-.5 2.8-.4 4 0" fill="none" stroke="#fff" stroke-width="1" stroke-opacity="0.85" stroke-linecap="round"/>',
+    },
+    pluto: {
+      r: 5,
+      ball: ['#fbebda', '#d4ad86', '#8f6546'],
+      // The dark Cthulhu region and the bright heart, Tombaugh Regio.
+      marks: '<path d="M-10-1.5c2-2.4 5-2.6 6.4-.4s.8 4.4-1.4 5.4-4.2.6-5.4-.6z" fill="#7a4836" fill-opacity="0.8"/>' +
+        '<path d="M2.6 6C-.8 3.4-1.6 1.2-.8-.4c.9-1.5 2.8-1.3 3.4.2.6-1.5 2.5-1.7 3.4-.2.8 1.6 0 3.8-3.4 6.4z" fill="#fff8ef" fill-opacity="0.95"/>',
+    },
+    sun: {
+      r: 6.2,
+      ball: ['#fffce6', '#ffd23f', '#ff9a1f'],
+      glow: true,
+      back: '<circle r="14" fill="#ffd23f" fill-opacity="0.3"/>' + Array.from({ length: 12 }, (_, i) => {
+        const a = (i * Math.PI) / 6;
+        const far = i % 2 ? 13.4 : 15.2;
+        const at = (r, da) => (r * Math.cos(a + da)).toFixed(2) + ' ' + (r * Math.sin(a + da)).toFixed(2);
+        return '<path d="M' + at(10.4, -0.2) + 'L' + at(far, 0) + 'L' + at(10.4, 0.2) + 'z" fill="' + (i % 2 ? '#ffc928' : '#ff9f1c') + '" stroke="#e07b00" stroke-width="0.4" stroke-linejoin="round"/>';
+      }).join(''),
+      marks: craters([[-3.5, 3, 1.4], [3, -3.5, 1], [4, 4.5, 0.8]], '#ffe680', '#ffd23f'),
+    },
+  };
+  function planetIcon(id) {
+    const { colors } = PLANET_TROPHIES.find((r) => r.id === id) || PLANET_TROPHIES[0];
+    const art = PLANET_ART[id];
+    const face = 'url(#face-' + id + ')';
+    const rim = 'url(#rim-' + id + ')';
+    const deep = colors[3];
+    const metal = 'stroke="' + deep + '" stroke-width="0.5" stroke-linejoin="round"';
+    return '<svg class="trophy-icon shiny" viewBox="0 0 32 32" aria-hidden="true">' +
+      // A dark stone stand with a metal plate, and the foot and stem.
+      '<rect x="9" y="26.8" width="14" height="3.4" rx="0.7" fill="#2c313d" stroke="#8b93a6" stroke-width="0.4"/>' +
+      '<rect x="12.5" y="27.7" width="7" height="1.6" rx="0.3" fill="' + rim + '"/>' +
+      '<path d="' + TROPHY_FOOT + '" fill="' + face + '" ' + metal + '/>' +
+      '<path d="' + TROPHY_STEM + '" fill="' + rim + '" ' + metal + '/>' +
+      '<path d="' + TROPHY_KNOB + '" fill="' + face + '" ' + metal + '/>' +
+      '<g transform="translate(16 ' + (PLANET_REST - art.r) + ') scale(' + art.r / 10 + ')">' + (art.back || '') +
+      '<g clip-path="url(#orb-clip)"><circle r="10" fill="url(#ball-' + id + ')"/>' + art.marks +
+      (art.glow ? '' : '<circle r="10" fill="url(#orb-shade)"/><ellipse cx="-4" cy="-4.6" rx="3" ry="1.7" transform="rotate(-35 -4 -4.6)" fill="#fff" fill-opacity="0.35"/>') + '</g>' +
+      '<circle r="10" fill="none" stroke="' + art.ball[2] + '" stroke-width="0.6"/>' + (art.front || '') + '</g>' +
+      // The dish the body sits in, in front of it.
+      '<path d="' + TROPHY_DISH + '" fill="' + face + '" ' + metal + '/>' +
+      '<g clip-path="url(#trophy-metal)"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/></g>' +
+      glint('clip-' + id) +
+      [[25, 4.6, 1.4], [6.4, 20.6, 1.2], [26.2, 22, 1.1]].map(([x, y, size], i) => sparkle(x, y, size, i)).join('') +
+      '</svg>';
+  }
+
+  const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon, maps: atlasIcon, astronomy: planetIcon };
   const rewardIcon = (id, appId = app.id) => REWARD_ICONS[appId](id);
   // StoliceMax: the capital a souvenir comes from. LiteraturaMax: the
   // country that gives a prize. JęzykiMax: the city, with its flag.
   // MapkiMax: where and when a famous map, atlas or globe was made.
+  // AstronomiaMax: what the body on a trophy is (a planet, a star).
   function rewardPlace(id, appId = app.id) {
     const { iso } = rewardOf(appId, id);
+    if (appId === 'astronomy') return appT(appId).bodyKind(id);
     if (appId === 'literature') return iso ? countryName(iso) : appT(appId).international;
     if (appId === 'languages') return flag(iso) + ' ' + appT(appId).cityName(id);
     if (appId === 'maps') return appT(appId).madeIn(id);
@@ -4823,14 +5057,15 @@
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), CELEBRATION_MS);
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // A trophy gets confetti, a souvenir fireworks, glassware an
+      // A keychain gets confetti, a souvenir fireworks, glassware an
       // exploding elixir, a literary prize a rain of letters, a city symbol
-      // thought bubbles, a map a paper plane.
+      // thought bubbles, a map a paper plane, a planet trophy a rocket.
       if (isTimes()) confetti(CELEBRATION_MS);
       else if (app.id === 'capitals') fireworks(CELEBRATION_MS, fireworksSound());
       else if (app.id === 'chemistry') elixirBurst(CELEBRATION_MS);
       else if (app.id === 'literature') letterRain(RAIN_MAX_MS);
       else if (app.id === 'maps') planeRoute(CELEBRATION_MS);
+      else if (app.id === 'astronomy') rocketDust(banner);
       else speechBubbles(CELEBRATION_MS);
     }
   }
@@ -5760,6 +5995,208 @@
       ctx.globalAlpha = 1;
       if (elapsed < ms) requestAnimationFrame(frame);
       else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  }
+
+  // AstronomiaMax: a rocket zooms up the screen in loops, round and round
+  // the new trophy, and leaves a trail of dust behind it. The dust gathers
+  // over the trophy, and when it clears, the trophy and all have gone.
+  const DUST = ['#efe8dc', '#ddd4c6', '#c8bdad', '#faf3e8'];
+  const STARDUST = ['#fff6c4', '#ffd23f', '#ffffff'];
+  const ROCKET_FLY = 3.4; // seconds the rocket is on the screen
+  const ROCKET_HIDE = 2.4; // seconds until the dust covers the trophy
+  const ROCKET_MAX_MS = 7000; // stops the dust if the page is too slow to finish
+  function rocketDust(banner) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti dust';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+    // Soft round puffs of dust, drawn once and then scaled.
+    const puffs = DUST.map((color) => {
+      const puff = document.createElement('canvas');
+      puff.width = puff.height = 64;
+      const p = puff.getContext('2d');
+      const g = p.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, color);
+      g.addColorStop(0.5, color + 'b3');
+      g.addColorStop(1, color + '00');
+      p.fillStyle = g;
+      p.fillRect(0, 0, 64, 64);
+      return puff;
+    });
+    // The banner is still growing in: its middle is where it will be, but
+    // its size is read without the growing.
+    const rect = banner.getBoundingClientRect();
+    const bx = rect.left + rect.width / 2;
+    const by = rect.top + rect.height / 2;
+    const box = { left: bx - banner.offsetWidth / 2, top: by - banner.offsetHeight / 2, width: banner.offsetWidth, height: banner.offsetHeight };
+    const size = Math.max(0.8, Math.min(1.5, Math.min(innerWidth, innerHeight) / 700));
+    // The rocket goes round a circle of radius R, about once a second, while
+    // the circle rises: fast from below the screen to the trophy, slowly
+    // past it, and faster again off the top.
+    const R = Math.min(innerWidth * 0.42, Math.max(box.width, box.height) * 0.62);
+    const turn = Math.random() < 0.5 ? 1 : -1;
+    const y0 = innerHeight + R + 60;
+    const yEnd = -R - 150;
+    const centreY = (t) => {
+      if (t < 1) return y0 + (by + R * 0.25 - y0) * (1 - (1 - t) ** 2);
+      if (t < 2.3) return by + R * 0.25 - R * 0.5 * ((t - 1) / 1.3);
+      const k = (t - 2.3) / (ROCKET_FLY - 2.3);
+      return by - R * 0.25 + (yEnd - by + R * 0.25) * k * k;
+    };
+    const at = (t) => {
+      const a = turn * t * Math.PI * 2;
+      return [bx + R * Math.sin(a), centreY(t) + R * Math.cos(a)];
+    };
+    const dust = [];
+    const puffAt = (x, y, now, big) => dust.push({
+      x, y, born: now, puff: pick(puffs),
+      life: big ? 1500 + Math.random() * 600 : 1300 + Math.random() * 700,
+      r0: (big ? 0.28 + Math.random() * 0.14 : 0) * Math.min(box.width, box.height) + (big ? 0 : (5 + Math.random() * 4) * size),
+      grow: big ? Math.min(box.width, box.height) * 0.18 : (26 + Math.random() * 18) * size,
+      alpha: big ? 0.9 : 0.65 + Math.random() * 0.25,
+      vx: (Math.random() - 0.5) * 30, vy: (Math.random() - 0.5) * 30 - 8,
+    });
+    const sparks = [];
+    const start = performance.now();
+    let tail = null; // where the trail was last laid
+    let covered = false;
+    const drawRocket = (x, y, angle, t) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.scale(1.1 * size, 1.1 * size);
+      ctx.lineJoin = 'round';
+      // The flame flickers.
+      const f = 13 + Math.sin(t * 45) * 3 + Math.random() * 3;
+      const flame = ctx.createLinearGradient(-13, 0, -13 - f, 0);
+      flame.addColorStop(0, '#fff3b0');
+      flame.addColorStop(0.4, '#ffb02e');
+      flame.addColorStop(1, 'rgb(255 90 31 / 0)');
+      ctx.fillStyle = flame;
+      ctx.beginPath();
+      ctx.moveTo(-13, -4.5);
+      ctx.quadraticCurveTo(-13 - f * 0.6, -3.5, -13 - f, 0);
+      ctx.quadraticCurveTo(-13 - f * 0.6, 3.5, -13, 4.5);
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#e2453c';
+      ctx.strokeStyle = '#7a1d17';
+      for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(-6, 5 * side);
+        ctx.lineTo(-15, 11.5 * side);
+        ctx.lineTo(-13.5, 4 * side);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#f4f6fb';
+      ctx.strokeStyle = '#5b6680';
+      ctx.beginPath();
+      ctx.moveTo(-13, -5.5);
+      ctx.lineTo(6, -5.5);
+      ctx.quadraticCurveTo(16, -4.5, 21, 0);
+      ctx.quadraticCurveTo(16, 4.5, 6, 5.5);
+      ctx.lineTo(-13, 5.5);
+      ctx.quadraticCurveTo(-15, 0, -13, -5.5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#e2453c';
+      ctx.beginPath();
+      ctx.moveTo(11, -5);
+      ctx.quadraticCurveTo(17, -3.8, 21, 0);
+      ctx.quadraticCurveTo(17, 3.8, 11, 5);
+      ctx.quadraticCurveTo(12.4, 0, 11, -5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#7cc4ff';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(1, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(0, -1, 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    };
+    const frame = (now) => {
+      const elapsed = Math.max(0, now - start);
+      const t = elapsed / 1000;
+      if (canvas.width !== Math.round(innerWidth * ratio)) {
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      let rocket = null;
+      if (t < ROCKET_FLY) {
+        const [x, y] = at(t);
+        const [x2, y2] = at(t + 0.01);
+        const angle = Math.atan2(y2 - y, x2 - x);
+        // Dust is laid behind the rocket every few pixels, so the trail
+        // has no gaps however fast it flies.
+        const back = [x - Math.cos(angle) * 16 * size, y - Math.sin(angle) * 16 * size];
+        if (tail) {
+          const steps = Math.ceil(Math.hypot(back[0] - tail[0], back[1] - tail[1]) / (7 * size));
+          for (let i = 1; i <= steps; i++) {
+            const k = i / steps;
+            puffAt(tail[0] + (back[0] - tail[0]) * k, tail[1] + (back[1] - tail[1]) * k, now, false);
+            if (Math.random() < 0.15) {
+              sparks.push({ x: back[0] + (Math.random() - 0.5) * 16, y: back[1] + (Math.random() - 0.5) * 16, born: now, life: 900 + Math.random() * 600, color: pick(STARDUST), r: 1.2 + Math.random() * 1.2 });
+            }
+          }
+        }
+        tail = back;
+        rocket = [x, y, angle];
+      }
+      if (!covered && t >= ROCKET_HIDE) {
+        // The dust gathers over the trophy, which goes while it is hidden.
+        covered = true;
+        for (let i = 0; i < 46; i++) {
+          puffAt(box.left + box.width * (-0.05 + Math.random() * 1.1), box.top + box.height * (-0.05 + Math.random() * 1.1), now + Math.random() * 250, true);
+        }
+        setTimeout(() => banner.classList.add('vanish'), 200);
+        setTimeout(() => banner.remove(), 600);
+      }
+      for (let i = dust.length - 1; i >= 0; i--) {
+        const d = dust[i];
+        const age = (now - d.born) / d.life;
+        if (age >= 1) {
+          dust.splice(i, 1);
+          continue;
+        }
+        if (age < 0) continue;
+        const r = d.r0 + d.grow * Math.sqrt(age);
+        ctx.globalAlpha = d.alpha * Math.min(1, age * 8) * (1 - age) ** 1.2;
+        ctx.drawImage(d.puff, d.x + d.vx * age - r, d.y + d.vy * age - r, r * 2, r * 2);
+      }
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const p = sparks[i];
+        const age = (now - p.born) / p.life;
+        if (age >= 1) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        ctx.globalAlpha = (1 - age) * (0.6 + 0.4 * Math.sin(age * 25));
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if (rocket) drawRocket(...rocket, t);
+      if (elapsed < ROCKET_MAX_MS && (rocket || dust.length || sparks.length)) requestAnimationFrame(frame);
+      else {
+        canvas.remove();
+        banner.remove();
+      }
     };
     requestAnimationFrame(frame);
   }
