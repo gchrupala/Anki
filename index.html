@@ -21,8 +21,8 @@
   /* MaxApki, a family of apps in one page: MnożenieMax (times tables),
      StoliceMax (capitals), ChemiaMax (chemical formulas), LiteraturaMax
      (authors of books), JęzykiMax (French, Spanish, Dutch, Italian and
-     Polish), MapkiMax (places on the map) and AstronomiaMax (the Solar System
-     and space).
+     Polish), MapkiMax (places on the map), AstronomiaMax (the Solar System
+     and space) and BiologiaMax (the families of animals, plants and fungi).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -131,7 +131,8 @@
   body[data-app="literature"] [data-app]:not([data-app~="literature"]),
   body[data-app="languages"] [data-app]:not([data-app~="languages"]),
   body[data-app="maps"] [data-app]:not([data-app~="maps"]),
-  body[data-app="astronomy"] [data-app]:not([data-app~="astronomy"]) { display: none !important; }
+  body[data-app="astronomy"] [data-app]:not([data-app~="astronomy"]),
+  body[data-app="biology"] [data-app]:not([data-app~="biology"]) { display: none !important; }
 
   body {
     margin: 0;
@@ -416,6 +417,8 @@
   /* AstronomiaMax: the rocket's dust covers the new trophy, which is gone
      when the dust clears. */
   .confetti.dust { z-index: 32; }
+  /* BiologiaMax: the butterflies fly over everything, the message too. */
+  .confetti.flutter { z-index: 34; }
   .trophy-banner.vanish { animation: vanish 0.4s ease-in forwards; }
   @keyframes vanish {
     from { opacity: 1; transform: translateX(-50%) scale(1); }
@@ -685,6 +688,14 @@
   .country.book { font-size: clamp(1.3rem, 6.2cqi, 2.5rem); }
   /* AstronomiaMax: a whole question, under its picture */
   .country.ask { font-size: clamp(1.15rem, 5cqi, 1.9rem); line-height: 1.3; }
+  /* BiologiaMax: the name of an organism, and its Latin name once answered.
+     The families to pick have their Latin name under them. */
+  .country.organism { font-size: clamp(1.3rem, 6.2cqi, 2.5rem); }
+  .latin { font-style: italic; direction: ltr; unicode-bidi: isolate; }
+  .nick.latin.veiled { visibility: hidden; }
+  .choice .latin { display: block; margin-top: 0.1rem; font-size: 0.8em; font-weight: 400; opacity: 0.8; }
+  .feedback .latin::before { content: " ("; }
+  .feedback .latin::after { content: ")"; }
   /* JęzykiMax: the language to learn, the card in that language and its answers */
   .targets { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
   .targets button {
@@ -1191,6 +1202,11 @@
             <span class="flag" id="astro-pic" aria-hidden="true"></span>
             <span class="country ask" id="astro-question"></span>
           </div>
+          <div class="place" data-app="biology" aria-live="polite">
+            <span class="flag" id="bio-pic" aria-hidden="true"></span>
+            <span class="country organism" id="bio-name"></span>
+            <span class="nick latin" id="bio-latin" lang="la"></span>
+          </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
           <button type="button" class="ghost-btn hold-btn" id="hold" hidden></button>
         </div>
@@ -1225,7 +1241,7 @@
         <button type="button" class="key ok" data-key="ok" tabindex="-1">OK</button>
       </div>
 
-      <div class="choices" id="choices" data-app="capitals chemistry literature languages astronomy" data-t-aria="choicesAria">
+      <div class="choices" id="choices" data-app="capitals chemistry literature languages astronomy biology" data-t-aria="choicesAria">
         <button type="button" class="choice" data-i="0"></button>
         <button type="button" class="choice" data-i="1"></button>
         <button type="button" class="choice" data-i="2"></button>
@@ -1250,7 +1266,7 @@
       <h2 data-t="progressTitle">Your times table</h2>
       <p class="sub" data-t="progressSub">Each square is one fact: row × column. Squares fill in as facts move into long-term memory.</p>
       <div class="square" id="square" role="img" data-app="times" data-t-aria="squareAria"></div>
-      <div class="map" id="map" role="img" data-app="capitals chemistry literature languages astronomy" data-t-aria="squareAria"></div>
+      <div class="map" id="map" role="img" data-app="capitals chemistry literature languages astronomy biology" data-t-aria="squareAria"></div>
       <div class="map-tabs" id="map-tabs" role="group" data-app="maps" data-t-aria="continentsAria"></div>
       <div class="progress-map" data-app="maps"><canvas id="progress-map" role="img" data-t-aria="squareAria"></canvas></div>
       <ul class="legend">
@@ -1294,7 +1310,7 @@
       <div class="chips" id="extra-chips"></div>
     </section>
 
-    <section data-app="capitals chemistry literature languages maps astronomy">
+    <section data-app="capitals chemistry literature languages maps astronomy biology">
       <h3 data-t="groupsTitle">Groups</h3>
       <div class="chips" id="group-chips"></div>
       <p class="hint" data-t="groupsHint" style="margin-top:0.5rem"></p>
@@ -1494,6 +1510,7 @@
 <script src="i18n-languages.js"></script>
 <script src="i18n-maps.js"></script>
 <script src="i18n-astronomy.js"></script>
+<script src="i18n-biology.js"></script>
 <script src="countries.js"></script>
 <script src="chemistry.js"></script>
 <script src="literature.js"></script>
@@ -1502,6 +1519,7 @@
 <script src="places.js"></script>
 <script src="maps.js"></script>
 <script src="astronomy.js"></script>
+<script src="biology.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1516,7 +1534,7 @@
   // Level 1: learned (left the first-day steps); 2: next review a week or
   // more away; 3: mastered (MATURE_DAYS). Keep the rules text in i18n.js,
   // i18n-capitals.js, i18n-chemistry.js, i18n-literature.js,
-  // i18n-languages.js and i18n-astronomy.js in step.
+  // i18n-languages.js, i18n-astronomy.js and i18n-biology.js in step.
   const LEVEL_COINS = [0, 2, 5, 10];
   const OLD_LEVEL_COINS = [0, 1, 2, 5]; // MnożenieMax before settings layout 6
   const LEVEL_NAMES = [null, 'learned', 'week', 'mastered'];
@@ -1700,6 +1718,27 @@
     ['pluto', 400, GOLDEN],
     ['sun', 600, ['#fffbe6', '#ffd84a', '#e2a400', '#8a5a00']],
   ].map(([id, price, colors]) => ({ id, price, colors }));
+  // BiologiaMax: specimens for a natural history collection: feathers,
+  // shells, teeth, bones and fossils. The colours are those of the
+  // specimen; where it comes from, or how old it is, is in i18n-biology.js
+  // (specimenFrom).
+  const SPECIMENS = [
+    ['jayfeather', 30, '#cfe9ff', '#3f8be8', '#2459b8', '#14284d'],
+    ['fishbone', 45, '#fffdf4', '#efe6cf', '#c9b994', '#6b5b3a'],
+    ['sharktooth', 60, '#ffffff', '#eef2f4', '#c2ccd3', '#5f6b74'],
+    ['nautilus', 80, '#fffaf0', '#f3e2c4', '#d9b98a', '#7a4f24'],
+    ['peacock', 100, '#d9fff0', '#2bb39a', '#16766b', '#0b3d3a'],
+    ['antler', 125, '#f1dcc0', '#b8875a', '#7f5a32', '#4e3519'],
+    ['amber', 150, '#fff2b3', '#ffb627', '#d9780b', '#7a3b00'],
+    ['ammonite', 180, '#fff4d6', '#dcb46c', '#a37a3c', '#5c4019'],
+    ['trilobite', 210, '#ece6dc', '#a39580', '#6d604f', '#3a3128'],
+    ['dinobone', 250, '#f2dcb8', '#c49a62', '#94693a', '#4f3518'],
+    ['smilodon', 300, '#fffdf5', '#ece0c4', '#c2ad86', '#6e5a3a'],
+    ['tusk', 350, '#fffbea', '#f1dfb0', '#cdb27a', '#7a6234'],
+    ['rextooth', 400, '#f6dcb2', '#b07a3e', '#7a4c1e', '#3d2208'],
+    ['megalodon', 475, '#d5dee6', '#5d6b78', '#36404a', '#14191e'],
+    ['rexskull', 600, '#fff1d6', '#d8b98a', '#a9864f', '#5a4220'],
+  ].map(([id, price, ...colors]) => ({ id, price, colors }));
 
   // Extra numbers practised by default, each times 1 to 12 (not with each other).
   const DEFAULT_EXTRAS = [15, 20, 25];
@@ -1814,10 +1853,28 @@
       rewards: PLANET_TROPHIES,
       strings: (l) => I18N.ASTRONOMY[l] || {},
     },
+    biology: {
+      id: 'biology',
+      name: 'BiologiaMax',
+      hash: 'biologia',
+      storeKey: 'biology-cards-v1',
+      layout: 1,
+      // A name and four families take a moment to read: Easy within 6 seconds.
+      fastSeconds: 6,
+      settings: () => ({ groups: BIO_GROUPS.slice(), newPerDay: 5, retention: 0.9, answerTime: 20 }),
+      groupKey: 'groups', // the setting with the groups of organisms to practise
+      rewards: SPECIMENS,
+      strings: (l) => I18N.BIOLOGY[l] || {},
+    },
   };
   // The icons of the apps, for the app menu and the header: a card with a
-  // drawing in black and white, on the colour of the app.
+  // drawing in black and white, on the colour of the app. BiologiaMax has
+  // a butterfly: these are its left wings, drawn again mirrored.
+  const BUTTERFLY_WINGS = '<path d="M250 268c-14-26-44-44-66-36-18 7-14 34 8 48 16 10 38 12 58 4z"/><path d="M250 286c-20 0-42 10-48 28-5 15 8 25 22 18 14-7 24-24 26-46z"/>';
   const APP_ICONS = {
+    biology: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#c2306d"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#7d1a44"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/>' +
+      '<g fill="#fff" stroke="#000" stroke-width="9" stroke-linejoin="round">' + BUTTERFLY_WINGS + '<g transform="matrix(-1 0 0 1 512 0)">' + BUTTERFLY_WINGS + '</g></g>' +
+      '<circle cx="214" cy="256" r="10"/><circle cx="298" cy="256" r="10"/><path d="M256 252v68" stroke="#000" stroke-width="16" stroke-linecap="round"/><path d="M252 252c-6-14-14-22-26-26M260 252c6-14 14-22 26-26" fill="none" stroke="#000" stroke-width="6" stroke-linecap="round"/></g></svg>',
     astronomy: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#1d2766"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#0f1640"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><g transform="rotate(-16 256 280)" fill="none" stroke="#000" stroke-width="9" stroke-linecap="round"><path d="M172 280a84 21 0 0 1 168 0"/><circle cx="256" cy="280" r="40" fill="#fff"/><path d="M220 266c24 7 48 7 72 0" stroke-width="6"/><path d="M340 280a84 21 0 0 1-168 0"/></g><path d="M170 222l4.5 10.5 10.5 4.5-10.5 4.5-4.5 10.5-4.5-10.5-10.5-4.5 10.5-4.5z" fill="#000"/><path d="M350 300l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#000"/><circle cx="336" cy="232" r="5" fill="#000"/></g></svg>',
     maps: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0d8a86"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#075c59"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M180 240l50-15 50 15 50-15v84l-50 15-50-15-50 15z" fill="#fff" stroke="#000" stroke-width="9" stroke-linejoin="round"/><path d="M230 225v84M280 240v84" stroke="#000" stroke-width="7"/><path d="M196 300c16-6 22-24 40-26s30 14 46 4" fill="none" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 12"/><path d="M306 304c-15-17-26-30-26-43a26 26 0 0 1 52 0c0 13-11 26-26 43z" fill="#000"/><circle cx="306" cy="261" r="10" fill="#fff"/></g></svg>',
     languages: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#e8710a"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#9c4a05"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M190 222h90a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-58l-28 22 6-22h-10a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#000"/><path d="M196 244h78M196 264h50" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M252 262h86a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14h-6l6 20-28-20h-58a14 14 0 0 1-14-14v-34a14 14 0 0 1 14-14z" fill="#fff" stroke="#000" stroke-width="8" stroke-linejoin="round"/><path d="M258 284h74M258 304h44" stroke="#000" stroke-width="9" stroke-linecap="round"/></g></svg>',
@@ -1826,8 +1883,12 @@
     literature: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#c0392b"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#7d2219"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><path d="M256 250c-22-14-50-16-74-10v72c24-6 52-4 74 10zM256 250c22-14 50-16 74-10v72c-24-6-52-4-74 10z" fill="#fff" stroke="#000" stroke-width="9" stroke-linejoin="round"/><path d="M200 266c13-3 28-2 40 3M200 288c13-3 28-2 40 3M312 266c-13-3-28-2-40 3M312 288c-13-3-28-2-40 3" stroke="#000" stroke-width="6" stroke-linecap="round" fill="none"/></g></svg>',
     capitals: '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#7b3fc4"/><g transform="rotate(-6 256 256)"><rect x="112" y="178" width="300" height="180" rx="14" fill="#4f2386"/><rect x="106" y="166" width="300" height="180" rx="14" fill="#fff"/><line x1="106" y1="208" x2="406" y2="208" stroke="#000" stroke-width="6"/><circle cx="256" cy="277" r="52" fill="#fff"/><g fill="none" stroke="#000" stroke-width="9" stroke-linecap="round"><ellipse cx="256" cy="277" rx="22" ry="52"/><line x1="204" y1="277" x2="308" y2="277"/><line x1="214" y1="251" x2="298" y2="251"/><line x1="214" y1="303" x2="298" y2="303"/><circle cx="256" cy="277" r="52" stroke-width="11"/></g></g></svg>',
   };
-  // The sign embossed on the coins of each app.
+  // The sign embossed on the coins of each app. BiologiaMax: a butterfly,
+  // whose left wings are drawn again mirrored.
+  const COIN_WINGS = '<path d="M15.4 15.6c-1.2-2.8-3.6-4.6-5.4-4-1.6.6-1.2 3 .8 4.2 1.4.8 3 .8 4.6-.2zM15.4 16.6c-1.6 0-3.4.8-3.8 2.4-.4 1.4.8 2.2 2 1.6 1.2-.6 1.8-2.2 1.8-4z"/>';
   const EMBLEMS = {
+    biology: '<g style="fill: var(--gold-hi)" transform="translate(.4 .4)">' + COIN_WINGS + '<g transform="matrix(-1 0 0 1 32 0)">' + COIN_WINGS + '</g><rect x="15.3" y="12.6" width="1.4" height="8" rx="0.7"/></g>' +
+      '<g style="fill: var(--gold-deep)" fill-opacity="0.85">' + COIN_WINGS + '<g transform="matrix(-1 0 0 1 32 0)">' + COIN_WINGS + '</g><rect x="15.3" y="12.6" width="1.4" height="8" rx="0.7"/></g>',
     astronomy: '<g transform="rotate(-20 16.4 16.4)"><ellipse cx="16.4" cy="16.4" rx="8.4" ry="2.5" fill="none" style="stroke: var(--gold-hi)" stroke-width="1.2"/></g><circle cx="16.4" cy="16.4" r="4.4" style="fill: var(--gold-hi)"/>' +
       '<g transform="rotate(-20 16 16)" fill="none" stroke-width="1.2"><path d="M7.6 16a8.4 2.5 0 0 1 16.8 0" style="stroke: var(--gold-deep)" opacity="0.85"/></g><circle cx="16" cy="16" r="4.4" style="fill: var(--gold-deep)" fill-opacity="0.85"/>' +
       '<g transform="rotate(-20 16 16)" fill="none"><path d="M24.4 16a8.4 2.5 0 0 1-16.8 0" style="stroke: var(--gold-hi)" stroke-width="2.2"/><path d="M24.4 16a8.4 2.5 0 0 1-16.8 0" style="stroke: var(--gold-deep)" stroke-width="1.2" opacity="0.85"/></g>',
@@ -2082,6 +2143,13 @@
     const [id, wrong] = key.split('#');
     return ASTRO_TEXT(wrong || BY_QUESTION[id].answer, lang());
   };
+  const BY_ORGANISM = Object.fromEntries(BIO_ORGANISMS.map((o) => [o.id, o]));
+  // BiologiaMax: a family on offer is the id of the organism for the right
+  // one, or the id with the wrong family after # (o17#felidae).
+  const bioFamily = (key) => {
+    const [id, wrong] = key.split('#');
+    return BIO_FAMILIES[wrong || BY_ORGANISM[id].family];
+  };
   const LANG_IDS = Object.fromEntries(LANGUAGE_TARGETS.map((l) => [l, LANGUAGE_CARDS[l].map((c) => c.id)]));
   // JęzykiMax: the text of each answer on offer for the card shown. The
   // right answer has the id of the card, the wrong ones the id with #1, #2
@@ -2236,6 +2304,29 @@
       label: (id) => BY_QUESTION[id].text[lang()],
       number: (id) => BY_QUESTION[id].number,
       logColumns: 'question,picked',
+    },
+    biology: {
+      groups: BIO_GROUPS,
+      ids: BIO_ORGANISMS.map((o) => o.id),
+      group: (id) => BY_ORGANISM[id].group,
+      // The right family, the family most closely related to it, and two
+      // more from the next five: those whose places on the tree of life
+      // share the most with it (BIO_KINSHIP), so a dog gets other families
+      // of carnivores and a rose other families of flowering plants.
+      options: (id) => {
+        const right = BY_ORGANISM[id].family;
+        const others = shuffle(Object.keys(BIO_FAMILIES).filter((f) => f !== right))
+          .sort((x, y) => BIO_KINSHIP(right, y) - BIO_KINSHIP(right, x));
+        return shuffle([id, ...[others[0], ...shuffle(others.slice(1, 6)).slice(0, 2)].map((f) => id + '#' + f)]);
+      },
+      answer: (key) => {
+        const family = bioFamily(key);
+        return esc(family.name[lang()]) + '<span class="latin" lang="la">' + esc(family.latin) + '</span>';
+      },
+      tile: (id) => BY_ORGANISM[id].pic,
+      label: (id) => BY_ORGANISM[id].name[lang()],
+      number: (id) => BY_ORGANISM[id].number,
+      logColumns: 'organism,picked',
     },
     // MapkiMax has no answers to pick from: the child places a pin on the map.
     maps: {
@@ -2872,6 +2963,14 @@
       } else if (app.id === 'astronomy') {
         $('astro-pic').textContent = BY_QUESTION[c.id].pic;
         $('astro-question').textContent = BY_QUESTION[c.id].text[lang()];
+      } else if (app.id === 'biology') {
+        // The Latin name often gives the family away (Canis, Canidae), so
+        // it shows only once answered; its line keeps its place until then.
+        const organism = BY_ORGANISM[c.id];
+        $('bio-pic').textContent = organism.pic;
+        $('bio-name').textContent = organism.name[lang()];
+        $('bio-latin').textContent = organism.latin;
+        $('bio-latin').classList.toggle('veiled', mode === 'ask');
       } else {
         const card = BY_LANG[c.id];
         const text = $('lang-text');
@@ -2882,13 +2981,14 @@
         $('say').hidden = !sayText(card, mode !== 'ask') || !voiceFor(card.lang);
         $('lang-meaning').textContent = mode !== 'ask' ? meaningOf(c) : '';
       }
-      // JęzykiMax: big pictures as answers. JęzykiMax and AstronomiaMax:
-      // long answers one under another.
+      // JęzykiMax: big pictures as answers. JęzykiMax, AstronomiaMax and
+      // BiologiaMax: long answers one under another.
       const word = app.id === 'languages' && BY_LANG[c.id];
       $('choices').classList.toggle('pics', !!word && word.kind === 'w');
-      $('choices').classList.toggle('long', app.id === 'astronomy'
-        ? options.some((k) => astroAnswer(k).length > 26)
-        : !!word && options.some((k) => (langOffered[k] || '').length > 18));
+      let long = !!word && options.some((k) => (langOffered[k] || '').length > 18);
+      if (app.id === 'astronomy') long = options.some((k) => astroAnswer(k).length > 26);
+      if (app.id === 'biology') long = options.some((k) => bioFamily(k).name[lang()].length > 22);
+      $('choices').classList.toggle('long', long);
       // Once answered, the right answer turns green and a wrong pick is marked.
       $('choices').classList.toggle('answered', mode !== 'ask');
       $('choices').querySelectorAll('.choice').forEach((btn, i) => {
@@ -3750,7 +3850,7 @@
       }
       defs.appendChild(g);
     };
-    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE, PRIZES, CITIES, ATLASES, PLANET_TROPHIES)) {
+    for (const { id, colors: [hi, mid, lo, deep] } of TROPHIES.concat(SOUVENIRS, GLASSWARE, PRIZES, CITIES, ATLASES, PLANET_TROPHIES, SPECIMENS)) {
       gradient('linearGradient', 'rim-' + id, { x1: 0, y1: 0, x2: 1, y2: 1 }, [[0, hi], [0.45, mid], [1, deep]]);
       gradient('radialGradient', 'face-' + id, { cx: 0.35, cy: 0.3, r: 0.85 }, [[0, hi], [0.5, mid], [1, lo]]);
     }
@@ -3775,6 +3875,7 @@
     for (const { id } of PRIZES) clipPath('clip-' + id, PRIZE_ART[id].shape);
     for (const { id } of CITIES) clipPath('clip-' + id, CITY_ART[id].shape);
     for (const { id } of ATLASES) clipPath('clip-' + id, ATLAS_ART[id].shape);
+    for (const { id } of SPECIMENS) clipPath('clip-' + id, SPECIMEN_ART[id].shape);
     // AstronomiaMax: the body on top of each trophy, lit from the top left,
     // and the metal of the trophy for its glitter.
     for (const { id } of PLANET_TROPHIES) {
@@ -5096,15 +5197,233 @@
       '</svg>';
   }
 
-  const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon, maps: atlasIcon, astronomy: planetIcon };
+  // BiologiaMax: specimens of a natural history collection, each on a
+  // wooden base with a brass plate. As for the souvenirs, "shape" is the
+  // outline for the glitter and the beam of light, "art" draws the
+  // specimen from the face and rim gradients and the colours of the
+  // reward, and "sparkles" are the twinkling stars.
+  const SPECIMEN_BASE = '<rect x="5" y="27" width="22" height="3.4" rx="0.8" fill="#7a4a24" stroke="#3f2410" stroke-width="0.5"/>' +
+    '<rect x="12.5" y="27.9" width="7" height="1.5" rx="0.3" fill="#e9c15a" stroke="#8a5a00" stroke-width="0.3"/>';
+  const WOOD = (d) => '<path d="' + d + '" fill="#8a5a2e" stroke="#3f2410" stroke-width="0.4" stroke-linejoin="round"/>';
+  const woodPost = (x, top) => WOOD('M' + (x - 0.55) + ' ' + top + 'h1.1V27h-1.1z');
+  const strokes = (d, color, width, extra = '') => '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="' + width + '" stroke-linecap="round" stroke-linejoin="round"' + extra + '/>';
+  const round2 = (n) => Number(n.toFixed(2));
+  // The jay feather: blue, barred black across the vane, pale at its base.
+  const JAY_VANE = 'M14.6 22.4C10.6 17.4 12.2 8.6 20.6 3.4C23.4 9.8 21.4 18.4 15.6 22.6z';
+  const JAY_BARS = Array.from({ length: 7 }, (_, i) => {
+    const t = 0.42 + i * 0.08;
+    return 'M' + round2(13.6 + 7 * t - 7.7) + ' ' + round2(26.6 - 23.4 * t - 2.3) + 'l15.4 4.6';
+  }).join('');
+  // The ammonite: a coil that winds three times inwards, with ribs across it.
+  const AMMONITE = (() => {
+    const at = (r, a) => round2(16 + r * Math.cos(a)) + ' ' + round2(15.4 + r * Math.sin(a));
+    const k = Math.log(10 / 1.2) / (6 * Math.PI);
+    const radius = (a) => 9.6 * Math.exp(-k * a);
+    let coil = '';
+    for (let a = 0; a <= 6 * Math.PI; a += 0.2) coil += (a ? 'L' : 'M') + at(radius(a), a - 0.6);
+    let ribs = '';
+    for (let a = 0; a < 4 * Math.PI; a += 0.34) ribs += 'M' + at(radius(a), a - 0.6) + 'L' + at(radius(a) * 0.82, a - 0.6);
+    return { coil, ribs };
+  })();
+  // The nautilus: brown stripes from the middle of the shell outwards.
+  const NAUTILUS_STRIPES = Array.from({ length: 11 }, (_, i) => {
+    const a = -1.7 + i * 0.32;
+    const at = (r) => round2(17 + r * Math.cos(a + 0.05 * r)) + ' ' + round2(15 + r * Math.sin(a + 0.05 * r));
+    return 'M' + at(3.6) + 'Q' + at(7) + ' ' + at(10.6);
+  }).join('');
+  // The trilobite: the segments of its body, narrower towards the tail.
+  const TRILOBITE_SEGMENTS = Array.from({ length: 7 }, (_, i) => {
+    const y = 14 + i * 1.35;
+    const inset = i * 0.3;
+    return 'M' + round2(8.4 + inset) + ' ' + round2(y) + 'c' + round2(5.2 - inset) + ' .7 ' + round2(10 - 2 * inset) + ' .7 ' + round2(15.2 - 2 * inset) + ' 0';
+  }).join('');
+  // The T. rex skull: a row of teeth along the upper jaw.
+  const REX_TEETH = 'M5.2 21.4' + 'l.8 1.9.8-1.9'.repeat(9) + 'z' + 'M6 22.9' + 'l.7-1.5.7 1.5'.repeat(9) + 'z';
+  const SPECIMEN_ART = {
+    jayfeather: {
+      shape: '<path d="' + JAY_VANE + '"/>',
+      sparkles: [[24.6, 6, 1.4], [7.6, 11, 1.2], [24.4, 19, 1.1]],
+      art: (f, rim, [hi, , , deep]) => WOOD('M13.2 24.6h3.6l.5 2.4h-4.6z') +
+        path(JAY_VANE, f, deep, 0.5) +
+        '<g clip-path="url(#clip-jayfeather)"><path d="M4.6 14.7L27.6 21.6V32H4.6z" fill="#e6ebf2"/>' + strokes(JAY_BARS, '#141a2a', 0.7) + '</g>' +
+        strokes('M14.6 23.2c-1.6-.6-2.6-1.8-2.8-3.2M15.2 22.4c-1.1-1.2-1.5-2.6-1.3-4M15.8 22.8c1.4-.8 2.2-2 2.4-3.4', '#d9dee6', 0.5) +
+        strokes('M14.6 26c1.6-4.6 3.4-9.6 6-22.4', '#f4efe2', 0.9),
+    },
+    fishbone: {
+      shape: '<path d="M3.6 15.4c.4-2.8 2.8-4.8 5.8-4.8 1.4 0 2.4.4 3 1v7.6c-.6.6-1.6 1-3 1-3 0-5.4-2-5.8-4.8z"/><path d="M24.4 15.4l4-4.4c.4 1.8.2 3.4-.6 4.4.8 1 1 2.6.6 4.4z"/><rect x="12" y="14.8" width="12.8" height="1.2"/>',
+      sparkles: [[26, 6.6, 1.4], [5.4, 23, 1.2], [19, 23.6, 1.1]],
+      art: (f, rim, [hi, , lo, deep]) => woodPost(13.4, 15.8) + woodPost(22, 15.8) +
+        [0, 1, 2, 3].map((i) => {
+          const x = 13.6 + i * 2.4;
+          const h = 1 - i * 0.14;
+          const rib = 'M' + x + ' 15c' + round2(0.6 * h) + ' ' + round2(-1.6 * h) + ' ' + round2(1.6 * h) + ' ' + round2(-3 * h) + ' ' + round2(2.8 * h) + ' ' + round2(-3.8 * h) +
+            'M' + x + ' 15.8c' + round2(0.6 * h) + ' ' + round2(1.6 * h) + ' ' + round2(1.6 * h) + ' ' + round2(3 * h) + ' ' + round2(2.8 * h) + ' ' + round2(3.8 * h);
+          return strokes(rib, deep, 1.5) + strokes(rib, hi, 0.8);
+        }).join('') +
+        '<rect x="12" y="14.8" width="12.8" height="1.2" rx="0.5" fill="' + f + '" stroke="' + deep + '" stroke-width="0.4"/>' +
+        path('M24.4 15.4l4-4.4c.4 1.8.2 3.4-.6 4.4.8 1 1 2.6.6 4.4z', f, deep, 0.5) +
+        path('M3.6 15.4c.4-2.8 2.8-4.8 5.8-4.8 1.4 0 2.4.4 3 1v7.6c-.6.6-1.6 1-3 1-3 0-5.4-2-5.8-4.8z', f, deep, 0.5) +
+        '<circle cx="7.4" cy="14" r="1.2" fill="' + deep + '"/>' +
+        strokes('M10.2 12.4c1 2 1 4.2 0 6M3.8 16.2l1.6.3', lo, 0.5),
+    },
+    sharktooth: {
+      shape: '<path d="M16 4.2c1.8 5.6 4.6 11.2 7.2 16.4H8.8c2.6-5.2 5.4-10.8 7.2-16.4z"/>',
+      sparkles: [[24.6, 6, 1.4], [6.6, 11.6, 1.2], [25.4, 16.6, 1.1]],
+      art: (f, rim, [, , , deep]) => WOOD('M13 24.2h6l.6 2.8h-7.2z') +
+        path('M8 20.6h16c.6 1.8-.2 3.6-1.8 4-1.8.4-3-1-4.6-1.2-.6-.1-1.2-.1-1.6 0-1.6.2-2.8 1.6-4.6 1.2C8.2 24.2 7.4 22.4 8 20.6z', '#d8c6a4', '#7a6644', 0.5) +
+        path('M16 4.2c1.8 5.6 4.6 11.2 7.2 16.4H8.8c2.6-5.2 5.4-10.8 7.2-16.4z', f, deep, 0.5) +
+        strokes('M16 4.2c1.8 5.6 4.6 11.2 7.2 16.4M16 4.2c-1.8 5.6-4.6 11.2-7.2 16.4', '#fff', 0.45, ' stroke-dasharray="0.35 0.45"') +
+        strokes('M14.6 8.6c-.8 3-2 6.2-3.4 9', '#fff', 0.8, ' stroke-opacity="0.85"'),
+    },
+    nautilus: {
+      shape: '<circle cx="17" cy="15" r="10"/>',
+      sparkles: [[27, 4.6, 1.4], [4.6, 23.6, 1.2], [28, 22, 1.1]],
+      art: (f, rim, [, , lo, deep]) => WOOD('M11.4 24.4h10.8l.6 2.6H10.8z') +
+        '<circle cx="17" cy="15" r="10" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        '<g clip-path="url(#clip-nautilus)">' + strokes(NAUTILUS_STRIPES, '#b5652a', 1.1, ' stroke-opacity="0.85"') + '</g>' +
+        '<circle cx="15.6" cy="15" r="1.8" fill="#5a3a1e" fill-opacity="0.55"/>' +
+        path('M7 15c0-4.6 2.4-8.4 6-9.8-1.2 2.8-1.8 6-1.8 9.8s.6 7 1.8 9.8C9.4 23.4 7 19.6 7 15z', '#f6e3ec', lo, 0.5) +
+        strokes('M10.4 8.6c-.8 2-1.2 4.2-1.2 6.4s.4 4.4 1.2 6.4', '#fff', 0.6, ' stroke-opacity="0.8"'),
+    },
+    peacock: {
+      shape: '<ellipse cx="16" cy="9.4" rx="6.2" ry="7.2"/>',
+      sparkles: [[25.6, 5, 1.4], [6.4, 7, 1.2], [24.4, 17, 1.1]],
+      art: (f, rim, [, , lo, deep]) => WOOD('M14 24h4.4l.6 3h-5.6z') +
+        strokes(Array.from({ length: 8 }, (_, i) => {
+          const y = 23.6 - i * 1.3;
+          const w = 2 + i * 0.25;
+          return 'M16.2 ' + y + 'l' + -w + ' -1.8M16.2 ' + y + 'l' + w + ' -1.8';
+        }).join(''), '#4fb77a', 0.5, ' stroke-opacity="0.85"') +
+        strokes('M16.4 26.4c-.6-6.4-.6-12.6-.2-17.6', '#efe7cf', 0.8) +
+        '<ellipse cx="16" cy="9.4" rx="6.2" ry="7.2" fill="#2f9c5a" stroke="' + deep + '" stroke-width="0.4"/>' +
+        '<ellipse cx="16" cy="9.8" rx="4.4" ry="5.4" fill="#d4a62a"/>' +
+        '<ellipse cx="16" cy="10.2" rx="3.4" ry="4.2" fill="' + f + '"/>' +
+        '<path d="M16 13.4c-1.6-1.2-2.4-2.4-2.4-3.6a1.2 1.2 0 0 1 2.4-.4 1.2 1.2 0 0 1 2.4.4c0 1.2-.8 2.4-2.4 3.6z" fill="#1e2a8c"/>' +
+        '<ellipse cx="15" cy="7.6" rx="1.1" ry="0.7" fill="#fff" fill-opacity="0.55"/>',
+    },
+    antler: {
+      shape: '<path d="M8.6 25.4c-.8-5.6.6-11.2 3.8-15.8 2.4-3.4 5.6-6 9.4-7.6l1.1 1.8c-3.4 1.6-6.2 4-8.4 7-2.8 4.2-4 9.2-3.4 14.4z"/>',
+      sparkles: [[26, 8, 1.4], [5, 12, 1.2], [24.4, 22.6, 1.1]],
+      art: (f, rim, [, , lo, deep]) => WOOD('M7.4 25.6h5.6l.4 1.4H7z') +
+        path('M10.4 21.8c2.6-.4 5-1.6 6.8-3.8l1.2.9c-2 2.6-4.8 4-7.8 4.5z', f, deep, 0.45) +
+        path('M12 16.2c2.6-.6 4.8-2 6.4-4.2l1.2.8c-1.8 2.6-4.4 4.2-7.4 4.8z', f, deep, 0.45) +
+        path('M15.6 10.6c2-.2 3.8-1 5.4-2.4l.9 1c-1.8 1.6-3.8 2.5-6 2.8z', f, deep, 0.45) +
+        path('M8.6 25.4c-.8-5.6.6-11.2 3.8-15.8 2.4-3.4 5.6-6 9.4-7.6l1.1 1.8c-3.4 1.6-6.2 4-8.4 7-2.8 4.2-4 9.2-3.4 14.4z', f, deep, 0.5) +
+        strokes('M10.3 22.6c-.2-3 .4-5.8 1.8-8.6M14 11.6c1.4-1.8 3-3.4 4.8-4.6', lo, 0.4) +
+        '<ellipse cx="10" cy="25.3" rx="2.4" ry="1.1" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.45"/>',
+    },
+    amber: {
+      shape: '<path d="M7.6 19.6c-1.4-5 1.4-11 6.6-12.8 5.4-1.8 10.8 1.2 11.6 6.2.8 5.2-2.4 10-7.8 10.8-4.6.6-9-1-10.4-4.2z"/>',
+      sparkles: [[26.4, 5.6, 1.4], [5.2, 9.4, 1.2], [27, 21, 1.1]],
+      art: (f, rim, [hi, , , deep]) => WOOD('M12.6 23.4h7.2l.8 3.6h-8.8z') +
+        path('M7.6 19.6c-1.4-5 1.4-11 6.6-12.8 5.4-1.8 10.8 1.2 11.6 6.2.8 5.2-2.4 10-7.8 10.8-4.6.6-9-1-10.4-4.2z', f, deep, 0.6) +
+        '<ellipse cx="16.6" cy="13.6" rx="2.8" ry="1.1" transform="rotate(-38 16.6 13.6)" fill="#fff" fill-opacity="0.45" stroke="#7a3b00" stroke-width="0.25"/>' +
+        '<ellipse cx="18.4" cy="14.6" rx="2.6" ry="1" transform="rotate(-12 18.4 14.6)" fill="#fff" fill-opacity="0.45" stroke="#7a3b00" stroke-width="0.25"/>' +
+        strokes('M14.6 16.9l-1.8 2.8M15.8 16.5l-.8 3.4M17 16.2l.8 3.2M14.4 16.8l-3 .4M17.6 16l2.6-.4M13.2 17.6l-2.4 1.6', '#3b2208', 0.3) +
+        strokes('M13.2 17.6c1.6-1.2 3.6-2 5.8-2.4', '#3b2208', 1) +
+        '<circle cx="12.7" cy="17.9" r="0.8" fill="#3b2208"/>' +
+        '<circle cx="21.4" cy="18.6" r="0.5" fill="' + hi + '"/><circle cx="11" cy="12.8" r="0.4" fill="' + hi + '"/>' +
+        strokes('M10.4 12.4c1-2 2.8-3.4 5-4', '#fff', 1, ' stroke-opacity="0.7"'),
+    },
+    ammonite: {
+      shape: '<circle cx="16" cy="15.4" r="9.6"/>',
+      sparkles: [[26.8, 4.4, 1.4], [4.8, 23.8, 1.2], [27.6, 21, 1.1]],
+      art: (f, rim, [, , lo, deep]) => WOOD('M10.4 24h11.2l.6 3H9.8z') +
+        '<circle cx="16" cy="15.4" r="9.6" fill="' + f + '" stroke="' + deep + '" stroke-width="0.5"/>' +
+        strokes(AMMONITE.ribs, lo, 0.4) + strokes(AMMONITE.coil, deep, 0.6),
+    },
+    trilobite: {
+      shape: '<path d="M16 4.2c5 0 8.8 2.6 9.2 6.4.1 1-.2 1.8-.8 2.4l-.6 8.2c-.2 2.8-3.6 4.8-7.8 4.8s-7.6-2-7.8-4.8l-.6-8.2c-.6-.6-.9-1.4-.8-2.4.4-3.8 4.2-6.4 9.2-6.4z"/>',
+      sparkles: [[27, 5, 1.4], [5, 6.6, 1.2], [27, 20, 1.1]],
+      art: (f, rim, [, , lo, deep]) => WOOD('M11.6 25h8.8l.6 2h-10z') +
+        path('M7.8 11.4l-1.8 5.4.9-.1 1.8-4.6zM24.2 11.4l1.8 5.4-.9-.1-1.8-4.6z', lo, deep, 0.4) +
+        path('M16 4.2c5 0 8.8 2.6 9.2 6.4.1 1-.2 1.8-.8 2.4l-.6 8.2c-.2 2.8-3.6 4.8-7.8 4.8s-7.6-2-7.8-4.8l-.6-8.2c-.6-.6-.9-1.4-.8-2.4.4-3.8 4.2-6.4 9.2-6.4z', f, deep, 0.5) +
+        path('M13.8 12.4c-.4-2.2-.2-4.4.6-6.4h3.2c.8 2 1 4.2.6 6.4z', lo, deep, 0.4) +
+        strokes('M7.6 12.4c5.6 1 11.2 1 16.8 0M10.2 9.2c.6-.9 1.6-1.3 2.6-1.1M21.8 9.2c-.6-.9-1.6-1.3-2.6-1.1', deep, 0.6) +
+        strokes(TRILOBITE_SEGMENTS + 'M10.4 23.4c3.6 1.2 7.6 1.2 11.2 0', deep, 0.4) +
+        strokes('M13.4 12.8c-.2 3.6-.2 7.4.2 11M18.6 12.8c.2 3.6.2 7.4-.2 11', deep, 0.5),
+    },
+    dinobone: {
+      shape: '<path d="M13 3.8c1.6-1 3.4-.4 3.8 1.2.6-1.4 2.6-1.8 3.8-.6 1.3 1.3.9 3.4-.8 4.2-.7.3-1 1-1 1.8l-.2 11.2c0 .8.4 1.4 1.1 1.8 1.6.8 2 2.9.7 4.1-1.2 1.1-3.2.9-3.8-.6-.5 1.5-2.4 2-3.7.9-1.4-1.2-1.1-3.4.5-4.1.8-.4 1.2-1 1.2-1.8l.2-11.2c0-.8-.4-1.5-1.1-1.9-1.6-.9-1.9-3.4-.7-4.4z"/>',
+      sparkles: [[25.6, 7, 1.4], [7, 12, 1.2], [24.6, 20, 1.1]],
+      art: (f, rim, [, , lo, deep]) => path('M13 3.8c1.6-1 3.4-.4 3.8 1.2.6-1.4 2.6-1.8 3.8-.6 1.3 1.3.9 3.4-.8 4.2-.7.3-1 1-1 1.8l-.2 11.2c0 .8.4 1.4 1.1 1.8 1.6.8 2 2.9.7 4.1-1.2 1.1-3.2.9-3.8-.6-.5 1.5-2.4 2-3.7.9-1.4-1.2-1.1-3.4.5-4.1.8-.4 1.2-1 1.2-1.8l.2-11.2c0-.8-.4-1.5-1.1-1.9-1.6-.9-1.9-3.4-.7-4.4z', f, deep, 0.55) +
+        strokes('M16.2 11.6l.7 1.6-.8 1.2M17.6 18l-.8 1.4.5 1M14.6 6.4c.6.6 1.6.8 2.4.4', lo, 0.35) +
+        strokes('M18.2 10.6l-.2 10.6', '#fff', 0.6, ' stroke-opacity="0.5"'),
+    },
+    smilodon: {
+      shape: '<path d="M4.6 14.2c0-2.2 1.4-3.8 3.6-4.4 2.8-.8 5.6-2.6 9-2.8 4.6-.4 8.8 1.6 10 5.4.8 2.6-.2 5-2.6 6.2l-.8 1.6h-2.6l-.6-1.2-3 .2-.8 1.2h-2.4l-.8-1.6H8.4c-2.4 0-3.8-2-3.8-4.6z"/><path d="M8.2 18.6c.6 2.8.6 5.6-.2 8.2-.4-.2-.6-.4-.8-.6-.2-2.6-.8-5-1.8-7.2z"/>',
+      sparkles: [[27.4, 5, 1.4], [3.6, 22, 1.2], [26.4, 24, 1.1]],
+      art: (f, rim, [, , lo, deep]) => woodPost(16, 22) +
+        path('M10 19.8h12c.8 0 1.2.8.8 1.4-1.8 2.2-5 3-8.4 3-1.8 0-3.4-.6-4.6-1.6-.8-.6-.8-2.8.2-2.8z', f, deep, 0.5) +
+        path('M4.6 14.2c0-2.2 1.4-3.8 3.6-4.4 2.8-.8 5.6-2.6 9-2.8 4.6-.4 8.8 1.6 10 5.4.8 2.6-.2 5-2.6 6.2l-.8 1.6h-2.6l-.6-1.2-3 .2-.8 1.2h-2.4l-.8-1.6H8.4c-2.4 0-3.8-2-3.8-4.6z', f, deep, 0.55) +
+        path('M8.2 18.6c.6 2.8.6 5.6-.2 8.2-.4-.2-.6-.4-.8-.6-.2-2.6-.8-5-1.8-7.2z', f, deep, 0.5) +
+        '<ellipse cx="15.4" cy="12.6" rx="2.4" ry="2" fill="' + deep + '"/><ellipse cx="6.6" cy="12.8" rx="0.9" ry="1.3" fill="' + deep + '"/>' +
+        strokes('M12.6 16.2c2.6.6 5.4.6 8.2-.2M20.4 9.4c2 .6 3.6 2 4.4 3.8', lo, 0.5) +
+        path('M10.6 18.6l.5 1.2.5-1.2zM12.2 18.6l.5 1.2.5-1.2z', '#fff', deep, 0.3),
+    },
+    tusk: {
+      shape: '<path d="M4.4 25.4c1.6-5.6 5.6-10.2 11.2-12.8 3.6-1.6 7.6-2.4 11.6-2.2l.1 1.4c-3.4 0-6.8.8-10 2.2-4.8 2.2-8.4 6.2-10 11.4z"/>',
+      sparkles: [[24.6, 5.4, 1.4], [5, 13, 1.2], [27, 18.6, 1.1]],
+      art: (f, rim, [, , lo, deep]) => woodPost(9.8, 20.4) + woodPost(20.4, 13) +
+        WOOD('M8.4 20.6h2.8l-.2.8H8.6zM19 13.2h2.8l-.2.8H19.2z') +
+        path('M4.4 25.4c1.6-5.6 5.6-10.2 11.2-12.8 3.6-1.6 7.6-2.4 11.6-2.2l.1 1.4c-3.4 0-6.8.8-10 2.2-4.8 2.2-8.4 6.2-10 11.4z', f, deep, 0.55) +
+        strokes('M8.2 19.4l1.2 1.1M11.4 15.6l1 1.2M15.2 13l.8 1.2M19.4 11.4l.5 1.3M23.2 10.6l.3 1.3', lo, 0.45) +
+        '<ellipse cx="5.9" cy="25.5" rx="1.6" ry="0.6" fill="' + lo + '" stroke="' + deep + '" stroke-width="0.4"/>',
+    },
+    rextooth: {
+      shape: '<path d="M10.8 21.4c.2-5.6 2.4-11.6 6.4-16.8.6-.8 1.6-.6 1.8.4 1.2 5.6 2.2 10.8 2.2 16.4z"/>',
+      sparkles: [[25, 6, 1.4], [6.4, 9, 1.2], [25.6, 18, 1.1]],
+      art: (f, rim, [, , , deep]) => WOOD('M11.6 25.6h8.8l.4 1.4H11.2z') +
+        path('M10.8 21.4h10.4c.2 1.6-.2 3.2-1.2 4.4H12c-1-1.2-1.4-2.8-1.2-4.4z', '#c9a77a', deep, 0.5) +
+        path('M10.8 21.4c.2-5.6 2.4-11.6 6.4-16.8.6-.8 1.6-.6 1.8.4 1.2 5.6 2.2 10.8 2.2 16.4z', f, deep, 0.55) +
+        strokes('M19 5c1.2 5.6 2.2 10.8 2.2 16.4', '#f6dcb2', 0.45, ' stroke-dasharray="0.35 0.45"') +
+        strokes('M14.6 10.4c-1.2 2.8-1.8 5.8-2 8.8', '#fff', 0.7, ' stroke-opacity="0.6"'),
+    },
+    megalodon: {
+      shape: '<path d="M16 3c2.2 6.2 5.2 12.2 8.2 17.6H7.8C10.8 15.2 13.8 9.2 16 3z"/>',
+      sparkles: [[26, 5, 1.5], [5.6, 10.4, 1.3], [26.4, 15.6, 1.1]],
+      art: (f, rim, [hi, , , deep]) => WOOD('M12.4 25h7.2l.6 2h-8.4z') +
+        path('M7.4 21.2l2.6 1.4 6-1.2 6 1.2 2.6-1.4c.6 1.8 0 3.6-1.6 4.2-1.6.6-3.2-.4-4.8-.8-1.4-.3-3-.3-4.4 0-1.6.4-3.2 1.4-4.8.8-1.6-.6-2.2-2.4-1.6-4.2z', '#8a6a48', '#3a2a18', 0.45) +
+        path('M16 3c2.2 6.2 5.2 12.2 8.2 17.6H7.8C10.8 15.2 13.8 9.2 16 3z', f, deep, 0.55) +
+        path('M7.8 20.6h16.4l-2 1.8-6.2-1.2-6.2 1.2z', '#22282e', deep, 0.3) +
+        strokes('M16 3c2.2 6.2 5.2 12.2 8.2 17.6M16 3c-2.2 6.2-5.2 12.2-8.2 17.6', hi, 0.45, ' stroke-dasharray="0.35 0.45"') +
+        strokes('M14 8.6c-1 3.4-2.6 7-4.4 10', '#fff', 0.8, ' stroke-opacity="0.5"'),
+    },
+    rexskull: {
+      shape: '<path d="M3.2 15.6c-.2-1.8.8-3.2 2.6-3.6l5.2-1.4c2.6-3 6-4.6 10-4.6 3.6 0 6.6 1.6 7.8 4.6.8 1.8.6 4-.4 5.6l-.6 3.8c-.2 1.2-1.2 2-2.4 2H5.8c-1.4 0-2.4-.8-2.6-2.2z"/>',
+      sparkles: [[27.6, 3.6, 1.5], [3.4, 8.6, 1.3], [29, 24, 1.1]],
+      art: (f, rim, [, , lo, deep]) => path('M4.6 22.8h18.6c1.4 0 2.6 1 2.6 2.2 0 .6-.4 1-1 1.2-4.6.8-9.8 1-14.6.8-2.2 0-4-.8-5.2-2-.8-.8-.8-2.2-.4-2.2z', f, deep, 0.5) +
+        path(REX_TEETH, '#fffaf0', deep, 0.25) +
+        path('M3.2 15.6c-.2-1.8.8-3.2 2.6-3.6l5.2-1.4c2.6-3 6-4.6 10-4.6 3.6 0 6.6 1.6 7.8 4.6.8 1.8.6 4-.4 5.6l-.6 3.8c-.2 1.2-1.2 2-2.4 2H5.8c-1.4 0-2.4-.8-2.6-2.2z', f, deep, 0.55) +
+        '<ellipse cx="6.2" cy="14.6" rx="1" ry="0.8" fill="' + deep + '"/>' +
+        '<ellipse cx="12.6" cy="14.2" rx="3.2" ry="2" transform="rotate(-8 12.6 14.2)" fill="' + deep + '"/>' +
+        '<ellipse cx="19.4" cy="11.4" rx="1.6" ry="2" fill="' + deep + '"/>' +
+        '<ellipse cx="24.4" cy="13.8" rx="1.7" ry="2.6" fill="' + deep + '"/>' +
+        strokes('M7.6 18.6c4.4.6 9 .6 13.6-.2M16 6.8c-1 1.6-1.6 3.4-1.6 5.2', lo, 0.45),
+    },
+  };
+  function specimenIcon(id) {
+    const { colors } = SPECIMENS.find((r) => r.id === id) || SPECIMENS[0];
+    const art = SPECIMEN_ART[id];
+    return '<svg class="trophy-icon shiny" viewBox="0 0 32 32" aria-hidden="true">' + SPECIMEN_BASE +
+      art.art('url(#face-' + id + ')', 'url(#rim-' + id + ')', colors) +
+      '<g clip-path="url(#clip-' + id + ')"><rect class="glitter" width="32" height="32" fill="url(#glitter-a)"/><rect class="glitter b" width="32" height="32" fill="url(#glitter-b)"/></g>' +
+      glint('clip-' + id) +
+      art.sparkles.map(([x, y, size], i) => sparkle(x, y, size, i)).join('') +
+      '</svg>';
+  }
+
+  const REWARD_ICONS = { times: trophyIcon, capitals: souvenirIcon, chemistry: glassIcon, literature: prizeIcon, languages: cityIcon, maps: atlasIcon, astronomy: planetIcon, biology: specimenIcon };
   const rewardIcon = (id, appId = app.id) => REWARD_ICONS[appId](id);
   // StoliceMax: the capital a souvenir comes from. LiteraturaMax: the
   // country that gives a prize. JęzykiMax: the city, with its flag.
   // MapkiMax: where and when a famous map, atlas or globe was made.
   // AstronomiaMax: what the body on a trophy is (a planet, a star).
+  // BiologiaMax: the animal a specimen comes from, or the age of a fossil.
   function rewardPlace(id, appId = app.id) {
     const { iso } = rewardOf(appId, id);
     if (appId === 'astronomy') return appT(appId).bodyKind(id);
+    if (appId === 'biology') return appT(appId).specimenFrom(id);
     if (appId === 'literature') return iso ? countryName(iso) : appT(appId).international;
     if (appId === 'languages') return flag(iso) + ' ' + appT(appId).cityName(id);
     if (appId === 'maps') return appT(appId).madeIn(id);
@@ -5129,13 +5448,15 @@
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       // A keychain gets confetti, a souvenir fireworks, glassware an
       // exploding elixir, a literary prize a rain of letters, a city symbol
-      // thought bubbles, a map a paper plane, a planet trophy a rocket.
+      // thought bubbles, a map a paper plane, a planet trophy a rocket, a
+      // specimen butterflies.
       if (isTimes()) confetti(CELEBRATION_MS);
       else if (app.id === 'capitals') fireworks(CELEBRATION_MS, fireworksSound());
       else if (app.id === 'chemistry') elixirBurst(CELEBRATION_MS);
       else if (app.id === 'literature') letterRain(RAIN_MAX_MS);
       else if (app.id === 'maps') planeRoute(CELEBRATION_MS);
       else if (app.id === 'astronomy') rocketDust(banner);
+      else if (app.id === 'biology') butterflyLift(banner);
       else speechBubbles(CELEBRATION_MS);
     }
   }
@@ -6268,6 +6589,271 @@
       else {
         canvas.remove();
         banner.remove();
+      }
+    };
+    requestAnimationFrame(frame);
+  }
+
+  // BiologiaMax: a swarm of butterflies flies up from the bottom of the
+  // screen. Small groups of them land on the text and buttons on the
+  // screen and carry them off the top, swaying; a last group carries off
+  // the message with the new specimen. When the swarm has gone, what they
+  // carried floats back down into its place. Only the look of the page
+  // moves (the CSS properties translate and rotate), never its layout.
+  const BUTTERFLIES = [
+    // wings, edges and spots, after a monarch, a morpho, a brimstone, a
+    // large white, a peacock butterfly, a swallowtail, and a pink and a
+    // green one
+    ['#f39a1e', '#2a1a0c', '#ffffff'],
+    ['#2f7fe8', '#0d1f4a', '#9fd4ff'],
+    ['#f2e35c', '#9a8a1c', '#e8a33a'],
+    ['#fbfbf6', '#3a3a3a', '#3a3a3a'],
+    ['#c2362b', '#3a1410', '#5aa6e8'],
+    ['#f6dc58', '#1d1d1d', '#3d7be0'],
+    ['#ff8fc8', '#8a2a5e', '#ffffff'],
+    ['#2cc78a', '#0b4a33', '#cfffe8'],
+  ];
+  // The right wings of a butterfly 26 units across, with its head up.
+  const FOREWING = 'M.6-1.5C3-9 10-11.5 12.5-8.5 14-6 11-1.5 1 .5z';
+  const HINDWING = 'M.8.5C6 .5 10.5 3 9.5 7 8.5 10 3.5 8.5.6 2.5z';
+  const CARRIED = 'h1, h2, h3, p, li, button, .shop-item, .country, .flag, .nick, .count, .coins, .tag, .pill';
+  const FLUTTER_MAX_MS = 8000; // puts everything back if the page is too slow to finish
+  function butterflyLift(banner) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'confetti flutter';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const W = innerWidth;
+    const H = innerHeight;
+    const size = Math.max(0.8, Math.min(1.4, Math.min(W, H) / 600));
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+    const fore = new Path2D(FOREWING);
+    const hind = new Path2D(HINDWING);
+    const butterfly = (scale) => ({ colors: pick(BUTTERFLIES), size: scale, flapHz: rand(7, 11), phase: rand(0, Math.PI * 2) });
+
+    // The things to carry: what is on the open panel, or else on the page,
+    // that fits on the screen, is not too big, does not overlap another one
+    // and is not cut off by a box around it.
+    const open = [...document.querySelectorAll('.panel')].find((p) => !p.hidden);
+    const clipped = (el) => {
+      for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+        const st = getComputedStyle(a);
+        if (st.overflowX === 'visible' && st.overflowY === 'visible') continue;
+        const r = a.getBoundingClientRect();
+        if (r.left > 0 || r.top > 0 || r.right < W || r.bottom < H) return true;
+      }
+      return false;
+    };
+    const chosen = [];
+    for (const el of shuffle([...(open || document.querySelector('.app')).querySelectorAll(CARRIED)])) {
+      if (chosen.length >= (W < 600 ? 5 : 8)) break;
+      const r = el.getBoundingClientRect();
+      if (r.width < 24 || r.height < 12 || r.width > W * 0.9 || r.height > H * 0.3) continue;
+      if (r.top < 0 || r.bottom > H || r.left < 0 || r.right > W) continue;
+      if (chosen.some((c) => r.left < c.r.right && c.r.left < r.right && r.top < c.r.bottom && c.r.top < r.bottom)) continue;
+      if (getComputedStyle(el).visibility !== 'visible' || clipped(el)) continue;
+      chosen.push({ el, r });
+    }
+    // The banner is still growing in: its middle is where it will be, but
+    // its size is read without the growing.
+    const b = banner.getBoundingClientRect();
+    chosen.push({
+      el: banner,
+      r: new DOMRect(b.left + b.width / 2 - banner.offsetWidth / 2, b.top + b.height / 2 - banner.offsetHeight / 2, banner.offsetWidth, banner.offsetHeight),
+      banner: true,
+    });
+
+    // Each one is grabbed, tugged, lifted off the top, and later floats
+    // back down (all but the banner, which is gone by then).
+    const TUG = 0.25;
+    const FALL = 1.1;
+    const items = chosen.map(({ el, r, banner: last }, i) => {
+      const grab = last ? 2.4 : 0.5 + i * 0.16 + rand(0, 0.25);
+      const lift = last ? 1.2 : rand(1.5, 2);
+      const carriers = Math.max(2, Math.min(5, Math.round(r.width / 70) + 1));
+      return {
+        el, r, last, grab, lift,
+        back: last ? Infinity : Math.max(3.7 + i * 0.07 + rand(0, 0.2), grab + TUG + lift + 0.1),
+        away: -(r.bottom + 60 * size),
+        sway: Math.max(0, Math.min(rand(10, 22) * size, r.left - 2, W - r.right - 2)),
+        swayHz: rand(0.7, 1.1),
+        phase: rand(0, Math.PI * 2),
+        tilt: rand(4, 9) * (Math.random() < 0.5 ? -1 : 1) * Math.min(1, 150 / r.width),
+        before: { translate: el.style.translate, rotate: el.style.rotate, pointerEvents: el.style.pointerEvents },
+        done: false,
+        carriers: Array.from({ length: carriers }, (_, j) => ({
+          ...butterfly(size * rand(0.8, 1)),
+          across: (j + 0.5) / carriers - 0.5,
+          from: r.left + r.width / 2 + rand(-0.3, 0.3) * W,
+          fly: rand(0.6, 0.9),
+        })),
+      };
+    });
+    // Where a thing is at time t: [dx, dy, degrees], or null before it is grabbed.
+    const moved = (it, t) => {
+      if (t < it.grab) return null;
+      const u = t - it.grab;
+      if (u < TUG) {
+        const w = Math.sin((u / TUG) * Math.PI);
+        return [0, -4 * size * w, it.tilt * 0.3 * w];
+      }
+      const wave = Math.sin(2 * Math.PI * it.swayHz * (u - TUG) + it.phase);
+      if (t < it.back) {
+        const k = Math.min(1, (u - TUG) / it.lift);
+        const grow = Math.min(1, k * 2);
+        return [it.sway * wave * grow, it.away * k ** 1.8, it.tilt * wave * grow];
+      }
+      const k = Math.min(1, (t - it.back) / FALL);
+      const calm = 1 - k;
+      return [it.sway * wave * calm, it.away * calm ** 3, it.tilt * wave * calm];
+    };
+    const place = (it, move) => {
+      it.el.style.translate = move ? move[0].toFixed(1) + 'px ' + move[1].toFixed(1) + 'px' : it.before.translate;
+      it.el.style.rotate = move ? move[2].toFixed(2) + 'deg' : it.before.rotate;
+      it.el.style.pointerEvents = move ? 'none' : it.before.pointerEvents;
+    };
+    const putBack = (it) => {
+      if (it.done) return;
+      it.done = true;
+      place(it, null);
+    };
+
+    // The swarm: more butterflies on a bigger screen.
+    const swarm = Array.from({ length: Math.round(Math.min(110, Math.max(45, (W * H) / 9000))) }, () => ({
+      ...butterfly(size * rand(0.55, 1)),
+      start: rand(0, 1.8),
+      dur: rand(2, 3.2),
+      x0: rand(-0.05, 1.05) * W,
+      drift: rand(-0.25, 0.25) * W,
+      sway: rand(15, 45) * size,
+      swayHz: rand(0.6, 1.4),
+      swayPhase: rand(0, Math.PI * 2),
+    }));
+    const swarmAt = (s, t) => {
+      const k = (t - s.start) / s.dur;
+      return [s.x0 + s.drift * k + s.sway * Math.sin(2 * Math.PI * s.swayHz * t + s.swayPhase), H + 30 * size - (H + 70 * size) * k * (0.7 + 0.3 * k)];
+    };
+
+    const draw = (bf, x, y, angle, t, fast) => {
+      const [wing, edge, spot] = bf.colors;
+      // Seen from above, the wings look narrow when they are up.
+      const openWings = 0.15 + 0.85 * (0.5 + 0.5 * Math.cos(2 * Math.PI * bf.flapHz * (fast ? 1.4 : 1) * t + bf.phase));
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.scale(bf.size, bf.size);
+      ctx.lineWidth = 1.2;
+      for (const side of [-1, 1]) {
+        ctx.save();
+        ctx.scale(side * openWings, 1);
+        ctx.fillStyle = wing;
+        ctx.strokeStyle = edge;
+        ctx.fill(hind);
+        ctx.stroke(hind);
+        ctx.fill(fore);
+        ctx.stroke(fore);
+        ctx.fillStyle = spot;
+        ctx.beginPath();
+        ctx.arc(9.4, -7, 1.4, 0, Math.PI * 2);
+        ctx.arc(6, 5, 1.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.fillStyle = '#2a2018';
+      ctx.beginPath();
+      ctx.ellipse(0, 0.5, 1.1, 6.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#2a2018';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(-0.4, -5.6);
+      ctx.quadraticCurveTo(-1.5, -9, -3.2, -10.4);
+      ctx.moveTo(0.4, -5.6);
+      ctx.quadraticCurveTo(1.5, -9, 3.2, -10.4);
+      ctx.stroke();
+      ctx.restore();
+    };
+    // The heading of something moving from a to b, for a butterfly drawn head up.
+    const heading = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]) + Math.PI / 2;
+    // Where a carrier holds on: on the top edge of the thing, turned with it.
+    const holdAt = (it, c, move) => {
+      const [dx, dy, deg] = move || [0, 0, 0];
+      const a = (deg * Math.PI) / 180;
+      const ox = c.across * it.r.width * 0.9;
+      const oy = -it.r.height / 2 - 2 * size;
+      return [it.r.left + it.r.width / 2 + dx + ox * Math.cos(a) - oy * Math.sin(a), it.r.top + it.r.height / 2 + dy + ox * Math.sin(a) + oy * Math.cos(a), a];
+    };
+
+    const start = performance.now();
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      items.forEach(putBack);
+      canvas.remove();
+    };
+    setTimeout(finish, FLUTTER_MAX_MS);
+    const frame = (now) => {
+      if (finished) return;
+      try {
+        const t = Math.max(0, now - start) / 1000;
+        if (canvas.width !== Math.round(W * ratio)) {
+          canvas.width = Math.round(W * ratio);
+          canvas.height = Math.round(H * ratio);
+        }
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+        let busy = false;
+        for (const s of swarm) {
+          if (t < s.start || t > s.start + s.dur) {
+            busy = busy || t < s.start;
+            continue;
+          }
+          busy = true;
+          const p = swarmAt(s, t);
+          draw(s, p[0], p[1], heading(swarmAt(s, t - 0.03), p), t, false);
+        }
+        for (const it of items) {
+          if (it.done) continue;
+          busy = true;
+          const move = moved(it, t);
+          if (it.last && t > it.grab + TUG + it.lift) {
+            // The message is gone, carried off the top.
+            it.done = true;
+            it.el.remove();
+            continue;
+          }
+          if (it.back !== Infinity && t >= it.back + FALL) {
+            putBack(it);
+            continue;
+          }
+          if (move) place(it, move);
+          if (t >= it.back) continue; // they let go at the top
+          for (const c of it.carriers) {
+            const set = it.grab - c.fly;
+            if (t < set) continue;
+            const hold = holdAt(it, c, move);
+            if (t < it.grab) {
+              // Flying in from below the screen, a little from the side.
+              const k = (t - set) / c.fly;
+              const ease = 1 - (1 - k) ** 2;
+              const from = [c.from, H + 40 * size];
+              const x = from[0] + (hold[0] - from[0]) * ease + Math.sin(k * Math.PI) * 20 * size * c.across;
+              const y = from[1] + (hold[1] - from[1]) * ease;
+              draw(c, x, y, k > 0.85 ? hold[2] : heading(from, hold), t, false);
+            } else {
+              draw(c, hold[0], hold[1], hold[2], t, true);
+            }
+          }
+        }
+        if (busy) requestAnimationFrame(frame);
+        else finish();
+      } catch (e) {
+        finish();
+        noteError(e);
       }
     };
     requestAnimationFrame(frame);

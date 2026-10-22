@@ -1,8 +1,8 @@
-# MaxApki: MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax and AstronomiaMax
+# MaxApki: MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds six sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, [JęzykiMax](#językimax), which teaches French, Spanish, Dutch, Italian and Polish, [MapkiMax](#mapkimax), which teaches where cities, mountains, lakes, rivers, seas, islands and deserts are on the map, and [AstronomiaMax](#astronomiamax), which teaches facts about the Solar System, stars and spaceflight. The seven apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all seven.
+The same page also holds seven sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, [JęzykiMax](#językimax), which teaches French, Spanish, Dutch, Italian and Polish, [MapkiMax](#mapkimax), which teaches where cities, mountains, lakes, rivers, seas, islands and deserts are on the map, [AstronomiaMax](#astronomiamax), which teaches facts about the Solar System, stars and spaceflight, and [BiologiaMax](#biologiamax), which teaches the families of animals, plants and fungi. The eight apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all eight.
 
 ## Running it
 
@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MaxApki", and its icon shows the cards of the seven apps. MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax and AstronomiaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
+The home-screen name is "MaxApki", and its icon shows the cards of the eight apps. MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed.
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -124,11 +124,11 @@ StoliceMax teaches the capitals of countries. It runs in the same page and at th
 
 The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. Inside the app each icon has the colour of its app, with a card and a drawing in black and white; the home-screen icon of MaxApki is in full colour. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
 
-The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura`, `#jezyki`, `#mapki` or `#astronomia` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
+The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura`, `#jezyki`, `#mapki`, `#astronomia` or `#biologia` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
 
 The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
-Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble, those of MapkiMax a compass rose, those of AstronomiaMax a planet with a ring. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
+Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble, those of MapkiMax a compass rose, those of AstronomiaMax a planet with a ring, those of BiologiaMax a butterfly. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
 
 ### Cards
 
@@ -387,6 +387,44 @@ The shop sells trophies with a body of the Solar System on top instead of a cup:
 
 All 11 together cost 2380 coins; learning all 138 questions to the mastered level pays 2346, plus 10 for each finished day. Buying one launches a rocket. It flies up from the bottom of the screen in loops around the new trophy and leaves a trail of dust behind, with some glittering stardust in it. The dust gathers over the trophy, and the trophy fades out while it is hidden. When the dust has cleared, about 5 seconds after the purchase, the trophy and its message are gone. With reduced motion switched on in the device settings, only the trophy is shown. The trophies and their prices are set in `PLANET_TROPHIES` in `index.html`, the drawings of the bodies in `PLANET_ART`, the names in `i18n-astronomy.js`.
 
+## BiologiaMax
+
+BiologiaMax teaches which family animals, plants and fungi belong to. It runs in the same page as the other apps and has the same options.
+
+- Each card is an organism: 238 animals, plants and fungi in nine groups: mammals; birds; reptiles and amphibians (with four dinosaurs); fish; insects; other invertebrates; fruit, vegetables and grains; trees, flowers and herbs; and fungi. The card shows a picture (an emoji) and the name of the organism, and the child picks its family from four. Each family has its name in the language of the page with its Latin name under it ("Psowate", *Canidae*). Once answered, the card also shows the Latin name of the organism (*Vulpes vulpes*). It is hidden until then because it often gives the family away: a family is named after one of its genera (*Canis*, *Canidae*).
+- There are 156 families. They follow current classifications, so some cards hold a surprise: the orca is a dolphin, the giant panda a bear, the dodo a pigeon, people are great apes, the horse chestnut and the maples belong to the soapberry family, the lime tree and cacao to the mallow family, vanilla is an orchid, and puffballs belong to the mushroom family.
+- The wrong answers are families of close relatives. Each family has a place on the tree of life: a path from the kingdom down to the order or below (animals, vertebrates, mammals, carnivores, dog-like carnivores for the dog family). As in ChemiaMax, one wrong answer is always a family whose path shares the most with that of the right one, and two more come from the next five. A dog gets other families of carnivores, a carp other families of fish, a rose other families of flowering plants. The paths only rank families by kinship; they are not a full classification.
+- Emoji exist for few organisms, so many share a picture: most fungi are 🍄 (a fly agaric), most small birds 🐦 and all conifers 🌲. Only emoji up to Emoji 13 (2020) are used, as newer ones such as 🪿 (goose) or 🫎 (moose) show as empty boxes on some tablets.
+- As in StoliceMax, a right answer the first time is never Easy. Easy needs a right answer within 6 seconds. The default time limit is 20 seconds, and 5 new organisms a day. All groups are on by default.
+- The progress view has a square for each organism, with its picture, by group.
+- The review log uses the number of the organism in `biology.js` as `card_id`, and has the organism (`o17`) and the family picked: the organism for the right family, or the organism followed by `#` and the wrong family (`o17#felidae`).
+
+The organisms and families and their names in the five languages are in `biology.js`. They were written for this app and have not been checked by a biology teacher. Some families of fungi and animals have no common Persian name; for them the Persian name is the Latin one in Persian letters.
+
+### Rewards
+
+The shop sells specimens for a natural history collection: feathers, a shell, teeth, bones and fossils, each on a wooden base with a brass plate. Under its name the shop says which animal it comes from or, for a fossil, how old it is.
+
+| Specimen | From | Coins |
+| --- | --- | --- |
+| Jay feather | Eurasian jay | 30 |
+| Fish skeleton | common carp | 45 |
+| Shark tooth | great white shark | 60 |
+| Nautilus shell | nautilus | 80 |
+| Peacock feather | Indian peafowl | 100 |
+| Deer antler | red deer | 125 |
+| Amber with a mosquito | 40 million years old | 150 |
+| Ammonite | 150 million years old | 180 |
+| Trilobite | 400 million years old | 210 |
+| Dinosaur bone | 150 million years old | 250 |
+| Sabre-toothed cat skull | 20,000 years old | 300 |
+| Mammoth tusk | 30,000 years old | 350 |
+| T. rex tooth | 66 million years old | 400 |
+| Megalodon tooth | 5 million years old | 475 |
+| T. rex skull | 66 million years old | 600 |
+
+All 15 together cost 3355 coins; learning all 238 organisms to the mastered level pays 4046, plus 10 for each finished day. Buying one sets off a swarm of butterflies, in the colours of a monarch, a morpho, a brimstone and other butterflies, that flies up from the bottom of the screen. Small groups of them land on the text and buttons on the screen, such as the specimens in the shop, and carry them off the top, swaying; a last group carries off the message with the new specimen. When the swarm has gone, about 5 seconds after the purchase, what they carried floats back down into its place. Only what is shown moves, not the layout of the page, and what is carried cannot be tapped while it is away. With reduced motion switched on in the device settings, only the specimen is shown. The specimens and their prices are set in `SPECIMENS` in `index.html`, the drawings in `SPECIMEN_ART`, the names and where they come from in `i18n-biology.js`.
+
 ## Collection and gifts
 
 The button with the latest reward in the header opens the collection: the rewards of all the apps, by app, with the number in each. A reward in the collection, or on the list in the shop, opens large, and from there it can be given away.
@@ -400,13 +438,13 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 
 ## How the page holds several apps
 
-`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax and AstronomiaMax, the apps where the child picks one of four answers. MapkiMax has an entry there too, for what it shares with them (the continents and the review log), but no answers to pick from. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`, `languages`, `maps`, `astronomy`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js`, `i18n-literature.js`, `i18n-languages.js`, `i18n-maps.js` and `i18n-astronomy.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened, the number of apps the menu was last seen with and the codes of the gift links received and given are saved under their own key (`max-apps`). The collection reads the rewards of the other apps from what they saved.
+`APPS` in `index.html` describes each app: its name, the key its progress is saved under, its default settings and its rewards. `CHOICE` holds what differs between StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, AstronomiaMax and BiologiaMax, the apps where the child picks one of four answers. MapkiMax has an entry there too, for what it shares with them (the continents and the review log), but no answers to pick from. Parts of the page that belong to some of the apps carry `data-app` with their names (`times`, `capitals`, `chemistry`, `literature`, `languages`, `maps`, `astronomy`, `biology`) and are hidden while another app is open. `i18n-capitals.js`, `i18n-chemistry.js`, `i18n-literature.js`, `i18n-languages.js`, `i18n-maps.js`, `i18n-astronomy.js` and `i18n-biology.js` have only the text that differs in those apps; the page puts it over the text of `i18n.js`. The open app, the language, the apps opened, the number of apps the menu was last seen with and the codes of the gift links received and given are saved under their own key (`max-apps`). The collection reads the rewards of the other apps from what they saved.
 
 ## Tests
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
 
-`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text. `tests/literature.test.js` checks the LiteraturaMax data and text: one number per book, every author known and from a country with a flag, names and titles in every language with no two alike, books by at least four authors in each category, and the LiteraturaMax text. `tests/languages.test.js` checks the JęzykiMax data and text: one id and number per card, every kind of card at every level in every language, three different wrong answers for each gap and question and one gap per sentence, the concepts each gap and question uses, every picture word in at least two gaps or questions, the meaning of each sentence with a gap in the other interface languages, no picture or word twice, at least four pictures per theme, and the JęzykiMax text. `tests/maps.test.js` checks `geo.js` (decoding, distances, the projection) and the MapkiMax data and text: one id and number per place, names in every language (Persian ones in Persian letters), at least 20 places of each kind and five kinds on each continent, places in Iran, Poland and the Netherlands, every place within reach on the map of its continent (cities and peaks in its first view), every layer of the base map, every region with places of its own continent inside its outline, a label for every country, and the MapkiMax text. `tests/astronomy.test.js` checks the AstronomiaMax data and text: one id and number per question, every question in every language (Persian ones with Persian digits) with no two alike, a text for every answer in every language, four different answers for each question, a question without wrong answers of its own only where its kind has at least four answers with different names, at least 10 questions per topic, and the AstronomiaMax text.
+`tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text. `tests/literature.test.js` checks the LiteraturaMax data and text: one number per book, every author known and from a country with a flag, names and titles in every language with no two alike, books by at least four authors in each category, and the LiteraturaMax text. `tests/languages.test.js` checks the JęzykiMax data and text: one id and number per card, every kind of card at every level in every language, three different wrong answers for each gap and question and one gap per sentence, the concepts each gap and question uses, every picture word in at least two gaps or questions, the meaning of each sentence with a gap in the other interface languages, no picture or word twice, at least four pictures per theme, and the JęzykiMax text. `tests/maps.test.js` checks `geo.js` (decoding, distances, the projection) and the MapkiMax data and text: one id and number per place, names in every language (Persian ones in Persian letters), at least 20 places of each kind and five kinds on each continent, places in Iran, Poland and the Netherlands, every place within reach on the map of its continent (cities and peaks in its first view), every layer of the base map, every region with places of its own continent inside its outline, a label for every country, and the MapkiMax text. `tests/astronomy.test.js` checks the AstronomiaMax data and text: one id and number per question, every question in every language (Persian ones with Persian digits) with no two alike, a text for every answer in every language, four different answers for each question, a question without wrong answers of its own only where its kind has at least four answers with different names, at least 10 questions per topic, and the AstronomiaMax text. `tests/biology.test.js` checks the BiologiaMax data and text: one id and number per organism, a picture no newer than Emoji 13, a Latin name and a name in every language for every organism (Persian ones in Persian letters) with no two alike, a name in every language for every family with no two alike, Latin family names ending in -idae for animals and -aceae for plants and fungi, organisms for every family, wrong answers from the same kingdom, at least 10 organisms per group, and the BiologiaMax text.
 
 ## Limitations
 
@@ -416,7 +454,7 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 
 ## Files
 
-- `index.html`: the seven apps (layout, styles and interface code).
+- `index.html`: the eight apps (layout, styles and interface code).
 - `i18n.js`: the interface text in Polish, English, Dutch, Spanish and Persian.
 - `i18n-capitals.js`: the text that differs in StoliceMax.
 - `countries.js`: the countries and capitals of StoliceMax.
@@ -430,6 +468,8 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 - `i18n-maps.js`: the text that differs in MapkiMax.
 - `i18n-astronomy.js`: the text that differs in AstronomiaMax.
 - `astronomy.js`: the questions and answers of AstronomiaMax.
+- `i18n-biology.js`: the text that differs in BiologiaMax.
+- `biology.js`: the organisms and families of BiologiaMax.
 - `places.js`: the places of MapkiMax, with their names and shapes.
 - `maps.js`: the base map of MapkiMax: land, heights, ice, lakes, rivers and borders, the outlines of the regions, and where country names are written.
 - `geo.js`: the map projection, the encoded lines of `maps.js` and `places.js`, and distances on the Earth. It has no dependencies and works in the browser and in Node.
@@ -437,5 +477,5 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
-- `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax and AstronomiaMax data.
+- `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax data.
 - `stolice/`: the first address of StoliceMax, which now leads to the app, and a service worker that removes the old offline copy.
