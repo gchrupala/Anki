@@ -20,9 +20,9 @@
 <style>
   /* MaxApki, a family of apps in one page: MnożenieMax (times tables),
      StoliceMax (capitals), ChemiaMax (chemical formulas), LiteraturaMax
-     (authors of books), JęzykiMax (French, Spanish, Dutch and Italian),
-     MapkiMax (places on the map) and AstronomiaMax (the Solar System and
-     space).
+     (authors of books), JęzykiMax (French, Spanish, Dutch, Italian and
+     Polish), MapkiMax (places on the map) and AstronomiaMax (the Solar System
+     and space).
      Layout: a 5×3 index card with the keypad or the four answers below it on
      squared notebook paper, and the progress beside it (stacked on phones).
      Dark theme: chalkboard. */
@@ -698,10 +698,11 @@
     cursor: pointer;
   }
   .targets button[aria-pressed="true"] { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
-  /* Four languages: two rows of two on a phone */
+  /* Five languages: rows of two on a phone, the last one in the middle */
   @media (max-width: 560px) {
-    .targets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
-    .targets button { padding: 0.3rem 0.55rem; }
+    .targets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; }
+    .targets button { grid-column: span 2; padding: 0.3rem 0.55rem; }
+    .targets button:last-child:nth-child(odd) { grid-column: 2 / span 2; }
   }
   .target { direction: ltr; unicode-bidi: isolate; }
   .target.sentence { font-size: clamp(1.2rem, 5.4cqi, 2rem); line-height: 1.3; }
@@ -1153,6 +1154,7 @@
         <button type="button" data-target="es" lang="es" aria-pressed="false">🇪🇸 Español</button>
         <button type="button" data-target="nl" lang="nl" aria-pressed="false">🇳🇱 Nederlands</button>
         <button type="button" data-target="it" lang="it" aria-pressed="false">🇮🇹 Italiano</button>
+        <button type="button" data-target="pl" lang="pl" aria-pressed="false">🇵🇱 Polski</button>
       </div>
       <div class="card" id="card">
         <div class="card-head">
@@ -1631,25 +1633,30 @@
     ['andersen', 450, null, '#fffbe0', '#ffd700', '#d4a200', '#806000'],
     ['nobel', 700, 'SE', '#fffbe6', '#ffd84a', '#e2a400', '#8a5a00'],
   ].map(([id, price, iso, ...colors]) => ({ id, price, iso, colors }));
-  // JęzykiMax: symbols of cities where French, Spanish, Dutch or Italian is
-  // spoken, with the country of the city. One shop for all four languages.
+  // JęzykiMax: symbols of cities where French, Spanish, Dutch, Italian or
+  // Polish is spoken, with the country of the city. One shop for all five
+  // languages.
   const CITIES = [
     ['tilburg', 30, 'NL', '#e7f9d9', '#5cbf4a', '#2f8a2a', '#1a4d17'],
     ['paris', 50, 'FR', '#fff8ec', '#e9dcc2', '#bfae8c', '#6b5c3e'],
     ['bocca', 60, 'IT', '#ffffff', '#dcd8d0', '#a8a294', '#5a5448'],
     ['sevilla', 75, 'ES', '#ffe9d6', '#e0a072', '#b0683c', '#5e3016'],
+    ['wroclaw', 90, 'PL', '#fff0d6', '#d9a066', '#a0612a', '#55300f'],
     ['amsterdamarms', 100, 'NL', '#ffd6d2', '#e3262e', '#a3121a', '#5c070b'],
     ['bruxelles', 125, 'BE', '#ffe1bf', '#c98a4b', '#8c5726', '#4e2d10'],
     ['pisa', 140, 'IT', '#ffffff', '#f1ede4', '#c9c0ae', '#6b6252'],
     ['buenosaires', 150, 'AR', '#ffffff', '#eef1f5', '#b9c3cf', '#5a6778'],
     ['antwerpen', 175, 'BE', '#fff6c4', '#ffc928', '#e09a00', '#9c6200'],
     ['geneve', 200, 'CH', '#ffffff', '#cdeeff', '#7fc4ef', '#2f7fb8'],
+    ['gdansk', 225, 'PL', '#ffe1d1', '#d8704e', '#a8452a', '#5a1e0e'],
     ['habana', 250, 'CU', '#d9fffa', '#2ec4b6', '#1a8a80', '#0a4a44'],
     ['venezia', 275, 'IT', '#fff6c4', '#ffc928', '#e09a00', '#8a5a00'],
     ['utrecht', 300, 'NL', '#fbf3e4', '#d9c7a4', '#a8916a', '#5a4a30'],
+    ['warszawa', 325, 'PL', '#e3f6ee', '#79c2a5', '#3e8a6c', '#1c4536'],
     ['quebec', 350, 'CA', '#d6f5e6', '#3fae80', '#23714f', '#0f3d29'],
     ['mexico', 400, 'MX', '#fff6c4', '#ffc928', '#e09a00', '#8a5a00'],
     ['marseille', 450, 'FR', '#fff6c4', '#ffd23f', '#e0a800', '#8a5a00'],
+    ['krakow', 475, 'PL', '#e6f8d8', '#66bb55', '#2f7d32', '#14451a'],
     ['firenze', 500, 'IT', '#ffe0cc', '#e07a4a', '#b0502a', '#5e2410'],
     ['rotterdam', 525, 'NL', '#ffffff', '#e3edf6', '#a7bccf', '#46586b'],
     ['barcelona', 600, 'ES', '#fff3dc', '#e7cb96', '#b89458', '#5e4626'],
@@ -1767,7 +1774,7 @@
       layout: 2,
       // Reading a sentence and four answers takes a while: Easy within 6 seconds.
       fastSeconds: 6,
-      // target: the language learned (fr, es, nl or it); levels: A1, A2, B1, B2;
+      // target: the language learned (fr, es, nl, it or pl); levels: A1, A2, B1, B2;
       // autoSay: read the cards aloud without the speaker button.
       settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, autoSay: false }),
       groupKey: 'levels',
@@ -3024,7 +3031,7 @@
     if (card.kind === 'g') return answered ? fillGap(card.show, card.answer) : '';
     return answered ? card.show + ' – ' + card.answer : card.show;
   }
-  const VOICES = { fr: 'fr-fr', es: 'es-es', nl: 'nl-nl', it: 'it-it' };
+  const VOICES = { fr: 'fr-fr', es: 'es-es', nl: 'nl-nl', it: 'it-it', pl: 'pl-pl' };
   function voiceFor(target) {
     if (!('speechSynthesis' in window)) return null;
     const voices = speechSynthesis.getVoices();
@@ -4542,6 +4549,22 @@
   const GONDOLA = 'M2.5 20.6c5 2.6 17 2.8 23.6-1.6l1.4-3.6 1.2.4-.9 3.9c-.6 1.2-1.6 2.2-3 2.8C19 24.6 9 24.6 4 22.2z';
   // Florence: the dome of the cathedral, on its drum, with its lantern.
   const DUOMO = 'M8.4 19C8.4 12.2 11.8 7.6 16 6.6c4.2 1 7.6 5.6 7.6 12.4z';
+  // Warsaw: the mermaid, with her sword raised and her shield.
+  const SYRENKA = 'M13.2 10c1.6-.8 3.2-.8 4.8 0l-.4 3c-.4 1.2-.4 2.4.2 3.6.8 2.8 2.6 4.8 5.2 5.4l1.6-2.6.2 3.2 2.2 2-4.2.2c-4.8.4-9-1.6-9.6-6.2-.2-1.2 0-2.4.4-3.4-.4-1.8-.8-3.6-.4-5.8z';
+  const HAIR = 'M14 5.8c1.6-1.2 3.6-.8 4.4.8.6 1.4.2 3 .6 4.6-1-.4-1.6-1.2-1.8-2.2z';
+  const SHIELD_PL = 'M8.4 11.4h6v3.8c0 2.2-1.4 3.6-3 4.4-1.6-.8-3-2.2-3-4.4z';
+  const SWORD = 'M22.4.6l.9.5-2.4 5.4-.9-.4z';
+  // Kraków: the Wawel dragon, sitting up and breathing fire.
+  const SMOK = 'M4 26c-1.6-.4-2-2-.6-2.6 1.4-.6 2.6.6 4.2.4 1.2-3.4 3-6.2 5.6-8 1.6-1.2 2.8-3 3.6-5.2.8-2.4 2-4 4-4.6l2.4-.4 1.6 1.2 2.6.4-.2 1.6-2.4.2 1.8.8-.6 1.2-3-.6c-1 .6-1.6 1.8-1.6 3.2 0 1.6.8 3 2 4.2 1.6 1.6 2.4 3.4 2.2 5.6l-1.4 2.2z';
+  const WINGS = 'M12.4 15.6c-1-3-1.4-6.2-.6-9.6l1.6 2.6 1.4-3.2 1.2 3.4 2-1.4c-.4 3-1.4 5.6-3 7.8z';
+  const FIRE = 'M24.6 8.6c2.2-1.2 4.6-1.4 6.6-.6-1 .4-1.6 1-1.8 1.8 1-.2 1.8 0 2.4.6-1.6.2-2.8.8-3.6 1.8-1.2-.6-2.4-1.2-3.6-1.6z';
+  // Wrocław: one of the little bronze dwarfs, in his pointed cap.
+  const KRASNAL = 'M11.4 17.6c.4-2 2.4-3.2 4.6-3.2s4.2 1.2 4.6 3.2l1.6 7.4H9.8z';
+  const CAP = 'M11.4 11.2c.4-3.6 2-6.6 4.4-8.8 1.6-.6 3.2.2 4 1.8-1.2-.4-2.2 0-2.6.8 1.2 1.8 2.2 3.8 2.6 6.2z';
+  const BEARD = 'M12.6 12.6c0 4 1.6 6.6 3.4 7.6 1.8-1 3.4-3.6 3.4-7.6z';
+  // Gdańsk: the Crane, the old wooden port crane between its brick towers.
+  const ZURAW_TOWERS = 'M4.6 27V13l3.2-2.8 3.2 2.8V27zM21 27V13l3.2-2.8 3.2 2.8V27z';
+  const ZURAW_WOOD = 'M10.6 27V9.2L16 2l5.4 7.2V27z';
   const SAGRADA = SPIRES.map(spire).join('') + 'M5 27V19h22v8z';
   const CITY_ART = {
     tilburg: {
@@ -4701,6 +4724,53 @@
         path(DUOMO, f, deep, 0.6) +
         '<path d="M12 19c0-5 1.6-9.2 4-12.4M20 19c0-5-1.6-9.2-4-12.4M16 19V6.6" stroke="#fff" stroke-width="0.6" fill="none"/>' +
         path('M14.8 6.6V3.8h2.4v2.8zM15 3.8l1-2 1 2z', '#f4f1ea', '#5f7a5a', 0.4) + '<circle cx="16" cy="1.6" r="0.5" fill="#ffc928"/>',
+    },
+  });
+  Object.assign(CITY_ART, {
+    warszawa: {
+      shape: '<path d="' + SYRENKA + HAIR + SHIELD_PL + SWORD + '"/><circle cx="15.6" cy="7.4" r="2"/>',
+      sparkles: [[26, 3, 1.4], [5, 7, 1.4], [27, 13, 1.3]],
+      art: (f, rim, [hi, , lo, deep]) => path('M5 27c1-2.6 4-3.6 7.2-3.4 3.4.2 7.6-.4 9.6 1.4 1 .8 1.6 1.4 2 2z', '#a8a294', '#5a5448', 0.5) +
+        '<path d="M17.6 10.8l2.6-4.6" stroke="' + deep + '" stroke-width="1.7" stroke-linecap="round"/><path d="M17.6 10.8l2.6-4.6" stroke="' + f + '" stroke-width="0.9" stroke-linecap="round"/>' +
+        path(SWORD, '#e8eef4', '#56606b', 0.35) + '<path d="M19.4 5.6l2.8 1.2" stroke="' + deep + '" stroke-width="0.7" stroke-linecap="round"/>' +
+        path(HAIR, f, deep, 0.5) + path(SYRENKA, f, deep, 0.6) +
+        '<path d="M14.6 18c1.4.8 2.4.6 3.4-.2M15.6 20.4c1.4.8 2.6.6 3.6-.4M17.6 22.6c1.4.6 2.6.4 3.6-.6" stroke="' + lo + '" stroke-width="0.4" fill="none"/>' +
+        '<circle cx="15.6" cy="7.4" r="2" fill="' + f + '" stroke="' + deep + '" stroke-width="0.6"/>' +
+        path(SHIELD_PL, f, deep, 0.6) + '<path d="M9.6 12.6h3.6v2.4c0 1.4-.8 2.4-1.8 3-1-.6-1.8-1.6-1.8-3z" fill="none" stroke="' + lo + '" stroke-width="0.4"/>',
+    },
+    krakow: {
+      shape: '<path d="' + SMOK + WINGS + FIRE + '"/>',
+      sparkles: [[9, 3, 1.4], [27, 15, 1.4], [3.5, 18, 1.3]],
+      art: (f, rim, [hi, , lo, deep]) => path('M6 27c.6-1.6 2-2.4 4-2.6h11c1.8.2 3 1 3.6 2.6z', '#a8a294', '#5a5448', 0.5) +
+        path(WINGS, f, deep, 0.5) + '<path d="M12 6.4l2.2 7.6M17 6.8l-2.8 6.6" stroke="' + lo + '" stroke-width="0.4"/>' +
+        path(FIRE, '#ffbe0b', '#e85d04', 0.5) + '<path d="M25.4 9.2c1.6-.6 3.2-.6 4.4-.2" stroke="#e85d04" stroke-width="0.5" fill="none"/>' +
+        path(SMOK, f, deep, 0.6) +
+        '<path d="M13.6 21.6c1.8-1.2 2.6-1 3.4.6M12.6 24c1.8-1.2 2.6-1 3.4.6" stroke="' + lo + '" stroke-width="0.4" fill="none"/>' +
+        '<path d="M18 16.6l2.6 1.6.2 1.6" stroke="' + deep + '" stroke-width="0.6" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="21.8" cy="7.6" r="0.6" fill="' + deep + '"/>' + '<path d="M20.4 6.4l-.6-1.8M21.6 6.2l.4-1.8" stroke="' + deep + '" stroke-width="0.6" stroke-linecap="round"/>',
+    },
+    wroclaw: {
+      shape: '<path d="' + KRASNAL + CAP + BEARD + '"/><circle cx="16" cy="12.4" r="2.8"/><path d="M10.4 25h4.4v2h-4.4zM17.2 25h4.4v2h-4.4z"/>',
+      sparkles: [[23, 4, 1.4], [6, 12, 1.4], [26, 17, 1.3]],
+      art: (f, rim, [hi, , lo, deep]) => path(KRASNAL, f, deep, 0.6) +
+        '<path d="M16 15v10" stroke="' + lo + '" stroke-width="0.5"/>' + '<path d="M10.8 21.4h10.4" stroke="' + deep + '" stroke-width="0.9"/>' +
+        path('M10.4 25h4.4v2h-4.4zM17.2 25h4.4v2h-4.4z', '#5a3412', '#2e1806', 0.4) +
+        '<circle cx="16" cy="12.4" r="2.8" fill="#f2c9a0" stroke="' + deep + '" stroke-width="0.5"/>' +
+        path(BEARD, '#f4f1ea', '#8a8478', 0.5) +
+        '<circle cx="14.9" cy="11.8" r="0.45" fill="' + deep + '"/><circle cx="17.1" cy="11.8" r="0.45" fill="' + deep + '"/><circle cx="16" cy="13.1" r="0.8" fill="#e8907a"/>' +
+        path(CAP, '#d62839', '#7a0f1a', 0.6) + '<path d="M11.2 11h9.6" stroke="#7a0f1a" stroke-width="0.9" stroke-linecap="round"/>' +
+        '<circle cx="12.4" cy="19.2" r="1" fill="#f2c9a0" stroke="' + deep + '" stroke-width="0.4"/><circle cx="19.6" cy="19.2" r="1" fill="#f2c9a0" stroke="' + deep + '" stroke-width="0.4"/>',
+    },
+    gdansk: {
+      shape: '<path d="' + ZURAW_TOWERS + ZURAW_WOOD + '"/>',
+      sparkles: [[16, 0.6, 1.3], [3, 5, 1.4], [29, 5, 1.4]],
+      art: (f, rim, [hi, , lo, deep]) => path(ZURAW_TOWERS, f, deep, 0.6) +
+        '<path d="' + [15.4, 18.2, 21, 23.8].map((y) => 'M4.6 ' + y + 'h6.4M21 ' + y + 'h6.4').join('') + '" stroke="' + lo + '" stroke-width="0.35"/>' +
+        '<path d="M6.8 14.6h2v2.4h-2zM23.2 14.6h2v2.4h-2zM6.8 19.8h2v2.4h-2zM23.2 19.8h2v2.4h-2z" fill="' + deep + '"/>' +
+        path(ZURAW_WOOD, '#6b4423', '#2e1806', 0.6) +
+        '<path d="M10.6 12h10.8M10.6 16h10.8M10.6 20h10.8M13.4 7.4V27M18.6 7.4V27" stroke="#3b2414" stroke-width="0.4"/>' +
+        path('M14.2 9.6h3.6v4h-3.6z', '#1f140c', '#1f140c', 0.3) + '<path d="M16 13.6v5" stroke="#d9c7a4" stroke-width="0.4"/>' +
+        path('M13.6 27v-3.4a2.4 2.4 0 0 1 4.8 0V27z', '#1f140c', '#1f140c', 0.3),
     },
   });
   const cityIcon = (id) => modelIcon(id, CITIES, CITY_ART);
@@ -5786,13 +5856,15 @@
   }
 
   // JęzykiMax: thought bubbles with words in many languages pop up and rise
-  // for a new city symbol, most of them in French, Spanish, Dutch and Italian.
+  // for a new city symbol, most of them in French, Spanish, Dutch, Italian and
+  // Polish.
   const BUBBLE_WORDS = [
     'Bonjour !', 'Merci !', 'Bravo !', 'Super !', 'Salut !', 'Génial !',
     '¡Hola!', '¡Gracias!', '¡Olé!', '¡Genial!', '¡Vamos!', '¡Qué bien!',
     'Hallo!', 'Dank je!', 'Goed zo!', 'Hoera!', 'Top!', 'Gezellig!',
     'Ciao!', 'Grazie!', 'Evviva!', 'Bellissimo!', 'Forza!', 'Bravissima!',
-    'Cześć!', 'Brawo!', 'Hello!', 'Hej!', 'Olá!', 'Привіт!', 'Γεια!', 'Ahoj!', 'Merhaba!', 'Jambo!',
+    'Cześć!', 'Brawo!', 'Hura!', 'Dziękuję!', 'Świetnie!', 'Ekstra!',
+    'Hello!', 'Hej!', 'Olá!', 'Привіт!', 'Γεια!', 'Ahoj!', 'Merhaba!', 'Jambo!',
     'سلام', 'آفرین', 'مرحبا', 'שלום', 'नमस्ते', 'こんにちは', '你好', '안녕!',
   ];
 
