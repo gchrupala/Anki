@@ -10,7 +10,7 @@ const all = Object.values(LANGUAGE_CARDS).flat();
 const BY_ID = Object.fromEntries(all.map((c) => [c.id, c]));
 
 test('each card has its own id and number, a level and a kind', () => {
-  assert.deepEqual(LANGUAGE_TARGETS, ['fr', 'es', 'nl', 'it']);
+  assert.deepEqual(LANGUAGE_TARGETS, ['fr', 'es', 'nl', 'it', 'pl']);
   assert.equal(new Set(all.map((c) => c.id)).size, all.length);
   assert.equal(new Set(all.map((c) => c.number)).size, all.length);
   for (const c of all) {
@@ -64,7 +64,7 @@ test('every sentence with a gap has its meaning in the other interface languages
 
 test('every language has the JęzykiMax text', () => {
   const cities = ['tilburg', 'paris', 'bocca', 'pisa', 'venezia', 'firenze', 'sevilla', 'amsterdamarms', 'bruxelles', 'buenosaires', 'antwerpen', 'geneve', 'habana',
-    'utrecht', 'quebec', 'mexico', 'marseille', 'rotterdam', 'barcelona'];
+    'utrecht', 'quebec', 'mexico', 'marseille', 'rotterdam', 'barcelona', 'warszawa', 'krakow', 'wroclaw', 'gdansk'];
   for (const lang of I18N.LANGS) {
     const t = I18N.LANGUAGES[lang];
     assert.equal(t.appName, 'JęzykiMax');

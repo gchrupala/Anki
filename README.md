@@ -2,7 +2,7 @@
 
 A prototype browser app that teaches the multiplication tables with flash cards. The cards are scheduled with FSRS, the algorithm Anki offers alongside its older SM-2.
 
-The same page also holds six sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, [JęzykiMax](#językimax), which teaches French, Spanish, Dutch and Italian, [MapkiMax](#mapkimax), which teaches where cities, mountains, lakes, rivers, seas, islands and deserts are on the map, and [AstronomiaMax](#astronomiamax), which teaches facts about the Solar System, stars and spaceflight. The seven apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all seven.
+The same page also holds six sister apps with the same options: [StoliceMax](#stolicemax), which teaches the capitals of countries, [ChemiaMax](#chemiamax), which teaches the formulas of elements and common chemical compounds, [LiteraturaMax](#literaturamax), which teaches who wrote well-known books, [JęzykiMax](#językimax), which teaches French, Spanish, Dutch, Italian and Polish, [MapkiMax](#mapkimax), which teaches where cities, mountains, lakes, rivers, seas, islands and deserts are on the map, and [AstronomiaMax](#astronomiamax), which teaches facts about the Solar System, stars and spaceflight. The seven apps form a family, MaxApki, installed as one app at one address. Tapping the app name at the top of the screen opens a menu with all seven.
 
 ## Running it
 
@@ -244,7 +244,7 @@ The books and authors and their names in the five languages are in `literature.j
 
 ## JęzykiMax
 
-JęzykiMax teaches French, Spanish, Dutch and Italian at the levels A1, A2, B1 and B2 of the Common European Framework of Reference for Languages. It runs in the same page as the other apps and has the same options. The language to learn is separate from the language of the interface: four buttons above the card choose it, and each language has its own cards and its own number of new cards a day. The coins of the four languages go into one purse.
+JęzykiMax teaches French, Spanish, Dutch, Italian and Polish at the levels A1, A2, B1 and B2 of the Common European Framework of Reference for Languages. It runs in the same page as the other apps and has the same options. The language to learn is separate from the language of the interface: five buttons above the card choose it, and each language has its own cards and its own number of new cards a day. The coins of the five languages go into one purse.
 
 - The cards are only in the language being learned, with pictures (emoji), so they need no translation into the five interface languages. The instruction ("Co to jest?", "Which word is missing?") is in the interface language. There are five kinds of card, each with four answers:
   - a picture, and the child picks the word or phrase ("la pomme", "Il pleut.", "Tengo frío.");
@@ -252,7 +252,7 @@ JęzykiMax teaches French, Spanish, Dutch and Italian at the levels A1, A2, B1 a
   - a sentence with a gap, and the child picks the missing word ("Je vais ___ école." with "à l’", "au", "à la", "aux");
   - a question, and the child picks the answer that fits ("¿Por qué llegas tarde?" with "Porque perdí el autobús.", "Con mi hermano.", "A las nueve.", "En la cocina.");
   - a word, and the child picks its opposite.
-- Each language has about 750 cards: 176 pictures (vocabulary with articles, everyday phrases, idioms at B1 and B2), each as a picture card and a word card, about 230 sentences with a gap, 130 to 143 questions and 36 pairs of opposites. Gaps and questions were written for each language and test its grammar: articles and gender, verb forms, past and future tenses, pronouns, at B1 the subjunctive, the conditional and relative clauses, and at B2 the passive, reported speech, conditionals about the past and linking words. The B2 picture cards are idioms, with a picture of what they mean (🤐 for keeping a secret).
+- Each language has 750 to 800 cards: 176 pictures (vocabulary with articles, everyday phrases, idioms at B1 and B2), each as a picture card and a word card, 230 to 275 sentences with a gap, 130 to 143 questions and 36 pairs of opposites. Gaps and questions were written for each language and test its grammar: articles and gender, verb forms, past and future tenses, pronouns, at B1 the subjunctive, the conditional and relative clauses, and at B2 the passive, reported speech, conditionals about the past and linking words. Polish has no articles: its gaps test the cases, the gender of past-tense verbs, aspect and numerals instead. The B2 picture cards are idioms, with a picture of what they mean (🤐 for keeping a secret).
 - The words learned from pictures should come back in sentences, so that the child practises them in use and not only as a picture puzzle. Each gap and question lists the picture concepts it uses (the word or phrase is in the sentence with the gap filled in, or in the question or its right answer, in any form). `node tools/language-coverage.js` shows, per language and theme, how many concepts come back on two or more other cards (`node tools/language-coverage.js nl` lists them one by one). In every language each picture word comes back in at least two gaps or questions: as the word to pick (*De ___ vliegt het vliegtuig.*), in a construction (*Mijn tante werkt ___ piloot.*, *Ik ___ het koud.*, *Ze is piloot.*), in a form (*Twee ___ schilderen ons huis.*) or, for the idioms, in a situation where they fit (*Was de rekentoets moeilijk? – Nee hoor, dat was een eitje.*). The wrong answers of a word gap share the article and form of the right one, so only the meaning decides.
 - A new gap or question waits until the picture cards of the words it uses have been learned (they are past the first-day steps), so a word is met with its picture before it comes in sentences. A picture of a level that is switched off holds nothing back. And as Anki buries siblings, a new card that shares a word with a card answered today or still being learned waits for another day, so the same word is not asked twice within a few minutes.
 - The wrong answers of gaps and questions are written with them. Those of picture, word and opposite cards are other cards of the same kind, of the same theme (food, animals, weather, jobs and so on) where it has enough, then of the same level.
@@ -270,25 +270,29 @@ The shop sells symbols of cities where these languages are spoken, drawn as glit
 | Arc de Triomphe | Paris | 50 |
 | Mouth of Truth | Rome | 60 |
 | Giralda | Seville | 75 |
+| Dwarf (one of the bronze dwarfs in the streets) | Wrocław | 90 |
 | Coat of arms | Amsterdam | 100 |
 | Manneken Pis | Brussels | 125 |
 | Leaning Tower | Pisa | 140 |
 | Obelisk | Buenos Aires | 150 |
 | Antwerp hand | Antwerp | 175 |
 | Jet d’Eau | Geneva | 200 |
+| Crane (the medieval port crane) | Gdańsk | 225 |
 | Classic car | Havana | 250 |
 | Gondola | Venice | 275 |
 | Dom Tower | Utrecht | 300 |
+| Mermaid | Warsaw | 325 |
 | Château Frontenac | Quebec City | 350 |
 | Angel of Independence | Mexico City | 400 |
 | Notre-Dame de la Garde | Marseille | 450 |
+| Wawel Dragon | Kraków | 475 |
 | Cathedral dome | Florence | 500 |
 | Erasmus Bridge | Rotterdam | 525 |
 | Sagrada Família | Barcelona | 600 |
 
-All 19 together cost 4755 coins; learning all the cards of one language to the mastered level pays 5610. Buying one makes thought bubbles (💭) pop up and rise for 4 seconds, with words such as "Bonjour !", "¡Hola!", "Goed zo!", "Evviva!" and greetings in many other languages and scripts. With reduced motion switched on in the device settings, only the symbol is shown. The symbols and their prices are set in `CITIES` in `index.html`, the drawings in `CITY_ART`, the names of the symbols and cities in `i18n-languages.js`.
+All 23 together cost 5870 coins; learning all the cards of one language to the mastered level pays 17 coins a card, about 13,000 in all. Buying one makes thought bubbles (💭) pop up and rise for 4 seconds, with words such as "Bonjour !", "¡Hola!", "Goed zo!", "Evviva!" and greetings in many other languages and scripts. With reduced motion switched on in the device settings, only the symbol is shown. The symbols and their prices are set in `CITIES` in `index.html`, the drawings in `CITY_ART`, the names of the symbols and cities in `i18n-languages.js`.
 
-The cards are in `languages.js`. They were written for this app; the French, Spanish, Dutch and Italian have not been checked by a teacher.
+The cards are in `languages.js`. They were written for this app; the French, Spanish, Dutch, Italian and Polish have not been checked by a teacher.
 
 ## MapkiMax
 
@@ -421,7 +425,7 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 - `i18n-literature.js`: the text that differs in LiteraturaMax.
 - `literature.js`: the books and authors of LiteraturaMax.
 - `i18n-languages.js`: the text that differs in JęzykiMax.
-- `languages.js`: the French, Spanish, Dutch and Italian cards of JęzykiMax.
+- `languages.js`: the French, Spanish, Dutch, Italian and Polish cards of JęzykiMax.
 - `languages-translations.js`: what the sentences with a gap mean, in the languages of the interface.
 - `i18n-maps.js`: the text that differs in MapkiMax.
 - `i18n-astronomy.js`: the text that differs in AstronomiaMax.
