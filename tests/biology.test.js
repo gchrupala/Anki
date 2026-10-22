@@ -4,7 +4,12 @@ require('../i18n.js');
 require('../i18n-biology.js');
 require('../biology.js');
 
-const { BIO_FAMILIES, BIO_ORGANISMS, BIO_GROUPS, BIO_KINSHIP, I18N } = globalThis;
+const { BIO_ANSWERS, BIO_QUESTIONS, BIO_GROUPS, BIO_TEXT, I18N } = globalThis;
+
+// The answers of each kind, as the app picks wrong answers from them.
+const kinds = {};
+for (const a of Object.values(BIO_ANSWERS)) (kinds[a.kind] = kinds[a.kind] || []).push(a.id);
+const isNumber = (answer) => /^\d+(\.\d+)?( [a-z-]+)?$/.test(answer);
 
 // Emoji added after Emoji 13 (2020), which some tablets show as an empty
 // box: the ranges of Emoji 14 and 15, and the newer sequences that join a
@@ -14,62 +19,70 @@ const NEWER = [[0x1fa75, 0x1fa77], [0x1fa7b, 0x1fa7c], [0x1fa87, 0x1fa88], [0x1f
 const newerEmoji = (pic) => /‍(⬛|\u{1f525}|\u{1f7eb}|\u{1f7e9})/u.test(pic) ||
   [...pic].some((ch) => NEWER.some(([lo, hi]) => ch.codePointAt(0) >= lo && ch.codePointAt(0) <= hi));
 
-test('each organism has its own number and id', () => {
-  assert.ok(BIO_ORGANISMS.length >= 200);
-  assert.equal(new Set(BIO_ORGANISMS.map((o) => o.number)).size, BIO_ORGANISMS.length);
-  assert.equal(new Set(BIO_ORGANISMS.map((o) => o.id)).size, BIO_ORGANISMS.length);
+test('each question has its own number and id', () => {
+  assert.ok(BIO_QUESTIONS.length >= 140);
+  assert.equal(new Set(BIO_QUESTIONS.map((q) => q.number)).size, BIO_QUESTIONS.length);
+  assert.equal(new Set(BIO_QUESTIONS.map((q) => q.id)).size, BIO_QUESTIONS.length);
+  for (const q of BIO_QUESTIONS) assert.equal(q.id, 'o' + q.number);
 });
 
-test('every organism has a picture, a Latin name and a name in every language, no two alike', () => {
-  for (const o of BIO_ORGANISMS) {
-    assert.ok(o.pic, o.id);
-    assert.ok(!newerEmoji(o.pic), `${o.id} ${o.pic}`);
-    // A genus and a species, or a hybrid such as Citrus × limon.
-    assert.match(o.latin, /^[A-Z][a-z]+ (× )?[a-z-]+$/, o.id);
-    for (const lang of I18N.LANGS) assert.ok(o.name[lang], `${o.id} ${lang}`);
-    assert.doesNotMatch(o.name.fa, /[A-Za-z0-9]/, o.id);
+test('every question has a picture and is asked in every language, no two the same', () => {
+  for (const q of BIO_QUESTIONS) {
+    assert.ok(q.pic, q.id);
+    assert.ok(!newerEmoji(q.pic), `${q.id} ${q.pic}`);
+    for (const lang of I18N.LANGS) assert.ok(q.text[lang], `${q.id} ${lang}`);
+    // Persian questions write numbers in Persian digits.
+    assert.doesNotMatch(q.text.fa, /[0-9]/, q.id);
+    // A Latin name is a genus and a species, or a hybrid such as Fragaria × ananassa.
+    if (q.latin) assert.match(q.latin, /^[A-Z][a-z]+ (× )?[a-z-]+$/, q.id);
   }
   for (const lang of I18N.LANGS) {
-    const names = BIO_ORGANISMS.map((o) => o.name[lang]);
-    assert.equal(new Set(names).size, names.length, lang);
+    const texts = BIO_QUESTIONS.map((q) => q.text[lang]);
+    assert.equal(new Set(texts).size, texts.length, lang);
   }
 });
 
-test('every family has a name in every language, no two alike, and organisms of its own', () => {
-  const used = new Set(BIO_ORGANISMS.map((o) => o.family));
-  for (const f of Object.values(BIO_FAMILIES)) {
-    // Animal families end in -idae, those of plants and fungi in -aceae.
-    assert.match(f.latin, f.place[0] === 'A' ? /^[A-Z][a-z]+idae$/ : /^[A-Z][a-z]+aceae$/, f.id);
-    assert.ok(['A', 'P', 'F'].includes(f.place[0]), f.id);
-    for (const lang of I18N.LANGS) assert.ok(f.name[lang], `${f.id} ${lang}`);
-    assert.doesNotMatch(f.name.fa, /[A-Za-z]/, f.id);
-    assert.ok(used.has(f.id), `${f.id} has no organisms`);
+test('every answer has a text in every language', () => {
+  for (const q of BIO_QUESTIONS) {
+    for (const answer of [q.answer, ...(q.wrong || [])]) {
+      assert.ok(BIO_ANSWERS[answer] || isNumber(answer), `${q.id} ${answer}`);
+      for (const lang of I18N.LANGS) assert.ok(BIO_TEXT(answer, lang), `${q.id} ${answer} ${lang}`);
+    }
   }
-  for (const o of BIO_ORGANISMS) assert.ok(BIO_FAMILIES[o.family], `${o.id} ${o.family}`);
-  for (const lang of I18N.LANGS) {
-    const names = Object.values(BIO_FAMILIES).map((f) => f.name[lang]);
-    assert.equal(new Set(names).size, names.length, lang);
+  // Families have their Latin name: -idae for animals, -aceae for plants.
+  for (const id of kinds.family) assert.match(BIO_ANSWERS[id].latin, /^[A-Z][a-z]+(idae|aceae)$/, id);
+});
+
+test('each question offers four different answers in every language', () => {
+  for (const q of BIO_QUESTIONS) {
+    if (q.wrong) {
+      assert.equal(q.wrong.length, 3, q.id);
+      for (const lang of I18N.LANGS) {
+        const texts = [q.answer, ...q.wrong].map((a) => BIO_TEXT(a, lang));
+        assert.equal(new Set(texts).size, 4, `${q.id} ${lang}`);
+      }
+    } else {
+      // Wrong answers of the same kind, picked by the app.
+      const answer = BIO_ANSWERS[q.answer];
+      assert.ok(answer, `${q.id} needs wrong answers of its own`);
+      assert.ok(!['type', 'family'].includes(answer.kind), `${q.id} needs wrong answers of its own`);
+      assert.ok(kinds[answer.kind].length >= 4, `${q.id} ${answer.kind}`);
+    }
+  }
+  for (const [kind, ids] of Object.entries(kinds)) {
+    if (kind === 'type') continue; // only offered with the wrong answers written for them
+    for (const lang of I18N.LANGS) {
+      const names = ids.map((id) => BIO_TEXT(id, lang));
+      assert.equal(new Set(names).size, names.length, `${kind} ${lang}`);
+    }
   }
 });
 
-test('the wrong answers come from the same kingdom', () => {
-  // The app offers the family most closely related to the right one and
-  // two of the next five: all six must be animals for an animal, plants
-  // for a plant and fungi for a fungus.
-  const ids = Object.keys(BIO_FAMILIES);
-  for (const id of ids) {
-    const closest = ids.filter((f) => f !== id).sort((x, y) => BIO_KINSHIP(id, y) - BIO_KINSHIP(id, x)).slice(0, 6);
-    for (const f of closest) assert.ok(BIO_KINSHIP(id, f) >= 1, `${id} ${f}`);
-  }
-  assert.equal(BIO_KINSHIP('canidae', 'felidae'), 4);
-  assert.equal(BIO_KINSHIP('canidae', 'rosaceae'), 0);
-});
-
-test('each group has enough organisms and every organism has a group', () => {
+test('each topic has enough questions and every question has a topic', () => {
   for (const group of BIO_GROUPS) {
-    assert.ok(BIO_ORGANISMS.filter((o) => o.group === group).length >= 10, group);
+    assert.ok(BIO_QUESTIONS.filter((q) => q.group === group).length >= 10, group);
   }
-  for (const o of BIO_ORGANISMS) assert.ok(BIO_GROUPS.includes(o.group), o.id);
+  for (const q of BIO_QUESTIONS) assert.ok(BIO_GROUPS.includes(q.group), q.id);
 });
 
 test('every language has the BiologiaMax text', () => {
@@ -78,7 +91,7 @@ test('every language has the BiologiaMax text', () => {
   for (const lang of I18N.LANGS) {
     const t = I18N.BIOLOGY[lang];
     assert.equal(t.appName, 'BiologiaMax');
-    for (const key of ['typeAnswer', 'newOne', 'choicesAria', 'groupsTitle', 'groupsHint', 'ruleFast', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
+    for (const key of ['typeAnswer', 'newOne', 'choicesAria', 'groupsTitle', 'groupsHint', 'ruleSlow', 'ruleFast', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
       assert.ok(t[key], `${lang} ${key}`);
     }
     for (const key of ['rightIs', 'typeToGoOn', 'trophyName', 'trophyTitle', 'trophiesAria', 'specimenFrom']) {

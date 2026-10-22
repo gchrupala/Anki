@@ -688,9 +688,8 @@
   .country.book { font-size: clamp(1.3rem, 6.2cqi, 2.5rem); }
   /* AstronomiaMax: a whole question, under its picture */
   .country.ask { font-size: clamp(1.15rem, 5cqi, 1.9rem); line-height: 1.3; }
-  /* BiologiaMax: the name of an organism, and its Latin name once answered.
-     The families to pick have their Latin name under them. */
-  .country.organism { font-size: clamp(1.3rem, 6.2cqi, 2.5rem); }
+  /* BiologiaMax: the Latin name of a species once answered, and of each
+     family to pick, under its name. */
   .latin { font-style: italic; direction: ltr; unicode-bidi: isolate; }
   .nick.latin.veiled { visibility: hidden; }
   .choice .latin { display: block; margin-top: 0.1rem; font-size: 0.8em; font-weight: 400; opacity: 0.8; }
@@ -1204,7 +1203,7 @@
           </div>
           <div class="place" data-app="biology" aria-live="polite">
             <span class="flag" id="bio-pic" aria-hidden="true"></span>
-            <span class="country organism" id="bio-name"></span>
+            <span class="country ask" id="bio-question"></span>
             <span class="nick latin" id="bio-latin" lang="la"></span>
           </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
@@ -1858,11 +1857,15 @@
       name: 'BiologiaMax',
       hash: 'biologia',
       storeKey: 'biology-cards-v1',
-      layout: 1,
-      // A name and four families take a moment to read: Easy within 6 seconds.
-      fastSeconds: 6,
-      settings: () => ({ groups: BIO_GROUPS.slice(), newPerDay: 5, retention: 0.9, answerTime: 20 }),
-      groupKey: 'groups', // the setting with the groups of organisms to practise
+      // Version of the settings layout; 2 made the cards questions on many
+      // topics, where before they asked only for the family of an organism.
+      layout: 2,
+      // As in AstronomiaMax, a whole question and four answers take a while
+      // to read: Easy within 8 seconds, Hard after 15.
+      fastSeconds: 8,
+      slowSeconds: 15,
+      settings: () => ({ groups: BIO_GROUPS.slice(), newPerDay: 5, retention: 0.9, answerTime: 30 }),
+      groupKey: 'groups', // the setting with the topics to practise
       rewards: SPECIMENS,
       strings: (l) => I18N.BIOLOGY[l] || {},
     },
@@ -2006,6 +2009,12 @@
         // level, so its cards wait until the easier levels are done.
         s.settings.levels = s.settings.levels.concat('B2');
       }
+      if (app.id === 'biology' && (s.settings.layout || 1) < 2) {
+        // The groups of organisms became topics: practise all of them, with
+        // the longer time a question needs (unless it was set by hand).
+        s.settings.groups = BIO_GROUPS.slice();
+        if (s.settings.answerTime === 20) s.settings.answerTime = 30;
+      }
       if (s.settings.nextAfter === 5 && !s.settings.nextAfterChosen) {
         // Saved while 5 seconds was the default: the default is now as before.
         s.settings.nextAfter = NEXT_CLASSIC;
@@ -2143,12 +2152,16 @@
     const [id, wrong] = key.split('#');
     return ASTRO_TEXT(wrong || BY_QUESTION[id].answer, lang());
   };
-  const BY_ORGANISM = Object.fromEntries(BIO_ORGANISMS.map((o) => [o.id, o]));
-  // BiologiaMax: a family on offer is the id of the organism for the right
-  // one, or the id with the wrong family after # (o17#felidae).
-  const bioFamily = (key) => {
+  const BY_BIO = Object.fromEntries(BIO_QUESTIONS.map((q) => [q.id, q]));
+  // BiologiaMax: the answers of each kind (organs, vitamins), from which a
+  // question without wrong answers of its own gets three.
+  const BIO_KINDS = {};
+  for (const a of Object.values(BIO_ANSWERS)) (BIO_KINDS[a.kind] = BIO_KINDS[a.kind] || []).push(a.id);
+  // An answer on offer, as in AstronomiaMax: the id of the question for the
+  // right one, or the id with the wrong answer after # (o11#procyonidae).
+  const bioAnswer = (key) => {
     const [id, wrong] = key.split('#');
-    return BIO_FAMILIES[wrong || BY_ORGANISM[id].family];
+    return wrong || BY_BIO[id].answer;
   };
   const LANG_IDS = Object.fromEntries(LANGUAGE_TARGETS.map((l) => [l, LANGUAGE_CARDS[l].map((c) => c.id)]));
   // JęzykiMax: the text of each answer on offer for the card shown. The
@@ -2307,26 +2320,27 @@
     },
     biology: {
       groups: BIO_GROUPS,
-      ids: BIO_ORGANISMS.map((o) => o.id),
-      group: (id) => BY_ORGANISM[id].group,
-      // The right family, the family most closely related to it, and two
-      // more from the next five: those whose places on the tree of life
-      // share the most with it (BIO_KINSHIP), so a dog gets other families
-      // of carnivores and a rose other families of flowering plants.
+      ids: BIO_QUESTIONS.map((q) => q.id),
+      group: (id) => BY_BIO[id].group,
+      // The right answer and three wrong ones: those written with the
+      // question, or else three other answers of the same kind.
       options: (id) => {
-        const right = BY_ORGANISM[id].family;
-        const others = shuffle(Object.keys(BIO_FAMILIES).filter((f) => f !== right))
-          .sort((x, y) => BIO_KINSHIP(right, y) - BIO_KINSHIP(right, x));
-        return shuffle([id, ...[others[0], ...shuffle(others.slice(1, 6)).slice(0, 2)].map((f) => id + '#' + f)]);
+        const q = BY_BIO[id];
+        const wrong = q.wrong || shuffle(BIO_KINDS[BIO_ANSWERS[q.answer].kind].filter((a) => a !== q.answer)).slice(0, 3);
+        return shuffle([id, ...wrong.map((a) => id + '#' + a)]);
       },
+      // A family has its Latin name under its own.
       answer: (key) => {
-        const family = bioFamily(key);
-        return esc(family.name[lang()]) + '<span class="latin" lang="la">' + esc(family.latin) + '</span>';
+        const answer = bioAnswer(key);
+        const family = BIO_ANSWERS[answer] && BIO_ANSWERS[answer].latin;
+        return esc(BIO_TEXT(answer, lang())) + (family ? '<span class="latin" lang="la">' + esc(family) + '</span>' : '');
       },
-      tile: (id) => BY_ORGANISM[id].pic,
-      label: (id) => BY_ORGANISM[id].name[lang()],
-      number: (id) => BY_ORGANISM[id].number,
-      logColumns: 'organism,picked',
+      tile: (id) => BY_BIO[id].pic,
+      label: (id) => BY_BIO[id].text[lang()],
+      // From the id, so that the log also numbers the cards of the first
+      // BiologiaMax that are no longer asked.
+      number: (id) => Number(id.slice(1)),
+      logColumns: 'question,picked',
     },
     // MapkiMax has no answers to pick from: the child places a pin on the map.
     maps: {
@@ -2964,12 +2978,13 @@
         $('astro-pic').textContent = BY_QUESTION[c.id].pic;
         $('astro-question').textContent = BY_QUESTION[c.id].text[lang()];
       } else if (app.id === 'biology') {
-        // The Latin name often gives the family away (Canis, Canidae), so
-        // it shows only once answered; its line keeps its place until then.
-        const organism = BY_ORGANISM[c.id];
-        $('bio-pic').textContent = organism.pic;
-        $('bio-name').textContent = organism.name[lang()];
-        $('bio-latin').textContent = organism.latin;
+        // A question about one species shows its Latin name once answered:
+        // it often gives the family away (Canis, Canidae). Its line keeps
+        // its place until then.
+        const q = BY_BIO[c.id];
+        $('bio-pic').textContent = q.pic;
+        $('bio-question').textContent = q.text[lang()];
+        $('bio-latin').textContent = q.latin || '';
         $('bio-latin').classList.toggle('veiled', mode === 'ask');
       } else {
         const card = BY_LANG[c.id];
@@ -2987,7 +3002,7 @@
       $('choices').classList.toggle('pics', !!word && word.kind === 'w');
       let long = !!word && options.some((k) => (langOffered[k] || '').length > 18);
       if (app.id === 'astronomy') long = options.some((k) => astroAnswer(k).length > 26);
-      if (app.id === 'biology') long = options.some((k) => bioFamily(k).name[lang()].length > 22);
+      if (app.id === 'biology') long = options.some((k) => BIO_TEXT(bioAnswer(k), lang()).length > 26);
       $('choices').classList.toggle('long', long);
       // Once answered, the right answer turns green and a wrong pick is marked.
       $('choices').classList.toggle('answered', mode !== 'ask');
