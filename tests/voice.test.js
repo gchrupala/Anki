@@ -54,3 +54,28 @@ test('the other languages learned', () => {
   assert.equal(VOICE.pick(['jabłko'], ['jabłko', 'banan', 'chleb', 'ser']), 0);
   assert.equal(VOICE.pick(['jablko'], ['jabłko', 'banan', 'chleb', 'ser']), 0);
 });
+
+test('answers that are forms of one word: the one heard word for word', () => {
+  const tennis = ['tennist', 'getennist', 'tennissen', 'tennis'];
+  const context = ['Ik ', ' elke dinsdag met mijn vriendin.'];
+  assert.equal(VOICE.pick(['tennis'], tennis, context), 3);
+  assert.equal(VOICE.pick(['Tennis'], tennis, context), 3);
+  assert.equal(VOICE.pick(['tennist'], tennis, context), 0);
+  assert.equal(VOICE.pick(['ik tennis elke dinsdag met mijn vriendin'], tennis, context), 3);
+  const guitars = ['gitaars', 'gitaar', 'gitaaren', 'gitaren'];
+  const two = ['Mijn broer heeft twee ', ': een gewone en een elektrische.'];
+  assert.equal(VOICE.pick(['gitaar'], guitars, two), 1);
+  assert.equal(VOICE.pick(['gitaren'], guitars, two), 3);
+  assert.equal(VOICE.pick(['mijn broer heeft twee gitaren een gewone en een elektrische'], guitars, two), 3);
+});
+
+test('the likeliest text heard counts first', () => {
+  assert.equal(VOICE.pick(['tennist', 'tennis'], ['tennist', 'getennist', 'tennissen', 'tennis']), 0);
+  assert.equal(VOICE.pick(['tenis', 'tennis'], ['tennist', 'getennist', 'tennissen', 'tennis']), 3);
+});
+
+test('an answer that holds another', () => {
+  assert.equal(VOICE.pick(['de la'], ['de la', 'la', 'le', 'du']), 0);
+  assert.equal(VOICE.pick(['la'], ['de la', 'la', 'le', 'du']), 1);
+  assert.equal(VOICE.pick(['le du'], ['de la', 'la', 'le', 'du']), -1);
+});

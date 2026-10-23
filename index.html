@@ -1399,7 +1399,7 @@
       <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
       <label class="field" for="auto-say" data-app="languages"><span data-t="autoSay">Read aloud by itself</span> <input id="auto-say" type="checkbox"></label>
       <p class="hint" data-app="languages" data-t="autoSayHint"></p>
-      <label class="field" for="voice" id="voice-field" data-app="languages"><span data-t="voice">Listen for the answer by itself</span> <input id="voice" type="checkbox"></label>
+      <label class="field" for="voice" id="voice-field" data-app="languages"><span data-t="voice">Listen for answers</span> <input id="voice" type="checkbox"></label>
       <p class="hint" id="voice-hint" data-app="languages" data-t="voiceHint"></p>
     </section>
 
@@ -2667,7 +2667,6 @@
     // JęzykiMax: moving on stops the reading of the card left.
     if (app.id === 'languages' && 'speechSynthesis' in window) speechSynthesis.cancel();
     heardId = null;
-    tappedId = null;
     const c = again ? state.cards[again.id] : SRS.pickNext(queues(), avoidList());
     typed = '';
     picked = null;
@@ -2897,9 +2896,9 @@
   // ---------- JęzykiMax: answering by voice ----------
 
   // Where the browser can recognize speech (Chrome, Edge and Safari), a
-  // card has a 🎤 button: tapped, the app listens for the answer to that
-  // card, and voice.js makes out which answer was said, in the language
-  // learned. With the setting on, it listens by itself on every card.
+  // card has a 🎤 button. It switches on listening, for this card and the
+  // next ones, as the setting does, and voice.js makes out which answer was
+  // said, in the language learned. Tapped while listening, it switches it off.
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const SPEECH_LANGS = { fr: 'fr-FR', es: 'es-ES', nl: 'nl-NL', it: 'it-IT', pl: 'pl-PL' };
   // Times it listens for a card, while it hears nothing it understands.
@@ -2910,7 +2909,6 @@
   let voiceTries = 0;
   let voiceHeard = ''; // the last thing heard that was no answer
   let voiceError = ''; // why it stopped listening (the key of its text), until 🎤 is tapped
-  let tappedId = null; // the card on which 🎤 was tapped
 
   // Whether the card shown can be answered by voice now, with 🎤 on it:
   // not a card whose answers are pictures.
@@ -2920,9 +2918,6 @@
     if (mode !== 'ask' && mode !== 'wrong') return false;
     return BY_LANG[c.id].kind !== 'w';
   }
-  // Whether it listens without a tap: with the setting on, or on the card
-  // where 🎤 was tapped (again after a wrong answer).
-  const voiceWanted = () => state.settings.voice || tappedId === currentId;
 
   function stopListening() {
     clearTimeout(listenTimer);
@@ -2935,7 +2930,7 @@
   // has been read aloud, so as not to hear it.
   function listen() {
     stopListening();
-    if (!voiceCard() || !voiceWanted() || voiceError || voiceTries >= VOICE_TRIES || panelOpen() || document.visibilityState === 'hidden') {
+    if (!voiceCard() || !state.settings.voice || voiceError || voiceTries >= VOICE_TRIES || panelOpen() || document.visibilityState === 'hidden') {
       return renderVoice();
     }
     if (reading()) {
@@ -7879,15 +7874,15 @@
   });
   document.querySelectorAll('.undo-btn').forEach((b) => b.addEventListener('click', () => undo()));
 
-  // The microphone: listens for the answer to this card, or stops listening.
+  // The microphone: switches listening on (and listens now), or off.
   $('mic').addEventListener('click', (e) => {
     e.stopPropagation();
-    if (recognizer || listenTimer) {
+    state.settings.voice = !(recognizer || listenTimer);
+    save();
+    if (!state.settings.voice) {
       stopListening();
-      voiceTries = VOICE_TRIES;
       return renderVoice();
     }
-    tappedId = currentId;
     voiceError = '';
     listenAnew();
   });
