@@ -418,7 +418,7 @@ The shop sells specimens for a natural history collection: feathers, a shell, te
 | Nautilus shell | nautilus | 80 |
 | Peacock feather | Indian peafowl | 100 |
 | Deer antler | red deer | 125 |
-| Amber with a mosquito | 40 million years old | 150 |
+| Amber with a butterfly | 40 million years old | 150 |
 | Ammonite | 150 million years old | 180 |
 | Trilobite | 400 million years old | 210 |
 | Dinosaur bone | 150 million years old | 250 |
