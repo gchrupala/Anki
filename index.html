@@ -558,11 +558,14 @@
   .card::before { content: ""; grid-area: 1 / 1 / 3 / 2; aspect-ratio: 5 / 3; }
   .card > .card-head { grid-area: 1 / 1; }
   .card > .card-body { grid-area: 2 / 1; }
+  /* The text on the right and the Back button go under the tag when the
+     card is too narrow for all three. */
   .card-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 0.4rem 0.75rem;
     padding: 0.7rem 1.1rem 0.55rem;
     border-bottom: 2px solid var(--card-margin);
     font-size: 0.72rem;
@@ -572,6 +575,21 @@
     color: var(--ink-soft);
   }
   .card-head > span { white-space: nowrap; }
+  .head-end { display: inline-flex; align-items: center; gap: 0.5rem; margin-inline-start: auto; }
+  /* Back to the previous card: small, in the style of the card head */
+  .undo-btn {
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .undo-btn:hover { border-color: var(--pen); color: var(--pen); }
+  [dir="rtl"] .undo-icon { display: inline-block; transform: scaleX(-1); }
   .tag { display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; }
   .tag::before {
     content: "";
@@ -1169,7 +1187,7 @@
       <div class="card" id="card">
         <div class="card-head">
           <span class="tag new" id="tag"></span>
-          <span id="seen"></span>
+          <span class="head-end"><span id="seen"></span><button type="button" class="undo-btn" data-t-title="undoTitle" hidden><span class="undo-icon" aria-hidden="true">↶</span> <span data-t="undo">Back</span></button></span>
         </div>
         <div class="card-body" id="card-body">
           <div class="question" data-app="times" aria-live="polite">
@@ -1212,7 +1230,7 @@
       </div>
 
       <div class="card" id="done" hidden>
-        <div class="card-head"><span data-t="finished">Finished</span><span id="done-date"></span></div>
+        <div class="card-head"><span data-t="finished">Finished</span><span class="head-end"><span id="done-date"></span><button type="button" class="undo-btn" data-t-title="undoTitle" hidden><span class="undo-icon" aria-hidden="true">↶</span> <span data-t="undo">Back</span></button></span></div>
         <div class="card-body done-body">
           <h2 class="done-title" data-t="doneTitle">All done for today!</h2>
           <p id="done-stats"></p>
@@ -2509,6 +2527,7 @@
   let advanceTimer = null;
   let held = false; // the child stopped at the card after answering
   let heardId = null; // JęzykiMax: the card shown whose reading aloud started
+  const undos = []; // the answers of this visit that can be taken back, the last one last
   let idleTimer = null;
   let giveUpTimer = null;
   // Builds the feedback line, so that it follows a change of language.
@@ -2624,14 +2643,15 @@
     renderCard();
   }
 
-  function next() {
+  // again: an answer taken back (see undo), whose card is asked again.
+  function next(again) {
     clearTimeout(advanceTimer);
     held = false;
     pauseTimers();
     // JęzykiMax: moving on stops the reading of the card left.
     if (app.id === 'languages' && 'speechSynthesis' in window) speechSynthesis.cancel();
     heardId = null;
-    const c = SRS.pickNext(queues(), avoidList());
+    const c = again ? state.cards[again.id] : SRS.pickNext(queues(), avoidList());
     typed = '';
     picked = null;
     pin = null;
@@ -2649,7 +2669,7 @@
       currentId = c.id;
       shown = { type: c.type, reps: c.reps };
       mode = 'ask';
-      if (!isTimes() && !isMaps()) options = choice().options(c.id);
+      if (!isTimes() && !isMaps()) options = again ? again.options : choice().options(c.id);
       shownAt = performance.now();
       const first = c.reps === 0;
       const ask = !isTimes() && choice().prompt;
@@ -2673,6 +2693,7 @@
     pauseTimers();
     const c = current();
     if (mode !== 'ask' || !c) return;
+    const before = { id: c.id, card: JSON.parse(JSON.stringify(c)), options: options.slice(), offered: langOffered, lastId };
     const timedOut = value === null;
     const ms = performance.now() - shownAt;
     let right;
@@ -2706,6 +2727,7 @@
     lastId = c.id;
     const reward = right ? payRewards(updated) : { coins: 0 };
     if (reward.coins) addCoins(reward.coins);
+    undos.push({ ...before, daily: d, right, wasNew, coins: reward.coins });
     save();
 
     if (right) {
@@ -2750,6 +2772,34 @@
   const distanceText = () => (mapAnswer.km < 0.5
     ? T().onTheSpot
     : T().kmAway(new Intl.NumberFormat(lang(), { maximumFractionDigits: 0 }).format(Math.max(1, mapAnswer.km))));
+
+  // Back to the previous card: the last answer is taken back. The card, the
+  // review log, the counts of the day and the coins it paid are as before
+  // it, and the card is asked again with the same answers to choose from.
+  // Not on another day (after midnight, or with the clock moved), nor once
+  // the coins it paid have been spent.
+  function undoable() {
+    const u = undos[undos.length - 1];
+    return !!u && u.daily === daily() && balance() >= u.coins;
+  }
+  function undo() {
+    if (!undoable()) return render();
+    const u = undos.pop();
+    state.cards[u.id] = u.card;
+    state.log.pop();
+    const d = u.daily;
+    d.answered -= 1;
+    if (u.right) d.right -= 1;
+    if (u.wasNew) newDay().newSeen -= 1;
+    if (u.coins) {
+      state.coins -= u.coins;
+      d.coins -= u.coins;
+    }
+    lastId = u.lastId;
+    langOffered = u.offered; // JęzykiMax: the texts of those answers
+    save();
+    next(u);
+  }
 
   // After a wrong answer the child gives the right one to move on.
   function moveOn(c) {
@@ -3081,6 +3131,7 @@
     $('choices').hidden = done;
     $('atlas').hidden = done;
     $('done').hidden = !done;
+    document.querySelectorAll('.undo-btn').forEach((b) => { b.hidden = !undoable(); });
 
     if (shown && !done) {
       const tag = $('tag');
@@ -6948,6 +6999,9 @@
     document.querySelectorAll('[data-t-aria]').forEach((el) => {
       el.setAttribute('aria-label', t[el.dataset.tAria] || '');
     });
+    document.querySelectorAll('[data-t-title]').forEach((el) => {
+      el.title = t[el.dataset.tTitle] || '';
+    });
     document.querySelectorAll('.size-label').forEach((el) => {
       el.textContent = fact(el.dataset.n, el.dataset.n);
     });
@@ -7063,6 +7117,7 @@
     save();
     pauseTimers();
     clearTimeout(advanceTimer);
+    undos.length = 0;
     app = APPS[id];
     prefs.app = id;
     if (!prefs.opened.includes(id)) prefs.opened.push(id);
@@ -7580,6 +7635,7 @@
     btn.textContent = T().erased;
     state = { ...defaultState(), settings: state.settings };
     lastId = null;
+    undos.length = 0;
     save();
     syncSettings();
     next();
@@ -7675,6 +7731,7 @@
     e.stopPropagation();
     hold();
   });
+  document.querySelectorAll('.undo-btn').forEach((b) => b.addEventListener('click', () => undo()));
 
   // JęzykiMax: the speaker button, and the language to learn.
   $('say').addEventListener('click', (e) => {
@@ -7694,6 +7751,7 @@
     save();
     pauseTimers();
     clearTimeout(advanceTimer);
+    undos.length = 0;
     currentId = null;
     lastId = null;
     shown = null;
@@ -7732,7 +7790,14 @@
       if (e.key === 'Escape') closePanel();
       return;
     }
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) {
+      // Ctrl+Z (⌘Z on a Mac), as in Anki: back to the previous card.
+      if (e.key.toLowerCase() === 'z' && !e.altKey && !e.shiftKey && undoable()) {
+        e.preventDefault();
+        undo();
+      }
+      return;
+    }
     const t = e.target;
     if (t.closest && t.closest('input, textarea, select')) return;
     const onButton = t.closest && t.closest('button') && !t.closest('#keypad, #choices');

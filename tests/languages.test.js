@@ -82,6 +82,7 @@ test('every language has the JęzykiMax text', () => {
     }
     assert.ok(I18N.STRINGS[lang].appWhat.languages, `${lang} appWhat`);
     assert.ok(I18N.STRINGS[lang].hold && I18N.STRINGS[lang].goOn && I18N.STRINGS[lang].nextNow, `${lang} hold`);
+    assert.ok(I18N.STRINGS[lang].undo && I18N.STRINGS[lang].undoTitle, `${lang} undo`);
   }
 });
 
