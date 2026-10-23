@@ -15,31 +15,31 @@
   const SPECIMENS = {
     pl: {
       jayfeather: 'Pióro sójki', fishbone: 'Szkielet ryby', sharktooth: 'Ząb rekina', nautilus: 'Muszla łodzika',
-      peacock: 'Pióro pawia', antler: 'Poroże jelenia', amber: 'Bursztyn z komarem', ammonite: 'Amonit',
+      peacock: 'Pióro pawia', antler: 'Poroże jelenia', amber: 'Bursztyn z motylem', ammonite: 'Amonit',
       trilobite: 'Trylobit', dinobone: 'Kość dinozaura', smilodon: 'Czaszka tygrysa szablozębnego', tusk: 'Cios mamuta',
       rextooth: 'Ząb tyranozaura', megalodon: 'Ząb megalodona', rexskull: 'Czaszka tyranozaura',
     },
     en: {
       jayfeather: 'Jay feather', fishbone: 'Fish skeleton', sharktooth: 'Shark tooth', nautilus: 'Nautilus shell',
-      peacock: 'Peacock feather', antler: 'Deer antler', amber: 'Amber with a mosquito', ammonite: 'Ammonite',
+      peacock: 'Peacock feather', antler: 'Deer antler', amber: 'Amber with a butterfly', ammonite: 'Ammonite',
       trilobite: 'Trilobite', dinobone: 'Dinosaur bone', smilodon: 'Sabre-toothed cat skull', tusk: 'Mammoth tusk',
       rextooth: 'T. rex tooth', megalodon: 'Megalodon tooth', rexskull: 'T. rex skull',
     },
     nl: {
       jayfeather: 'Gaaienveer', fishbone: 'Visgraat', sharktooth: 'Haaientand', nautilus: 'Nautilusschelp',
-      peacock: 'Pauwenveer', antler: 'Hertengewei', amber: 'Barnsteen met een mug', ammonite: 'Ammoniet',
+      peacock: 'Pauwenveer', antler: 'Hertengewei', amber: 'Barnsteen met een vlinder', ammonite: 'Ammoniet',
       trilobite: 'Trilobiet', dinobone: 'Dinosaurusbot', smilodon: 'Schedel van een sabeltandtijger', tusk: 'Slagtand van een mammoet',
       rextooth: 'Tand van een T. rex', megalodon: 'Megalodontand', rexskull: 'Schedel van een T. rex',
     },
     es: {
       jayfeather: 'Pluma de arrendajo', fishbone: 'Esqueleto de pez', sharktooth: 'Diente de tiburón', nautilus: 'Concha de nautilo',
-      peacock: 'Pluma de pavo real', antler: 'Cornamenta de ciervo', amber: 'Ámbar con un mosquito', ammonite: 'Amonites',
+      peacock: 'Pluma de pavo real', antler: 'Cornamenta de ciervo', amber: 'Ámbar con una mariposa', ammonite: 'Amonites',
       trilobite: 'Trilobites', dinobone: 'Hueso de dinosaurio', smilodon: 'Cráneo de tigre dientes de sable', tusk: 'Colmillo de mamut',
       rextooth: 'Diente de T. rex', megalodon: 'Diente de megalodón', rexskull: 'Cráneo de T. rex',
     },
     fa: {
       jayfeather: 'پر جی', fishbone: 'اسکلت ماهی', sharktooth: 'دندان کوسه', nautilus: 'صدف ناتیلوس',
-      peacock: 'پر طاووس', antler: 'شاخ گوزن', amber: 'کهربا با پشه', ammonite: 'آمونیت',
+      peacock: 'پر طاووس', antler: 'شاخ گوزن', amber: 'کهربا با پروانه', ammonite: 'آمونیت',
       trilobite: 'تریلوبیت', dinobone: 'استخوان دایناسور', smilodon: 'جمجمهٔ ببر دندان‌شمشیری', tusk: 'عاج ماموت',
       rextooth: 'دندان تیرانوسوروس', megalodon: 'دندان مگالودون', rexskull: 'جمجمهٔ تیرانوسوروس',
     },
