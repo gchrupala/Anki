@@ -739,9 +739,9 @@
   .gap.joined { margin-inline-end: 0; }
   #lang-pic:empty { display: none; }
   .say { border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); padding: 0.15rem 0.75rem; font-size: 1.2rem; cursor: pointer; }
-  /* JęzykiMax, answering by voice: the microphone, with a ring that pulses
-     while it listens, and what was heard when it is no answer */
-  .mic { border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); padding: 0.15rem 0.75rem; font-size: 1.2rem; cursor: pointer; align-self: center; }
+  /* JęzykiMax, answering by voice: the microphone button, with a ring that
+     pulses while it listens, and what was heard when it is no answer */
+  .mic { border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); padding: 0.3rem 0.9rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; align-self: center; }
   .mic.on { border-color: var(--pen); animation: listening 1.4s ease-in-out infinite; }
   @keyframes listening { 50% { box-shadow: 0 0 0 0.3rem var(--line); } }
   .heard { margin: 0; font-size: 0.85rem; color: var(--ink-soft); text-align: center; }
@@ -1233,7 +1233,7 @@
           </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
           <p class="heard" id="heard" aria-live="polite"></p>
-          <button type="button" class="mic" id="mic" data-t-aria="voice" hidden>🎤</button>
+          <button type="button" class="mic" id="mic" hidden>🎤</button>
           <button type="button" class="ghost-btn hold-btn" id="hold" hidden></button>
         </div>
       </div>
@@ -1399,7 +1399,7 @@
       <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
       <label class="field" for="auto-say" data-app="languages"><span data-t="autoSay">Read aloud by itself</span> <input id="auto-say" type="checkbox"></label>
       <p class="hint" data-app="languages" data-t="autoSayHint"></p>
-      <label class="field" for="voice" id="voice-field" data-app="languages"><span data-t="voice">Answer by voice</span> <input id="voice" type="checkbox"></label>
+      <label class="field" for="voice" id="voice-field" data-app="languages"><span data-t="voice">Listen for the answer by itself</span> <input id="voice" type="checkbox"></label>
       <p class="hint" id="voice-hint" data-app="languages" data-t="voiceHint"></p>
     </section>
 
@@ -2667,6 +2667,7 @@
     // JęzykiMax: moving on stops the reading of the card left.
     if (app.id === 'languages' && 'speechSynthesis' in window) speechSynthesis.cancel();
     heardId = null;
+    tappedId = null;
     const c = again ? state.cards[again.id] : SRS.pickNext(queues(), avoidList());
     typed = '';
     picked = null;
@@ -2895,9 +2896,10 @@
 
   // ---------- JęzykiMax: answering by voice ----------
 
-  // With the setting on, the app listens when a card is shown, with the
-  // speech recognition of the browser (Chrome, Edge and Safari have it),
-  // and voice.js makes out which answer was said, in the language learned.
+  // Where the browser can recognize speech (Chrome, Edge and Safari), a
+  // card has a 🎤 button: tapped, the app listens for the answer to that
+  // card, and voice.js makes out which answer was said, in the language
+  // learned. With the setting on, it listens by itself on every card.
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const SPEECH_LANGS = { fr: 'fr-FR', es: 'es-ES', nl: 'nl-NL', it: 'it-IT', pl: 'pl-PL' };
   // Times it listens for a card, while it hears nothing it understands.
@@ -2908,15 +2910,19 @@
   let voiceTries = 0;
   let voiceHeard = ''; // the last thing heard that was no answer
   let voiceError = ''; // why it stopped listening (the key of its text), until 🎤 is tapped
+  let tappedId = null; // the card on which 🎤 was tapped
 
-  // Whether the card shown can be answered by voice now: not a card whose
-  // answers are pictures.
+  // Whether the card shown can be answered by voice now, with 🎤 on it:
+  // not a card whose answers are pictures.
   function voiceCard() {
     const c = current();
-    if (!c || !Recognition || app.id !== 'languages' || !state.settings.voice) return false;
+    if (!c || !Recognition || app.id !== 'languages') return false;
     if (mode !== 'ask' && mode !== 'wrong') return false;
     return BY_LANG[c.id].kind !== 'w';
   }
+  // Whether it listens without a tap: with the setting on, or on the card
+  // where 🎤 was tapped (again after a wrong answer).
+  const voiceWanted = () => state.settings.voice || tappedId === currentId;
 
   function stopListening() {
     clearTimeout(listenTimer);
@@ -2929,7 +2935,7 @@
   // has been read aloud, so as not to hear it.
   function listen() {
     stopListening();
-    if (!voiceCard() || voiceError || voiceTries >= VOICE_TRIES || panelOpen() || document.visibilityState === 'hidden') {
+    if (!voiceCard() || !voiceWanted() || voiceError || voiceTries >= VOICE_TRIES || panelOpen() || document.visibilityState === 'hidden') {
       return renderVoice();
     }
     if (reading()) {
@@ -2993,9 +2999,10 @@
   function renderVoice() {
     const on = voiceCard();
     const mic = $('mic');
+    const t = T();
     mic.hidden = !on;
     mic.classList.toggle('on', !!recognizer);
-    const t = T();
+    mic.textContent = '🎤 ' + (recognizer ? t.voiceListening : t.voiceSay);
     $('heard').textContent = !on ? '' : voiceError ? t[voiceError] : voiceHeard ? t.heardNote(voiceHeard) : '';
   }
 
@@ -7872,7 +7879,7 @@
   });
   document.querySelectorAll('.undo-btn').forEach((b) => b.addEventListener('click', () => undo()));
 
-  // The microphone: listens again, or stops listening to this card.
+  // The microphone: listens for the answer to this card, or stops listening.
   $('mic').addEventListener('click', (e) => {
     e.stopPropagation();
     if (recognizer || listenTimer) {
@@ -7880,6 +7887,7 @@
       voiceTries = VOICE_TRIES;
       return renderVoice();
     }
+    tappedId = currentId;
     voiceError = '';
     listenAnew();
   });

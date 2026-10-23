@@ -68,7 +68,7 @@ test('every language has the JęzykiMax text', () => {
   for (const lang of I18N.LANGS) {
     const t = I18N.LANGUAGES[lang];
     assert.equal(t.appName, 'JęzykiMax');
-    for (const key of ['newOne', 'choicesAria', 'targetAria', 'listen', 'autoSay', 'autoSayHint', 'voice', 'voiceHint', 'heardNote', 'voiceDenied', 'voiceNetwork', 'voiceNoMic', 'voiceLanguage', 'groupsTitle', 'groupsHint', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
+    for (const key of ['newOne', 'choicesAria', 'targetAria', 'listen', 'autoSay', 'autoSayHint', 'voice', 'voiceHint', 'voiceSay', 'voiceListening', 'heardNote', 'voiceDenied', 'voiceNetwork', 'voiceNoMic', 'voiceLanguage', 'groupsTitle', 'groupsHint', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
       assert.ok(t[key], `${lang} ${key}`);
     }
     for (const key of ['rightIs', 'typeToGoOn', 'trophyName', 'trophyTitle', 'trophiesAria', 'cityName']) {
