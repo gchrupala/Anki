@@ -1547,10 +1547,17 @@
   }
   // Seconds a card stays after a right answer, unless set otherwise. The
   // default is as it was before the setting: 1.4 seconds, 2.2 when coins
-  // are paid, and 0.9 after the right answer is tapped following a wrong one.
+  // are paid, and 0.9 after the right answer is tapped following a wrong one
+  // (JęzykiMax: 5 seconds).
   const NEXT_CLASSIC = 1.4;
   const NEXT_AFTER = NEXT_CLASSIC;
   const NEXT_NOW_MS = 400; // "at once": just long enough to see the answer turn green
+  // JęzykiMax: how often to look whether the card is still being read aloud
+  // before moving on, for how long at most (should the end never come), and
+  // the pause between the end of the reading and the next card.
+  const READING_POLL_MS = 250;
+  const READING_MAX_MS = 20000;
+  const READING_PAUSE_MS = 400;
   const IDLE_SUBMIT_MS = 3000; // MnożenieMax: check a shorter answer after this pause
   const STATE_CODES = { new: 0, learning: 1, review: 2, relearning: 3 };
   const PRAISE = { [SRS.EASY]: 'easy', [SRS.GOOD]: 'good', [SRS.HARD]: 'hard' };
@@ -1813,8 +1820,9 @@
       // Reading a sentence and four answers takes a while: Easy within 6 seconds.
       fastSeconds: 6,
       // target: the language learned (fr, es, nl, it or pl); levels: A1, A2, B1, B2;
-      // autoSay: read the cards aloud without the speaker button.
-      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, autoSay: false }),
+      // autoSay: read the cards aloud without the speaker button. A card
+      // stays 5 seconds after an answer, to hear it and read its translation.
+      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, autoSay: false, nextAfter: 5 }),
       groupKey: 'levels',
       rewards: CITIES,
       strings: (l) => I18N.LANGUAGES[l] || {},
@@ -2015,9 +2023,9 @@
         s.settings.groups = BIO_GROUPS.slice();
         if (s.settings.answerTime === 20) s.settings.answerTime = 30;
       }
-      if (s.settings.nextAfter === 5 && !s.settings.nextAfterChosen) {
-        // Saved while 5 seconds was the default: the default is now as before.
-        s.settings.nextAfter = NEXT_CLASSIC;
+      if ((s.settings.nextAfter === 5 || s.settings.nextAfter === NEXT_CLASSIC) && !s.settings.nextAfterChosen) {
+        // Saved with an earlier default, not set by hand: the default now.
+        s.settings.nextAfter = app.settings().nextAfter || NEXT_AFTER;
       }
       s.settings.layout = app.layout;
       const d = defaultState();
@@ -2500,6 +2508,7 @@
   let shownAt = 0;
   let advanceTimer = null;
   let held = false; // the child stopped at the card after answering
+  let heardId = null; // JęzykiMax: the card shown whose reading aloud started
   let idleTimer = null;
   let giveUpTimer = null;
   // Builds the feedback line, so that it follows a change of language.
@@ -2577,7 +2586,8 @@
   // least ms), unless the child holds this one with the button under it.
   // With no time set, the card stays until Next is tapped; set to "at
   // once", it goes after a blink, whatever there is to read. As before the
-  // setting, the wait is shorter after a wrong answer (afterWrong).
+  // setting, the wait is shorter after a wrong answer (afterWrong). In
+  // JęzykiMax it also waits until the card has been read aloud to the end.
   function advanceIn(least, afterWrong) {
     clearTimeout(advanceTimer);
     const wait = state.settings.nextAfter;
@@ -2589,10 +2599,21 @@
     if (wait < 0) ms = NEXT_NOW_MS;
     else if (wait === NEXT_CLASSIC) ms = Math.max(afterWrong ? 900 : 1400, least);
     else ms = Math.max(wait * 1000, least);
-    advanceTimer = setTimeout(next, ms);
+    advanceTimer = setTimeout(nextAfterReading, ms);
     btn.style.setProperty('--wait', ms + 'ms');
     void btn.offsetWidth; // restart the line
     btn.classList.add('counting');
+  }
+  // JęzykiMax: something of the card is being read aloud, or waits to be.
+  const reading = () => app.id === 'languages' && 'speechSynthesis' in window && (speechSynthesis.speaking || speechSynthesis.pending);
+  function nextAfterReading(waited = 0) {
+    if (reading() && waited < READING_MAX_MS) {
+      advanceTimer = setTimeout(() => nextAfterReading(waited + READING_POLL_MS), READING_POLL_MS);
+    } else if (waited > 0) {
+      advanceTimer = setTimeout(next, READING_PAUSE_MS);
+    } else {
+      next();
+    }
   }
   function hold() {
     if (mode !== 'right') return;
@@ -2607,6 +2628,9 @@
     clearTimeout(advanceTimer);
     held = false;
     pauseTimers();
+    // JęzykiMax: moving on stops the reading of the card left.
+    if (app.id === 'languages' && 'speechSynthesis' in window) speechSynthesis.cancel();
+    heardId = null;
     const c = SRS.pickNext(queues(), avoidList());
     typed = '';
     picked = null;
@@ -3153,23 +3177,45 @@
     const tag = (v) => v.lang.replace('_', '-').toLowerCase();
     return voices.find((v) => tag(v) === VOICES[target]) || voices.find((v) => tag(v).startsWith(target)) || null;
   }
-  // JęzykiMax, with the setting on: read the card aloud when it is shown
-  // and again, with the answer, once it is answered.
-  function sayByItself() {
-    if (app.id === 'languages' && state.settings.autoSay) say();
+  // What sayText(card, true) adds to sayText(card, false): the answer of a
+  // question or an opposite, nothing for a word whose answer is a picture,
+  // and the whole card when nothing of it is read before the answer.
+  function sayRest(card) {
+    if (card.kind === 'q' || card.kind === 'o') return card.answer;
+    if (card.kind === 'w') return '';
+    return sayText(card, true);
   }
+  // JęzykiMax, with the setting on: each part of a card is read aloud once.
+  // The card is read when it is shown, as far as that gives nothing away.
+  // Once it is answered, right or wrong, what is new is read: the answer,
+  // or the whole sentence with its gap filled in, after what is still being
+  // read. If the card was not heard when shown (browsers stay silent until
+  // the page has been tapped), the whole card is read with its answer.
+  function sayByItself() {
+    const c = current();
+    if (!c || app.id !== 'languages' || !state.settings.autoSay) return;
+    const card = BY_LANG[c.id];
+    if (mode === 'ask') return speak(card, sayText(card, false));
+    if (heardId === c.id || reading()) speak(card, sayRest(card), true);
+    else speak(card, sayText(card, true));
+  }
+  // The speaker button: the whole card, as far as it gives nothing away.
   function say() {
     const c = current();
-    if (!c || app.id !== 'languages') return;
-    const card = BY_LANG[c.id];
-    const text = sayText(card, mode !== 'ask');
+    if (c && app.id === 'languages') speak(BY_LANG[c.id], sayText(BY_LANG[c.id], mode !== 'ask'));
+  }
+  // Reads text aloud with the voice for the language of the card, instead
+  // of what is being read, or after it.
+  function speak(card, text, after) {
     const voice = voiceFor(card.lang);
     if (!text || !voice) return;
-    speechSynthesis.cancel();
+    if (!after) speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.voice = voice;
     u.lang = voice.lang;
     u.rate = 0.9;
+    const id = currentId;
+    u.addEventListener('start', () => { heardId = id; });
     speechSynthesis.speak(u);
   }
 
