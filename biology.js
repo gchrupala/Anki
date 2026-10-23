@@ -22,7 +22,10 @@
  * carries over.
  *
  * Pictures show the subject of the question, or a symbol for it where no
- * emoji shows it well (a raven is not a blue bird). They use emoji up to
+ * emoji shows it well (a raven is not a blue bird). A picture must not give
+ * the answer away: no tooth for the hardest substance in the body (tooth
+ * enamel), no star for the arms of a starfish (five), no globe showing
+ * Africa for where storks spend the winter. They use emoji up to
  * Emoji 13 (2020), which tablets from the last few years show; a newer one
  * such as 🪿 (goose) would show as an empty box on some.
  *
@@ -402,13 +405,13 @@
       'cheetah'],
     [240, 'ANI', '📏', ['Jakie jest największe zwierzę, jakie kiedykolwiek żyło na Ziemi, większe od wszystkich dinozaurów?', 'What is the largest animal that has ever lived on Earth, bigger than any dinosaur?', 'Wat is het grootste dier dat ooit op aarde heeft geleefd, groter dan elke dinosaurus?', '¿Cuál es el animal más grande que ha vivido nunca en la Tierra, mayor que cualquier dinosaurio?', 'بزرگ‌ترین جانوری که تا به حال روی زمین زندگی کرده، حتی بزرگ‌تر از همهٔ دایناسورها، کدام است؟'],
       'bluewhale'],
-    [241, 'ANI', '🌳', ['Które zwierzę jest najwyższe na świecie?', 'Which animal is the tallest in the world?', 'Welk dier is het hoogste ter wereld?', '¿Cuál es el animal más alto del mundo?', 'بلندقدترین جانور جهان کدام است؟'],
+    [241, 'ANI', '🪜', ['Które zwierzę jest najwyższe na świecie?', 'Which animal is the tallest in the world?', 'Welk dier is het hoogste ter wereld?', '¿Cuál es el animal más alto del mundo?', 'بلندقدترین جانور جهان کدام است؟'],
       'giraffe'],
     [242, 'ANI', '⚖️', ['Które zwierzę lądowe jest najcięższe?', 'Which land animal is the heaviest?', 'Welk landdier is het zwaarst?', '¿Cuál es el animal terrestre más pesado?', 'سنگین‌ترین جانور خشکی کدام است؟'],
       'elephant'],
-    [243, 'ANI', '🦆', ['Który ssak składa jaja?', 'Which mammal lays eggs?', 'Welk zoogdier legt eieren?', '¿Qué mamífero pone huevos?', 'کدام پستاندار تخم می‌گذارد؟'],
+    [243, 'ANI', '🥚', ['Który ssak składa jaja?', 'Which mammal lays eggs?', 'Welk zoogdier legt eieren?', '¿Qué mamífero pone huevos?', 'کدام پستاندار تخم می‌گذارد؟'],
       'platypus'],
-    [244, 'ANI', '🥚', ['Który ptak znosi największe jaja?', 'Which bird lays the largest eggs?', 'Welke vogel legt de grootste eieren?', '¿Qué ave pone los huevos más grandes?', 'کدام پرنده بزرگ‌ترین تخم‌ها را می‌گذارد؟'],
+    [244, 'ANI', '🍳', ['Który ptak znosi największe jaja?', 'Which bird lays the largest eggs?', 'Welke vogel legt de grootste eieren?', '¿Qué ave pone los huevos más grandes?', 'کدام پرنده بزرگ‌ترین تخم‌ها را می‌گذارد؟'],
       'ostrich'],
     [245, 'ANI', '🔎', ['Który ptak jest najmniejszy na świecie?', 'Which bird is the smallest in the world?', 'Welke vogel is de kleinste ter wereld?', '¿Cuál es el ave más pequeña del mundo?', 'کوچک‌ترین پرندهٔ جهان کدام است؟'],
       'hummingbird'],
@@ -418,7 +421,7 @@
       'swift'],
     [248, 'ANI', '💨', ['Które zwierzę jest najszybsze na świecie, gdy pikuje z góry na zdobycz?', 'Which animal is the fastest in the world when it dives down onto its prey?', 'Welk dier is het snelste ter wereld als het naar beneden duikt op zijn prooi?', '¿Qué animal es el más rápido del mundo cuando se lanza en picado sobre su presa?', 'کدام جانور وقتی برای شکار از بالا شیرجه می‌رود، سریع‌ترین جانور جهان است؟'],
       'peregrine'],
-    [249, 'ANI', '🌊', ['Który ptak nurkuje najgłębiej, ponad 500 metrów pod wodę?', 'Which bird dives the deepest, more than 500 metres under water?', 'Welke vogel duikt het diepst, meer dan 500 meter onder water?', '¿Qué ave bucea a más profundidad, más de 500 metros bajo el agua?', 'کدام پرنده از همه عمیق‌تر شیرجه می‌زند، بیش از ۵۰۰ متر زیر آب؟'],
+    [249, 'ANI', '🤿', ['Który ptak nurkuje najgłębiej, ponad 500 metrów pod wodę?', 'Which bird dives the deepest, more than 500 metres under water?', 'Welke vogel duikt het diepst, meer dan 500 meter onder water?', '¿Qué ave bucea a más profundidad, más de 500 metros bajo el agua?', 'کدام پرنده از همه عمیق‌تر شیرجه می‌زند، بیش از ۵۰۰ متر زیر آب؟'],
       'penguin'],
     [250, 'ANI', '🦇', ['Do której grupy zwierząt należy nietoperz?', 'Which group of animals does the bat belong to?', 'Tot welke groep dieren behoort de vleermuis?', '¿A qué grupo de animales pertenece el murciélago?', 'خفاش جزو کدام گروه جانوران است؟'],
       'mammals'],
@@ -432,11 +435,11 @@
       'crustaceans'],
     [255, 'ANI', '🕸️', ['Ile nóg ma pająk?', 'How many legs does a spider have?', 'Hoeveel poten heeft een spin?', '¿Cuántas patas tiene una araña?', 'عنکبوت چند پا دارد؟'],
       '8', ['6', '10', '4']],
-    [256, 'ANI', '🐜', ['Ile nóg ma każdy owad?', 'How many legs does an insect have?', 'Hoeveel poten heeft een insect?', '¿Cuántas patas tiene un insecto?', 'هر حشره چند پا دارد؟'],
+    [256, 'ANI', '🔢', ['Ile nóg ma każdy owad?', 'How many legs does an insect have?', 'Hoeveel poten heeft een insect?', '¿Cuántas patas tiene un insecto?', 'هر حشره چند پا دارد؟'],
       '6', ['4', '8', '10']],
     [257, 'ANI', '🐙', ['Ile serc ma ośmiornica?', 'How many hearts does an octopus have?', 'Hoeveel harten heeft een octopus?', '¿Cuántos corazones tiene un pulpo?', 'هشت‌پا چند قلب دارد؟'],
       '3', ['1', '2', '8']],
-    [258, 'ANI', '⭐', ['Ile ramion ma zwykle rozgwiazda?', 'How many arms does a starfish usually have?', 'Hoeveel armen heeft een zeester meestal?', '¿Cuántos brazos tiene normalmente una estrella de mar?', 'ستارهٔ دریایی معمولاً چند بازو دارد؟'],
+    [258, 'ANI', '🏖️', ['Ile ramion ma zwykle rozgwiazda?', 'How many arms does a starfish usually have?', 'Hoeveel armen heeft een zeester meestal?', '¿Cuántos brazos tiene normalmente una estrella de mar?', 'ستارهٔ دریایی معمولاً چند بازو دارد؟'],
       '5', ['3', '4', '8']],
     [259, 'ANI', '🐄', ['Z ilu części składa się żołądek krowy?', 'How many chambers does a cow’s stomach have?', 'Uit hoeveel delen bestaat de maag van een koe?', '¿Cuántas cavidades tiene el estómago de una vaca?', 'معدهٔ گاو چند بخش دارد؟'],
       '4', ['1', '2', '6']],
@@ -484,7 +487,7 @@
       'fruit'],
     [280, 'PLA', '🥜', ['Którą częścią rośliny jest orzeszek ziemny, który jemy?', 'Which part of the plant is the peanut that we eat?', 'Welk deel van de plant is de pinda die we eten?', '¿Qué parte de la planta es el cacahuete que comemos?', 'بادام‌زمینی‌ای که می‌خوریم کدام بخش گیاه است؟'],
       'seed'],
-    [281, 'PLA', '🪵', ['Z której części drzewa robi się cynamon?', 'Which part of the tree is cinnamon made from?', 'Van welk deel van de boom wordt kaneel gemaakt?', '¿De qué parte del árbol se hace la canela?', 'دارچین را از کدام بخش درخت به دست می‌آورند؟'],
+    [281, 'PLA', '🥧', ['Z której części drzewa robi się cynamon?', 'Which part of the tree is cinnamon made from?', 'Van welk deel van de boom wordt kaneel gemaakt?', '¿De qué parte del árbol se hace la canela?', 'دارچین را از کدام بخش درخت به دست می‌آورند؟'],
       'bark'],
     [282, 'PLA', '🌲', ['Które drzewo iglaste zrzuca igły na zimę?', 'Which conifer drops its needles for the winter?', 'Welke naaldboom verliest in de winter zijn naalden?', '¿Qué conífera pierde sus agujas en invierno?', 'کدام درخت سوزنی‌برگ در زمستان برگ‌هایش را می‌ریزد؟'],
       't_larch', ['t_pine', 't_spruce', 't_juniper']],
@@ -510,9 +513,9 @@
     // The human body
     [292, 'HUM', '💀', ['Ile kości ma dorosły człowiek?', 'How many bones does an adult human have?', 'Hoeveel botten heeft een volwassen mens?', '¿Cuántos huesos tiene una persona adulta?', 'بدن یک انسان بالغ چند استخوان دارد؟'],
       '206', ['56', '106', '306']],
-    [293, 'HUM', '👶', ['Kto ma więcej kości: noworodek czy dorosły?', 'Who has more bones: a newborn baby or an adult?', 'Wie heeft meer botten: een pasgeboren baby of een volwassene?', '¿Quién tiene más huesos: un recién nacido o un adulto?', 'چه کسی استخوان‌های بیشتری دارد: نوزاد یا بزرگسال؟'],
+    [293, 'HUM', '🦴', ['Kto ma więcej kości: noworodek czy dorosły?', 'Who has more bones: a newborn baby or an adult?', 'Wie heeft meer botten: een pasgeboren baby of een volwassene?', '¿Quién tiene más huesos: un recién nacido o un adulto?', 'چه کسی استخوان‌های بیشتری دارد: نوزاد یا بزرگسال؟'],
       't_baby', ['t_adult', 't_same', 't_taller']],
-    [294, 'HUM', '🦵', ['Która kość jest najdłuższa w ciele człowieka?', 'Which is the longest bone in the human body?', 'Wat is het langste bot in het menselijk lichaam?', '¿Cuál es el hueso más largo del cuerpo humano?', 'بلندترین استخوان بدن انسان کدام است؟'],
+    [294, 'HUM', '📐', ['Która kość jest najdłuższa w ciele człowieka?', 'Which is the longest bone in the human body?', 'Wat is het langste bot in het menselijk lichaam?', '¿Cuál es el hueso más largo del cuerpo humano?', 'بلندترین استخوان بدن انسان کدام است؟'],
       'femur'],
     [295, 'HUM', '👂', ['Jak nazywa się najmniejsza kość człowieka, ukryta w uchu?', 'What is the smallest bone in the human body, hidden in the ear, called?', 'Hoe heet het kleinste bot van de mens, verborgen in het oor?', '¿Cómo se llama el hueso más pequeño del cuerpo, escondido en el oído?', 'کوچک‌ترین استخوان بدن انسان که در گوش پنهان است چه نام دارد؟'],
       'stapes'],
@@ -524,7 +527,7 @@
       'lungs'],
     [299, 'HUM', '💧', ['Który narząd oczyszcza krew i wytwarza mocz?', 'Which organ cleans the blood and makes urine?', 'Welk orgaan zuivert het bloed en maakt urine?', '¿Qué órgano limpia la sangre y produce la orina?', 'کدام اندام خون را تصفیه می‌کند و ادرار می‌سازد؟'],
       'kidneys'],
-    [300, 'HUM', '✋', ['Jaki jest największy narząd człowieka?', 'What is the largest organ of the human body?', 'Wat is het grootste orgaan van het menselijk lichaam?', '¿Cuál es el órgano más grande del cuerpo humano?', 'بزرگ‌ترین اندام بدن انسان کدام است؟'],
+    [300, 'HUM', '🏆', ['Jaki jest największy narząd człowieka?', 'What is the largest organ of the human body?', 'Wat is het grootste orgaan van het menselijk lichaam?', '¿Cuál es el órgano más grande del cuerpo humano?', 'بزرگ‌ترین اندام بدن انسان کدام است؟'],
       'skin'],
     [301, 'HUM', '🧍', ['Jaki jest największy narząd wewnątrz ciała?', 'What is the largest organ inside the body?', 'Wat is het grootste orgaan binnen in het lichaam?', '¿Cuál es el órgano más grande del interior del cuerpo?', 'بزرگ‌ترین اندام درون بدن کدام است؟'],
       'liver'],
@@ -550,7 +553,7 @@
       't_iris', ['t_pupil', 't_lens', 't_eyelid']],
     [312, 'HUM', '👅', ['Jaki piąty smak, oprócz słodkiego, słonego, kwaśnego i gorzkiego, czuje język?', 'Which fifth taste can the tongue sense, besides sweet, salty, sour and bitter?', 'Welke vijfde smaak proeft de tong, naast zoet, zout, zuur en bitter?', '¿Qué quinto sabor percibe la lengua, además de dulce, salado, ácido y amargo?', 'زبان علاوه بر شیرین، شور، ترش و تلخ، کدام مزهٔ پنجم را حس می‌کند؟'],
       't_umami', ['t_spicy', 't_metallic', 't_cool']],
-    [313, 'HUM', '🦴', ['Gdzie w ciele powstają krwinki?', 'Where in the body are blood cells made?', 'Waar in het lichaam worden bloedcellen gemaakt?', '¿Dónde se fabrican las células de la sangre?', 'یاخته‌های خون در کجای بدن ساخته می‌شوند؟'],
+    [313, 'HUM', '🏭', ['Gdzie w ciele powstają krwinki?', 'Where in the body are blood cells made?', 'Waar in het lichaam worden bloedcellen gemaakt?', '¿Dónde se fabrican las células de la sangre?', 'یاخته‌های خون در کجای بدن ساخته می‌شوند؟'],
       't_marrow', ['t_inheart', 't_inlungs', 't_instomach']],
     [314, 'HUM', '⛵', ['Brak której witaminy wywoływał u żeglarzy szkorbut?', 'A lack of which vitamin gave sailors scurvy?', 'Door een tekort aan welke vitamine kregen zeelieden scheurbuik?', '¿La falta de qué vitamina causaba escorbuto a los marineros?', 'کمبود کدام ویتامین در ملوانان بیماری اسکوربوت ایجاد می‌کرد؟'],
       'vit_c'],
@@ -562,7 +565,7 @@
       'vit_a'],
     [318, 'HUM', '😎', ['Jak nazywa się barwnik, który daje skórze kolor i chroni ją przed słońcem?', 'What is the pigment called that gives skin its colour and protects it from the sun?', 'Hoe heet de kleurstof die de huid kleur geeft en haar tegen de zon beschermt?', '¿Cómo se llama el pigmento que da color a la piel y la protege del sol?', 'رنگیزه‌ای که به پوست رنگ می‌دهد و از آن در برابر آفتاب محافظت می‌کند چه نام دارد؟'],
       'melanin'],
-    [319, 'HUM', '🦷', ['Jaka jest najtwardsza substancja w ciele człowieka?', 'What is the hardest substance in the human body?', 'Wat is de hardste stof in het menselijk lichaam?', '¿Cuál es la sustancia más dura del cuerpo humano?', 'سخت‌ترین مادهٔ بدن انسان کدام است؟'],
+    [319, 'HUM', '💎', ['Jaka jest najtwardsza substancja w ciele człowieka?', 'What is the hardest substance in the human body?', 'Wat is de hardste stof in het menselijk lichaam?', '¿Cuál es la sustancia más dura del cuerpo humano?', 'سخت‌ترین مادهٔ بدن انسان کدام است؟'],
       'enamel'],
 
     // Cells, genes and microbes
@@ -580,7 +583,7 @@
       't_helix', ['t_sphere', 't_cube', 't_star']],
     [326, 'CEL', '🧬', ['Ile chromosomów jest w większości komórek człowieka?', 'How many chromosomes are there in most human cells?', 'Hoeveel chromosomen zitten er in de meeste cellen van de mens?', '¿Cuántos cromosomas hay en la mayoría de las células humanas?', 'در بیشتر یاخته‌های انسان چند کروموزوم وجود دارد؟'],
       '46', ['23', '44', '48']],
-    [327, 'CEL', '🤧', ['Które z nich nie są komórkami i mnożą się tylko wewnątrz cudzych komórek?', 'Which of these are not cells and can only multiply inside other cells?', 'Welke van deze zijn geen cellen en kunnen zich alleen in andere cellen vermenigvuldigen?', '¿Cuáles de estos no son células y solo se multiplican dentro de otras células?', 'کدام‌یک یاخته نیستند و فقط درون یاخته‌های دیگر تکثیر می‌شوند؟'],
+    [327, 'CEL', '🧪', ['Które z nich nie są komórkami i mnożą się tylko wewnątrz cudzych komórek?', 'Which of these are not cells and can only multiply inside other cells?', 'Welke van deze zijn geen cellen en kunnen zich alleen in andere cellen vermenigvuldigen?', '¿Cuáles de estos no son células y solo se multiplican dentro de otras células?', 'کدام‌یک یاخته نیستند و فقط درون یاخته‌های دیگر تکثیر می‌شوند؟'],
       't_viruses', ['k_bacteria', 't_yeasts', 't_amoebas']],
     [328, 'CEL', '💊', ['Co zwalczają antybiotyki?', 'What do antibiotics fight?', 'Wat bestrijden antibiotica?', '¿Qué combaten los antibióticos?', 'آنتی‌بیوتیک‌ها با چه چیزی مبارزه می‌کنند؟'],
       'k_bacteria', ['t_viruses', 't_allergies', 't_fractures']],
@@ -592,7 +595,7 @@
       'k_bacteria'],
 
     // Life in nature
-    [332, 'ECO', '🌍', ['Na którym kontynencie zimują bociany z Polski?', 'On which continent do storks from Poland spend the winter?', 'Op welk continent overwinteren ooievaars uit Polen?', '¿En qué continente pasan el invierno las cigüeñas de Polonia?', 'لک‌لک‌های لهستان زمستان را در کدام قاره می‌گذرانند؟'],
+    [332, 'ECO', '🧳', ['Na którym kontynencie zimują bociany z Polski?', 'On which continent do storks from Poland spend the winter?', 'Op welk continent overwinteren ooievaars uit Polen?', '¿En qué continente pasan el invierno las cigüeñas de Polonia?', 'لک‌لک‌های لهستان زمستان را در کدام قاره می‌گذرانند؟'],
       'africa'],
     [333, 'ECO', '🦘', ['Na którym kontynencie kangury żyją na wolności?', 'On which continent do kangaroos live in the wild?', 'Op welk continent leven kangoeroes in het wild?', '¿En qué continente viven los canguros en libertad?', 'کانگوروها در کدام قاره در طبیعت زندگی می‌کنند؟'],
       'australia'],
@@ -610,7 +613,7 @@
       'krill'],
     [340, 'ECO', '🐛', ['Czym żywią się gąsienice jedwabnika?', 'What do silkworm caterpillars eat?', 'Wat eten de rupsen van de zijdevlinder?', '¿Qué comen los gusanos de seda?', 'کرم ابریشم چه می‌خورد؟'],
       'mulberry'],
-    [341, 'ECO', '🌺', ['Czym żywią się głównie kolibry?', 'What do hummingbirds mainly feed on?', 'Waarmee voeden kolibries zich vooral?', '¿De qué se alimentan sobre todo los colibríes?', 'مرغ‌های مگس‌خوار بیشتر از چه چیزی تغذیه می‌کنند؟'],
+    [341, 'ECO', '🍴', ['Czym żywią się głównie kolibry?', 'What do hummingbirds mainly feed on?', 'Waarmee voeden kolibries zich vooral?', '¿De qué se alimentan sobre todo los colibríes?', 'مرغ‌های مگس‌خوار بیشتر از چه چیزی تغذیه می‌کنند؟'],
       'nectar'],
     [342, 'ECO', '🐄', ['Kim jest krowa ze względu na to, co je?', 'What is a cow, going by what it eats?', 'Wat is een koe, gezien wat ze eet?', '¿Qué es una vaca, según lo que come?', 'گاو از نظر غذایی که می‌خورد چیست؟'],
       'herbivore'],
@@ -632,7 +635,7 @@
       't_producer', ['t_consumer', 't_decomposer', 't_parasite']],
     [351, 'ECO', '🍂', ['Kim w łańcuchu pokarmowym są grzyby i bakterie, które zamieniają opadłe liście w ziemię?', 'What are the fungi and bacteria that turn fallen leaves into soil in a food chain?', 'Wat zijn de schimmels en bacteriën die gevallen bladeren in aarde veranderen in een voedselketen?', '¿Qué son en una cadena alimentaria los hongos y bacterias que convierten las hojas caídas en tierra?', 'قارچ‌ها و باکتری‌هایی که برگ‌های ریخته را به خاک تبدیل می‌کنند در زنجیرهٔ غذایی چه نقشی دارند؟'],
       't_decomposer', ['t_producer', 't_consumer', 't_parasite']],
-    [352, 'ECO', '🌊', ['Skąd pochodzi co najmniej połowa tlenu w powietrzu?', 'Where does at least half of the oxygen in the air come from?', 'Waar komt minstens de helft van de zuurstof in de lucht vandaan?', '¿De dónde viene al menos la mitad del oxígeno del aire?', 'دست‌کم نیمی از اکسیژن هوا از کجا می‌آید؟'],
+    [352, 'ECO', '🌬️', ['Skąd pochodzi co najmniej połowa tlenu w powietrzu?', 'Where does at least half of the oxygen in the air come from?', 'Waar komt minstens de helft van de zuurstof in de lucht vandaan?', '¿De dónde viene al menos la mitad del oxígeno del aire?', 'دست‌کم نیمی از اکسیژن هوا از کجا می‌آید؟'],
       't_plankton', ['t_amazon', 't_taiga', 't_meadows']],
     [353, 'ECO', '🦬', ['W której puszczy w Polsce uratowano żubry przed wyginięciem?', 'In which Polish forest were European bison saved from dying out?', 'In welk Pools woud werden wisenten van uitsterven gered?', '¿En qué bosque polaco se salvó al bisonte europeo de la extinción?', 'بیزون‌های اروپایی در کدام جنگل لهستان از انقراض نجات یافتند؟'],
       't_bialowieza', ['t_kampinos', 't_tuchola', 't_notecka']],
