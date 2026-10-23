@@ -7,11 +7,15 @@
  * trusting the browser's own copy (which GitHub Pages lets it keep for 10
  * minutes).
  *
+ * The stored copy is always fetched from the server, past the browser's own
+ * copy: when this worker is installed, and when the page asks for it with
+ * "Reload from the server" (the message "refresh"), which then waits for it.
+ *
  * It removes only its own old copies (those named CACHE_PREFIX...), not
  * other copies stored on the same site. Change CACHE when the list of app
  * files changes.
  */
-const CACHE = 'times-table-cards-v13';
+const CACHE = 'times-table-cards-v14';
 const CACHE_PREFIX = 'times-table-cards-';
 const APP_FILES = [
   './',
@@ -49,10 +53,20 @@ const APP_FILES = [
 ];
 const NETWORK_TIMEOUT_MS = 4000;
 
+// Stores a fresh copy of every app file, or none if one cannot be fetched.
+const storeFresh = () =>
+  caches.open(CACHE).then((cache) => cache.addAll(APP_FILES.map((file) => new Request(file, { cache: 'reload' }))));
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(APP_FILES)).then(() => self.skipWaiting())
-  );
+  event.waitUntil(storeFresh().then(() => self.skipWaiting()));
+});
+
+// "Reload from the server": the page waits for the answer ("done" or
+// "failed") on the port it sends.
+self.addEventListener('message', (event) => {
+  if (event.data !== 'refresh') return;
+  const answer = (text) => () => event.ports[0] && event.ports[0].postMessage(text);
+  event.waitUntil(storeFresh().then(answer('done'), answer('failed')));
 });
 
 self.addEventListener('activate', (event) => {

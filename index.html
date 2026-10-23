@@ -7780,8 +7780,11 @@
     next();
   });
 
-  // Fetches the newest version: first a newer offline worker (sw.js), if there
-  // is one, then the page itself, which the worker always checks with the server.
+  // Fetches the newest version: a newer offline worker (sw.js), if there is
+  // one, which stores a fresh copy of the app files as it is installed;
+  // otherwise the worker there is stores a fresh copy now. The page waits
+  // for it, so that a slow server cannot leave it with the old copy, then
+  // reloads.
   $('reload-app').addEventListener('click', async () => {
     if (navigator.onLine === false) {
       $('reload-status').textContent = T().reloadOffline;
@@ -7789,15 +7792,22 @@
     }
     $('reload-app').disabled = true;
     $('reload-status').textContent = T().reloading;
+    // Waits at most ms for something to happen.
+    const until = (ms, start) => new Promise((resolve) => {
+      start(resolve);
+      setTimeout(resolve, ms);
+    });
     try {
       const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
       if (reg) {
         await reg.update();
         if (reg.installing || reg.waiting) {
-          // Wait (at most 10 seconds) until the new worker takes over.
-          await new Promise((resolve) => {
-            navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true });
-            setTimeout(resolve, 10000);
+          await until(60000, (done) => navigator.serviceWorker.addEventListener('controllerchange', done, { once: true }));
+        } else if (navigator.serviceWorker.controller) {
+          await until(60000, (done) => {
+            const channel = new MessageChannel();
+            channel.port1.onmessage = done;
+            navigator.serviceWorker.controller.postMessage('refresh', [channel.port2]);
           });
         }
       }
