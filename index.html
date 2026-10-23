@@ -739,12 +739,19 @@
   .gap.joined { margin-inline-end: 0; }
   #lang-pic:empty { display: none; }
   .say { border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); padding: 0.15rem 0.75rem; font-size: 1.2rem; cursor: pointer; }
+  /* JęzykiMax, answering by voice: the microphone, with a ring that pulses
+     while it listens, and what was heard when it is no answer */
+  .mic { border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); padding: 0.15rem 0.75rem; font-size: 1.2rem; cursor: pointer; align-self: center; }
+  .mic.on { border-color: var(--pen); animation: listening 1.4s ease-in-out infinite; }
+  @keyframes listening { 50% { box-shadow: 0 0 0 0.3rem var(--line); } }
+  .heard { margin: 0; font-size: 0.85rem; color: var(--ink-soft); text-align: center; }
+  .heard:empty { display: none; }
   .choices.pics .choice { font-size: clamp(1.8rem, 9vw, 2.4rem); line-height: 1; }
   .choices.long { grid-template-columns: minmax(0, 1fr); }
   .card.shake .place { animation: shake 0.35s; }
   .card.enter .place { animation: rise 0.25s ease-out; }
   @media (prefers-reduced-motion: reduce) {
-    .slot.empty::after, .card.shake .question, .card.enter .question, .card.shake .place, .card.enter .place { animation: none; }
+    .slot.empty::after, .card.shake .question, .card.enter .question, .card.shake .place, .card.enter .place, .mic.on { animation: none; }
   }
 
   /* MapkiMax: the kind and name of the place on a low card, and below it
@@ -1225,6 +1232,8 @@
             <span class="nick latin" id="bio-latin" lang="la"></span>
           </div>
           <p class="feedback" id="feedback" aria-live="polite"></p>
+          <p class="heard" id="heard" aria-live="polite"></p>
+          <button type="button" class="mic" id="mic" data-t-aria="voice" hidden>🎤</button>
           <button type="button" class="ghost-btn hold-btn" id="hold" hidden></button>
         </div>
       </div>
@@ -1390,6 +1399,8 @@
       <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
       <label class="field" for="auto-say" data-app="languages"><span data-t="autoSay">Read aloud by itself</span> <input id="auto-say" type="checkbox"></label>
       <p class="hint" data-app="languages" data-t="autoSayHint"></p>
+      <label class="field" for="voice" id="voice-field" data-app="languages"><span data-t="voice">Answer by voice</span> <input id="voice" type="checkbox"></label>
+      <p class="hint" id="voice-hint" data-app="languages" data-t="voiceHint"></p>
     </section>
 
     <section>
@@ -1519,6 +1530,7 @@
 </div>
 
 <script src="srs.js"></script>
+<script src="voice.js"></script>
 <script src="geo.js"></script>
 <script src="i18n.js"></script>
 <script src="i18n-capitals.js"></script>
@@ -2007,7 +2019,8 @@
       // newPerDay, retention, answerTime (seconds without an answer before a
       // card counts as not known; 0 = no limit), nextAfter (seconds a card
       // stays after a right answer; 0 = until Next is tapped, -1 = at once;
-      // nextAfterChosen once it is set by hand), and the cards to practise.
+      // nextAfterChosen once it is set by hand), voice (listen for the
+      // answer said), and the cards to practise.
       settings: { nextAfter: NEXT_AFTER, ...app.settings(), layout: app.layout },
       daily: null,
       coins: 0,
@@ -2557,16 +2570,19 @@
     }
   }
 
-  // Stops both timers, and restarts them from now when the card is still open.
+  // Stops both timers and the listening for an answer said, and restarts
+  // them from now when the card is still open.
   function pauseTimers() {
     clearTimeout(idleTimer);
     clearTimeout(giveUpTimer);
+    stopListening();
   }
   function resumeTimers() {
     if (mode !== 'ask') return;
     shownAt = performance.now();
     if (typed) idleTimer = setTimeout(submitTyped, IDLE_SUBMIT_MS);
     else armGiveUp();
+    listenAnew();
   }
 
   // A small copy of the header coin, for text lines.
@@ -2683,19 +2699,21 @@
     if (isMaps() && c) atlas.home(BY_PLACE[c.id].continent, regionOf(c.id));
     armGiveUp();
     if (mode === 'ask') sayByItself();
+    listenAnew();
   }
 
   // value: the answer (MnożenieMax: the number typed; StoliceMax and ChemiaMax:
   // the id of the card whose answer was picked), or null when nothing was given
   // within the time limit, so the card counts as not known (Again), like a
-  // wrong answer.
-  function submit(value) {
+  // wrong answer. at: when it was given, if not now (an answer said ends
+  // before the browser has made it out).
+  function submit(value, at) {
     pauseTimers();
     const c = current();
     if (mode !== 'ask' || !c) return;
     const before = { id: c.id, card: JSON.parse(JSON.stringify(c)), options: options.slice(), offered: langOffered, lastId };
     const timedOut = value === null;
-    const ms = performance.now() - shownAt;
+    const ms = (at || performance.now()) - shownAt;
     let right;
     let grade;
     let logged = value;
@@ -2766,6 +2784,7 @@
     render();
     if (isMaps()) atlas.focus(c.id, mapAnswer.pin);
     sayByItself();
+    listenAnew(); // after a wrong answer, for the right one
   }
   const submitTyped = () => submit(Number(typed));
   // MapkiMax: how far the pin is from the place, such as "312 km away".
@@ -2803,6 +2822,7 @@
 
   // After a wrong answer the child gives the right one to move on.
   function moveOn(c) {
+    stopListening();
     mode = 'right';
     feedback = () => '<strong>' + esc(T().thatsIt) + '</strong><br>' + esc(T().comesBack(whenText(c.due)));
     advanceIn(0, true);
@@ -2853,10 +2873,10 @@
 
   // StoliceMax and ChemiaMax: i is the answer tapped (0 to 3). After a wrong answer the
   // child taps the right one to move on; after a right one any tap moves on.
-  function choose(i) {
+  function choose(i, at) {
     if (mode === 'done' || !options[i]) return;
     if (mode === 'right') return next();
-    if (mode === 'ask') return submit(options[i]);
+    if (mode === 'ask') return submit(options[i], at);
     const c = current();
     if (options[i] === c.id) {
       moveOn(c);
@@ -2871,6 +2891,112 @@
     el.classList.remove('enter', 'shake');
     void el.offsetWidth; // restart the animation
     el.classList.add(cls);
+  }
+
+  // ---------- JęzykiMax: answering by voice ----------
+
+  // With the setting on, the app listens when a card is shown, with the
+  // speech recognition of the browser (Chrome, Edge and Safari have it),
+  // and voice.js makes out which answer was said, in the language learned.
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SPEECH_LANGS = { fr: 'fr-FR', es: 'es-ES', nl: 'nl-NL', it: 'it-IT', pl: 'pl-PL' };
+  // Times it listens for a card, while it hears nothing it understands.
+  // Each start beeps on Android.
+  const VOICE_TRIES = 3;
+  let recognizer = null; // set while listening
+  let listenTimer = null;
+  let voiceTries = 0;
+  let voiceHeard = ''; // the last thing heard that was no answer
+  let voiceError = ''; // why it stopped listening (the key of its text), until 🎤 is tapped
+
+  // Whether the card shown can be answered by voice now: not a card whose
+  // answers are pictures.
+  function voiceCard() {
+    const c = current();
+    if (!c || !Recognition || app.id !== 'languages' || !state.settings.voice) return false;
+    if (mode !== 'ask' && mode !== 'wrong') return false;
+    return BY_LANG[c.id].kind !== 'w';
+  }
+
+  function stopListening() {
+    clearTimeout(listenTimer);
+    listenTimer = null;
+    const r = recognizer;
+    recognizer = null;
+    if (r) r.abort();
+  }
+  // Listens for the answer to the card shown. It first waits until the card
+  // has been read aloud, so as not to hear it.
+  function listen() {
+    stopListening();
+    if (!voiceCard() || voiceError || voiceTries >= VOICE_TRIES || panelOpen() || document.visibilityState === 'hidden') {
+      return renderVoice();
+    }
+    if (reading()) {
+      listenTimer = setTimeout(listen, READING_POLL_MS);
+      return renderVoice();
+    }
+    const id = currentId;
+    const r = new Recognition();
+    r.lang = SPEECH_LANGS[BY_LANG[id].lang];
+    r.interimResults = false;
+    r.maxAlternatives = 5;
+    let saidAt = 0;
+    r.onspeechend = () => { saidAt = performance.now(); };
+    r.onresult = (e) => {
+      if (recognizer !== r || currentId !== id || !voiceCard()) return;
+      answerHeard(Array.from(e.results[0], (a) => a.transcript), saidAt || performance.now());
+    };
+    r.onerror = (e) => {
+      const why = { 'not-allowed': 'voiceDenied', 'service-not-allowed': 'voiceDenied', network: 'voiceNetwork',
+        'audio-capture': 'voiceNoMic', 'language-not-supported': 'voiceLanguage' }[e.error];
+      if (why) voiceError = why;
+    };
+    // Heard nothing, or nothing it understood: it listens again.
+    r.onend = () => {
+      if (recognizer !== r) return;
+      recognizer = null;
+      voiceTries += 1;
+      listen();
+    };
+    recognizer = r;
+    try {
+      r.start();
+    } catch (e) {
+      recognizer = null;
+    }
+    renderVoice();
+  }
+  // For a new card, or once a wrong answer shows the right one.
+  function listenAnew() {
+    voiceTries = 0;
+    voiceHeard = '';
+    listen();
+  }
+
+  // Taps the answer heard. After a wrong answer, the right one moves on,
+  // and another shakes the card and it listens again.
+  function answerHeard(heard, at) {
+    const was = mode;
+    const buttons = [...$('choices').querySelectorAll('.choice')];
+    const card = BY_LANG[currentId];
+    const i = VOICE.pick(heard, buttons.map((b) => b.textContent), card.kind === 'g' ? card.show.split('___') : null);
+    if (i < 0) {
+      voiceHeard = heard[0] || '';
+      return renderVoice();
+    }
+    pressed(buttons[i]);
+    choose(i, at);
+    if (was === 'wrong' && mode === 'wrong') listenAnew();
+  }
+
+  function renderVoice() {
+    const on = voiceCard();
+    const mic = $('mic');
+    mic.hidden = !on;
+    mic.classList.toggle('on', !!recognizer);
+    const t = T();
+    $('heard').textContent = !on ? '' : voiceError ? t[voiceError] : voiceHeard ? t.heardNote(voiceHeard) : '';
   }
 
   // ---------- rendering ----------
@@ -3091,6 +3217,7 @@
     const holdBtn = $('hold');
     holdBtn.hidden = mode !== 'right';
     holdBtn.textContent = held ? T().goOn + (T().dir === 'rtl' ? ' ◀' : ' ▶') : '⏸ ' + T().hold;
+    renderVoice();
   }
 
   function render() {
@@ -3254,6 +3381,7 @@
   function say() {
     const c = current();
     if (c && app.id === 'languages') speak(BY_LANG[c.id], sayText(BY_LANG[c.id], mode !== 'ask'));
+    if (recognizer) listen(); // after the reading, so as not to hear it
   }
   // Reads text aloud with the voice for the language of the card, instead
   // of what is being read, or after it.
@@ -7439,6 +7567,7 @@
     $('next-after').value = String(s.nextAfter);
     $('sound').checked = s.sound !== false;
     $('auto-say').checked = !!s.autoSay;
+    $('voice').checked = !!s.voice;
     $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
@@ -7558,6 +7687,14 @@
 
   $('auto-say').addEventListener('change', (e) => {
     state.settings.autoSay = e.target.checked;
+    save();
+  });
+
+  // JęzykiMax: answering by voice, where the browser can recognize speech.
+  for (const id of ['voice-field', 'voice-hint']) $(id).hidden = !Recognition;
+  $('voice').addEventListener('change', (e) => {
+    state.settings.voice = e.target.checked;
+    voiceError = '';
     save();
   });
 
@@ -7732,6 +7869,18 @@
     hold();
   });
   document.querySelectorAll('.undo-btn').forEach((b) => b.addEventListener('click', () => undo()));
+
+  // The microphone: listens again, or stops listening to this card.
+  $('mic').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (recognizer || listenTimer) {
+      stopListening();
+      voiceTries = VOICE_TRIES;
+      return renderVoice();
+    }
+    voiceError = '';
+    listenAnew();
+  });
 
   // JęzykiMax: the speaker button, and the language to learn.
   $('say').addEventListener('click', (e) => {
