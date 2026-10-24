@@ -1,8 +1,9 @@
 /*
  * The cards of JęzykiMax: French, Spanish, Dutch, Italian and Polish at the
  * levels A1, A2, B1 and B2 of the Common European Framework. The cards are
- * only in the language being learned, with pictures (emoji), so they need no
- * translation into the languages of the interface.
+ * only in the language being learned, with pictures (emoji). Once a card is
+ * answered, the page shows what it means in the language of the interface
+ * (meaning, from languages-translations.js).
  *
  * Five kinds of card:
  *   p  a picture; the child picks the word or phrase
@@ -2252,6 +2253,16 @@
   // The cards of each language. number is the card_id in the review log.
   const KINDS = ['p', 'w', 'g', 'q', 'o'];
   const UI_LANGS = ['pl', 'en', 'nl', 'es', 'fa'];
+  // What a card means in each interface language, '' in the language of the
+  // card: the word of a picture, the pair of opposites, the sentence of a
+  // gap filled in, the question with its answer.
+  const meaningIn = (lang, texts) => Object.fromEntries(UI_LANGS.map((ui, k) => [ui, ui === lang ? '' : (texts && texts[k]) || '']));
+  // A word in the interface languages: the Polish, Dutch and Spanish of its
+  // row in PICTURES or OPPOSITES, and the English and Persian of
+  // languages-translations.js.
+  const inUi = (row, [en, fa] = []) => UI_LANGS.map((ui) => (ui === 'en' ? en : ui === 'fa' ? fa : row[TARGETS.indexOf(ui)]));
+  const PICTURE_MEANINGS = root.PICTURE_TRANSLATIONS || {};
+  const OPPOSITE_MEANINGS = root.OPPOSITE_TRANSLATIONS || [];
   const CARDS = {};
   TARGETS.forEach((lang, l) => {
     const cards = [];
@@ -2264,21 +2275,24 @@
     });
     PICTURES.forEach(([key, level, theme, picture, ...words], i) => {
       const word = tidy(lang, words[l]);
-      add('p', key, i, { level, theme, show: picture, answer: word, label: word });
-      add('w', key, i, { level, theme, show: word, answer: picture, label: word });
+      const meaning = meaningIn(lang, inUi(words, PICTURE_MEANINGS[key]));
+      add('p', key, i, { level, theme, show: picture, answer: word, label: word, meaning });
+      add('w', key, i, { level, theme, show: word, answer: picture, label: word, meaning });
     });
-    // What the sentence means in the interface languages (languages-translations.js).
-    const meanings = (root.GAP_TRANSLATIONS || {})[lang] || [];
+    const gapMeanings = (root.GAP_TRANSLATIONS || {})[lang] || [];
     GAPS[lang].forEach(([level, sentence, answer, w1, w2, w3, uses = []], i) => {
-      const meaning = meanings[i] ? Object.fromEntries(UI_LANGS.map((l, k) => [l, meanings[i][k]])) : {};
+      const meaning = meaningIn(lang, gapMeanings[i]);
       add('g', i + 1, i, { level, show: tidy(lang, sentence), answer, wrong: [w1, w2, w3], label: tidy(lang, sentence), meaning, uses });
     });
+    const questionMeanings = (root.QUESTION_TRANSLATIONS || {})[lang] || [];
     QUESTIONS[lang].forEach(([level, question, answer, w1, w2, w3, uses = []], i) => {
-      add('q', i + 1, i, { level, show: tidy(lang, question), answer: tidy(lang, answer), wrong: [w1, w2, w3].map((w) => tidy(lang, w)), label: tidy(lang, question), uses });
+      const meaning = meaningIn(lang, questionMeanings[i]);
+      add('q', i + 1, i, { level, show: tidy(lang, question), answer: tidy(lang, answer), wrong: [w1, w2, w3].map((w) => tidy(lang, w)), label: tidy(lang, question), meaning, uses });
     });
     OPPOSITES.forEach(([level, ...pairs], i) => {
       const [word, opposite] = pairs[l];
-      add('o', i + 1, i, { level, show: word, answer: opposite, label: word + ' ↔ ' + opposite });
+      const meaning = meaningIn(lang, inUi(pairs, OPPOSITE_MEANINGS[i]).map((pair) => pair && pair.join(' ↔ ')));
+      add('o', i + 1, i, { level, show: word, answer: opposite, label: word + ' ↔ ' + opposite, meaning });
     });
     CARDS[lang] = cards;
   });
