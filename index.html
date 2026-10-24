@@ -7825,15 +7825,16 @@
 
   // Progress moves to another device or browser as a file with what every
   // app saved: { maxapki: 1, saved: time, data: { storage key: saved value } }.
-  // Apps with no card answered yet are left out, so that they don't replace
-  // progress on the other device.
+  // Apps with no card answered and no reward (bought or received as a gift)
+  // are left out, so that they don't replace progress on the other device.
   const PROGRESS_FILE = 1;
-  const answered = (s) => !!(s && s.cards && s.settings && Object.values(s.cards).some((c) => c && c.reps > 0));
+  const hasProgress = (s) => !!(s && s.cards && s.settings &&
+    (Object.values(s.cards).some((c) => c && c.reps > 0) || (Array.isArray(s.trophies) && s.trophies.length)));
   function progressFile() {
     const data = { [PREFS_KEY]: prefs };
     for (const a of Object.values(APPS)) {
       const s = a.id === app.id ? state : savedState(a.id);
-      if (answered(s)) data[a.storeKey] = s;
+      if (hasProgress(s)) data[a.storeKey] = s;
     }
     if (Object.keys(data).length === 1) return null;
     const d = new Date();
@@ -7850,13 +7851,15 @@
       return null;
     }
     if (!file || file.maxapki !== PROGRESS_FILE || typeof file.saved !== 'number' || !file.data) return null;
-    const apps = Object.values(APPS).filter((a) => answered(file.data[a.storeKey]));
+    const apps = Object.values(APPS).filter((a) => hasProgress(file.data[a.storeKey]));
     return apps.length ? { saved: file.saved, data: file.data, apps } : null;
   }
-  // Whether an app the file replaces has answers here newer than its last
-  // answer in the file.
+  // Whether an app the file replaces has answers or rewards here newer than
+  // its last answer or reward in the file.
   function newerHere(file) {
-    const last = (s) => (s && Array.isArray(s.log) && s.log.length ? s.log[s.log.length - 1][0] : 0);
+    const last = (s) => Math.max(0,
+      ...(s && Array.isArray(s.log) ? s.log.slice(-1).map((entry) => entry[0]) : []),
+      ...(s && Array.isArray(s.trophies) ? s.trophies.map((tr) => tr.at || 0) : []));
     return file.apps.some((a) => last(a.id === app.id ? state : savedState(a.id)) > last(file.data[a.storeKey]));
   }
   // Stores the progress of a file in place of this device's, and starts the
