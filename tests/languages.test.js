@@ -40,6 +40,28 @@ test('gaps and questions have one right and three different wrong answers', () =
   }
 });
 
+test('the length of the answers does not give the right one away', () => {
+  // Always picking the longest answer, or the second longest and so on (at
+  // random among answers of the same length), is right on at most a third
+  // of the gaps and of the questions of each language. A guess is right on
+  // a quarter.
+  const length = (s) => [...s].length;
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const kind of 'gq') {
+      const cards = LANGUAGE_CARDS[lang].filter((c) => c.kind === kind);
+      const right = [0, 0, 0, 0];
+      for (const c of cards) {
+        const longer = c.wrong.filter((w) => length(w) > length(c.answer)).length;
+        const same = c.wrong.filter((w) => length(w) === length(c.answer)).length;
+        for (let k = longer; k <= longer + same; k++) right[k] += 1 / (same + 1);
+      }
+      right.forEach((n, k) => {
+        assert.ok(n <= cards.length / 3, `${lang} ${kind}: answer ${k + 1} by length is right on ${n.toFixed(1)} of ${cards.length}`);
+      });
+    }
+  }
+});
+
 test('pictures and words are not repeated, so the four answers always differ', () => {
   for (const lang of LANGUAGE_TARGETS) {
     for (const kind of 'pwo') {
@@ -53,13 +75,31 @@ test('pictures and words are not repeated, so the four answers always differ', (
   for (const [theme, n] of Object.entries(themes)) assert.ok(n >= 4, theme);
 });
 
-test('every sentence with a gap has its meaning in the other interface languages', () => {
-  for (const c of all.filter((x) => x.kind === 'g')) {
+test('every card has its meaning in the other interface languages', () => {
+  for (const c of all) {
     for (const lang of I18N.LANGS) {
       if (lang === c.lang) assert.equal(c.meaning[lang], '', `${c.id} ${lang}`);
       else assert.ok(c.meaning[lang], `${c.id} ${lang}`);
     }
   }
+  // A question is translated with its answer.
+  for (const c of all.filter((x) => x.kind === 'q')) {
+    for (const lang of I18N.LANGS) {
+      if (lang !== c.lang) assert.ok(c.meaning[lang].includes(' – '), `${c.id} ${lang}`);
+    }
+  }
+});
+
+test('the translations have one row for each card, so none is shifted', () => {
+  const { GAP_TRANSLATIONS, QUESTION_TRANSLATIONS, PICTURE_TRANSLATIONS, OPPOSITE_TRANSLATIONS } = globalThis;
+  for (const lang of LANGUAGE_TARGETS) {
+    const count = (kind) => LANGUAGE_CARDS[lang].filter((c) => c.kind === kind).length;
+    assert.equal(GAP_TRANSLATIONS[lang].length, count('g'), `${lang} gaps`);
+    assert.equal(QUESTION_TRANSLATIONS[lang].length, count('q'), `${lang} questions`);
+    assert.equal(OPPOSITE_TRANSLATIONS.length, count('o'), `${lang} opposites`);
+  }
+  const concepts = LANGUAGE_CARDS.fr.filter((c) => c.kind === 'p').map((c) => c.id.split('.')[2]);
+  assert.deepEqual(Object.keys(PICTURE_TRANSLATIONS).sort(), concepts.slice().sort());
 });
 
 test('every language has the JęzykiMax text', () => {
@@ -68,7 +108,7 @@ test('every language has the JęzykiMax text', () => {
   for (const lang of I18N.LANGS) {
     const t = I18N.LANGUAGES[lang];
     assert.equal(t.appName, 'JęzykiMax');
-    for (const key of ['newOne', 'choicesAria', 'targetAria', 'listen', 'autoSay', 'autoSayHint', 'voice', 'voiceHint', 'voiceSay', 'voiceListening', 'heardNote', 'voiceDenied', 'voiceNetwork', 'voiceNoMic', 'voiceLanguage', 'groupsTitle', 'groupsHint', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
+    for (const key of ['newOne', 'choicesAria', 'targetAria', 'listen', 'translate', 'translateHint', 'autoSay', 'autoSayHint', 'voice', 'voiceHint', 'voiceSay', 'voiceListening', 'heardNote', 'voiceDenied', 'voiceNetwork', 'voiceNoMic', 'voiceLanguage', 'groupsTitle', 'groupsHint', 'ruleFastRating', 'shopHint', 'yourTrophies', 'noTrophies']) {
       assert.ok(t[key], `${lang} ${key}`);
     }
     for (const key of ['rightIs', 'typeToGoOn', 'trophyName', 'trophyTitle', 'trophiesAria', 'cityName']) {

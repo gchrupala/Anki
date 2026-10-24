@@ -1401,6 +1401,8 @@
       </label>
       <p class="hint" data-t="nextAfterHint"></p>
       <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
+      <label class="field" for="translate" data-app="languages"><span data-t="translate">Show the translation</span> <input id="translate" type="checkbox"></label>
+      <p class="hint" data-app="languages" data-t="translateHint"></p>
       <label class="field" for="auto-say" data-app="languages"><span data-t="autoSay">Read aloud by itself</span> <input id="auto-say" type="checkbox"></label>
       <p class="hint" data-app="languages" data-t="autoSayHint"></p>
       <label class="field" for="voice" id="voice-field" data-app="languages"><span data-t="voice">Listen for answers</span> <input id="voice" type="checkbox"></label>
@@ -1868,9 +1870,11 @@
       // Reading a sentence and four answers takes a while: Easy within 6 seconds.
       fastSeconds: 6,
       // target: the language learned (fr, es, nl, it or pl); levels: A1, A2, B1, B2;
-      // autoSay: read the cards aloud without the speaker button. A card
-      // stays 5 seconds after an answer, to hear it and read its translation.
-      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, autoSay: false, nextAfter: 5 }),
+      // translate: once answered, show what the card means in the language
+      // of the page; autoSay: read the cards aloud without the speaker
+      // button. A card stays 5 seconds after an answer, to hear it and read
+      // its translation.
+      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, translate: true, autoSay: false, nextAfter: 5 }),
       groupKey: 'levels',
       rewards: CITIES,
       strings: (l) => I18N.LANGUAGES[l] || {},
@@ -2780,7 +2784,7 @@
       feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong>' + away() + '<br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
       // Time to read the coins, in JęzykiMax a translation, and in MapkiMax
       // to see the place on the map.
-      advanceIn(Math.max(reward.coins ? 2200 : 0, meaningOf(c) ? 3500 : 0, isMaps() ? 3000 : 0));
+      advanceIn(Math.max(reward.coins ? 2200 : 0, meaningTime(c), isMaps() ? 3000 : 0));
     } else if (isMaps()) {
       // MapkiMax: the place is shown in green, and the child taps it to move on.
       mode = 'wrong';
@@ -3356,13 +3360,16 @@
     return esc(before) + '<span class="gap' + (filled ? ' filled' : '') + joined + '">' + (filled ? esc(card.answer) : '') + '</span>' + esc(rest);
   }
 
-  // JęzykiMax: what a sentence with a gap means in the language of the page,
-  // unless that is the language of the sentence.
+  // JęzykiMax: what a card means in the language of the page (the word, the
+  // pair of opposites, the sentence filled in, the question with its
+  // answer), unless that is the language of the card or the translation is
+  // switched off. Once answered, the card stays long enough to read it.
   function meaningOf(c) {
     const card = app.id === 'languages' && BY_LANG[c.id];
-    if (!card || card.kind !== 'g' || card.lang === lang()) return '';
+    if (!card || card.lang === lang() || !state.settings.translate) return '';
     return card.meaning[lang()] || '';
   }
+  const meaningTime = (c) => (!meaningOf(c) ? 0 : 'gq'.includes(BY_LANG[c.id].kind) ? 3500 : 2000);
 
   // JęzykiMax: what the speaker button reads aloud, with a voice of the
   // device for the language. Nothing that gives the answer away before it
@@ -7593,6 +7600,7 @@
     $('answer-time').value = String(s.answerTime);
     $('next-after').value = String(s.nextAfter);
     $('sound').checked = s.sound !== false;
+    $('translate').checked = !!s.translate;
     $('auto-say').checked = !!s.autoSay;
     $('voice').checked = !!s.voice;
     $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
@@ -7712,6 +7720,12 @@
   $('sound').addEventListener('change', (e) => {
     state.settings.sound = e.target.checked;
     save();
+  });
+
+  $('translate').addEventListener('change', (e) => {
+    state.settings.translate = e.target.checked;
+    save();
+    renderCard();
   });
 
   $('auto-say').addEventListener('change', (e) => {
