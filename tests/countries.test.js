@@ -65,3 +65,14 @@ test('every language has the text of the app menu', () => {
     assert.equal(typeof t.shareLink, 'function', `${lang} shareLink`);
   }
 });
+
+test('every language has the text for moving progress', () => {
+  for (const lang of I18N.LANGS) {
+    const t = I18N.STRINGS[lang];
+    for (const key of ['moveHint', 'sendProgress', 'loadProgress', 'progressNone', 'progressSent', 'progressBad',
+      'progressNewer', 'replaceProgress', 'cancel', 'progressFailed']) assert.ok(t[key], `${lang} ${key}`);
+    assert.ok(t.progressDownloaded('MaxApki.txt').includes('MaxApki.txt'), `${lang} progressDownloaded`);
+    const from = t.progressFrom('DATE', 'APPS');
+    assert.ok(from.includes('DATE') && from.includes('APPS'), `${lang} progressFrom`);
+  }
+});

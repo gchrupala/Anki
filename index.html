@@ -1097,6 +1097,10 @@
   .rules th { font-weight: 600; color: var(--ink-soft); }
   .row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
   .danger { border-color: var(--bad); color: var(--bad); }
+  /* Moving progress: the buttons, and what a file holds, to confirm. */
+  .move-row { margin-bottom: 0.6rem; }
+  .move-confirm { margin-bottom: 0.6rem; padding: 0.6rem 0.8rem; border: 1.5px solid var(--line); border-radius: 12px; }
+  .move-confirm p { margin-bottom: 0.6rem; }
   .sheet-foot { display: flex; justify-content: flex-end; }
 </style>
 </head>
@@ -1454,6 +1458,20 @@
     <section>
       <h3 data-t="progressSection">Progress</h3>
       <p data-t="savedHere">Progress is saved in this browser only.</p>
+      <p class="hint" data-t="moveHint"></p>
+      <div class="row move-row">
+        <button type="button" class="ghost-btn" id="send-progress" data-t="sendProgress">Send progress</button>
+        <button type="button" class="ghost-btn" id="load-progress" data-t="loadProgress">Load progress</button>
+      </div>
+      <input type="file" id="progress-file" hidden>
+      <div class="move-confirm" id="import-box" hidden>
+        <p id="import-text"></p>
+        <div class="row">
+          <button type="button" class="ghost-btn danger" id="import-yes" data-t="replaceProgress">Replace progress</button>
+          <button type="button" class="ghost-btn" id="import-no" data-t="cancel">Cancel</button>
+        </div>
+      </div>
+      <p class="hint" id="progress-status" role="status"></p>
       <button type="button" class="ghost-btn danger" id="reset" data-t="erase">Erase all progress</button>
     </section>
 
@@ -1941,6 +1959,9 @@
     capitals: '<path d="M16 9l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5L9 14.1l5.2-.2z" style="fill: var(--gold-hi)"/><path d="M15.6 8.6l1.8 4.9 5.2.2-4.1 3.3 1.4 5-4.3-2.9-4.3 2.9 1.4-5-4.1-3.3 5.2-.2z" style="fill: var(--gold-deep)" fill-opacity="0.85"/>',
   };
 
+  // Set once progress from a file has been stored, until the page reloads
+  // with it: nothing may save the old progress over it.
+  let replacing = false;
   const PREFS_KEY = 'max-apps';
   function loadPrefs() {
     try {
@@ -1972,6 +1993,7 @@
     return { app: 'times', lang: (saved && saved.settings && saved.settings.lang) || 'auto', appsSeen: 0, opened: Object.keys(APPS), gifts: [], given: [] };
   }
   function savePrefs() {
+    if (replacing) return;
     try {
       localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
     } catch (e) {
@@ -2096,6 +2118,7 @@
   }
 
   function save() {
+    if (replacing) return;
     try {
       localStorage.setItem(app.storeKey, JSON.stringify(state));
     } catch (e) {
@@ -7579,6 +7602,8 @@
     const n = state.log.length;
     $('log-status').textContent = n === 0 ? t.logNone : t.logCount(n);
     $('log-text').hidden = true;
+    $('import-box').hidden = true;
+    $('progress-status').textContent = '';
     // The date GitHub Pages published the files, from the page's Last-Modified header.
     const published = new Date(document.lastModified);
     $('app-version').textContent = isNaN(published) ? '' :
@@ -7780,6 +7805,138 @@
     save();
     syncSettings();
     next();
+  });
+
+  // ---------- moving progress ----------
+
+  // Progress moves to another device or browser as a file with what every
+  // app saved: { maxapki: 1, saved: time, data: { storage key: saved value } }.
+  // The file is .txt because Chrome shares files of a few kinds only, and
+  // .json is not one of them. Apps with no card answered yet are left out, so
+  // that they don't replace progress on the other device.
+  const PROGRESS_FILE = 1;
+  const answered = (s) => !!(s && s.cards && s.settings && Object.values(s.cards).some((c) => c && c.reps > 0));
+  function progressFile() {
+    const data = { [PREFS_KEY]: prefs };
+    for (const a of Object.values(APPS)) {
+      const s = a.id === app.id ? state : savedState(a.id);
+      if (answered(s)) data[a.storeKey] = s;
+    }
+    if (Object.keys(data).length === 1) return null;
+    const d = new Date();
+    const day = [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, '0')).join('-');
+    const text = JSON.stringify({ maxapki: PROGRESS_FILE, saved: Date.now(), data });
+    return new File([text], 'MaxApki-' + day + '.txt', { type: 'text/plain' });
+  }
+  // The progress in a file, with the apps it has; null if it has none.
+  function readProgress(text) {
+    let file = null;
+    try {
+      file = JSON.parse(text);
+    } catch (e) {
+      return null;
+    }
+    if (!file || file.maxapki !== PROGRESS_FILE || typeof file.saved !== 'number' || !file.data) return null;
+    const apps = Object.values(APPS).filter((a) => answered(file.data[a.storeKey]));
+    return apps.length ? { saved: file.saved, data: file.data, apps } : null;
+  }
+  // Whether an app the file replaces has answers here newer than its last
+  // answer in the file.
+  function newerHere(file) {
+    const last = (s) => (s && Array.isArray(s.log) && s.log.length ? s.log[s.log.length - 1][0] : 0);
+    return file.apps.some((a) => last(a.id === app.id ? state : savedState(a.id)) > last(file.data[a.storeKey]));
+  }
+  // Stores the progress of a file in place of this device's, and starts the
+  // page again with it. The open app, the language and the other settings
+  // come from the file; the apps opened and the gift links of both devices
+  // are kept.
+  function replaceProgress(file) {
+    try {
+      for (const a of file.apps) localStorage.setItem(a.storeKey, JSON.stringify(file.data[a.storeKey]));
+      const p = file.data[PREFS_KEY];
+      if (p && APPS[p.app]) {
+        for (const key of ['opened', 'gifts', 'given']) {
+          p[key] = [...new Set((Array.isArray(p[key]) ? p[key] : []).concat(prefs[key]))];
+        }
+        localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+      }
+    } catch (e) {
+      $('progress-status').textContent = T().progressFailed;
+      return;
+    }
+    replacing = true;
+    location.reload();
+  }
+
+  // Opens the device's share menu with the progress file, for example to send
+  // it by AirDrop or to save it in Files. Where files can't be shared, the
+  // file is downloaded.
+  $('send-progress').addEventListener('click', async () => {
+    const t = T();
+    const status = $('progress-status');
+    $('import-box').hidden = true;
+    const file = progressFile();
+    if (!file) {
+      status.textContent = t.progressNone;
+      return;
+    }
+    status.textContent = '';
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'MaxApki' });
+        status.textContent = t.progressSent;
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return; // closed without sending
+      }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    status.textContent = t.progressDownloaded(file.name);
+  });
+
+  // Loading a file first says what it holds; its progress is stored only
+  // once that is confirmed.
+  let arriving = null;
+  $('load-progress').addEventListener('click', () => $('progress-file').click());
+  $('progress-file').addEventListener('change', async (e) => {
+    const input = e.target;
+    const chosen = input.files && input.files[0];
+    if (!chosen) return;
+    const t = T();
+    let text = '';
+    // A file of MaxApki is at most a few MB, as the browser keeps no more.
+    if (chosen.size < 20e6) {
+      try {
+        text = await chosen.text();
+      } catch (err) {
+        /* unreadable: not progress */
+      }
+    }
+    input.value = ''; // the same file can be chosen again
+    arriving = readProgress(text);
+    $('import-box').hidden = !arriving;
+    if (!arriving) {
+      $('progress-status').textContent = t.progressBad;
+      return;
+    }
+    $('progress-status').textContent = '';
+    const date = new Date(arriving.saved).toLocaleString(lang(), { dateStyle: 'long', timeStyle: 'short' });
+    const names = arriving.apps.map((a) => a.name);
+    const list = Intl.ListFormat ? new Intl.ListFormat(lang(), { type: 'conjunction' }).format(names) : names.join(', ');
+    $('import-text').textContent = t.progressFrom(date, list) + (newerHere(arriving) ? ' ' + t.progressNewer : '');
+  });
+  $('import-yes').addEventListener('click', () => {
+    if (arriving) replaceProgress(arriving);
+  });
+  $('import-no').addEventListener('click', () => {
+    arriving = null;
+    $('import-box').hidden = true;
   });
 
   // Fetches the newest version: first a newer offline worker (sw.js), if there
