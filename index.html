@@ -359,9 +359,9 @@
   .receive .primary-btn { flex: none; min-height: 2.4rem; padding: 0.4rem 0.9rem; font-size: 0.9rem; }
   /* The collection: the rewards of all the apps, by app. */
   .collection { display: flex; flex-direction: column; gap: 1rem; }
-  .collection h3 { display: flex; align-items: center; gap: 0.45rem; }
+  .collection h3, .shelf-head { display: flex; align-items: center; gap: 0.45rem; }
   .collection h3 .app-icon { width: 1.4rem; height: 1.4rem; }
-  .collection h3 .tally { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
+  .collection h3 .tally, .shelf-head .tally { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
   /* Shop */
   .shop-balance { display: flex; align-items: center; gap: 0.2rem; margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--coin-ink); }
   .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.75rem; }
@@ -375,8 +375,22 @@
     border-radius: 14px;
     background: var(--paper);
     text-align: center;
+    position: relative;
   }
   .shop-item .trophy-icon { width: 3.6rem; height: 3.6rem; }
+  /* How many of a reward are already in the collection. */
+  .shop-item .owned {
+    position: absolute;
+    top: 0.45rem;
+    inset-inline-end: 0.45rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--coin-soft);
+    color: var(--coin-ink);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
   .shop-item .name { font-size: 0.9rem; font-weight: 600; }
   .shop-item .place { margin-top: -0.3rem; font-size: 0.8rem; color: var(--ink-soft); }
   .shop-item .price { display: inline-flex; align-items: center; font-weight: 700; color: var(--coin-ink); font-variant-numeric: tabular-nums; }
@@ -1501,7 +1515,7 @@
     <p class="hint" data-t="shopHint"></p>
     <div class="shop-grid" id="shop-grid"></div>
     <section>
-      <h3 data-t="yourTrophies">Your trophies</h3>
+      <h3 class="shelf-head"><span data-t="yourTrophies">Your trophies</span><span class="tally" id="shelf-tally" hidden></span></h3>
       <p class="hint" id="shelf-hint" data-t="shelfHint" hidden></p>
       <div class="trophy-shelf" id="trophy-shelf"></div>
     </section>
@@ -7310,10 +7324,16 @@
     const t = T();
     const have = balance();
     $('shop-balance').innerHTML = coinIcon() + esc(t.shopBalance(have));
+    const owned = {};
+    for (const tr of state.trophies) {
+      const { id } = reward(tr.metal);
+      owned[id] = (owned[id] || 0) + 1;
+    }
     $('shop-grid').innerHTML = app.rewards.map(({ id, price }) => {
       const short = price - have;
       const place = rewardPlace(id);
       return '<div class="shop-item' + (short > 0 ? ' too-dear' : '') + '">' + rewardIcon(id) +
+        (owned[id] ? '<span class="owned" role="img" title="' + esc(t.owned(owned[id])) + '" aria-label="' + esc(t.owned(owned[id])) + '">×' + esc(num(owned[id])) + '</span>' : '') +
         '<span class="name">' + esc(t.trophyName(id)) + '</span>' +
         (place ? '<span class="place">' + esc(place) + '</span>' : '') +
         '<span class="price">' + coinIcon() + esc(num(price)) + '</span>' +
@@ -7323,6 +7343,8 @@
         '</div>';
     }).join('');
     $('shelf-hint').hidden = state.trophies.length === 0;
+    $('shelf-tally').hidden = state.trophies.length === 0;
+    $('shelf-tally').textContent = num(state.trophies.length);
     $('trophy-shelf').innerHTML = state.trophies.length
       ? state.trophies.map((tr, i) => '<button type="button" data-owned="' + i + '" title="' + esc(t.trophyName(tr.metal)) + '" aria-label="' + esc(t.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal) + '</button>').join('')
       : '<p class="hint">' + esc(t.noTrophies) + '</p>';
