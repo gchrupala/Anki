@@ -1462,8 +1462,8 @@
       <p data-t="savedHere">Progress is saved in this browser only.</p>
       <p class="hint" data-t="moveHint"></p>
       <div class="row move-row">
-        <button type="button" class="ghost-btn" id="send-progress" data-t="sendProgress">Send progress</button>
-        <button type="button" class="ghost-btn" id="load-progress" data-t="loadProgress">Load progress</button>
+        <button type="button" class="ghost-btn" id="save-progress" data-t="saveProgress">Save progress to a file</button>
+        <button type="button" class="ghost-btn" id="load-progress" data-t="loadProgress">Load progress from a file</button>
       </div>
       <input type="file" id="progress-file" hidden>
       <div class="move-confirm" id="import-box" hidden>
@@ -7825,9 +7825,8 @@
 
   // Progress moves to another device or browser as a file with what every
   // app saved: { maxapki: 1, saved: time, data: { storage key: saved value } }.
-  // The file is .txt because Chrome shares files of a few kinds only, and
-  // .json is not one of them. Apps with no card answered yet are left out, so
-  // that they don't replace progress on the other device.
+  // Apps with no card answered yet are left out, so that they don't replace
+  // progress on the other device.
   const PROGRESS_FILE = 1;
   const answered = (s) => !!(s && s.cards && s.settings && Object.values(s.cards).some((c) => c && c.reps > 0));
   function progressFile() {
@@ -7840,7 +7839,7 @@
     const d = new Date();
     const day = [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, '0')).join('-');
     const text = JSON.stringify({ maxapki: PROGRESS_FILE, saved: Date.now(), data });
-    return new File([text], 'MaxApki-' + day + '.txt', { type: 'text/plain' });
+    return new File([text], 'MaxApki-' + day + '.json', { type: 'application/json' });
   }
   // The progress in a file, with the apps it has; null if it has none.
   function readProgress(text) {
@@ -7882,10 +7881,8 @@
     location.reload();
   }
 
-  // Opens the device's share menu with the progress file, for example to send
-  // it by AirDrop or to save it in Files. Where files can't be shared, the
-  // file is downloaded.
-  $('send-progress').addEventListener('click', async () => {
+  // Downloads the progress file, to be moved to the other device or browser.
+  $('save-progress').addEventListener('click', () => {
     const t = T();
     const status = $('progress-status');
     $('import-box').hidden = true;
@@ -7893,16 +7890,6 @@
     if (!file) {
       status.textContent = t.progressNone;
       return;
-    }
-    status.textContent = '';
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: 'MaxApki' });
-        status.textContent = t.progressSent;
-        return;
-      } catch (e) {
-        if (e && e.name === 'AbortError') return; // closed without sending
-      }
     }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(file);
