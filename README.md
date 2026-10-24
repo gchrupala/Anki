@@ -27,7 +27,7 @@ Then, on the tablet:
 - **iPad:** open the address in Safari, tap the Share button, then "Add to Home Screen".
 - **Android:** open the address in Chrome, open the ⋮ menu, then "Install app" or "Add to Home screen".
 
-The home-screen name is "MaxApki", and its icon shows the cards of the eight apps. MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed. To keep it, or to move it to another device, send it as a file first (see [Moving progress](#moving-progress)).
+The home-screen name is "MaxApki", and its icon shows the cards of the eight apps. MnożenieMax, StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax are opened from inside it. On a tablet where the app was installed as "MnożenieMax", Chrome updates the name and icon by itself when it next checks the app, which can take up to a day; it may ask to confirm the change. Progress is stored on the tablet only, separately from the browser, and is lost if the app is removed. To keep it, or to move it to another device, save it to a file first (see [Moving progress](#moving-progress)).
 
 The offline copy is kept by `sw.js` (a service worker). On every launch it asks the server whether the app files have changed, so a pushed change appears the next time the app is opened online, once GitHub Pages has published it (usually within a minute or two). Without internet, or if the server takes more than 4 seconds to answer, it uses the stored copy. A change to `sw.js` itself takes one extra launch: the first launch installs the new `sw.js`, the second uses it. Opening `index.html` as a local file still works, but without the offline copy or installation.
 
@@ -112,7 +112,7 @@ The settings panel (the gear button, "Ustawienia" in Polish) lets you:
 - change the number of new facts per day and the target recall;
 - switch the sound of the fireworks on or off (StoliceMax only; on by default);
 - move the app clock ahead by a day, to see how reviews come back;
-- send the progress of all the apps as a file, or load such a file (see [Moving progress](#moving-progress));
+- save the progress of all the apps to a file, or load such a file (see [Moving progress](#moving-progress));
 - copy the review log as CSV.
 
 The explanations in the panel (what a setting does, how the cards are scheduled, how coins are earned, how to move progress) are folded. The "i" button next to a setting or a heading shows or hides them.
@@ -448,12 +448,12 @@ A gift link is the address of the app followed by `#gift/<app>/<reward>/<code>`,
 
 Progress is saved in the browser, so each device and each browser keeps its own. On an iPad, Safari and the app added to the home screen also keep separate progress. The "Postępy" (Progress) section of the settings moves progress from one to another as a file:
 
-- **Sending.** "Wyślij postępy" (send progress) puts the progress of all the apps into one file, `MaxApki-<date>.txt`, and opens the share menu of the device with it, for example to send it by AirDrop, e-mail or a message, or to save it in Files. Where the browser cannot share files (Firefox on a computer, for example), the file is downloaded instead. Apps with no card answered yet are left out.
-- **Loading.** On the other device, "Wczytaj postępy" (load progress) opens a file picker. The app says when the progress in the file was saved and which apps it holds, and warns when this device has answers newer than those in the file. The file is stored only after "Zastąp postępy" (replace progress); the app then starts again with it.
+- **Saving.** "Zapisz postępy do pliku" (save progress to a file) downloads one file with the progress and settings of all the apps, `MaxApki-<date>.json`, including the rewards in the collection. An app is in the file once a card has been answered or a setting changed in it. The file then has to be moved to the other device, for example by AirDrop or e-mail.
+- **Loading.** On the other device, "Wczytaj postępy z pliku" (load progress from a file) opens a file picker. The app says when the progress in the file was saved and which apps it holds, and warns when this device has answers or rewards newer than those in the file. The file is stored only after "Zastąp postępy" (replace progress); the app then starts again with it.
 
-Loading replaces the progress of each app in the file: its cards, coins, rewards and review log. Apps that are not in the file keep their progress on this device. The open app, the language and the other choices saved under `max-apps` come from the file, while the apps opened and the codes of gift links from both devices are kept. This is a copy, not a sync: answers given on two devices are not merged, so practise on one device at a time and move the progress each time you switch.
+Loading replaces the progress of each app that has progress in the file: its cards, coins, rewards (bought or received as gifts), review log and settings. An app in the file with no card answered and no reward brings only its settings, and keeps its progress on this device. Apps that are not in the file keep their progress and settings on this device. The open app, the language and the other choices saved under `max-apps` come from the file, while the apps opened and the codes of gift links from both devices are kept. This is a copy, not a sync: answers given on two devices are not merged, so practise on one device at a time and move the progress each time you switch.
 
-The file holds JSON, `{ "maxapki": 1, "saved": <time>, "data": { <storage key>: <saved value> } }`. Its extension is `.txt` because Chrome shares files of certain types only, and `.json` is not one of them.
+The file holds JSON: `{ "maxapki": 1, "saved": <time>, "data": { <storage key>: <saved value> } }`. Loading checks what is in the file, not its name, so a file saved with the earlier `.txt` extension still loads.
 
 ## How the page holds several apps
 
