@@ -7825,24 +7825,28 @@
 
   // Progress moves to another device or browser as a file with what every
   // app saved: { maxapki: 1, saved: time, data: { storage key: saved value } }.
-  // Apps with no card answered and no reward (bought or received as a gift)
-  // are left out, so that they don't replace progress on the other device.
+  // An app saves once a setting is changed or a card answered. An app with
+  // no card answered and no reward (bought or received as a gift) brings its
+  // settings only, so that it doesn't replace progress on the other device.
   const PROGRESS_FILE = 1;
-  const hasProgress = (s) => !!(s && s.cards && s.settings &&
-    (Object.values(s.cards).some((c) => c && c.reps > 0) || (Array.isArray(s.trophies) && s.trophies.length)));
+  const valid = (s) => !!(s && s.cards && s.settings);
+  const hasProgress = (s) => valid(s) &&
+    (Object.values(s.cards).some((c) => c && c.reps > 0) || (Array.isArray(s.trophies) && s.trophies.length > 0));
   function progressFile() {
     const data = { [PREFS_KEY]: prefs };
     for (const a of Object.values(APPS)) {
-      const s = a.id === app.id ? state : savedState(a.id);
-      if (hasProgress(s)) data[a.storeKey] = s;
+      const saved = savedState(a.id);
+      const s = a.id === app.id ? state : saved;
+      if (saved && valid(s)) data[a.storeKey] = s;
     }
-    if (Object.keys(data).length === 1) return null;
+    if (!Object.values(APPS).some((a) => hasProgress(data[a.storeKey]))) return null;
     const d = new Date();
     const day = [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, '0')).join('-');
     const text = JSON.stringify({ maxapki: PROGRESS_FILE, saved: Date.now(), data });
     return new File([text], 'MaxApki-' + day + '.json', { type: 'application/json' });
   }
-  // The progress in a file, with the apps it has; null if it has none.
+  // The progress in a file: the apps it has, and those with progress; null
+  // if it has no progress.
   function readProgress(text) {
     let file = null;
     try {
@@ -7851,8 +7855,9 @@
       return null;
     }
     if (!file || file.maxapki !== PROGRESS_FILE || typeof file.saved !== 'number' || !file.data) return null;
-    const apps = Object.values(APPS).filter((a) => hasProgress(file.data[a.storeKey]));
-    return apps.length ? { saved: file.saved, data: file.data, apps } : null;
+    const apps = Object.values(APPS).filter((a) => valid(file.data[a.storeKey]));
+    const progressApps = apps.filter((a) => hasProgress(file.data[a.storeKey]));
+    return progressApps.length ? { saved: file.saved, data: file.data, apps, progressApps } : null;
   }
   // Whether an app the file replaces has answers or rewards here newer than
   // its last answer or reward in the file.
@@ -7860,15 +7865,20 @@
     const last = (s) => Math.max(0,
       ...(s && Array.isArray(s.log) ? s.log.slice(-1).map((entry) => entry[0]) : []),
       ...(s && Array.isArray(s.trophies) ? s.trophies.map((tr) => tr.at || 0) : []));
-    return file.apps.some((a) => last(a.id === app.id ? state : savedState(a.id)) > last(file.data[a.storeKey]));
+    return file.progressApps.some((a) => last(a.id === app.id ? state : savedState(a.id)) > last(file.data[a.storeKey]));
   }
   // Stores the progress of a file in place of this device's, and starts the
-  // page again with it. The open app, the language and the other settings
-  // come from the file; the apps opened and the gift links of both devices
-  // are kept.
+  // page again with it. The open app, the language and the settings of the
+  // apps in the file come from the file; the apps opened and the gift links
+  // of both devices are kept.
   function replaceProgress(file) {
     try {
-      for (const a of file.apps) localStorage.setItem(a.storeKey, JSON.stringify(file.data[a.storeKey]));
+      for (const a of file.apps) {
+        const s = file.data[a.storeKey];
+        const here = a.id === app.id ? state : savedState(a.id);
+        const kept = hasProgress(s) || !valid(here) ? s : { ...here, settings: s.settings };
+        localStorage.setItem(a.storeKey, JSON.stringify(kept));
+      }
       const p = file.data[PREFS_KEY];
       if (p && APPS[p.app]) {
         for (const key of ['opened', 'gifts', 'given']) {
@@ -7931,9 +7941,10 @@
     }
     $('progress-status').textContent = '';
     const date = new Date(arriving.saved).toLocaleString(lang(), { dateStyle: 'long', timeStyle: 'short' });
-    const names = arriving.apps.map((a) => a.name);
+    const names = arriving.progressApps.map((a) => a.name);
     const list = Intl.ListFormat ? new Intl.ListFormat(lang(), { type: 'conjunction' }).format(names) : names.join(', ');
-    $('import-text').textContent = t.progressFrom(date, list) + (newerHere(arriving) ? ' ' + t.progressNewer : '');
+    $('import-text').textContent = t.progressFrom(date, list) + ' ' + t.progressSettings +
+      (newerHere(arriving) ? ' ' + t.progressNewer : '');
   });
   $('import-yes').addEventListener('click', () => {
     if (arriving) replaceProgress(arriving);
