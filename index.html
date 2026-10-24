@@ -375,8 +375,22 @@
     border-radius: 14px;
     background: var(--paper);
     text-align: center;
+    position: relative;
   }
   .shop-item .trophy-icon { width: 3.6rem; height: 3.6rem; }
+  /* How many of a reward are already in the collection. */
+  .shop-item .owned {
+    position: absolute;
+    top: 0.45rem;
+    inset-inline-end: 0.45rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--coin-soft);
+    color: var(--coin-ink);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
   .shop-item .name { font-size: 0.9rem; font-weight: 600; }
   .shop-item .place { margin-top: -0.3rem; font-size: 0.8rem; color: var(--ink-soft); }
   .shop-item .price { display: inline-flex; align-items: center; font-weight: 700; color: var(--coin-ink); font-variant-numeric: tabular-nums; }
@@ -7280,10 +7294,16 @@
     const t = T();
     const have = balance();
     $('shop-balance').innerHTML = coinIcon() + esc(t.shopBalance(have));
+    const owned = {};
+    for (const tr of state.trophies) {
+      const { id } = reward(tr.metal);
+      owned[id] = (owned[id] || 0) + 1;
+    }
     $('shop-grid').innerHTML = app.rewards.map(({ id, price }) => {
       const short = price - have;
       const place = rewardPlace(id);
       return '<div class="shop-item' + (short > 0 ? ' too-dear' : '') + '">' + rewardIcon(id) +
+        (owned[id] ? '<span class="owned" role="img" title="' + esc(t.owned(owned[id])) + '" aria-label="' + esc(t.owned(owned[id])) + '">×' + esc(num(owned[id])) + '</span>' : '') +
         '<span class="name">' + esc(t.trophyName(id)) + '</span>' +
         (place ? '<span class="place">' + esc(place) + '</span>' : '') +
         '<span class="price">' + coinIcon() + esc(num(price)) + '</span>' +
