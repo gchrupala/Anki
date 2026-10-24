@@ -359,9 +359,9 @@
   .receive .primary-btn { flex: none; min-height: 2.4rem; padding: 0.4rem 0.9rem; font-size: 0.9rem; }
   /* The collection: the rewards of all the apps, by app. */
   .collection { display: flex; flex-direction: column; gap: 1rem; }
-  .collection h3 { display: flex; align-items: center; gap: 0.45rem; }
+  .collection h3, .shelf-head { display: flex; align-items: center; gap: 0.45rem; }
   .collection h3 .app-icon { width: 1.4rem; height: 1.4rem; }
-  .collection h3 .tally { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
+  .collection h3 .tally, .shelf-head .tally { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
   /* Shop */
   .shop-balance { display: flex; align-items: center; gap: 0.2rem; margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--coin-ink); }
   .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.75rem; }
@@ -1481,7 +1481,7 @@
     <p class="hint" data-t="shopHint"></p>
     <div class="shop-grid" id="shop-grid"></div>
     <section>
-      <h3 data-t="yourTrophies">Your trophies</h3>
+      <h3 class="shelf-head"><span data-t="yourTrophies">Your trophies</span><span class="tally" id="shelf-tally" hidden></span></h3>
       <p class="hint" id="shelf-hint" data-t="shelfHint" hidden></p>
       <div class="trophy-shelf" id="trophy-shelf"></div>
     </section>
@@ -7293,6 +7293,8 @@
         '</div>';
     }).join('');
     $('shelf-hint').hidden = state.trophies.length === 0;
+    $('shelf-tally').hidden = state.trophies.length === 0;
+    $('shelf-tally').textContent = num(state.trophies.length);
     $('trophy-shelf').innerHTML = state.trophies.length
       ? state.trophies.map((tr, i) => '<button type="button" data-owned="' + i + '" title="' + esc(t.trophyName(tr.metal)) + '" aria-label="' + esc(t.trophyName(tr.metal)) + '">' + rewardIcon(tr.metal) + '</button>').join('')
       : '<p class="hint">' + esc(t.noTrophies) + '</p>';
