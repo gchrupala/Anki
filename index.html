@@ -1080,9 +1080,31 @@
   .chip input:checked + span { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
   .chip input:focus-visible + span { outline: 3px solid var(--pen); outline-offset: 2px; }
   .fields { display: flex; flex-direction: column; gap: 0.6rem; }
-  .field { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; max-width: 20rem; }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; max-width: 22rem; }
   .field input[type="checkbox"] { width: 1.4rem; height: 1.4rem; margin: 0; accent-color: var(--pen); }
   .hint { font-size: 0.8rem; color: var(--ink-soft); }
+  /* The "i" buttons show and hide the explanations in the settings. */
+  .info-btn {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin-inline-start: 0.25rem;
+    padding: 0;
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+    background: none;
+    color: var(--ink-soft);
+    font: 700 0.75rem/1 var(--font-body);
+    letter-spacing: 0;
+    text-transform: none;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+  .info-btn::after { content: ""; position: absolute; inset: -0.45rem; }
+  .info-btn[aria-expanded="true"] { background: var(--pen); border-color: var(--pen); color: var(--pen-ink); }
   textarea {
     width: 100%;
     height: 8rem;
@@ -1355,9 +1377,9 @@
     </section>
 
     <section data-app="capitals chemistry literature languages maps astronomy biology">
-      <h3 data-t="groupsTitle">Groups</h3>
+      <h3><span data-t="groupsTitle">Groups</span> <button type="button" class="info-btn" aria-controls="groups-hint" aria-expanded="false">i</button></h3>
+      <p class="hint" id="groups-hint" data-t="groupsHint" hidden></p>
       <div class="chips" id="group-chips"></div>
-      <p class="hint" data-t="groupsHint" style="margin-top:0.5rem"></p>
     </section>
 
     <section data-app="maps">
@@ -1368,31 +1390,31 @@
     <section data-app="maps">
       <h3 data-t="mapTitle">Map</h3>
       <div class="fields">
-        <label class="field" for="map-view"><span data-t="mapView">First view</span>
+        <div class="field"><span><label for="map-view" data-t="mapView">First view</label> <button type="button" class="info-btn" aria-controls="map-view-hint" aria-expanded="false">i</button></span>
           <select id="map-view">
             <option value="continent"></option>
             <option value="region"></option>
           </select>
-        </label>
-        <p class="hint" data-t="mapViewHint"></p>
+        </div>
+        <p class="hint" id="map-view-hint" data-t="mapViewHint" hidden></p>
         <label class="field" for="thick-borders"><span data-t="thickBorders">Thick country borders</span> <input id="thick-borders" type="checkbox"></label>
-        <label class="field" for="country-names"><span data-t="countryNames">Country names</span> <input id="country-names" type="checkbox"></label>
-        <p class="hint" data-t="countryNamesHint"></p>
+        <div class="field"><span><label for="country-names" data-t="countryNames">Country names</label> <button type="button" class="info-btn" aria-controls="country-names-hint" aria-expanded="false">i</button></span> <input id="country-names" type="checkbox"></div>
+        <p class="hint" id="country-names-hint" data-t="countryNamesHint" hidden></p>
       </div>
     </section>
 
     <section class="fields">
       <label class="field" for="new-per-day"><span data-t="newPerDay">New facts per day</span> <input id="new-per-day" type="number" min="0" max="100" step="1"></label>
-      <label class="field" for="retention"><span data-t="retention">Target recall</span>
+      <div class="field"><span><label for="retention" data-t="retention">Target recall</label> <button type="button" class="info-btn" aria-controls="retention-hint" aria-expanded="false">i</button></span>
         <select id="retention">
           <option value="0.8">80%</option>
           <option value="0.85">85%</option>
           <option value="0.9">90%</option>
           <option value="0.95">95%</option>
         </select>
-      </label>
-      <p class="hint" data-t="retentionHint"></p>
-      <label class="field" for="answer-time"><span data-t="answerTime">Time to answer</span>
+      </div>
+      <p class="hint" id="retention-hint" data-t="retentionHint" hidden></p>
+      <div class="field"><span><label for="answer-time" data-t="answerTime">Time to answer</label> <button type="button" class="info-btn" aria-controls="answer-time-hint" aria-expanded="false">i</button></span>
         <select id="answer-time">
           <option value="10">10 s</option>
           <option value="15">15 s</option>
@@ -1401,9 +1423,9 @@
           <option value="60">60 s</option>
           <option value="0">-</option>
         </select>
-      </label>
-      <p class="hint" data-t="answerTimeHint"></p>
-      <label class="field" for="next-after"><span data-t="nextAfter">Next card after</span>
+      </div>
+      <p class="hint" id="answer-time-hint" data-t="answerTimeHint" hidden></p>
+      <div class="field"><span><label for="next-after" data-t="nextAfter">Next card after</label> <button type="button" class="info-btn" aria-controls="next-after-hint" aria-expanded="false">i</button></span>
         <select id="next-after">
           <option value="-1">-</option>
           <option value="1.4">1.4 s</option>
@@ -1412,29 +1434,31 @@
           <option value="10">10 s</option>
           <option value="0">-</option>
         </select>
-      </label>
-      <p class="hint" data-t="nextAfterHint"></p>
+      </div>
+      <p class="hint" id="next-after-hint" data-t="nextAfterHint" hidden></p>
       <label class="field" for="sound" data-app="capitals"><span data-t="fireworksSound">Fireworks sound</span> <input id="sound" type="checkbox"></label>
-      <label class="field" for="translate" data-app="languages"><span data-t="translate">Show the translation</span> <input id="translate" type="checkbox"></label>
-      <p class="hint" data-app="languages" data-t="translateHint"></p>
-      <label class="field" for="auto-say" data-app="languages"><span data-t="autoSay">Read aloud by itself</span> <input id="auto-say" type="checkbox"></label>
-      <p class="hint" data-app="languages" data-t="autoSayHint"></p>
-      <label class="field" for="voice" id="voice-field" data-app="languages"><span data-t="voice">Listen for answers</span> <input id="voice" type="checkbox"></label>
-      <p class="hint" id="voice-hint" data-app="languages" data-t="voiceHint"></p>
+      <div class="field" data-app="languages"><span><label for="translate" data-t="translate">Show the translation</label> <button type="button" class="info-btn" aria-controls="translate-hint" aria-expanded="false">i</button></span> <input id="translate" type="checkbox"></div>
+      <p class="hint" id="translate-hint" data-app="languages" data-t="translateHint" hidden></p>
+      <div class="field" data-app="languages"><span><label for="auto-say" data-t="autoSay">Read aloud by itself</label> <button type="button" class="info-btn" aria-controls="auto-say-hint" aria-expanded="false">i</button></span> <input id="auto-say" type="checkbox"></div>
+      <p class="hint" id="auto-say-hint" data-app="languages" data-t="autoSayHint" hidden></p>
+      <div class="field" id="voice-field" data-app="languages"><span><label for="voice" data-t="voice">Listen for answers</label> <button type="button" class="info-btn" aria-controls="voice-hint" aria-expanded="false">i</button></span> <input id="voice" type="checkbox"></div>
+      <p class="hint" id="voice-hint" data-app="languages" data-t="voiceHint" hidden></p>
     </section>
 
     <section>
-      <h3 data-t="howTitle">How the cards are scheduled</h3>
-      <p data-t="howP1"></p>
-      <p data-t="howP2"></p>
-      <table class="rules">
-        <tr><th data-t="ruleAnswer">Answer</th><th data-t="ruleRating">Anki rating</th></tr>
-        <tr><td data-t="ruleWrong">Wrong</td><td data-t="ruleWrongRating"></td></tr>
-        <tr><td data-t="ruleSlow">Right, slower than 10 s</td><td>Hard</td></tr>
-        <tr><td data-t="ruleRight">Right</td><td>Good</td></tr>
-        <tr><td data-t="ruleFast">Right within 4 s</td><td data-t="ruleFastRating"></td></tr>
-      </table>
-      <p style="margin-top:0.6rem" data-t="howP3"></p>
+      <h3><span data-t="howTitle">How the cards are scheduled</span> <button type="button" class="info-btn" aria-controls="how-text" aria-expanded="false">i</button></h3>
+      <div id="how-text" hidden>
+        <p data-t="howP1"></p>
+        <p data-t="howP2"></p>
+        <table class="rules">
+          <tr><th data-t="ruleAnswer">Answer</th><th data-t="ruleRating">Anki rating</th></tr>
+          <tr><td data-t="ruleWrong">Wrong</td><td data-t="ruleWrongRating"></td></tr>
+          <tr><td data-t="ruleSlow">Right, slower than 10 s</td><td>Hard</td></tr>
+          <tr><td data-t="ruleRight">Right</td><td>Good</td></tr>
+          <tr><td data-t="ruleFast">Right within 4 s</td><td data-t="ruleFastRating"></td></tr>
+        </table>
+        <p style="margin-top:0.6rem" data-t="howP3"></p>
+      </div>
     </section>
 
     <section>
@@ -1456,8 +1480,8 @@
     </section>
 
     <section>
-      <h3 data-t="coinsTitle">Coins</h3>
-      <p data-t="coinsRules"></p>
+      <h3><span data-t="coinsTitle">Coins</span> <button type="button" class="info-btn" aria-controls="coins-rules" aria-expanded="false">i</button></h3>
+      <p id="coins-rules" data-t="coinsRules" hidden></p>
       <p id="coins-total"></p>
     </section>
 
@@ -1472,9 +1496,9 @@
     </section>
 
     <section>
-      <h3 data-t="progressSection">Progress</h3>
+      <h3><span data-t="progressSection">Progress</span> <button type="button" class="info-btn" aria-controls="move-hint" aria-expanded="false">i</button></h3>
       <p data-t="savedHere">Progress is saved in this browser only.</p>
-      <p class="hint" data-t="moveHint"></p>
+      <p class="hint" id="move-hint" data-t="moveHint" hidden></p>
       <div class="row move-row">
         <button type="button" class="ghost-btn" id="send-progress" data-t="sendProgress">Send progress</button>
         <button type="button" class="ghost-btn" id="load-progress" data-t="loadProgress">Load progress</button>
@@ -7178,6 +7202,10 @@
     document.querySelectorAll('[data-t-title]').forEach((el) => {
       el.title = t[el.dataset.tTitle] || '';
     });
+    // Each "i" button follows the name of what it explains.
+    document.querySelectorAll('.info-btn').forEach((b) => {
+      b.setAttribute('aria-label', t.explain(b.previousElementSibling.textContent));
+    });
     document.querySelectorAll('.size-label').forEach((el) => {
       el.textContent = fact(el.dataset.n, el.dataset.n);
     });
@@ -7253,6 +7281,13 @@
   $('open-shop').addEventListener('click', () => openPanel('shop'));
   $('open-apps').addEventListener('click', () => openPanel('apps'));
   $('close-settings').addEventListener('click', closePanel);
+  document.querySelectorAll('.info-btn').forEach((b) => {
+    b.addEventListener('click', () => {
+      const text = $(b.getAttribute('aria-controls'));
+      text.hidden = !text.hidden;
+      b.setAttribute('aria-expanded', String(!text.hidden));
+    });
+  });
   $('close-shop').addEventListener('click', closePanel);
   $('close-apps').addEventListener('click', closePanel);
   $('close-showcase').addEventListener('click', closePanel);
@@ -7756,7 +7791,7 @@
   });
 
   // JęzykiMax: answering by voice, where the browser can recognize speech.
-  for (const id of ['voice-field', 'voice-hint']) $(id).hidden = !Recognition;
+  $('voice-field').hidden = !Recognition;
   $('voice').addEventListener('change', (e) => {
     state.settings.voice = e.target.checked;
     voiceError = '';

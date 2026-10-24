@@ -192,6 +192,7 @@
       eraseConfirm: 'Kliknij ponownie, aby usunąć wszystko',
       erased: 'Postępy usunięte',
       close: 'Gotowe',
+      explain: (what) => 'Wyjaśnienie: ' + what,
     },
 
     en: {
@@ -366,6 +367,7 @@
       eraseConfirm: 'Tap again to erase everything',
       erased: 'Progress erased',
       close: 'Done',
+      explain: (what) => 'Explanation: ' + what,
     },
 
     nl: {
@@ -540,6 +542,7 @@
       eraseConfirm: 'Tik nog eens om alles te wissen',
       erased: 'Voortgang gewist',
       close: 'Klaar',
+      explain: (what) => 'Uitleg: ' + what,
     },
 
     es: {
@@ -714,6 +717,7 @@
       eraseConfirm: 'Pulsa otra vez para borrarlo todo',
       erased: 'Progreso borrado',
       close: 'Hecho',
+      explain: (what) => 'Explicación: ' + what,
     },
     fa: {
       name: 'فارسی',
@@ -889,6 +893,7 @@
       eraseConfirm: 'برای پاک کردن همه چیز دوباره بزنید',
       erased: 'پیشرفت پاک شد',
       close: 'تمام',
+      explain: (what) => 'توضیح: ' + what,
     },
   };
 

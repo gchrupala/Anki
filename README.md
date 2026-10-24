@@ -115,6 +115,8 @@ The settings panel (the gear button, "Ustawienia" in Polish) lets you:
 - send the progress of all the apps as a file, or load such a file (see [Moving progress](#moving-progress));
 - copy the review log as CSV.
 
+The explanations in the panel (what a setting does, how the cards are scheduled, how coins are earned, how to move progress) are folded. The "i" button next to a setting or a heading shows or hides them.
+
 The log has one row per answer. Its first five columns (`card_id`, `review_time`, `review_rating`, `review_state`, `review_duration`) are the input format of the [FSRS optimizer](https://github.com/open-spaced-repetition/fsrs-optimizer), so the log can be used to fit FSRS parameters to one child once there are enough reviews. Two more columns give the fact and the typed answer.
 
 The progress square shows each fact: not started, practising (in the learning steps), learned, or mastered (interval of 21 days or more, which Anki calls "mature").
