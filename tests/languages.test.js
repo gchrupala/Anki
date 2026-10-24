@@ -40,6 +40,28 @@ test('gaps and questions have one right and three different wrong answers', () =
   }
 });
 
+test('the length of the answers does not give the right one away', () => {
+  // Always picking the longest answer, or the second longest and so on (at
+  // random among answers of the same length), is right on at most a third
+  // of the gaps and of the questions of each language. A guess is right on
+  // a quarter.
+  const length = (s) => [...s].length;
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const kind of 'gq') {
+      const cards = LANGUAGE_CARDS[lang].filter((c) => c.kind === kind);
+      const right = [0, 0, 0, 0];
+      for (const c of cards) {
+        const longer = c.wrong.filter((w) => length(w) > length(c.answer)).length;
+        const same = c.wrong.filter((w) => length(w) === length(c.answer)).length;
+        for (let k = longer; k <= longer + same; k++) right[k] += 1 / (same + 1);
+      }
+      right.forEach((n, k) => {
+        assert.ok(n <= cards.length / 3, `${lang} ${kind}: answer ${k + 1} by length is right on ${n.toFixed(1)} of ${cards.length}`);
+      });
+    }
+  }
+});
+
 test('pictures and words are not repeated, so the four answers always differ', () => {
   for (const lang of LANGUAGE_TARGETS) {
     for (const kind of 'pwo') {
