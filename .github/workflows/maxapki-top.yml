@@ -1,0 +1,40 @@
+# Copies main to gchrupala/maxapki, which serves the app at https://maxapki.top/
+# with GitHub Pages while the app moves there (docs/new-address.md).
+#
+# The copy is one commit with the files of main, without .github, and a CNAME
+# file with the domain. It replaces what was there before.
+#
+# Needs the secret MAXAPKI_TOKEN: a fine-grained personal access token with
+# access to gchrupala/maxapki only and the permission "Contents: Read and
+# write".
+name: Copy to maxapki.top
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: maxapki-top
+  cancel-in-progress: true
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Otherwise the token of this repository is used for every push to
+          # github.com, and the push to gchrupala/maxapki is refused.
+          persist-credentials: false
+      - name: Push the files to gchrupala/maxapki
+        env:
+          TOKEN: ${{ secrets.MAXAPKI_TOKEN }}
+        run: |
+          git checkout --orphan copy
+          git rm -r -q --cached .github
+          echo maxapki.top > CNAME
+          git add CNAME
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -q -m "Copy of gchrupala/Anki ${GITHUB_SHA::7}"
+          git push --force "https://x-access-token:${TOKEN}@github.com/gchrupala/maxapki.git" copy:main
