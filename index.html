@@ -1174,6 +1174,9 @@
   .backup-form label { font-size: 0.9rem; }
   .backup-form .row { margin-top: 0.3rem; }
   .sheet-foot { display: flex; justify-content: flex-end; }
+  /* The move to the new address: above the other panels, which it leaves
+     closed or open as they are. */
+  .move-panel { z-index: 20; }
 </style>
 </head>
 <body data-app="times">
@@ -1678,10 +1681,37 @@
   </div>
 </div>
 
+<!-- The move to the new address (move.js): at the old address once the
+     progress has been sent, and at the new one until the app is installed
+     there. Not closed by Back or a tap around it, as the other panels are. -->
+<div class="panel move-panel" id="moved" role="dialog" aria-modal="true" aria-labelledby="moved-title" hidden>
+  <div class="sheet" id="moved-sheet" tabindex="-1">
+    <h2 id="moved-title" data-t="movedTitle">MaxApki has a new address</h2>
+    <p id="moved-text"></p>
+    <div class="row move-row">
+      <button type="button" class="primary-btn" id="moved-open" data-t="movedOpen">Open the new MaxApki</button>
+      <button type="button" class="ghost-btn" id="moved-save" data-t="saveProgress">Save progress to a file</button>
+    </div>
+    <p class="hint" id="moved-hint"></p>
+    <p class="hint" id="moved-status" role="status"></p>
+  </div>
+</div>
+<div class="panel move-panel" id="install" role="dialog" aria-modal="true" aria-labelledby="install-title" hidden>
+  <div class="sheet" id="install-sheet" tabindex="-1">
+    <h2 id="install-title" data-t="installTitle">MaxApki has moved here</h2>
+    <p data-t="installText"></p>
+    <div class="sheet-foot row">
+      <button type="button" class="primary-btn" id="install-app" data-t="installButton" hidden>Install MaxApki</button>
+      <button type="button" class="ghost-btn" id="close-install" data-t="close">Done</button>
+    </div>
+  </div>
+</div>
+
 <script src="srs.js"></script>
 <script src="voice.js"></script>
 <script src="answer.js"></script>
 <script src="backup.js"></script>
+<script src="move.js"></script>
 <script src="geo.js"></script>
 <script src="i18n.js"></script>
 <script src="i18n-capitals.js"></script>
@@ -2164,6 +2194,9 @@
   // once the page has started.
   const arrivingGift = parseGift(location.hash);
   if (arrivingGift) prefs.app = arrivingGift.app;
+  // Progress sent from the old address (move.js), received once the page
+  // has started.
+  const arrivingMove = location.hash.startsWith(MOVE.PREFIX) ? location.hash.slice(MOVE.PREFIX.length) : null;
   if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
   let app = APPS[prefs.app];
   if (!prefs.opened.includes(app.id)) prefs.opened.push(app.id);
@@ -8211,7 +8244,8 @@
   // page again with it. The open app, the language and the settings of the
   // apps in the file come from the file; the apps opened and the gift links
   // of both devices are kept. A backup restored from GitHub (backupSha) is
-  // then this device's to replace.
+  // then this device's to replace. Progress moved from the old address
+  // (file.move) brings its connection to the backup (see takeMove).
   function replaceProgress(file) {
     try {
       for (const a of file.apps) {
@@ -8231,6 +8265,7 @@
         backup = { ...backup, sha: file.backupSha, hash: null, error: null, conflict: null };
         saveBackup();
       }
+      if (file.move) takeMove(file);
     } catch (e) {
       $('progress-status').textContent = T().progressFailed;
       return;
@@ -8239,11 +8274,10 @@
     location.reload();
   }
 
-  // Downloads the progress file, to be moved to the other device or browser.
-  $('save-progress').addEventListener('click', () => {
+  // Downloads the progress file, to be moved to the other device or browser,
+  // and says so in status.
+  function downloadProgress(status) {
     const t = T();
-    const status = $('progress-status');
-    $('import-box').hidden = true;
     const file = progressFile();
     if (!file) {
       status.textContent = t.progressNone;
@@ -8257,6 +8291,10 @@
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 10000);
     status.textContent = t.progressDownloaded(file.name);
+  }
+  $('save-progress').addEventListener('click', () => {
+    $('import-box').hidden = true;
+    downloadProgress($('progress-status'));
   });
 
   // Loading a file first says what it holds; its progress is stored only
@@ -8554,12 +8592,183 @@
     location.reload();
   });
 
+  // ---------- the move to maxapki.top ----------
+
+  // The app at the old address sends all the progress to the new one, once,
+  // and from then on only says that MaxApki has moved (move.js). What is
+  // saved of the move, under its own key at each address:
+  // { sent: { id, at }, received: [ids], install }.
+  //   sent: the move sent from the old address, and when;
+  //   received: the moves stored at the new address, so a link opened again
+  //     is not stored twice;
+  //   install: the app at the new address is to be installed.
+  const MOVE_KEY = 'max-move';
+  const atOldAddress = MOVE.OLD_ORIGINS.includes(location.origin);
+  const standalone = () => window.matchMedia && matchMedia('(display-mode: standalone)').matches;
+  const move = loadMove();
+
+  function loadMove() {
+    let m = null;
+    try {
+      m = JSON.parse(localStorage.getItem(MOVE_KEY));
+    } catch (e) {
+      /* none saved */
+    }
+    m = m && typeof m === 'object' ? m : {};
+    if (!Array.isArray(m.received)) m.received = [];
+    return m;
+  }
+  function saveMove() {
+    try {
+      localStorage.setItem(MOVE_KEY, JSON.stringify(move));
+    } catch (e) {
+      /* storage unavailable */
+    }
+  }
+
+  // The move link, with the progress and the connection to the backup as
+  // they are now; null if the progress is too much for a link.
+  async function moveLink() {
+    const file = { maxapki: PROGRESS_FILE, saved: Date.now(), data: progressData(), move: move.sent.id, backup };
+    try {
+      return await MOVE.makeLink(file);
+    } catch (e) {
+      return null; // a browser without CompressionStream
+    }
+  }
+
+  // At the old address: once the new one answers, sends the progress there.
+  // Without internet, or if the new address does not answer, the app works
+  // as before and tries again on its next start: going there offline would
+  // leave an error page.
+  async function sendMove() {
+    try {
+      const r = await fetch(MOVE.NEW_ORIGIN + '/manifest.webmanifest', { cache: 'no-store' });
+      if (!r.ok) return;
+    } catch (e) {
+      return;
+    }
+    if (replacing) return; // progress from a file is being stored
+    move.sent = { id: MOVE.newId(), at: Date.now() };
+    saveMove();
+    replacing = true;
+    const link = await moveLink();
+    if (link) location.replace(link);
+    else showMoved(null);
+  }
+
+  // At the old address, once the progress has been sent: nothing is saved or
+  // backed up any more, so that the progress cannot grow apart at the two
+  // addresses. The button sends it again, the same move, in case it did not
+  // arrive. A device on which it is too much for a link (link null) moves it
+  // as a file.
+  function showMoved(link) {
+    const t = T();
+    replacing = true;
+    pauseTimers();
+    $('moved-text').textContent = t.movedText(MOVE.NEW_ORIGIN.replace('https://', ''));
+    $('moved-hint').textContent = link === null ? t.movedTooMuch : t.movedHint;
+    $('moved').hidden = false;
+    document.body.classList.add('panel-open');
+    $('moved-sheet').focus({ preventScroll: true });
+  }
+  $('moved-open').addEventListener('click', async () => {
+    const link = await moveLink();
+    if (link) location.href = link;
+    else $('moved-hint').textContent = T().movedTooMuch;
+  });
+  $('moved-save').addEventListener('click', () => downloadProgress($('moved-status')));
+
+  // At the new address: the progress of a move link is stored at once if
+  // there is none here yet; otherwise the settings say what it holds and ask,
+  // as for a file. A move stored before is not stored again: the button of
+  // the old app sends the same move again.
+  async function receiveMove(code) {
+    const text = await MOVE.readLink(code);
+    let sent = null;
+    try {
+      sent = JSON.parse(text);
+    } catch (e) {
+      /* not a move */
+    }
+    if (!sent || typeof sent.move !== 'string' || !sent.move) {
+      toast(T().moveBad);
+      return;
+    }
+    if (move.received.includes(sent.move)) return;
+    const file = readProgress(text);
+    if (!file) {
+      // No progress at the old address: only the connection to the backup.
+      takeMove({ move: sent.move, backup: sent.backup });
+      showInstall();
+      return;
+    }
+    file.move = sent.move;
+    file.backup = sent.backup;
+    if (!Object.values(APPS).some((a) => hasProgress(a.id === app.id ? state : savedState(a.id)))) {
+      replaceProgress(file);
+      return;
+    }
+    openPanel('settings');
+    offerProgress(file);
+    $('import-box').scrollIntoView({ block: 'nearest' });
+  }
+
+  // Keeps what came with a move once its progress is stored here: its id,
+  // and the connection to the backup unless this device has its own.
+  function takeMove(file) {
+    move.received.push(file.move);
+    move.install = true;
+    saveMove();
+    backup = MOVE.mergeBackup(backup, file.backup && typeof file.backup === 'object' ? file.backup : null);
+    saveBackup();
+  }
+
+  // Until the app runs installed from the new address, each start asks to
+  // install it, and to remove the old one. Where the browser offers it, a
+  // button installs it at once.
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installEvent = e;
+    $('install-app').hidden = false;
+  });
+  function showInstall() {
+    if (standalone()) {
+      if (move.install) {
+        move.install = false;
+        saveMove();
+      }
+      return;
+    }
+    pauseTimers();
+    $('install').hidden = false;
+    document.body.classList.add('panel-open');
+    $('install-sheet').focus({ preventScroll: true });
+  }
+  $('install-app').addEventListener('click', async () => {
+    if (!installEvent) return;
+    installEvent.prompt();
+    const choice = await installEvent.userChoice.catch(() => null);
+    installEvent = null;
+    $('install-app').hidden = true;
+    if (choice && choice.outcome === 'accepted') $('close-install').click();
+  });
+  $('close-install').addEventListener('click', () => {
+    $('install').hidden = true;
+    if (!panelOpen()) {
+      document.body.classList.remove('panel-open');
+      resumeTimers();
+    }
+  });
+
   // ---------- sharing ----------
 
   // The address of the app, without the name of an app (#stolice) after it.
-  // A local file has no address to share, so it shares the public one.
-  const PUBLIC_URL = 'https://grzegorz.chrupala.me/Anki/';
-  const shareUrl = () => (/^https?:$/.test(location.protocol) ? location.origin + location.pathname : PUBLIC_URL);
+  // A local file has no address to share, and the old address is being left,
+  // so they share the public one.
+  const PUBLIC_URL = MOVE.NEW_ORIGIN + '/';
+  const shareUrl = () => (/^https?:$/.test(location.protocol) && !atOldAddress ? location.origin + location.pathname : PUBLIC_URL);
 
   function toast(text) {
     const el = document.createElement('div');
@@ -8828,8 +9037,10 @@
 
   // Offline copy and protected storage, when the app is served over http(s).
   // The offline copy is not available from a local file or inside the Claude
-  // preview.
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  // preview. A visit that brings a move waits for the next start: starting
+  // the page again while the offline copy installed on the first visit to the
+  // new address left the files of the app unloaded in a test.
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !arrivingMove) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
   if (navigator.storage && navigator.storage.persist) {
@@ -8849,6 +9060,13 @@
   if (arrivingGift) {
     if (giftRefusal(arrivingGift)) toast(giftRefusal(arrivingGift));
     else receiveGift(arrivingGift);
+  }
+  if (atOldAddress) {
+    if (move.sent) showMoved();
+    else sendMove();
+  } else {
+    if (arrivingMove) receiveMove(arrivingMove);
+    if (move.install) showInstall();
   }
   backupNow();
 })();

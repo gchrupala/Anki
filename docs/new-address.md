@@ -1,6 +1,6 @@
 # Moving MaxApki to a new address
 
-Design proposal. Nothing here is implemented yet. The new address is `https://maxapki.top/`; the domain is registered at Namecheap.
+The new address is `https://maxapki.top/`; the domain is registered at Namecheap. The move is built (`move.js`, `index.html`) and published at the new address. The sending version is not yet published at the old address ([Order of work](#order-of-work)).
 
 This plan covers the app installed from Chrome on Android, and the app opened in a browser on a computer. It does not cover the app added to the home screen of an iPad (see [Not covered](#not-covered)).
 
@@ -45,9 +45,9 @@ The new app is at the root of its address (`/`), the old one at `/Anki/`. Every 
 
 1. Create the public repository `gchrupala/maxapki` and push `main` to it.
 2. Add a `CNAME` file with `maxapki.top`, then turn on Pages: Settings → Pages → Deploy from a branch → `main`, `/ (root)`, custom domain `maxapki.top`.
-3. At Namecheap (Domain List → Manage → Advanced DNS), replace the parking records with GitHub's: four `A` records for host `@` (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`), four `AAAA` records (`2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`) and a `CNAME` record for `www` to `gchrupala.github.io`.
-4. Verify the domain for the GitHub account (Settings → Pages → Verified domains, a `TXT` record at Namecheap), so that no other GitHub account can serve a site at it.
-5. Once GitHub has made the certificate, turn on "Enforce HTTPS".
+3. At Namecheap (Domain List → Manage → Advanced DNS), delete the parking records and add one `ALIAS` record: host `@`, value `gchrupala.github.io.`. A bare domain cannot have a `CNAME` record; the `ALIAS` record does the same and follows GitHub's addresses if they change. (GitHub's own instructions list four `A` records instead.)
+4. Once GitHub has made the certificate, turn on "Enforce HTTPS". If the Pages settings still say "DNS check unsuccessful" after the record is in, "Check again" starts it.
+5. Optionally, verify the domain for the GitHub account (Settings → Pages → Verified domains, a `TXT` record at Namecheap), so that no other GitHub account can serve a site at it.
 
 ## The move link
 
@@ -64,41 +64,49 @@ https://maxapki.top/#move/<data>
 ```
 
 - `move` is a random id, made once for the move and kept by the old app.
-- `backup` is the whole `max-backup` entry, including the token, so that the GitHub backup carries on without being connected again. It is left out once the old app has deleted its token.
+- `backup` is the whole `max-backup` entry, including the token, so that the GitHub backup carries on without being connected again.
 - The part after `#` is never sent to a server.
 
-Size: an estimate with a year of practice in made-up data (about 3,800 cards and 20,000 answers in the review log) gives 1.6 MB of JSON, 0.33 MB after gzip and a link of 0.44 MB. Chrome accepts addresses up to 2 MB. If a link is longer than that, the old app offers the progress file instead ("Zapisz postępy do pliku").
+`move.js` makes and reads the link (`makeLink`, `readLink`), and works in the browser and in Node.
+
+Size: an estimate with a year of practice in made-up data (about 3,800 cards and 20,000 answers in the review log) gives 1.6 MB of JSON, 0.33 MB after gzip and a link of 0.44 MB. Chrome accepts addresses up to 2 MB. If a link would be longer, the old app does not send it and asks to move the progress as a file instead.
+
+What is saved of the move goes under `max-move` at each address: `{ sent: { id, at }, received: [ids], install }`.
 
 ## At the old address
 
-On start, if the move has not been sent yet:
+On start, if the move has not been sent yet (`sendMove`):
 
-1. Wait until the new address answers (a request for its `manifest.webmanifest`). Without internet, or if the new address does not answer, the app works as before and tries again on the next start. Going to the new address while offline would leave the user on an error page.
-2. Build the move link from `progressData()` and `max-backup`.
-3. Save under `max-moved` that the move was sent, with its id and time.
-4. Delete the token from `max-backup`. Only the new app keeps it.
-5. Go to the move link with `location.replace`.
+1. Wait until the new address answers (a request for its `manifest.webmanifest`; GitHub Pages allows it from another address). Without internet, or if the new address does not answer, the app works as before and tries again on the next start. Going to the new address while offline would leave the user on an error page.
+2. Save under `max-move` that the move was sent, with its id and time.
+3. Build the move link from `progressData()` and `max-backup`, and go there with `location.replace`.
 
-Once the move was sent, the old app no longer lets cards be answered and no longer backs up, so that progress cannot grow apart on the two addresses. It shows only a message that MaxApki has moved, with a button that opens the new address with the move link again (without the token).
+Once the move was sent, the old app saves nothing and backs up nothing (`replacing` stays set), so that progress cannot grow apart on the two addresses. It shows only a message that MaxApki has moved, above everything else (`showMoved`). The message names the new address and has two buttons:
+
+- "Otwórz nowe MaxApki" (open the new MaxApki) sends the same move again, with the token, in case it did not arrive.
+- "Zapisz postępy do pliku" (save progress to a file) downloads the progress file, to be loaded at the new address in the settings. This is the way out when the link would be too long, and when the move did not arrive in the new app.
+
+The old app keeps its token. The design first deleted it, so that only the new app would hold it, but then a move that did not arrive could not be sent again with the backup connection. The old app no longer backs up, so the token there is unused.
+
+The share button at the old address shares the new address.
 
 ## At the new address
 
-On start, before the page clears `location.hash` (where gift links are read):
+On start, the page copies `#move/` from the address before clearing it, as it does for gift links (`arrivingMove`). Once the page has started (`receiveMove`):
 
-1. Read `#move/`, decompress it and check it with `readProgress()`.
-2. If a move with this id was received before, ignore the data and just open the app. This is the case when the old icon is opened again.
-3. If the new address has no progress yet, store the progress at once with `replaceProgress()`, without asking. Otherwise ask with `offerProgress()`, which also warns when this device has newer answers.
-4. Store the `backup` that came with it under `max-backup`, together with the progress. If it has no token (a link sent again, see above) and a connection is already saved here, keep that connection.
-5. Save the id of the move, so that the same link is not stored twice.
-6. Show the message that asks to install the app (Chrome menu, "Install app"). The message is shown again on later starts in the browser view, until the app runs installed (`display-mode: standalone`).
+1. Decompress it and check it with `readProgress()`. A link that is not a move says so ("Ten link nie zawiera postępów z MaxApki").
+2. If a move with this id was stored before, do nothing. This is the case when the old app sends the same move again.
+3. If the new address has no progress yet, store the progress at once with `replaceProgress()`, without asking. Otherwise open the settings and ask with `offerProgress()`, which also warns when this device has newer answers. A move without any progress brings only the backup connection.
+4. Once it is stored (`takeMove`, called from `replaceProgress()`): save the id of the move, and the `backup` that came with it under `max-backup`, unless this device already has a connection of its own (`MOVE.mergeBackup`). A move that was not stored (declined) is not recorded, so it can be sent again.
+5. `replaceProgress()` starts the page again. From then on, each start in the browser asks to install the app (Chrome menu, "Zainstaluj aplikację"), and to remove the old one, until the app runs installed (`display-mode: standalone`). Where Chrome offers it (`beforeinstallprompt`), a button installs it at once.
 
-`replaceProgress()` already starts the page again, and the hash is removed from the address as for gift links.
+The visit that brings a move does not register the offline copy (`sw.js`); the next start does. In a test with headless Chrome, starting the page again while the offline copy installed on the first visit to the new address left the files of the app unloaded, and the page broken until its next start.
 
 The GitHub backup carries on as the same device, because the device name comes along. `backupOnce` replaces a backup without asking when it was written by a device of the same name (`backup.js`), so there is no conflict. The version of the last backup comes along too, so the new app backs up again only when the progress changes.
 
 ## The token in the link
 
-The token travels in the move link. It is not sent to any server, and the new page removes it from the address as soon as it starts. But Chrome may save the full address in its history before that. With history sync turned on, the token would then also be stored in the Google account.
+The token travels in the move link, and again each time the old app sends the move again. It is not sent to any server, and the new page removes it from the address as soon as it starts. But Chrome may save the full address in its history before that. With history sync turned on, the token would then also be stored in the Google account.
 
 This adds a copy of a token that is already readable on the device: anyone holding the unlocked tablet can read it with the developer tools of the browser (README, [Backing up to GitHub](../README.md#backing-up-to-github)). The token can only read and write the backup repository, and it expires after a year.
 
@@ -109,27 +117,24 @@ I found no other way to send it. The new address is a static site, so it receive
 ## Order of work
 
 1. Set up `gchrupala/maxapki` and `maxapki.top` ([Setting up `maxapki.top`](#setting-up-maxapkitop)).
-2. Publish the receiving version at the new address. Check that it opens over HTTPS and can be installed.
-3. Publish the sending version at the old address. Each tablet moves on its next start with internet.
-4. When all tablets have moved, `gchrupala/Anki` can be archived. Check that its Pages site still serves the sending version after that; if not, unarchive it. A tablet not opened before the old address stops working keeps its progress in the old storage.
+2. Publish the receiving version at the new address (push `main` to `gchrupala/maxapki`). Check that it opens over HTTPS and can be installed.
+3. Check on one Android tablet what the tests cannot ([To check on a tablet](#to-check-on-a-tablet)).
+4. Publish the sending version at the old address: cherry-pick the commit of the move onto `main` of `gchrupala/Anki` and push it. Each tablet moves on its next start with internet. Nothing can limit this to one tablet: every device that opens the old address moves.
+5. When all tablets have moved, `gchrupala/Anki` can be archived. Check that its Pages site still serves the sending version after that; if not, unarchive it. A tablet not opened before the old address stops working keeps its progress in the old storage.
 
-## Work
+## Tests
 
-- `index.html`: sending at the old address and receiving at the new one, next to "moving progress"; the message at each address. About 100 lines.
-- `i18n.js`: about 5 new strings in Polish, English, Dutch, Spanish and Persian.
-- `sw.js`: no change. It answers only requests to its own address, and the part of an address after `#` is not sent with a request.
-- README: a section on the move, and the address in "Running it" and "Installing on a tablet".
-- The repository `gchrupala/maxapki`, its `CNAME` file and the DNS records at Namecheap.
-- Tests, with Node: a move link made and read back with Polish and Persian letters, a link received twice, and a link without a token next to a saved connection.
+- `tests/move.test.js` (Node): a move link made and read back with Polish and Persian letters, links that are not a move, a year of practice that fits in a link and too much that does not, which backup connection is kept, and the text of the move in every language.
+- The whole move was also run in headless Chrome, with both addresses served from a local HTTPS server (not part of the repository): progress, coins and the backup connection arriving at the new address, the request to install, the old address showing only that MaxApki has moved and keeping its token, the same move sent again and not stored twice, a move into existing progress asking first in the settings, a broken link, and the installed app no longer asking to install it. 29 of 30 runs passed; in the other, the old address went to the new one later than the test waited, and the move still arrived.
 
-## To check before building
+## To check on a tablet
 
-- On an Android tablet: that the browser view opened from the installed app, Chrome itself and the app installed from the new address share their storage. Without this, the progress arrives in the browser view but not in the new app.
+- That the browser view opened from the installed app, Chrome itself and the app installed from the new address share their storage. Without this, the progress arrives in the browser view but not in the new app. The way out is then the progress file: "Zapisz postępy do pliku" on the moved screen of the old app, and "Wczytaj postępy z pliku" in the settings of the new one.
 - Whether Chrome offers "Install app" in that browser view, or only after "Open in Chrome".
 - The size of the move link on a tablet with real progress.
 - Whether Chrome keeps the address with the token in its history after the page has removed the hash.
 
 ## Not covered
 
-- **iPad.** On an iPad, the app added to the home screen keeps its own storage, separate from Safari and from any other home-screen app. A new home-screen app added from the new address starts empty, and nothing the old app does can store data in it. There the move needs a step by hand, such as copying the move link in the old app and pasting it in the new one.
+- **iPad.** On an iPad, the app added to the home screen keeps its own storage, separate from Safari and from any other home-screen app. A new home-screen app added from the new address starts empty, and nothing the old app does can store data in it. There the progress moves as a file: "Zapisz postępy do pliku" on the moved screen of the old app, then "Wczytaj postępy z pliku" in the settings of the new one.
 - **Several browsers on one device.** Each browser keeps its own storage, so the move happens in each browser in which the old address is opened.

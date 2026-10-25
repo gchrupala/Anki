@@ -11,7 +11,7 @@
  * other copies stored on the same site. Change CACHE when the list of app
  * files changes.
  */
-const CACHE = 'times-table-cards-v15';
+const CACHE = 'times-table-cards-v16';
 const CACHE_PREFIX = 'times-table-cards-';
 const APP_FILES = [
   './',
@@ -20,6 +20,7 @@ const APP_FILES = [
   './voice.js',
   './answer.js',
   './backup.js',
+  './move.js',
   './geo.js',
   './i18n.js',
   './i18n-capitals.js',

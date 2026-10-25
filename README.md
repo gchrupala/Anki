@@ -6,7 +6,7 @@ The same page also holds seven sister apps with the same options: [StoliceMax](#
 
 ## Running it
 
-The app is published with GitHub Pages at https://grzegorz.chrupala.me/Anki/ (https://gchrupala.github.io/Anki/ redirects there).
+The app is published with GitHub Pages at https://maxapki.top/, from the repository [gchrupala/maxapki](https://github.com/gchrupala/maxapki). Until every tablet has moved there, the earlier address, https://grzegorz.chrupala.me/Anki/, is served from [gchrupala/Anki](https://github.com/gchrupala/Anki) (see [Moving to maxapki.top](#moving-to-maxapkitop)).
 
 Open `index.html` in a browser. There is no build step and no server is needed.
 
@@ -129,9 +129,9 @@ StoliceMax teaches the capitals of countries. It runs in the same page and at th
 
 The app name at the top of the screen is a button. It shows the icons of the apps and an arrow, and opens a menu with all the apps. Inside the app each icon has the colour of its app, with a card and a drawing in black and white; the home-screen icon of MaxApki is in full colour. For each app the menu says what it teaches and how many cards it has left today; an app not opened yet is marked "nowa" (new). The menu opens by itself the first time, and again the first time after a new app was added, and then explains how many apps there are. When all of the day's cards are done, the done card has a button to another app that still has cards for today.
 
-The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura`, `#jezyki`, `#mapki`, `#astronomia` or `#biologia` at the end (https://grzegorz.chrupala.me/Anki/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/. That address now leads to `#stolice`, and its offline copy removes itself.
+The app that was open last opens on the next start. The address can also name the app: `#mnozenie`, `#stolice`, `#chemia`, `#literatura`, `#jezyki`, `#mapki`, `#astronomia` or `#biologia` at the end (https://maxapki.top/#stolice). For a short time StoliceMax had its own address, https://grzegorz.chrupala.me/Anki/stolice/ (now also https://maxapki.top/stolice/). That address now leads to `#stolice`, and its offline copy removes itself.
 
-The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://grzegorz.chrupala.me/Anki/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
+The share button in the header (three connected dots) opens the share menu of the device with the address of the app, https://maxapki.top/, for example to send it in a message. Where the browser has no share menu, it copies the address and says so.
 
 Each app keeps its own cards, coins and rewards. The coins of MnożenieMax have an embossed ×, those of StoliceMax a star, those of ChemiaMax an atom, those of LiteraturaMax an open book, those of JęzykiMax a speech bubble, those of MapkiMax a compass rose, those of AstronomiaMax a planet with a ring, those of BiologiaMax a butterfly. The atom is also the symbol on the ChemiaMax card in the app menu; the home-screen icon of MaxApki still shows a flask. The language is shared.
 
@@ -485,6 +485,15 @@ Loading replaces the progress of each app that has progress in the file: its car
 
 The file holds JSON: `{ "maxapki": 1, "saved": <time>, "data": { <storage key>: <saved value> } }`. Loading checks what is in the file, not its name, so a file saved with the earlier `.txt` extension still loads.
 
+## Moving to maxapki.top
+
+MaxApki moves from https://grzegorz.chrupala.me/Anki/ to https://maxapki.top/. The browser keeps progress separately for each address, so the app at the old address sends it to the new one (`move.js`; the design is in [docs/new-address.md](docs/new-address.md)):
+
+- **At the old address.** On its first start with internet once the new address answers, the app goes to `https://maxapki.top/#move/<data>`, where `<data>` is the progress file (with the connection to the backup on GitHub, token included), compressed with gzip and written in base64url. The part after `#` is not sent to a server. From then on the old app saves nothing and only says that MaxApki has moved. Its buttons send the progress again, or save it to a file. A device with too much progress for a link (over 2 MB) moves it as a file.
+- **At the new address.** The progress is stored at once if there is none there yet; otherwise the settings say what it holds and ask, as for a file. The same move is not stored twice. The backup on GitHub carries on as the same device, unless the new address is connected already. Until the app runs installed from the new address, each start asks to install it and to remove the old one (press and hold its icon, "Uninstall").
+
+On an iPad, the app added to the home screen keeps its own storage, so the progress has to be moved as a file there: "Zapisz postępy do pliku" on the moved screen of the old app, then "Wczytaj postępy z pliku" in the settings of the new one.
+
 ## Backing up to GitHub
 
 The "Kopia na GitHubie" (backup on GitHub) section of the settings keeps a copy of the progress in a private GitHub repository. The copy is the file that "Zapisz postępy do pliku" saves, stored as `<person>/maxapki.json`. Each backup is a commit, so the repository keeps every earlier version. It follows the GitHub sync of [Myo](https://github.com/gchrupala/myo).
@@ -521,6 +530,8 @@ The repository, the token and the state of the backup are saved on the device un
 
 `tests/srs.test.js` replays review sequences through `srs.js` and compares stability, difficulty and intervals with the values py-fsrs produces (`tests/fsrs_reference.json`). To regenerate that file, run `python tests/make_fsrs_reference.py` with the `fsrs` Python package installed.
 
+`tests/move.test.js` checks `move.js`: a move link made and read back with Polish and Persian letters, links that are not a move, a year of practice that fits in a link and too much that does not, which connection to the backup is kept at the new address, and the text of the move in every language.
+
 `tests/backup.test.js` checks `backup.js` against a stand-in for the GitHub API: repository names, the folder names of people, base64 of Polish and Persian text, the first backup into an empty repository and the backups that replace it, a backup from another device that is not replaced without asking, a backup whose answer from GitHub got lost, people and apps sharing a repository, a write at the same moment that is tried again, files over 1 MB, and errors such as an expired token or a public repository.
 
 `tests/countries.test.js` checks the StoliceMax data and text: 194 countries, each with a country and capital name in every language, at least four countries per continent, no two capitals with the same name on one continent, and the StoliceMax and app menu text in every language. `tests/chemistry.test.js` does the same for ChemiaMax: one formula and number per card, formulas made of element symbols, names in every language with no two alike, at least four cards per group, and the ChemiaMax text. `tests/literature.test.js` checks the LiteraturaMax data and text: one number per book, every author known and from a country with a flag, names and titles in every language with no two alike, books by at least four authors in each category, and the LiteraturaMax text. `tests/languages.test.js` checks the JęzykiMax data and text: one id and number per card, every kind of card at every level in every language, three different wrong answers for each gap and question and one gap per sentence, answers whose length does not give the right one away (picking the longest, the second longest and so on is right on at most a third of the gaps and questions), the concepts each gap and question uses, every picture word in at least two gaps or questions, the meaning of each card in the other interface languages (one row of translations per card, so none is shifted), no picture or word twice, at least four pictures per theme, and the JęzykiMax text. For the cards answered in the child's own words, it also checks that each is built on a card of its language, that its answers are short and count as right when written or said, that no definition holds its answer, that definitions and questions are translated, and that article cards ask the articles of their language (or ten, ta and to) of a noun in the singular. `tests/answer.test.js` checks how `answer.js` judges written and spoken answers. `tests/maps.test.js` checks `geo.js` (decoding, distances, the projection) and the MapkiMax data and text: one id and number per place, names in every language (Persian ones in Persian letters), at least 20 places of each kind and five kinds on each continent, places in Iran, Poland and the Netherlands, every place within reach on the map of its continent (cities and peaks in its first view), every layer of the base map, every region with places of its own continent inside its outline, a label for every country, and the MapkiMax text. `tests/astronomy.test.js` checks the AstronomiaMax data and text: one id and number per question, every question in every language (Persian ones with Persian digits) with no two alike, a text for every answer in every language, four different answers for each question, a question without wrong answers of its own only where its kind has at least four answers with different names, at least 10 questions per topic, and the AstronomiaMax text. `tests/biology.test.js` checks the BiologiaMax data and text as `tests/astronomy.test.js` does for AstronomiaMax, and also a picture no newer than Emoji 13 for every question, Latin names of species and families, and four different answers for every question in every language.
@@ -545,6 +556,9 @@ The repository, the token and the state of the backup are saved on the device un
 - `languages.js`: the French, Spanish, Dutch, Italian and Polish cards of JęzykiMax.
 - `languages-translations.js`: what the cards of JęzykiMax mean, in the languages of the interface.
 - `languages-recall.js`: the cards of JęzykiMax answered in the child's own words, and the article cards.
+- `move.js`: the move link that takes the progress from the old address to https://maxapki.top/. It works in the browser and in Node.
+- `CNAME`: the address GitHub Pages serves the app at, `maxapki.top`. It is only in `gchrupala/maxapki`, never in `gchrupala/Anki`.
+- `docs/new-address.md`: the design of the move to https://maxapki.top/.
 - `answer.js`: whether an answer written or said in the child's own words is right. It uses `voice.js` and works in the browser and in Node.
 - `i18n-maps.js`: the text that differs in MapkiMax.
 - `i18n-astronomy.js`: the text that differs in AstronomiaMax.
