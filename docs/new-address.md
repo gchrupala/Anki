@@ -1,6 +1,6 @@
 # Moving MaxApki to a new address
 
-Design proposal. Nothing here is implemented yet. The domain is not chosen yet; the plan assumes `maxapki.top`.
+Design proposal. Nothing here is implemented yet. The new address is `https://maxapki.top/`; the domain is registered at Namecheap.
 
 This plan covers the app installed from Chrome on Android, and the app opened in a browser on a computer. It does not cover the app added to the home screen of an iPad (see [Not covered](#not-covered)).
 
@@ -30,14 +30,24 @@ Installing the new app and removing the old one are the two steps the user has t
 
 The old address has to keep serving the app until every device has opened it once after the change. Only the app at the old address can send that device's progress.
 
-Today GitHub Pages redirects `https://gchrupala.github.io/Anki/` to `https://grzegorz.chrupala.me/Anki/`. If the new domain is set as the custom domain of this repository, GitHub will most likely redirect the old address to the new one in the same way (not confirmed in the GitHub documentation). The old app would then never run again, and the progress on the tablets would stay in the old storage until the redirect is removed.
+Today GitHub Pages redirects `https://gchrupala.github.io/Anki/` to `https://grzegorz.chrupala.me/Anki/`. If the new domain were set as the custom domain of this repository, GitHub would most likely redirect the old address to the new one in the same way (not confirmed in the GitHub documentation). The old app would then never run again, and the progress on the tablets would stay in the old storage.
 
-So the new address is served by a second deployment of the same files:
+So each address has its own repository, both on GitHub Pages:
 
-- a second repository with GitHub Pages and the new domain as its custom domain, updated from this one by a GitHub Action on every push to `main`, or
-- Cloudflare Pages, building from this repository.
+- **`gchrupala/maxapki`** (new) serves `https://maxapki.top/`. The app is developed there from now on: it gets the whole history of this repository, and its own `CNAME` file with `maxapki.top`. It has to be public, as GitHub Pages for a private repository needs a paid plan.
+- **`gchrupala/Anki`** (this one) keeps serving `https://grzegorz.chrupala.me/Anki/`, as part of the user site `gchrupala.github.io`. It gets the sending version, and after that only fixes to the sending. It never gets the `CNAME` file of the new repository: with that file, its Pages site would claim `maxapki.top` too. Once every tablet has moved, it can be archived.
 
-Both addresses serve the same files. The page decides what to do from `location.origin`: at the old address it sends, at the new address it receives.
+No GitHub Action is needed: nothing is copied from one repository to the other after the split. The receiving and the sending code are written once, in `maxapki`, and the commit that adds them is also brought to `Anki` (cherry-picked, without `CNAME`). The page decides what to do from `location.origin`: at the old address it sends, at the new address it receives.
+
+The new app is at the root of its address (`/`), the old one at `/Anki/`. Every path in the app is relative (`manifest.webmanifest`, `sw.js`, `stolice/`), so the files work at both without change. The manifest `id` (`./`) makes the app at the new address a different app for Chrome, which is why it has to be installed again.
+
+### Setting up `maxapki.top`
+
+1. Create the public repository `gchrupala/maxapki` and push `main` to it.
+2. Add a `CNAME` file with `maxapki.top`, then turn on Pages: Settings → Pages → Deploy from a branch → `main`, `/ (root)`, custom domain `maxapki.top`.
+3. At Namecheap (Domain List → Manage → Advanced DNS), replace the parking records with GitHub's: four `A` records for host `@` (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`), four `AAAA` records (`2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`) and a `CNAME` record for `www` to `gchrupala.github.io`.
+4. Verify the domain for the GitHub account (Settings → Pages → Verified domains, a `TXT` record at Namecheap), so that no other GitHub account can serve a site at it.
+5. Once GitHub has made the certificate, turn on "Enforce HTTPS".
 
 ## The move link
 
@@ -98,10 +108,10 @@ I found no other way to send it. The new address is a static site, so it receive
 
 ## Order of work
 
-1. Choose and buy the domain, and point it at the second deployment.
+1. Set up `gchrupala/maxapki` and `maxapki.top` ([Setting up `maxapki.top`](#setting-up-maxapkitop)).
 2. Publish the receiving version at the new address. Check that it opens over HTTPS and can be installed.
 3. Publish the sending version at the old address. Each tablet moves on its next start with internet.
-4. When all tablets have moved, the old address can redirect to the new one, for example by setting the custom domain on this repository. A tablet not opened by then keeps its progress in the old storage; removing the redirect brings the sending version back.
+4. When all tablets have moved, `gchrupala/Anki` can be archived. Check that its Pages site still serves the sending version after that; if not, unarchive it. A tablet not opened before the old address stops working keeps its progress in the old storage.
 
 ## Work
 
@@ -109,7 +119,7 @@ I found no other way to send it. The new address is a static site, so it receive
 - `i18n.js`: about 5 new strings in Polish, English, Dutch, Spanish and Persian.
 - `sw.js`: no change. It answers only requests to its own address, and the part of an address after `#` is not sent with a request.
 - README: a section on the move, and the address in "Running it" and "Installing on a tablet".
-- The second deployment (a repository and a GitHub Action, or Cloudflare Pages).
+- The repository `gchrupala/maxapki`, its `CNAME` file and the DNS records at Namecheap.
 - Tests, with Node: a move link made and read back with Polish and Persian letters, a link received twice, and a link without a token next to a saved connection.
 
 ## To check before building
