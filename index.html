@@ -1137,6 +1137,13 @@
   .move-row { margin-bottom: 0.6rem; }
   .move-confirm { margin-bottom: 0.6rem; padding: 0.6rem 0.8rem; border: 1.5px solid var(--line); border-radius: 12px; }
   .move-confirm p { margin-bottom: 0.6rem; }
+  /* Backup on GitHub: the steps to set it up, and the repository and token. */
+  .backup-steps { margin: 0 0 0.6rem; padding-inline-start: 1.2rem; font-size: 0.85rem; max-width: 60ch; }
+  .backup-steps li { margin-bottom: 0.3rem; }
+  .backup-steps a { color: var(--pen); overflow-wrap: anywhere; }
+  .backup-form { display: flex; flex-direction: column; align-items: stretch; gap: 0.35rem; max-width: 22rem; margin-bottom: 0.6rem; }
+  .backup-form label { font-size: 0.9rem; }
+  .backup-form .row { margin-top: 0.3rem; }
   .sheet-foot { display: flex; justify-content: flex-end; }
 </style>
 </head>
@@ -1515,6 +1522,43 @@
       <button type="button" class="ghost-btn danger" id="reset" data-t="erase">Erase all progress</button>
     </section>
 
+    <section id="backup-section">
+      <h3><span data-t="backupTitle">Backup on GitHub</span> <button type="button" class="info-btn" aria-controls="backup-hint" aria-expanded="false">i</button></h3>
+      <p class="hint" id="backup-hint" data-t="backupHint" hidden></p>
+      <div id="backup-setup">
+        <ol class="backup-steps">
+          <li><span data-t="backupStep1"></span> <a href="https://github.com/new?name=maxapki-data&amp;visibility=private" target="_blank" rel="noopener">github.com/new</a></li>
+          <li><span data-t="backupStep2"></span> <a href="https://github.com/settings/personal-access-tokens/new?name=MaxApki&amp;description=MaxApki+backup&amp;expires_in=366&amp;contents=write" target="_blank" rel="noopener">github.com/settings/personal-access-tokens</a></li>
+          <li data-t="backupStep3"></li>
+        </ol>
+        <form class="backup-form" id="backup-form" novalidate>
+          <label for="backup-repo" data-t="backupRepo">Repository</label>
+          <input type="text" class="link-field" id="backup-repo" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <label for="backup-token" data-t="backupToken">Token</label>
+          <input type="text" class="link-field" id="backup-token" dir="ltr" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <div class="row"><button type="submit" class="ghost-btn" id="backup-connect" data-t="backupConnect">Connect</button></div>
+        </form>
+      </div>
+      <div id="backup-on" hidden>
+        <p id="backup-repo-name"></p>
+        <div class="row move-row">
+          <button type="button" class="ghost-btn" id="backup-now" data-t="backupNow">Back up now</button>
+          <button type="button" class="ghost-btn" id="backup-restore" data-t="backupRestore">Restore the backup</button>
+        </div>
+        <div class="move-confirm" id="backup-conflict" hidden>
+          <p id="backup-conflict-text"></p>
+          <div class="row">
+            <button type="button" class="ghost-btn danger" id="backup-overwrite" data-t="backupOverwrite">Replace the backup</button>
+          </div>
+        </div>
+      </div>
+      <p class="hint" id="backup-status" role="status"></p>
+      <div id="backup-off" hidden>
+        <button type="button" class="ghost-btn" id="backup-disconnect" data-t="backupDisconnect">Disconnect</button>
+        <p class="hint" data-t="backupDisconnectNote" style="margin-top:0.6rem"></p>
+      </div>
+    </section>
+
     <div class="sheet-foot">
       <button type="button" class="primary-btn" id="close-settings" data-t="close">Done</button>
     </div>
@@ -1589,6 +1633,7 @@
 
 <script src="srs.js"></script>
 <script src="voice.js"></script>
+<script src="backup.js"></script>
 <script src="geo.js"></script>
 <script src="i18n.js"></script>
 <script src="i18n-capitals.js"></script>
@@ -2041,6 +2086,7 @@
     } catch (e) {
       /* storage unavailable */
     }
+    scheduleBackup();
   }
   const prefs = loadPrefs();
 
@@ -2166,6 +2212,7 @@
     } catch (e) {
       /* storage unavailable: progress lasts for this visit only */
     }
+    scheduleBackup();
   }
 
   let state = load() || defaultState();
@@ -7669,6 +7716,7 @@
     $('log-text').hidden = true;
     $('import-box').hidden = true;
     $('progress-status').textContent = '';
+    showBackup();
     // The date GitHub Pages published the files, from the page's Last-Modified header.
     const published = new Date(document.lastModified);
     $('app-version').textContent = isNaN(published) ? '' :
@@ -7889,14 +7937,20 @@
   const valid = (s) => !!(s && s.cards && s.settings);
   const hasProgress = (s) => valid(s) &&
     (Object.values(s.cards).some((c) => c && c.reps > 0) || (Array.isArray(s.trophies) && s.trophies.length > 0));
-  function progressFile() {
+  // What goes into the file: { storage key: saved value }, or null if no app
+  // has progress.
+  function progressData() {
     const data = { [PREFS_KEY]: prefs };
     for (const a of Object.values(APPS)) {
       const saved = savedState(a.id);
       const s = a.id === app.id ? state : saved;
       if (saved && valid(s)) data[a.storeKey] = s;
     }
-    if (!Object.values(APPS).some((a) => hasProgress(data[a.storeKey]))) return null;
+    return Object.values(APPS).some((a) => hasProgress(data[a.storeKey])) ? data : null;
+  }
+  function progressFile() {
+    const data = progressData();
+    if (!data) return null;
     const d = new Date();
     const day = [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, '0')).join('-');
     const text = JSON.stringify({ maxapki: PROGRESS_FILE, saved: Date.now(), data });
@@ -7927,7 +7981,8 @@
   // Stores the progress of a file in place of this device's, and starts the
   // page again with it. The open app, the language and the settings of the
   // apps in the file come from the file; the apps opened and the gift links
-  // of both devices are kept.
+  // of both devices are kept. A backup restored from GitHub (backupSha) is
+  // then this device's to replace.
   function replaceProgress(file) {
     try {
       for (const a of file.apps) {
@@ -7942,6 +7997,10 @@
           p[key] = [...new Set((Array.isArray(p[key]) ? p[key] : []).concat(prefs[key]))];
         }
         localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+      }
+      if (file.backupSha) {
+        backup = { ...backup, sha: file.backupSha, hash: null, error: null, conflict: null };
+        saveBackup();
       }
     } catch (e) {
       $('progress-status').textContent = T().progressFailed;
@@ -7990,19 +8049,27 @@
       }
     }
     input.value = ''; // the same file can be chosen again
-    arriving = readProgress(text);
-    $('import-box').hidden = !arriving;
-    if (!arriving) {
+    const file = readProgress(text);
+    if (!file) {
+      arriving = null;
+      $('import-box').hidden = true;
       $('progress-status').textContent = t.progressBad;
       return;
     }
     $('progress-status').textContent = '';
-    const date = new Date(arriving.saved).toLocaleString(lang(), { dateStyle: 'long', timeStyle: 'short' });
-    const names = arriving.progressApps.map((a) => a.name);
-    const list = Intl.ListFormat ? new Intl.ListFormat(lang(), { type: 'conjunction' }).format(names) : names.join(', ');
-    $('import-text').textContent = t.progressFrom(date, list) + ' ' + t.progressSettings +
-      (newerHere(arriving) ? ' ' + t.progressNewer : '');
+    offerProgress(file);
   });
+  const savedWhen = (time) => new Date(time).toLocaleString(lang(), { dateStyle: 'long', timeStyle: 'short' });
+  const appList = (names) =>
+    (Intl.ListFormat ? new Intl.ListFormat(lang(), { type: 'conjunction' }).format(names) : names.join(', '));
+  // Says what a file (or a backup) holds, to confirm before it is stored.
+  function offerProgress(file) {
+    const t = T();
+    arriving = file;
+    $('import-box').hidden = false;
+    $('import-text').textContent = t.progressFrom(savedWhen(file.saved), appList(file.progressApps.map((a) => a.name))) +
+      ' ' + t.progressSettings + (newerHere(file) ? ' ' + t.progressNewer : '');
+  }
   $('import-yes').addEventListener('click', () => {
     if (arriving) replaceProgress(arriving);
   });
@@ -8010,6 +8077,220 @@
     arriving = null;
     $('import-box').hidden = true;
   });
+
+  // ---------- backup on GitHub ----------
+
+  // The progress file of all the apps is backed up as maxapki.json in a
+  // private GitHub repository (see backup.js), with the name of this device.
+  // The connection and the state of the backup are kept on this device only,
+  // under their own key, so the token never goes into a progress file or a
+  // backup: { device, repo, token, sha, hash, at, error, conflict }.
+  //   device: a random name of this device, kept when it is disconnected;
+  //   sha: the version of the backup this device last wrote or restored;
+  //   hash: the fingerprint of the progress then backed up, and at: when;
+  //   error: why the last backup failed (a kind of BACKUP.BackupError);
+  //   conflict: { saved, apps } of a backup written by another device, which
+  //     waits for it to be restored here or replaced.
+  const BACKUP_KEY = 'max-backup';
+  let backup = loadBackup();
+  let backupBusy = false;
+  let backupAgain = false;
+  let backupWarned = false;
+
+  function loadBackup() {
+    let c = null;
+    try {
+      c = JSON.parse(localStorage.getItem(BACKUP_KEY));
+    } catch (e) {
+      /* none saved */
+    }
+    if (!c || typeof c.device !== 'string') {
+      c = { device: Math.random().toString(36).slice(2, 10) + Date.now().toString(36) };
+    }
+    return c.repo && c.token ? c : { device: c.device };
+  }
+  function saveBackup() {
+    try {
+      localStorage.setItem(BACKUP_KEY, JSON.stringify(backup));
+    } catch (e) {
+      /* storage unavailable: the connection lasts for this visit only */
+    }
+  }
+
+  // After a change, waits a minute for more before backing up. save() calls
+  // it, possibly before the code here has run, so it keeps its timer on
+  // itself.
+  function scheduleBackup() {
+    clearTimeout(scheduleBackup.timer);
+    scheduleBackup.timer = setTimeout(backupNow, 60 * 1000);
+  }
+
+  // Backs up the progress if it changed since the last backup, or after a
+  // failed one. overwrite replaces a backup written by another device.
+  async function backupNow(overwrite) {
+    clearTimeout(scheduleBackup.timer);
+    scheduleBackup.timer = 0;
+    const c = backup;
+    if (!c.repo || replacing || (c.conflict && overwrite !== true)) return;
+    if (backupBusy) {
+      backupAgain = true;
+      return;
+    }
+    const data = progressData();
+    if (!data) return;
+    const dataText = JSON.stringify(data);
+    const hash = BACKUP.fingerprint(dataText);
+    if (hash === c.hash && !c.error && overwrite !== true) return;
+    const text = JSON.stringify({ maxapki: PROGRESS_FILE, saved: Date.now(), device: c.device, data });
+    const once = (replace) => BACKUP.backupOnce({
+      remote: BACKUP.gitHubRemote(c), text, device: c.device, known: c.sha, overwrite: replace,
+      message: 'MaxApki: ' + new Date().toISOString(),
+    });
+    backupBusy = true;
+    showBackup();
+    let result = {};
+    try {
+      let r = await once(overwrite === true);
+      // A backup without progress in it is simply replaced.
+      if (r.conflict && !readProgress(r.conflict.text)) r = await once(true);
+      if (r.conflict) {
+        const file = readProgress(r.conflict.text);
+        result = { error: null, conflict: { saved: file.saved, apps: file.progressApps.map((a) => a.id) } };
+      } else {
+        result = { sha: r.sha, hash, at: Date.now(), error: null, conflict: null };
+      }
+    } catch (e) {
+      // Being offline is not shown as an error: the next change, a return to
+      // the app or getting back online tries again.
+      result = e && e.kind === 'network' ? {} : { error: (e && e.kind) || 'bad' };
+    } finally {
+      backupBusy = false;
+      if (backup === c) {
+        backup = { ...c, ...result };
+        saveBackup();
+      }
+      showBackup();
+      // Once a visit, outside the settings, say that backups have stopped.
+      if ((backup.error || backup.conflict) && !backupWarned && $('settings').hidden) {
+        backupWarned = true;
+        toast(T().backupTrouble);
+      }
+      if (backupAgain) {
+        backupAgain = false;
+        scheduleBackup();
+      }
+    }
+  }
+
+  function showBackup() {
+    const t = T();
+    const c = backup;
+    const on = !!c.repo;
+    $('backup-setup').hidden = on;
+    $('backup-on').hidden = !on;
+    $('backup-off').hidden = !on;
+    $('backup-repo').placeholder = t.backupRepoPlaceholder;
+    if (!on) return;
+    $('backup-repo-name').textContent = t.backupConnected(c.repo);
+    $('backup-now').disabled = backupBusy;
+    $('backup-status').textContent = backupBusy ? t.backupBusy
+      : c.error ? t.backupErrors[c.error] || t.backupErrors.bad
+      : c.at ? t.backupLast(savedWhen(c.at)) : t.backupNever;
+    $('backup-conflict').hidden = !c.conflict;
+    if (c.conflict) {
+      const names = c.conflict.apps.filter((id) => APPS[id]).map((id) => APPS[id].name);
+      $('backup-conflict-text').textContent = t.backupConflict(savedWhen(c.conflict.saved), appList(names));
+    }
+  }
+
+  $('backup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const t = T();
+    const repo = BACKUP.parseRepo($('backup-repo').value);
+    const token = $('backup-token').value.trim();
+    const problem = !repo ? 'repoFormat' : !token ? 'token' : null;
+    if (problem) {
+      $('backup-status').textContent = t.backupErrors[problem];
+      return;
+    }
+    $('backup-connect').disabled = true;
+    $('backup-status').textContent = t.backupConnecting;
+    try {
+      await BACKUP.gitHubRemote({ repo, token }).checkRepo();
+    } catch (err) {
+      $('backup-status').textContent = t.backupErrors[err && err.kind] || t.backupErrors.bad;
+      return;
+    } finally {
+      $('backup-connect').disabled = false;
+    }
+    backup = { device: backup.device, repo, token, sha: null, hash: null, at: null, error: null, conflict: null };
+    saveBackup();
+    $('backup-repo').value = '';
+    $('backup-token').value = '';
+    showBackup();
+    backupNow();
+  });
+
+  $('backup-now').addEventListener('click', () => {
+    if (backup.conflict) return;
+    backupNow();
+    showBackup(); // up to date: says when the last backup was made
+  });
+
+  // Fetches the backup and says what it holds, as for a file; it is stored
+  // only after "Replace progress".
+  $('backup-restore').addEventListener('click', async () => {
+    const t = T();
+    const status = $('backup-status');
+    status.textContent = t.backupFetching;
+    let pulled = null;
+    try {
+      pulled = await BACKUP.gitHubRemote(backup).pull();
+    } catch (err) {
+      status.textContent = t.backupErrors[err && err.kind] || t.backupErrors.bad;
+      return;
+    }
+    const file = pulled && readProgress(pulled.text);
+    if (!file) {
+      status.textContent = pulled ? t.backupBad : t.backupEmpty;
+      return;
+    }
+    status.textContent = '';
+    file.backupSha = pulled.sha;
+    offerProgress(file);
+    $('import-box').scrollIntoView({ block: 'nearest' });
+  });
+
+  $('backup-overwrite').addEventListener('click', () => backupNow(true));
+
+  let disconnectTimer = null;
+  $('backup-disconnect').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    if (!btn.dataset.armed) {
+      btn.dataset.armed = '1';
+      btn.textContent = T().backupDisconnectConfirm;
+      disconnectTimer = setTimeout(() => {
+        delete btn.dataset.armed;
+        btn.textContent = T().backupDisconnect;
+      }, 4000);
+      return;
+    }
+    clearTimeout(disconnectTimer);
+    delete btn.dataset.armed;
+    btn.textContent = T().backupDisconnect;
+    backup = { device: backup.device };
+    saveBackup();
+    $('backup-status').textContent = '';
+    showBackup();
+  });
+
+  // Leaving the app backs up a pending change now rather than never; coming
+  // back or getting back online tries again after a failure.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') backupNow();
+    else if (scheduleBackup.timer) backupNow();
+  });
+  window.addEventListener('online', () => backupNow());
 
   // Fetches the newest version: first a newer offline worker (sw.js), if there
   // is one, then the page itself, which the worker always checks with the server.
@@ -8267,6 +8548,7 @@
     if (giftRefusal(arrivingGift)) toast(giftRefusal(arrivingGift));
     else receiveGift(arrivingGift);
   }
+  backupNow();
 })();
 </script>
 </body>
