@@ -1,6 +1,6 @@
 # Moving MaxApki to a new address
 
-Design proposal. Nothing here is implemented yet. The domain is not chosen yet; the examples use `maxapki.de`.
+Design proposal. Nothing here is implemented yet. The domain is not chosen yet; the plan assumes `maxapki.top`.
 
 This plan covers the app installed from Chrome on Android, and the app opened in a browser on a computer. It does not cover the app added to the home screen of an iPad (see [Not covered](#not-covered)).
 
@@ -44,7 +44,7 @@ Both addresses serve the same files. The page decides what to do from `location.
 The progress travels in the address itself:
 
 ```
-https://maxapki.de/#move/<data>
+https://maxapki.top/#move/<data>
 ```
 
 `<data>` is the text of a progress file, compressed with gzip (`CompressionStream`) and written in base64url (letters, digits, `-` and `_`):
