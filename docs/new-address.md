@@ -22,7 +22,7 @@ This plan covers the app installed from Chrome on Android, and the app opened in
 2. The new address is outside the installed app, so Chrome shows it in a browser view over the app, with the address at the top. All progress, coins and rewards are already there.
 3. A message says that MaxApki has a new address and asks to install it again.
 4. A new MaxApki icon appears. It opens with all the progress. The GitHub backup carries on by itself; nothing has to be entered.
-5. They remove the old icon: long press, then "Uninstall". Until then, the old icon only says that the app has moved and opens the new address.
+5. They remove the old icon: long press, then "Uninstall". The old icon is grey and called "Stare MaxApki" by then ([Telling the two apps apart](#telling-the-two-apps-apart)). Until it is removed, it only says that the app has moved.
 
 Installing the new app and removing the old one are the two steps the user has to do. Chrome leaves both to the user. Chrome has a feature for moving an installed app to a new address ([PWA origin migration](https://developer.chrome.com/blog/seamless-pwa-origin-migration)), but it works only between addresses of the same site, such as `app.example.com` and `example.com`, and is announced for computers only.
 
@@ -40,6 +40,12 @@ So each address has its own repository, both on GitHub Pages:
 No GitHub Action is needed: nothing is copied from one repository to the other after the split. The receiving and the sending code are written once, in `maxapki`, and the commit that adds them is also brought to `Anki` (cherry-picked, without `CNAME`). The page decides what to do from `location.origin`: at the old address it sends, at the new address it receives.
 
 The new app is at the root of its address (`/`), the old one at `/Anki/`. Every path in the app is relative (`manifest.webmanifest`, `sw.js`, `stolice/`), so the files work at both without change. The manifest `id` (`./`) makes the app at the new address a different app for Chrome, which is why it has to be installed again.
+
+### Telling the two apps apart
+
+Both apps would be called "MaxApki" with the same icon, so it would be hard to tell which one to uninstall. The old address therefore has its own `manifest.webmanifest`, only in `gchrupala/Anki`: the name "Stare MaxApki" (old MaxApki) and a grey, faded copy of the icon (`icons/old-192.png`, `icons/old-512.png`, made from the PNG icons with Pillow). The new address keeps the name and the colourful icon.
+
+Chrome on Android updates the name and icon of an installed app when it next checks the manifest, at most once a day when the app is opened, and may show a dialog asking to confirm the change. So the manifest goes to the old address a few days before the move. The message at the new address names the grey "Stare MaxApki" icon, and says how to tell the old app if both icons still look the same: opened, it only says that MaxApki has moved.
 
 ### Setting up `maxapki.top`
 
@@ -119,8 +125,9 @@ I found no other way to send it. The new address is a static site, so it receive
 1. Set up `gchrupala/maxapki` and `maxapki.top` ([Setting up `maxapki.top`](#setting-up-maxapkitop)).
 2. Publish the receiving version at the new address (push `main` to `gchrupala/maxapki`). Check that it opens over HTTPS and can be installed.
 3. Check on one Android tablet what the tests cannot ([To check on a tablet](#to-check-on-a-tablet)).
-4. Publish the sending version at the old address: cherry-pick the commit of the move onto `main` of `gchrupala/Anki` and push it. Each tablet moves on its next start with internet. Nothing can limit this to one tablet: every device that opens the old address moves.
-5. When all tablets have moved, `gchrupala/Anki` can be archived. Check that its Pages site still serves the sending version after that; if not, unarchive it. A tablet not opened before the old address stops working keeps its progress in the old storage.
+4. Publish the manifest with the grey icon at the old address ([Telling the two apps apart](#telling-the-two-apps-apart)), and wait a few days, until the icon on the tablets has turned grey.
+5. Publish the sending version at the old address: cherry-pick the commits of the move onto `main` of `gchrupala/Anki` and push it. Each tablet moves on its next start with internet. Nothing can limit this to one tablet: every device that opens the old address moves.
+6. When all tablets have moved, `gchrupala/Anki` can be archived. Check that its Pages site still serves the sending version after that; if not, unarchive it. A tablet not opened before the old address stops working keeps its progress in the old storage.
 
 ## Tests
 

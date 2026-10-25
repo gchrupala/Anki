@@ -492,6 +492,8 @@ MaxApki moves from https://grzegorz.chrupala.me/Anki/ to https://maxapki.top/. T
 - **At the old address.** On its first start with internet once the new address answers, the app goes to `https://maxapki.top/#move/<data>`, where `<data>` is the progress file (with the connection to the backup on GitHub, token included), compressed with gzip and written in base64url. The part after `#` is not sent to a server. From then on the old app saves nothing and only says that MaxApki has moved. Its buttons send the progress again, or save it to a file. A device with too much progress for a link (over 2 MB) moves it as a file.
 - **At the new address.** The progress is stored at once if there is none there yet; otherwise the settings say what it holds and ask, as for a file. The same move is not stored twice. The backup on GitHub carries on as the same device, unless the new address is connected already. Until the app runs installed from the new address, each start asks to install it and to remove the old one (press and hold its icon, "Uninstall").
 
+So that the old app can be told from the new one, the old address has its own manifest, only in `gchrupala/Anki`: the name "Stare MaxApki" (old MaxApki) and a grey icon (`icons/old-192.png`, `icons/old-512.png`). Chrome updates the installed app to match when it next checks it, which can take up to a day, and may ask to confirm the change. So it goes to the old address a few days before the move.
+
 On an iPad, the app added to the home screen keeps its own storage, so the progress has to be moved as a file there: "Zapisz postępy do pliku" on the moved screen of the old app, then "Wczytaj postępy z pliku" in the settings of the new one.
 
 ## Backing up to GitHub
