@@ -118,7 +118,7 @@
     return -1;
   }
 
-  const api = { normalize, pick, MIN_SCORE, MARGIN };
+  const api = { normalize, distance, likeness, pick, MIN_SCORE, MARGIN };
 
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.VOICE = api;

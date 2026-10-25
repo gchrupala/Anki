@@ -762,6 +762,35 @@
   .heard:empty { display: none; }
   .choices.pics .choice { font-size: clamp(1.8rem, 9vw, 2.4rem); line-height: 1; }
   .choices.long { grid-template-columns: minmax(0, 1fr); }
+  /* JęzykiMax, answers in the child's own words: the right answer once
+     answered, the base form of the word for a gap, a big speaker for
+     dictation and a big microphone for answers said, and under the card the
+     field to write in, with the letters a keyboard may lack */
+  .own-answer { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.4rem, 6.5cqi, 2.6rem); line-height: 1.15; color: var(--good); }
+  .own-answer:empty { display: none; }
+  .gap-hint { color: var(--ink-soft); font-size: 0.8em; font-weight: 600; }
+  .say.big { font-size: 2.4rem; padding: 0.4rem 1.6rem; }
+  .mic.big { font-size: 1.15rem; padding: 0.55rem 1.4rem; }
+  .own-box { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; width: 100%; max-width: 32rem; margin-inline: auto; }
+  .own-row { display: flex; gap: 0.5rem; width: 100%; }
+  .own-input {
+    flex: 1;
+    min-width: 0;
+    height: 3.6rem;
+    padding: 0 0.9rem;
+    border: 1.5px solid var(--key-edge);
+    border-radius: 14px;
+    background: var(--key);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  .own-input:focus { outline: 2px solid var(--pen); outline-offset: 1px; }
+  .own-input[readonly] { opacity: 0.7; }
+  .own-ok { width: 5rem; }
+  .own-letters { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; }
+  .own-letters .key { width: 2.8rem; height: 2.8rem; font-size: 1.3rem; }
   .card.shake .place { animation: shake 0.35s; }
   .card.enter .place { animation: rise 0.25s ease-out; }
   @media (prefers-reduced-motion: reduce) {
@@ -1262,6 +1291,7 @@
           <div class="place" data-app="languages" aria-live="polite">
             <span class="flag" id="lang-pic"></span>
             <span class="country target" id="lang-text" dir="ltr"></span>
+            <span class="own-answer target" id="lang-answer" dir="ltr"></span>
             <span class="nick" id="lang-meaning" dir="auto"></span>
             <button type="button" class="say" id="say" data-t-aria="listen" hidden>🔊</button>
           </div>
@@ -1319,6 +1349,15 @@
         <button type="button" class="choice" data-i="1"></button>
         <button type="button" class="choice" data-i="2"></button>
         <button type="button" class="choice" data-i="3"></button>
+      </div>
+
+      <div class="own-box" id="own-box" data-app="languages" hidden>
+        <form class="own-row" id="own-form">
+          <input class="own-input" id="own-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" dir="ltr" data-t-aria="answerAria">
+          <button type="submit" class="key ok own-ok">OK</button>
+        </form>
+        <div class="own-letters" id="own-letters" data-t-aria="lettersAria"></div>
+        <button type="button" class="ghost-btn" id="own-skip"></button>
       </div>
 
       <div class="atlas" id="atlas" data-app="maps">
@@ -1450,6 +1489,12 @@
       <p class="hint" id="auto-say-hint" data-app="languages" data-t="autoSayHint" hidden></p>
       <div class="field" id="voice-field" data-app="languages"><span><label for="voice" data-t="voice">Listen for answers</label> <button type="button" class="info-btn" aria-controls="voice-hint" aria-expanded="false">i</button></span> <input id="voice" type="checkbox"></div>
       <p class="hint" id="voice-hint" data-app="languages" data-t="voiceHint" hidden></p>
+      <div class="field" id="speak-field" data-app="languages"><span><label for="speak-cards" data-t="speakCards">Spoken answers</label> <button type="button" class="info-btn" aria-controls="speak-hint" aria-expanded="false">i</button></span> <input id="speak-cards" type="checkbox"></div>
+      <p class="hint" id="speak-hint" data-app="languages" data-t="speakCardsHint" hidden></p>
+      <div class="field" data-app="languages"><span><label for="write-cards" data-t="writeCards">Written answers</label> <button type="button" class="info-btn" aria-controls="write-hint" aria-expanded="false">i</button></span> <input id="write-cards" type="checkbox"></div>
+      <p class="hint" id="write-hint" data-app="languages" data-t="writeCardsHint" hidden></p>
+      <div class="field" data-app="languages"><span><label for="article-cards" data-t="articleCards">Articles</label> <button type="button" class="info-btn" aria-controls="article-hint" aria-expanded="false">i</button></span> <input id="article-cards" type="checkbox"></div>
+      <p class="hint" id="article-hint" data-app="languages" data-t="articleCardsHint" hidden></p>
     </section>
 
     <section>
@@ -1635,6 +1680,7 @@
 
 <script src="srs.js"></script>
 <script src="voice.js"></script>
+<script src="answer.js"></script>
 <script src="backup.js"></script>
 <script src="geo.js"></script>
 <script src="i18n.js"></script>
@@ -1649,6 +1695,7 @@
 <script src="chemistry.js"></script>
 <script src="literature.js"></script>
 <script src="languages-translations.js"></script>
+<script src="languages-recall.js"></script>
 <script src="languages.js"></script>
 <script src="places.js"></script>
 <script src="maps.js"></script>
@@ -1957,9 +2004,11 @@
       // target: the language learned (fr, es, nl, it or pl); levels: A1, A2, B1, B2;
       // translate: once answered, show what the card means in the language
       // of the page; autoSay: read the cards aloud without the speaker
-      // button. A card stays 5 seconds after an answer, to hear it and read
-      // its translation.
-      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, translate: true, autoSay: false, nextAfter: 5 }),
+      // button; speak, write, articles: the cards answered by speaking or
+      // writing and the article cards (for now only in Dutch). A card stays
+      // 5 seconds after an answer, to hear it and read its translation.
+      settings: () => ({ target: 'fr', levels: LANGUAGE_LEVELS.slice(), newPerDay: 10, retention: 0.9, answerTime: 30, translate: true, autoSay: false, nextAfter: 5,
+        speak: true, write: true, articles: true }),
       groupKey: 'levels',
       rewards: CITIES,
       strings: (l) => I18N.LANGUAGES[l] || {},
@@ -2417,14 +2466,38 @@
       },
       group: (id) => BY_LANG[id].level,
       // A1, then A2, B1 and B2; within a level the cards that ask for the
-      // picture of a word come after the others.
-      rank: (id) => LANGUAGE_LEVELS.indexOf(BY_LANG[id].level) * 2 + (BY_LANG[id].kind === 'w' ? 1 : 0),
-      prompt: (id) => T().prompts[BY_LANG[id].kind],
+      // picture of a word, those answered in the child's own words and the
+      // article cards come after the others.
+      rank: (id) => LANGUAGE_LEVELS.indexOf(BY_LANG[id].level) * 2 + ('pgqo'.includes(BY_LANG[id].kind) ? 0 : 1),
+      // A picture to name says whether it is a colour or a number; a Polish
+      // article card asks ten, ta or to.
+      prompt: (id) => {
+        const card = BY_LANG[id];
+        const p = T().prompts;
+        return p[card.kind + '-' + card.lang] || p[card.kind + '-' + card.theme] || p[card.kind];
+      },
+      // Cards answered in the child's own words and article cards, as the
+      // settings allow, and only where they can be answered: by voice where
+      // the browser recognizes speech, dictation where the device has a
+      // voice for the language.
+      active: (id) => {
+        const card = BY_LANG[id];
+        if (card.kind === 'a') return !!state.settings.articles;
+        if (!OWN_KINDS.includes(card.kind)) return true;
+        const { say, write } = ownModes(card);
+        return say || (write && (card.kind !== 'l' || !!voiceFor(card.lang)));
+      },
       // Gaps and questions have their own wrong answers. Otherwise they are
       // the answers of other cards of the same kind: of the same theme where
-      // it has enough, then of the same level.
+      // it has enough, then of the same level. An article card has the
+      // articles of its language in a fixed order (de, het); a card answered
+      // in the child's own words, none.
       options: (id) => {
         const card = BY_LANG[id];
+        if (OWN_KINDS.includes(card.kind)) {
+          langOffered = {};
+          return [];
+        }
         let wrong = card.wrong;
         if (!wrong) {
           const alike = (o) => (o.theme && o.theme === card.theme ? 2 : 0) + (o.level === card.level ? 1 : 0);
@@ -2436,6 +2509,7 @@
         wrong.forEach((w, i) => {
           langOffered[id + '#' + (i + 1)] = w;
         });
+        if (card.kind === 'a') return Object.keys(langOffered).sort((x, y) => card.choices.indexOf(langOffered[x]) - card.choices.indexOf(langOffered[y]));
         return shuffle(Object.keys(langOffered));
       },
       answer: (key) => {
@@ -2445,7 +2519,7 @@
       },
       tile: (id) => {
         const card = BY_LANG[id];
-        return { p: card.show, w: card.answer, g: '_', q: '?', o: '⇄' }[card.kind];
+        return { p: card.show, w: card.answer, g: '_', q: '?', o: '⇄', s: '🗣️', d: '📖', f: '💡', h: '✏️', l: '👂', a: '🔤' }[card.kind];
       },
       // The tile or the label can be the answer: a picture, a word or an
       // opposite.
@@ -2508,6 +2582,33 @@
   };
   const choice = () => CHOICE[app.id];
 
+  // ---------- JęzykiMax: answers in the child's own words ----------
+
+  // The kinds of card answered by speaking or writing (languages-recall.js).
+  const OWN_KINDS = 'sdfhl';
+  // The card shown, if the child answers it in their own words.
+  function ownCard() {
+    const c = current();
+    const card = c && app.id === 'languages' && BY_LANG[c.id];
+    return card && OWN_KINDS.includes(card.kind) ? card : null;
+  }
+  // How a card can be answered: a picture to name and a question by voice,
+  // a gap and dictation in writing, a definition both ways; by voice only
+  // where the browser recognizes speech, and each as the settings allow.
+  function ownModes(card) {
+    return {
+      say: 'sdf'.includes(card.kind) && !!state.settings.speak && !!Recognition,
+      write: 'dhl'.includes(card.kind) && !!state.settings.write,
+    };
+  }
+  // How a written answer is judged (answer.js): the word of a definition or
+  // dictation with or without its article, and the word of a definition
+  // with one letter wrong as nearly right.
+  const WRITTEN_RULES = { d: { articles: true, typo: true }, h: {}, l: { articles: true } };
+  const writtenVerdict = (card, text) => ANSWER.written(text, card.accept, { lang: card.lang, ...WRITTEN_RULES[card.kind] });
+  // The letters with accents of each language, for keyboards without them.
+  const LETTERS = { fr: 'éèêàçùâîôûëïœ', es: 'áéíóúñü¿¡', nl: 'éëïöüè', it: 'àèéìòù', pl: 'ąćęłńóśźż' };
+
   // ---------- MapkiMax: finding places on the map ----------
 
   const isMaps = () => app.id === 'maps';
@@ -2545,8 +2646,10 @@
       const on = new Set(state.settings[app.groupKey]);
       // MapkiMax: also the kinds of places switched on.
       const kinds = isMaps() ? new Set(state.settings.kinds) : null;
+      // JęzykiMax: also the kinds of card switched on (active).
+      const active = choice().active || (() => true);
       for (const id of choice().ids) {
-        if (on.has(choice().group(id)) && (!kinds || kinds.has(BY_PLACE[id].kind))) list.push(choiceCard(id));
+        if (on.has(choice().group(id)) && (!kinds || kinds.has(BY_PLACE[id].kind)) && active(id)) list.push(choiceCard(id));
       }
     }
     // JęzykiMax introduces new cards in steps (rank), at random within a step.
@@ -2560,17 +2663,21 @@
   }
 
   // JęzykiMax: the words (picture concepts) of a card: its own for a picture
-  // or word card, those it uses for a gap or question.
+  // or word card and for the cards built on one, those it uses for a gap or
+  // question.
   const LANG_CONCEPTS = Object.fromEntries(Object.values(BY_LANG).map((c) => [c.id,
-    c.kind === 'p' || c.kind === 'w' ? [c.id.split('.')[2]] : c.uses || []]));
+    c.kind === 'p' || c.kind === 'w' ? [c.id.split('.')[2]] : c.concept ? [c.concept] : c.uses || []]));
 
   // JęzykiMax holds a new card back
   //  - while the picture card of a word it uses is new or being learned, so
   //    the child meets a word with its picture before meeting it in sentences;
-  //  - on a day another card with one of its words is being learned or was
-  //    answered, so the same word is not asked twice in a few minutes (as
-  //    Anki buries siblings). It comes on a later day.
-  // A picture of a level switched off holds nothing back.
+  //  - while the card it is built on (base: the picture card of its word, or
+  //    the gap with four answers) is new or being learned, so the child
+  //    answers in their own words what they already know from four answers;
+  //  - on a day another card with one of its words, or its base, is being
+  //    learned or was answered, so the same word is not asked twice in a few
+  //    minutes (as Anki buries siblings). It comes on a later day.
+  // A card of a level switched off holds nothing back.
   function heldBack(cards) {
     if (app.id !== 'languages') return () => false;
     const byId = Object.fromEntries(cards.map((c) => [c.id, c]));
@@ -2578,14 +2685,17 @@
     for (const c of cards) {
       if (SRS.isLearning(c) || (c.last !== null && SRS.dayIndex(c.last, ROLLOVER) === today())) {
         LANG_CONCEPTS[c.id].forEach((k) => busy.add(k));
+        busy.add(c.id);
       }
     }
-    const unlearned = (k) => {
-      const picture = byId[state.settings.target + '.p.' + k];
-      return !!picture && (picture.type === 'new' || SRS.isLearning(picture));
+    const unlearned = (id) => !!byId[id] && (byId[id].type === 'new' || SRS.isLearning(byId[id]));
+    return (c) => {
+      if (c.type !== 'new') return false;
+      const card = BY_LANG[c.id];
+      if (card.base && (busy.has(card.base) || unlearned(card.base))) return true;
+      return LANG_CONCEPTS[c.id].some((k) => busy.has(k)
+        || ('gqfh'.includes(card.kind) && unlearned(state.settings.target + '.p.' + k)));
     };
-    return (c) => c.type === 'new' && LANG_CONCEPTS[c.id].some((k) => busy.has(k)
-      || ((BY_LANG[c.id].kind === 'g' || BY_LANG[c.id].kind === 'q') && unlearned(k)));
   }
 
   function queues() {
@@ -2650,6 +2760,10 @@
   let typed = ''; // MnożenieMax: the digits typed
   let options = []; // the apps with four answers: the cards whose answers are the choices
   let picked = null; // the apps with four answers: the wrong answer picked
+  // JęzykiMax: an answer in the child's own words, judged: { right, close,
+  // text, skipped (I don't know), firstKeyAt }, for submit.
+  let ownVerdict = null;
+  let firstKeyAt = 0; // when the first letter of a written answer was typed
   let shownAt = 0;
   let advanceTimer = null;
   let held = false; // the child stopped at the card after answering
@@ -2678,7 +2792,8 @@
   function armGiveUp() {
     clearTimeout(giveUpTimer);
     const seconds = state.settings.answerTime;
-    if (mode === 'ask' && typed === '' && seconds > 0 && !panelOpen() && document.visibilityState !== 'hidden') {
+    const writing = !!ownCard() && $('own-input').value !== '';
+    if (mode === 'ask' && typed === '' && !writing && seconds > 0 && !panelOpen() && document.visibilityState !== 'hidden') {
       // MapkiMax: a pin placed but not confirmed is the answer.
       giveUpTimer = setTimeout(() => submit(isMaps() && pin ? pin : null), seconds * 1000);
     }
@@ -2786,6 +2901,9 @@
     picked = null;
     pin = null;
     mapAnswer = null;
+    ownVerdict = null;
+    firstKeyAt = 0;
+    $('own-input').value = '';
     if (!c) {
       currentId = null;
       mode = 'done';
@@ -2814,6 +2932,9 @@
     armGiveUp();
     if (mode === 'ask') sayByItself();
     listenAnew();
+    // JęzykiMax: the field for a written answer is ready to type in.
+    const own = mode === 'ask' && ownCard();
+    if (own && ownModes(own).write) $('own-input').focus({ preventScroll: true });
   }
 
   // value: the answer (MnożenieMax: the number typed; StoliceMax and ChemiaMax:
@@ -2828,6 +2949,9 @@
     const before = { id: c.id, card: JSON.parse(JSON.stringify(c)), options: options.slice(), offered: langOffered, lastId };
     const timedOut = value === null;
     const ms = (at || performance.now()) - shownAt;
+    // JęzykiMax: how an answer in the child's own words was judged; on a
+    // time-out { right: false } too.
+    const own = ownCard() ? ownVerdict || { right: false, text: null } : null;
     let right;
     let grade;
     let logged = value;
@@ -2839,6 +2963,16 @@
       right = grade !== SRS.AGAIN;
       const round = (x) => Math.round(x * 100) / 100;
       logged = timedOut ? null : [round(value[1]), round(value[0]), Math.round(mapAnswer.km)];
+    } else if (own) {
+      // JęzykiMax: an answer in the child's own words, judged before. A
+      // written one is timed to its first letter, not to the end of typing.
+      // Right but for accents or a letter, it is Hard. A right answer the
+      // first time is no guess, so it may be Easy.
+      right = !timedOut && own.right;
+      const seconds = (own.firstKeyAt ? Math.max(0, own.firstKeyAt - shownAt) : ms) / 1000;
+      grade = SRS.autoGrade(right, seconds, c.type, cfg());
+      if (right && own.close) grade = SRS.HARD;
+      logged = timedOut ? null : own.text;
     } else {
       right = !timedOut && value === (isTimes() ? c.a * c.b : c.id);
       grade = SRS.autoGrade(right, ms / 1000, c.type, cfg());
@@ -2868,7 +3002,11 @@
         ? '<br><span class="coin-note">' + coinIcon() + esc(T().coinReason[LEVEL_NAMES[reward.level]] + ' ' + T().coins(reward.coins)) + '</span>'
         : '');
       const away = () => (isMaps() ? ' ' + esc(distanceText()) : '');
-      feedback = () => '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong>' + away() + '<br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
+      // JęzykiMax: an answer written nearly right; the right one is on the card.
+      const praise = () => (own && own.close
+        ? '<strong>' + esc(T().nearlyRight) + '</strong> ' + esc(T().mindSpelling)
+        : '<strong>' + esc(T().praise[PRAISE[grade]]) + '</strong>');
+      feedback = () => praise() + away() + '<br>' + esc(T().comesBack(whenText(updated.due))) + coinNote();
       // Time to read the coins, in JęzykiMax a translation, and in MapkiMax
       // to see the place on the map.
       advanceIn(Math.max(reward.coins ? 2200 : 0, meaningTime(c), isMaps() ? 3000 : 0));
@@ -2888,11 +3026,15 @@
         typed = '';
       } else {
         picked = value;
-        answer = () => esc(T().rightIs('\u0001')).replace('\u0001', choice().answer(c.id)) + '<br>' + esc(T().typeToGoOn());
+        // JęzykiMax: the right answer in the child's own words is said, or
+        // written out, to go on.
+        const goOn = () => (!own ? T().typeToGoOn() : ownModes(BY_LANG[c.id]).say ? T().sayToGoOn : T().copyToGoOn);
+        answer = () => esc(T().rightIs('\u0001')).replace('\u0001', choice().answer(c.id)) + '<br>' + esc(goOn());
       }
-      feedback = timedOut
-        ? () => '<strong>' + esc(T().timeUp) + '</strong> ' + answer()
-        : () => '<strong>' + esc(T().notQuite) + '</strong> ' + (isTimes() ? esc(T().youWrote(value)) + ' ' : '') + answer();
+      const wrote = isTimes() ? String(value) : (own && own.text) || '';
+      if (timedOut) feedback = () => '<strong>' + esc(T().timeUp) + '</strong> ' + answer();
+      else if (own && own.skipped) feedback = answer;
+      else feedback = () => '<strong>' + esc(T().notQuite) + '</strong> ' + (wrote ? esc(T().youWrote(wrote)) + ' ' : '') + answer();
       flash('shake');
     }
     render();
@@ -3025,12 +3167,13 @@
   let voiceError = ''; // why it stopped listening (the key of its text), until 🎤 is tapped
 
   // Whether the card shown can be answered by voice now, with 🎤 on it:
-  // not a card whose answers are pictures.
+  // not a card whose answers are pictures, nor one answered in writing only.
   function voiceCard() {
     const c = current();
     if (!c || !Recognition || app.id !== 'languages') return false;
     if (mode !== 'ask' && mode !== 'wrong') return false;
-    return BY_LANG[c.id].kind !== 'w';
+    const own = ownCard();
+    return own ? ownModes(own).say : BY_LANG[c.id].kind !== 'w';
   }
 
   function stopListening() {
@@ -3092,6 +3235,7 @@
   // Taps the answer heard. After a wrong answer, the right one moves on,
   // and another shakes the card and it listens again.
   function answerHeard(heard, at) {
+    if (ownCard()) return ownHeard(ownCard(), heard, at);
     const was = mode;
     const buttons = [...$('choices').querySelectorAll('.choice')];
     const card = BY_LANG[currentId];
@@ -3105,14 +3249,34 @@
     if (was === 'wrong' && mode === 'wrong') listenAnew();
   }
 
+  // An answer said in the child's own words. What is not the answer may be
+  // a word misheard, so it is shown and the app listens again; only "I
+  // don't know" or the time limit count the card as not known. After a
+  // wrong answer, saying the right one moves on.
+  function ownHeard(card, heard, at) {
+    if (!ANSWER.said(heard, card.accept, { lang: card.lang })) {
+      voiceHeard = heard[0] || '';
+      return renderVoice();
+    }
+    if (mode === 'ask') {
+      ownVerdict = { right: true, close: false, text: '🎤 ' + (heard[0] || '') };
+      submit(card.id, at);
+    } else if (mode === 'wrong') {
+      moveOn(current());
+      renderCard();
+    }
+  }
+
   function renderVoice() {
     const on = voiceCard();
     const mic = $('mic');
     const t = T();
     mic.hidden = !on;
     mic.classList.toggle('on', !!recognizer);
+    mic.classList.toggle('big', !!ownCard());
     mic.textContent = '🎤 ' + (recognizer ? t.voiceListening : t.voiceSay);
-    $('heard').textContent = !on ? '' : voiceError ? t[voiceError] : voiceHeard ? t.heardNote(voiceHeard) : '';
+    const heard = ownCard() ? t.heardOther : t.heardNote;
+    $('heard').textContent = !on ? '' : voiceError ? t[voiceError] : voiceHeard ? heard(voiceHeard) : '';
   }
 
   // ---------- rendering ----------
@@ -3303,14 +3467,24 @@
         $('bio-latin').textContent = q.latin || '';
         $('bio-latin').classList.toggle('veiled', mode === 'ask');
       } else {
+        // A card answered in the child's own words shows the right answer
+        // once answered (a gap shows it in the sentence); dictation shows
+        // nothing but a big speaker before that.
         const card = BY_LANG[c.id];
+        const own = OWN_KINDS.includes(card.kind);
+        const answered = mode !== 'ask';
         const text = $('lang-text');
-        $('lang-pic').textContent = card.kind === 'p' ? card.show : '';
+        $('lang-pic').textContent = card.kind === 'p' || card.kind === 's' ? card.show : card.pic || '';
         text.lang = card.lang;
-        text.classList.toggle('sentence', card.kind === 'g' || card.kind === 'q');
-        text.innerHTML = card.kind === 'p' ? '' : card.kind === 'g' ? gapHtml(card, mode !== 'ask') : esc(card.show);
-        $('say').hidden = !sayText(card, mode !== 'ask') || !voiceFor(card.lang);
-        $('lang-meaning').textContent = mode !== 'ask' ? meaningOf(c) : '';
+        text.classList.toggle('sentence', 'gqdfh'.includes(card.kind));
+        text.innerHTML = 'psl'.includes(card.kind) ? '' : 'gha'.includes(card.kind) ? gapHtml(card, answered) : esc(card.show);
+        $('lang-answer').lang = card.lang;
+        $('lang-answer').textContent = own && answered && card.kind !== 'h' ? card.answer : '';
+        $('say').hidden = !sayText(card, answered) || !voiceFor(card.lang);
+        $('say').classList.toggle('big', card.kind === 'l' && !answered);
+        $('lang-meaning').textContent = answered ? meaningOf(c) : '';
+        $('choices').hidden = own;
+        renderOwnBox(card, own);
       }
       // JęzykiMax: big pictures as answers. JęzykiMax, AstronomiaMax and
       // BiologiaMax: long answers one under another.
@@ -3324,6 +3498,7 @@
       $('choices').classList.toggle('answered', mode !== 'ask');
       $('choices').querySelectorAll('.choice').forEach((btn, i) => {
         const id = options[i];
+        btn.hidden = !id; // JęzykiMax: an article card has two answers
         btn.innerHTML = id ? choice().answer(id) : '';
         btn.classList.toggle('is-right', mode !== 'ask' && id === c.id);
         btn.classList.toggle('is-wrong', mode === 'wrong' && id === picked);
@@ -3372,6 +3547,7 @@
     $('card').hidden = done;
     $('keypad').hidden = done;
     $('choices').hidden = done;
+    $('own-box').hidden = done;
     $('atlas').hidden = done;
     $('done').hidden = !done;
     document.querySelectorAll('.undo-btn').forEach((b) => { b.hidden = !undoable(); });
@@ -3438,13 +3614,42 @@
   }
 
   // JęzykiMax: a sentence with its gap, empty or filled in. A word that
-  // ends in an apostrophe joins the next one ("à l’école").
+  // ends in an apostrophe joins the next one ("à l’école"). An empty gap
+  // to write in has the base form of the word after it: "Ik ___ (heten) Sara."
   const fillGap = (sentence, word) => sentence.replace(/___( ?)/, (m, space) => word + (word.endsWith('’') ? '' : space));
   function gapHtml(card, filled) {
     const [before, after] = card.show.split('___');
     const rest = filled && card.answer.endsWith('’') ? after.replace(/^ /, '') : after;
     const joined = filled && card.answer.endsWith('’') ? ' joined' : '';
-    return esc(before) + '<span class="gap' + (filled ? ' filled' : '') + joined + '">' + (filled ? esc(card.answer) : '') + '</span>' + esc(rest);
+    const hint = card.hint && !filled ? ' <span class="gap-hint">(' + esc(card.hint) + ')</span>' : '';
+    return esc(before) + '<span class="gap' + (filled ? ' filled' : '') + joined + '">' + (filled ? esc(card.answer) : '') + '</span>' + hint + esc(rest);
+  }
+
+  // JęzykiMax: under a card answered in the child's own words, the field to
+  // write in (where it can be answered in writing), with the letters a
+  // keyboard may lack, and "I don't know". After a wrong answer the child
+  // writes out the right one, or says it; a card that can be answered by
+  // voice also has "Next", in case the right answer is not understood.
+  function renderOwnBox(card, own) {
+    $('own-box').hidden = !own;
+    if (!own) return;
+    const t = T();
+    const { say, write } = ownModes(card);
+    const input = $('own-input');
+    const letters = $('own-letters');
+    $('own-form').hidden = !write;
+    input.readOnly = mode === 'right';
+    input.lang = card.lang;
+    input.placeholder = mode === 'wrong' ? t.copyPlaceholder : t.answerPlaceholder;
+    letters.hidden = !write || mode === 'right';
+    if (letters.dataset.lang !== card.lang) {
+      letters.dataset.lang = card.lang;
+      letters.innerHTML = [...(LETTERS[card.lang] || '')]
+        .map((ch) => '<button type="button" class="key" data-letter="' + ch + '" tabindex="-1">' + ch + '</button>').join('');
+    }
+    const skip = $('own-skip');
+    skip.hidden = mode === 'right' || (mode === 'wrong' && !say);
+    skip.textContent = mode === 'ask' ? t.dontKnow : t.goOn + (t.dir === 'rtl' ? ' ◀' : ' ▶');
   }
 
   // JęzykiMax: what a card means in the language of the page (the word, the
@@ -3456,15 +3661,16 @@
     if (!card || card.lang === lang() || !state.settings.translate) return '';
     return card.meaning[lang()] || '';
   }
-  const meaningTime = (c) => (!meaningOf(c) ? 0 : 'gq'.includes(BY_LANG[c.id].kind) ? 3500 : 2000);
+  const meaningTime = (c) => (!meaningOf(c) ? 0 : 'gqdfh'.includes(BY_LANG[c.id].kind) ? 3500 : 2000);
 
   // JęzykiMax: what the speaker button reads aloud, with a voice of the
   // device for the language. Nothing that gives the answer away before it
-  // is picked.
+  // is picked, except in dictation, where the word read is the question.
   function sayText(card, answered) {
-    if (card.kind === 'p') return answered ? card.answer : '';
+    if (card.kind === 'p' || card.kind === 's') return answered ? card.answer : '';
     if (card.kind === 'w') return card.show;
-    if (card.kind === 'g') return answered ? fillGap(card.show, card.answer) : '';
+    if (card.kind === 'l') return card.answer;
+    if ('gha'.includes(card.kind)) return answered ? fillGap(card.show, card.answer) : '';
     return answered ? card.show + ' – ' + card.answer : card.show;
   }
   const VOICES = { fr: 'fr-fr', es: 'es-es', nl: 'nl-nl', it: 'it-it', pl: 'pl-pl' };
@@ -3478,8 +3684,8 @@
   // question or an opposite, nothing for a word whose answer is a picture,
   // and the whole card when nothing of it is read before the answer.
   function sayRest(card) {
-    if (card.kind === 'q' || card.kind === 'o') return card.answer;
-    if (card.kind === 'w') return '';
+    if ('qodf'.includes(card.kind)) return card.answer;
+    if (card.kind === 'w' || card.kind === 'l') return '';
     return sayText(card, true);
   }
   // JęzykiMax, with the setting on: each part of a card is read aloud once.
@@ -3488,10 +3694,13 @@
   // or the whole sentence with its gap filled in, after what is still being
   // read. If the card was not heard when shown (browsers stay silent until
   // the page has been tapped), the whole card is read with its answer.
+  // Dictation is read when it is shown, whatever the setting.
   function sayByItself() {
     const c = current();
-    if (!c || app.id !== 'languages' || !state.settings.autoSay) return;
+    if (!c || app.id !== 'languages') return;
     const card = BY_LANG[c.id];
+    if (card.kind === 'l' && mode === 'ask') return speak(card, card.answer);
+    if (!state.settings.autoSay) return;
     if (mode === 'ask') return speak(card, sayText(card, false));
     if (heardId === c.id || reading()) speak(card, sayRest(card), true);
     else speak(card, sayText(card, true));
@@ -7709,6 +7918,9 @@
     $('translate').checked = !!s.translate;
     $('auto-say').checked = !!s.autoSay;
     $('voice').checked = !!s.voice;
+    $('speak-cards').checked = !!s.speak;
+    $('write-cards').checked = !!s.write;
+    $('article-cards').checked = !!s.articles;
     $('coins-total').textContent = t.coinsTotal(state.coins || 0, state.spent || 0);
     const ahead = Math.round(state.clockOffset / DAY);
     $('clock-status').textContent = ahead ? t.clockAhead(ahead) : t.clockReal;
@@ -7848,13 +8060,26 @@
     save();
   });
 
+  // JęzykiMax: the cards answered by speaking (where the browser recognizes
+  // speech) or writing, and the article cards.
+  $('speak-field').hidden = !Recognition;
+  for (const [id, key] of [['speak-cards', 'speak'], ['write-cards', 'write'], ['article-cards', 'articles']]) {
+    $(id).addEventListener('change', (e) => {
+      state.settings[key] = e.target.checked;
+      save();
+      renderProgress();
+    });
+  }
+
   // Columns as read by the FSRS optimizer: card_id, review_time (ms),
   // review_rating (1-4), review_state (0 new, 1 learning, 2 review,
   // 3 relearning), review_duration (ms). The optimizer wants a number as
   // card_id: 7 × 8 is 708; for a country or compound see CHOICE. Extra
   // columns are for people: the fact and the number typed, or the card and
-  // the card whose answer was picked (an ISO code or a formula); in
-  // MapkiMax the place, where the pin was and how far from the place (km).
+  // the card whose answer was picked (an ISO code or a formula), in
+  // JęzykiMax for a card answered in the child's own words the answer
+  // written, or said after 🎤; in MapkiMax the place, where the pin was and
+  // how far from the place (km).
   function logCsv() {
     const rows = ['card_id,review_time,review_rating,review_state,review_duration,' +
       (isTimes() ? 'fact,typed' : choice().logColumns)];
@@ -7865,7 +8090,9 @@
       } else if (isMaps()) {
         rows.push([choice().number(id), t, rating, st, ms, id, ...(answer || ['', '', ''])].join(','));
       } else {
-        rows.push([choice().number(id), t, rating, st, ms, id, answer || ''].join(','));
+        // JęzykiMax: an answer written or said may hold a comma or quote.
+        const text = String(answer || '');
+        rows.push([choice().number(id), t, rating, st, ms, id, /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text].join(','));
       }
     }
     return rows.join('\n') + '\n';
@@ -8383,6 +8610,71 @@
     if (btn) choose(Number(btn.dataset.i));
   });
 
+  // JęzykiMax: an answer written in the child's own words. The time limit
+  // runs only while nothing is written. After a wrong answer, the right one
+  // written out moves on.
+  const ownInput = $('own-input');
+  ownInput.addEventListener('input', () => {
+    const card = ownCard();
+    if (!card) return;
+    if (mode === 'ask') {
+      if (ownInput.value && !firstKeyAt) firstKeyAt = performance.now();
+      if (ownInput.value) clearTimeout(giveUpTimer);
+      else armGiveUp();
+    } else if (mode === 'wrong' && writtenVerdict(card, ownInput.value) === 'right') {
+      moveOn(current());
+      renderCard();
+    }
+  });
+  $('own-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const card = ownCard();
+    if (!card) return;
+    if (mode === 'right') return next();
+    const verdict = writtenVerdict(card, ownInput.value);
+    if (mode === 'wrong') {
+      if (verdict === 'right') {
+        moveOn(current());
+        renderCard();
+      } else {
+        flash('shake');
+      }
+      return;
+    }
+    if (mode !== 'ask' || !ownInput.value.trim()) return;
+    ownVerdict = { right: verdict !== 'wrong', close: verdict === 'close', text: ownInput.value.trim(), firstKeyAt };
+    submit(card.id);
+    if (mode === 'wrong') ownInput.value = '';
+  });
+  // A letter with an accent goes where the cursor is, and the field keeps
+  // the focus, so the keyboard stays open.
+  const ownLetters = $('own-letters');
+  ownLetters.addEventListener('mousedown', (e) => e.preventDefault());
+  ownLetters.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-letter]');
+    if (!btn || ownInput.readOnly) return;
+    const { value } = ownInput;
+    const from = ownInput.selectionStart ?? value.length;
+    const to = ownInput.selectionEnd ?? value.length;
+    ownInput.value = value.slice(0, from) + btn.dataset.letter + value.slice(to);
+    ownInput.setSelectionRange(from + btn.dataset.letter.length, from + btn.dataset.letter.length);
+    ownInput.focus();
+    ownInput.dispatchEvent(new Event('input'));
+  });
+  // "I don't know" shows the answer, and the card counts as not known.
+  // After a wrong answer, "Next" moves on.
+  $('own-skip').addEventListener('click', () => {
+    const card = ownCard();
+    if (!card) return;
+    if (mode === 'ask') {
+      ownVerdict = { right: false, close: false, text: '', skipped: true };
+      submit(card.id);
+      ownInput.value = '';
+    } else if (mode === 'wrong' && ownModes(card).say) {
+      next();
+    }
+  });
+
   $('card-body').addEventListener('click', () => {
     if (mode === 'right' && !held) next();
   });
@@ -8463,8 +8755,10 @@
       return;
     }
     if (e.metaKey || e.ctrlKey || e.altKey) {
-      // Ctrl+Z (⌘Z on a Mac), as in Anki: back to the previous card.
-      if (e.key.toLowerCase() === 'z' && !e.altKey && !e.shiftKey && undoable()) {
+      // Ctrl+Z (⌘Z on a Mac), as in Anki: back to the previous card; while
+      // writing an answer, it undoes the typing.
+      const writing = e.target.closest && e.target.closest('input:not([readonly])');
+      if (e.key.toLowerCase() === 'z' && !e.altKey && !e.shiftKey && !writing && undoable()) {
         e.preventDefault();
         undo();
       }
