@@ -37,6 +37,8 @@ So the new address is served by a second deployment of the same files:
 - a second repository with GitHub Pages and the new domain as its custom domain, updated from this one by a GitHub Action on every push to `main`, or
 - Cloudflare Pages, building from this repository.
 
+Chosen: the repository `gchrupala/maxapki`. On every push to `main`, `.github/workflows/maxapki-top.yml` replaces its content with the files of `main` and a `CNAME` file with `maxapki.top`. When all tablets have moved, `maxapki.top` becomes the custom domain of this repository, and `gchrupala/maxapki` and the workflow can be deleted (see [Order of work](#order-of-work)).
+
 Both addresses serve the same files. The page decides what to do from `location.origin`: at the old address it sends, at the new address it receives.
 
 ## The move link

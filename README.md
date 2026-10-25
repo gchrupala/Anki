@@ -562,3 +562,5 @@ The repository, the token and the state of the backup are saved on the device un
 - `backup.js`: the backup on GitHub: the calls to the GitHub API, and whether a backup may be replaced. It has no dependencies and works in the browser and in Node.
 - `tests/`: scheduler tests and the py-fsrs reference data, and tests of the StoliceMax, ChemiaMax, LiteraturaMax, JęzykiMax, MapkiMax, AstronomiaMax and BiologiaMax data.
 - `stolice/`: the first address of StoliceMax, which now leads to the app, and a service worker that removes the old offline copy.
+- `docs/new-address.md`: the plan for moving the app to https://maxapki.top/.
+- `.github/workflows/maxapki-top.yml`: copies `main` to the repository `gchrupala/maxapki`, which serves the app at https://maxapki.top/ during the move. It needs the secret `MAXAPKI_TOKEN`, a fine-grained token with "Contents: Read and write" on that repository only.
