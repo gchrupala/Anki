@@ -2,9 +2,13 @@
  * Backup of the progress in a private GitHub repository, through the GitHub
  * REST API and a fine-grained personal access token. It follows the sync of
  * Myo (https://github.com/gchrupala/myo, js/sync.js). The backup is the
- * progress file of the settings, stored as maxapki.json, with the name of
- * the device that wrote it. Each backup is a commit, so the repository
- * keeps every earlier version.
+ * progress file of the settings, with the name of the device that wrote it.
+ * Each backup is a commit, so the repository keeps every earlier version.
+ *
+ * One repository can hold the data of several people and apps: each person
+ * has a folder, and each app a file in it, such as zosia/maxapki.json and
+ * zosia/myo.json. parsePerson turns a name into the name of the folder, the
+ * same way in all the apps.
  *
  * Progress from two devices cannot be merged. So a device replaces the
  * backup only if it wrote that backup itself, restored it, or is told to:
@@ -20,7 +24,7 @@
   'use strict';
 
   const API = 'https://api.github.com';
-  const PATH = 'maxapki.json';
+  const FILE = 'maxapki.json';
 
   // kind: 'auth' (bad or expired token), 'forbidden' (no write access),
   // 'notFound' (no such repository or no access to it), 'public' (the
@@ -46,6 +50,26 @@
       .replace(/\.git$/i, '');
     return /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(s) ? s : null;
   }
+
+  // A person's name -> the name of their folder: lower case, letters and
+  // digits of any script, anything else as a single hyphen; null when
+  // nothing is left. The same in every app that shares the repository.
+  function parsePerson(input) {
+    const s = String(input == null ? '' : input)
+      .normalize('NFC')
+      .toLowerCase()
+      .replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')
+      .replace(/^-+/, '')
+      .slice(0, 40)
+      .replace(/-+$/, '');
+    return s || null;
+  }
+
+  // The backup of a person (a name from parsePerson).
+  const pathFor = (person) => person + '/' + FILE;
+
+  // A path in the repository, for an address: each part encoded.
+  const encodePath = (path) => path.split('/').map(encodeURIComponent).join('/');
 
   // UTF-8 text <-> base64, which the contents API uses.
   function toBase64(text) {
@@ -81,14 +105,17 @@
     }
   }
 
-  function gitHubRemote({ repo, token, path = PATH, fetch: fetchFn = (...a) => root.fetch(...a) }) {
+  function gitHubRemote({ repo, token, path, fetch: fetchFn = (...a) => root.fetch(...a) }) {
     const headers = {
       Authorization: 'Bearer ' + token,
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
     };
     const repoUrl = API + '/repos/' + repo;
-    const fileUrl = repoUrl + '/contents/' + encodeURIComponent(path);
+    const fileUrl = repoUrl + '/contents/' + encodePath(path);
+    const parts = path.split('/');
+    const name = parts.pop();
+    const folderUrl = repoUrl + '/contents/' + encodePath(parts.join('/'));
 
     // no-store: a cached GET would return an old sha right after a backup.
     async function call(url, options = {}) {
@@ -112,13 +139,14 @@
       },
 
       // The sha of the backup, or null when there is none yet. It is read
-      // from the list of files, which does not bring their content.
+      // from the list of files in its folder, which does not bring their
+      // content.
       async sha() {
-        const res = await call(repoUrl + '/contents/');
-        if (res.status === 404) return null; // an empty repository
+        const res = await call(folderUrl);
+        if (res.status === 404) return null; // no folder yet, or an empty repository
         if (!res.ok) fail(res);
         const list = await res.json();
-        const entry = Array.isArray(list) ? list.find((f) => f.name === path && f.type === 'file') : null;
+        const entry = Array.isArray(list) ? list.find((f) => f.name === name && f.type === 'file') : null;
         return entry ? entry.sha : null;
       },
 
@@ -157,16 +185,24 @@
   // One backup. A backup this device does not know (another sha than the
   // one it last wrote or restored) is replaced only if this device wrote it
   // after all (its answer to the last backup got lost), or with overwrite.
+  // If the repository changed between reading and writing (another app or
+  // person writing at the same moment), it starts again, up to three times.
   async function backupOnce({ remote, text, device, known = null, overwrite = false, message }) {
-    const current = await remote.sha();
-    if (current && current !== known && !overwrite) {
-      const pulled = await remote.pull();
-      if (pulled && deviceOf(pulled.text) !== device) return { conflict: pulled };
+    for (let attempt = 1; ; attempt++) {
+      const current = await remote.sha();
+      if (current && current !== known && !overwrite) {
+        const pulled = await remote.pull();
+        if (pulled && deviceOf(pulled.text) !== device) return { conflict: pulled };
+      }
+      try {
+        return { sha: await remote.push(text, current, message) };
+      } catch (e) {
+        if (e.kind !== 'conflict' || attempt >= 3) throw e;
+      }
     }
-    return { sha: await remote.push(text, current, message) };
   }
 
-  const api = { PATH, BackupError, parseRepo, toBase64, fromBase64, fingerprint, deviceOf, gitHubRemote, backupOnce };
+  const api = { FILE, BackupError, parseRepo, parsePerson, pathFor, toBase64, fromBase64, fingerprint, deviceOf, gitHubRemote, backupOnce };
 
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.BACKUP = api;

@@ -1527,13 +1527,15 @@
       <p class="hint" id="backup-hint" data-t="backupHint" hidden></p>
       <div id="backup-setup">
         <ol class="backup-steps">
-          <li><span data-t="backupStep1"></span> <a href="https://github.com/new?name=maxapki-data&amp;visibility=private" target="_blank" rel="noopener">github.com/new</a></li>
+          <li><span data-t="backupStep1"></span> <a href="https://github.com/new?name=app-data&amp;visibility=private" target="_blank" rel="noopener">github.com/new</a></li>
           <li><span data-t="backupStep2"></span> <a href="https://github.com/settings/personal-access-tokens/new?name=MaxApki&amp;description=MaxApki+backup&amp;expires_in=366&amp;contents=write" target="_blank" rel="noopener">github.com/settings/personal-access-tokens</a></li>
           <li data-t="backupStep3"></li>
         </ol>
         <form class="backup-form" id="backup-form" novalidate>
           <label for="backup-repo" data-t="backupRepo">Repository</label>
           <input type="text" class="link-field" id="backup-repo" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <label for="backup-person" data-t="backupPerson">Name</label>
+          <input type="text" class="link-field" id="backup-person" autocomplete="off" spellcheck="false">
           <label for="backup-token" data-t="backupToken">Token</label>
           <input type="text" class="link-field" id="backup-token" dir="ltr" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
           <div class="row"><button type="submit" class="ghost-btn" id="backup-connect" data-t="backupConnect">Connect</button></div>
@@ -8080,12 +8082,14 @@
 
   // ---------- backup on GitHub ----------
 
-  // The progress file of all the apps is backed up as maxapki.json in a
-  // private GitHub repository (see backup.js), with the name of this device.
-  // The connection and the state of the backup are kept on this device only,
-  // under their own key, so the token never goes into a progress file or a
-  // backup: { device, repo, token, sha, hash, at, error, conflict }.
+  // The progress file of all the apps is backed up as <person>/maxapki.json
+  // in a private GitHub repository (see backup.js), with the name of this
+  // device. The connection and the state of the backup are kept on this
+  // device only, under their own key, so the token never goes into a
+  // progress file or a backup:
+  // { device, repo, person, token, sha, hash, at, error, conflict }.
   //   device: a random name of this device, kept when it is disconnected;
+  //   person: whose progress it is (from BACKUP.parsePerson);
   //   sha: the version of the backup this device last wrote or restored;
   //   hash: the fingerprint of the progress then backed up, and at: when;
   //   error: why the last backup failed (a kind of BACKUP.BackupError);
@@ -8107,8 +8111,9 @@
     if (!c || typeof c.device !== 'string') {
       c = { device: Math.random().toString(36).slice(2, 10) + Date.now().toString(36) };
     }
-    return c.repo && c.token ? c : { device: c.device };
+    return c.repo && c.person && c.token ? c : { device: c.device };
   }
+  const remoteFor = (c) => BACKUP.gitHubRemote({ repo: c.repo, token: c.token, path: BACKUP.pathFor(c.person) });
   function saveBackup() {
     try {
       localStorage.setItem(BACKUP_KEY, JSON.stringify(backup));
@@ -8143,7 +8148,7 @@
     if (hash === c.hash && !c.error && overwrite !== true) return;
     const text = JSON.stringify({ maxapki: PROGRESS_FILE, saved: Date.now(), device: c.device, data });
     const once = (replace) => BACKUP.backupOnce({
-      remote: BACKUP.gitHubRemote(c), text, device: c.device, known: c.sha, overwrite: replace,
+      remote: remoteFor(c), text, device: c.device, known: c.sha, overwrite: replace,
       message: 'MaxApki: ' + new Date().toISOString(),
     });
     backupBusy = true;
@@ -8190,8 +8195,9 @@
     $('backup-on').hidden = !on;
     $('backup-off').hidden = !on;
     $('backup-repo').placeholder = t.backupRepoPlaceholder;
+    $('backup-person').placeholder = t.backupPersonPlaceholder;
     if (!on) return;
-    $('backup-repo-name').textContent = t.backupConnected(c.repo);
+    $('backup-repo-name').textContent = t.backupConnected(c.repo, BACKUP.pathFor(c.person));
     $('backup-now').disabled = backupBusy;
     $('backup-status').textContent = backupBusy ? t.backupBusy
       : c.error ? t.backupErrors[c.error] || t.backupErrors.bad
@@ -8207,8 +8213,9 @@
     e.preventDefault();
     const t = T();
     const repo = BACKUP.parseRepo($('backup-repo').value);
+    const person = BACKUP.parsePerson($('backup-person').value);
     const token = $('backup-token').value.trim();
-    const problem = !repo ? 'repoFormat' : !token ? 'token' : null;
+    const problem = !repo ? 'repoFormat' : !person ? 'person' : !token ? 'token' : null;
     if (problem) {
       $('backup-status').textContent = t.backupErrors[problem];
       return;
@@ -8216,16 +8223,17 @@
     $('backup-connect').disabled = true;
     $('backup-status').textContent = t.backupConnecting;
     try {
-      await BACKUP.gitHubRemote({ repo, token }).checkRepo();
+      await remoteFor({ repo, person, token }).checkRepo();
     } catch (err) {
       $('backup-status').textContent = t.backupErrors[err && err.kind] || t.backupErrors.bad;
       return;
     } finally {
       $('backup-connect').disabled = false;
     }
-    backup = { device: backup.device, repo, token, sha: null, hash: null, at: null, error: null, conflict: null };
+    backup = { device: backup.device, repo, person, token, sha: null, hash: null, at: null, error: null, conflict: null };
     saveBackup();
     $('backup-repo').value = '';
+    $('backup-person').value = '';
     $('backup-token').value = '';
     showBackup();
     backupNow();
@@ -8245,7 +8253,7 @@
     status.textContent = t.backupFetching;
     let pulled = null;
     try {
-      pulled = await BACKUP.gitHubRemote(backup).pull();
+      pulled = await remoteFor(backup).pull();
     } catch (err) {
       status.textContent = t.backupErrors[err && err.kind] || t.backupErrors.bad;
       return;
