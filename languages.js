@@ -11,6 +11,8 @@
  *   g  a sentence with a gap (___); the child picks the missing word
  *   q  a question; the child picks the answer that fits
  *   o  a word; the child picks its opposite
+ * Dutch also has the cards of languages-recall.js, answered in the child's
+ * own words (kinds s, d, f, h and l) or with the article (a).
  * PICTURES gives each concept both a p and a w card. The wrong answers of
  * p, w and o cards are other concepts or opposites, chosen by the page;
  * gaps and questions list their own three wrong answers.
@@ -2263,6 +2265,8 @@
   const inUi = (row, [en, fa] = []) => UI_LANGS.map((ui) => (ui === 'en' ? en : ui === 'fa' ? fa : row[TARGETS.indexOf(ui)]));
   const PICTURE_MEANINGS = root.PICTURE_TRANSLATIONS || {};
   const OPPOSITE_MEANINGS = root.OPPOSITE_TRANSLATIONS || [];
+  const RECALL = root.RECALL_CARDS || {};
+  const RECALL_KINDS = ['s', 'd', 'f', 'h', 'l', 'a'];
   const CARDS = {};
   TARGETS.forEach((lang, l) => {
     const cards = [];
@@ -2294,8 +2298,62 @@
       const meaning = meaningIn(lang, inUi(pairs, OPPOSITE_MEANINGS[i]).map((pair) => pair && pair.join(' ↔ ')));
       add('o', i + 1, i, { level, show: word, answer: opposite, label: word + ' ↔ ' + opposite, meaning });
     });
+    if (RECALL[lang]) addRecall(lang, l, cards);
     CARDS[lang] = cards;
   });
+
+  // The cards of languages-recall.js (for now only Dutch), after those of
+  // the language: s, d, f, h and l are answered in the child's own words,
+  // a by picking de or het. accept lists the answers that count; base is the
+  // card that has to be learned first (the picture card of the word, or the
+  // gap with four answers). Their numbers start at 100000, so the numbers
+  // of the other cards stay as they were.
+  function addRecall(lang, l, cards) {
+    const { articles, SAY, DEFINITIONS, FACTS, HINTS, NO_DICTATION, PLURALS } = RECALL[lang];
+    const add = (kind, key, i, card) => cards.push({
+      id: lang + '.' + kind + '.' + key,
+      number: 100000 + (l + 1) * 10000 + RECALL_KINDS.indexOf(kind) * 1000 + i + 1,
+      lang,
+      kind,
+      ...card,
+    });
+    const byId = Object.fromEntries(cards.map((c) => [c.id, c]));
+    const order = Object.fromEntries(PICTURES.map(([key], i) => [key, i]));
+    const picture = (key) => byId[lang + '.p.' + key];
+    const fromPicture = (key) => {
+      const p = picture(key);
+      return { level: p.level, theme: p.theme, base: p.id, concept: key };
+    };
+    Object.entries(SAY).forEach(([key, also]) => {
+      const p = picture(key);
+      add('s', key, order[key], { ...fromPicture(key), show: p.show, answer: p.answer, accept: [p.answer, ...also], label: p.answer, meaning: p.meaning });
+    });
+    DEFINITIONS.forEach(([key, text, also, texts]) => {
+      const p = picture(key);
+      const meaning = meaningIn(lang, texts.map((t, k) => t && t + ' – ' + p.meaning[UI_LANGS[k]]));
+      add('d', key, order[key], { ...fromPicture(key), show: text, answer: p.answer, accept: [p.answer, ...also], label: text, meaning });
+    });
+    FACTS.forEach(([level, question, answer, also, uses, texts], i) => {
+      add('f', i + 1, i, { level, show: question, answer, accept: [answer, ...also], label: question, meaning: meaningIn(lang, texts), uses });
+    });
+    HINTS.forEach(([n, hint, also = []], i) => {
+      const g = byId[lang + '.g.' + n];
+      add('h', n, i, { level: g.level, show: g.show, hint, answer: g.answer, accept: [g.answer, ...also], label: g.label, meaning: g.meaning, uses: g.uses, base: g.id });
+    });
+    // One word, or a noun with its article.
+    const word = new RegExp('^((' + articles.join('|') + ') )?[^ .!?]+$');
+    PICTURES.forEach(([key, level], i) => {
+      const p = picture(key);
+      if (level === 'B2' || !word.test(p.answer)) return;
+      if (!NO_DICTATION.includes(key)) {
+        add('l', key, i, { ...fromPicture(key), show: '🔊', answer: p.answer, accept: [p.answer], label: p.answer, meaning: p.meaning });
+      }
+      const [article, ...noun] = p.answer.split(' ');
+      if (noun.length && !PLURALS.includes(key)) {
+        add('a', key, i, { ...fromPicture(key), pic: p.show, show: '___ ' + noun.join(' '), answer: article, wrong: articles.filter((a) => a !== article), label: p.answer, meaning: p.meaning });
+      }
+    });
+  }
 
   root.LANGUAGE_TARGETS = TARGETS;
   root.LANGUAGE_LEVELS = LEVELS;

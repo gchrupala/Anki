@@ -3,7 +3,9 @@ const assert = require('node:assert/strict');
 require('../i18n.js');
 require('../i18n-languages.js');
 require('../languages-translations.js');
+require('../languages-recall.js');
 require('../languages.js');
+const { written, said } = require('../answer.js');
 
 const { LANGUAGE_CARDS, LANGUAGE_TARGETS, LANGUAGE_LEVELS, I18N } = globalThis;
 const all = Object.values(LANGUAGE_CARDS).flat();
@@ -15,7 +17,7 @@ test('each card has its own id and number, a level and a kind', () => {
   assert.equal(new Set(all.map((c) => c.number)).size, all.length);
   for (const c of all) {
     assert.ok(LANGUAGE_LEVELS.includes(c.level), c.id);
-    assert.ok('pwgqo'.includes(c.kind), c.id);
+    assert.ok('pwgqosdfhla'.includes(c.kind), c.id);
     assert.ok(c.show && c.answer && c.label, c.id);
   }
 });
@@ -114,7 +116,12 @@ test('every language has the JęzykiMax text', () => {
     for (const key of ['rightIs', 'typeToGoOn', 'trophyName', 'trophyTitle', 'trophiesAria', 'cityName']) {
       assert.equal(typeof t[key], 'function', `${lang} ${key}`);
     }
-    for (const kind of 'pwgqo') assert.ok(t.prompts[kind], `${lang} prompt ${kind}`);
+    for (const kind of 'pwgqosdfhla') assert.ok(t.prompts[kind], `${lang} prompt ${kind}`);
+    for (const key of ['answerAria', 'answerPlaceholder', 'copyPlaceholder', 'lettersAria', 'dontKnow', 'copyToGoOn', 'sayToGoOn', 'nearlyRight', 'mindSpelling',
+      'speakCards', 'speakCardsHint', 'writeCards', 'writeCardsHint', 'articleCards', 'articleCardsHint']) {
+      assert.ok(t[key], `${lang} ${key}`);
+    }
+    assert.equal(typeof t.heardOther, 'function', `${lang} heardOther`);
     for (const level of LANGUAGE_LEVELS) assert.ok(t.groups[level], `${lang} ${level}`);
     for (const id of cities) {
       assert.ok(t.trophyName(id), `${lang} ${id}`);
@@ -128,7 +135,7 @@ test('every language has the JęzykiMax text', () => {
 
 test('the concepts a gap or question uses are pictures of its language', () => {
   for (const c of all) {
-    if (c.kind !== 'g' && c.kind !== 'q') assert.equal(c.uses, undefined, c.id);
+    if (!'gqfh'.includes(c.kind)) assert.equal(c.uses, undefined, c.id);
     else {
       assert.equal(new Set(c.uses).size, c.uses.length, c.id);
       for (const id of c.uses) assert.ok(BY_ID[`${c.lang}.p.${id}`], `${c.id} ${id}`);
@@ -144,5 +151,62 @@ test('every picture word comes back in at least two gaps or questions', () => {
       const users = cards.filter((c) => (c.uses || []).includes(concept));
       assert.ok(users.length >= 2, `${p.id}: ${users.map((c) => c.id).join(' ')}`);
     }
+  }
+});
+
+// ---------- the Dutch cards answered in the child's own words ----------
+
+const NL = LANGUAGE_CARDS.nl;
+const recall = (kind) => NL.filter((c) => c.kind === kind);
+
+test('the Dutch cards answered in own words are built on cards of the language', () => {
+  for (const kind of 'sdfhla') assert.ok(recall(kind).length >= 30, kind);
+  for (const c of NL.filter((x) => 'sdlah'.includes(x.kind))) {
+    assert.ok(BY_ID[c.base], `${c.id} base`);
+    assert.equal(BY_ID[c.base].kind, c.kind === 'h' ? 'g' : 'p', c.id);
+    assert.equal(BY_ID[c.base].level, c.level, c.id);
+  }
+  // No other language has them yet.
+  for (const lang of LANGUAGE_TARGETS.filter((l) => l !== 'nl')) {
+    assert.ok(LANGUAGE_CARDS[lang].every((c) => 'pwgqo'.includes(c.kind)), lang);
+  }
+});
+
+test('each answer in own words is short and counts as itself, written and said', () => {
+  for (const c of NL.filter((x) => 'sdfhl'.includes(x.kind))) {
+    assert.ok(c.accept.length >= 1 && c.accept[0] === c.answer, c.id);
+    assert.ok(c.answer.split(' ').length <= 3, `${c.id}: ${c.answer}`);
+    for (const a of c.accept) assert.ok(said([a], c.accept, { lang: 'nl' }), `${c.id} said ${a}`);
+    if ('dhl'.includes(c.kind)) {
+      const rules = c.kind === 'h' ? { lang: 'nl' } : { lang: 'nl', articles: true };
+      assert.equal(written(c.answer, c.accept, rules), 'right', c.id);
+    }
+  }
+});
+
+test('no two definitions or questions are the same, and each has its translations', () => {
+  for (const kind of 'df') {
+    const shown = recall(kind).map((c) => c.show);
+    assert.equal(new Set(shown).size, shown.length, kind);
+  }
+  for (const c of [...recall('d'), ...recall('f')]) {
+    for (const lang of I18N.LANGS.filter((l) => l !== 'nl')) assert.ok(c.meaning[lang].includes(' – '), `${c.id} ${lang}`);
+  }
+});
+
+test('a gap to write in has a hint and its sentence filled in has the answer', () => {
+  for (const c of recall('h')) {
+    assert.ok(c.hint && c.show.includes('___'), c.id);
+    assert.equal(c.answer, BY_ID[c.base].answer, c.id);
+    // The other forms that count are not the wrong answers of the gap.
+    for (const a of c.accept) assert.ok(!BY_ID[c.base].wrong.includes(a), `${c.id} ${a}`);
+  }
+});
+
+test('an article card asks de or het of a noun in the singular', () => {
+  for (const c of recall('a')) {
+    assert.ok(['de', 'het'].includes(c.answer), c.id);
+    assert.deepEqual(c.wrong, [c.answer === 'de' ? 'het' : 'de'], c.id);
+    assert.equal(c.answer + ' ' + c.show.replace('___ ', ''), BY_ID[c.base].answer, c.id);
   }
 });
