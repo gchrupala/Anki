@@ -515,6 +515,7 @@ The file holds JSON: `{ "maxapki": 1, "saved": <time>, "data": { <storage key>: 
 - `maps.js`: the base map of MapkiMax: land, heights, ice, lakes, rivers and borders, the outlines of the regions, and where country names are written.
 - `geo.js`: the map projection, the encoded lines of `maps.js` and `places.js`, and distances on the Earth. It has no dependencies and works in the browser and in Node.
 - `tools/make_maps.py`, `tools/places.txt`: how `maps.js` and `places.js` are made, and the list of places.
+- `tools/recall-test-progress.js`: makes a progress file in which the Dutch cards with answers to pick from are learned, so the cards answered in the child's own words can be tried at once (`node tools/recall-test-progress.js > test.json`, then load it in the settings). It replaces the JęzykiMax progress of that browser.
 - `manifest.webmanifest`, `sw.js`, `icons/`: what makes the web app installable and usable offline. The SVG files in `icons/` are the sources of the PNG icons.
 - `fonts/`: the Grandstander and Lexend fonts, and Vazirmatn for Persian, with their licences, bundled so the app looks the same offline.
 - `srs.js`: the FSRS scheduler and card queues. It has no dependencies and works in the browser and in Node.
