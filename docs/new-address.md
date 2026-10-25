@@ -22,7 +22,7 @@ This plan covers the app installed from Chrome on Android, and the app opened in
 2. The new address is outside the installed app, so Chrome shows it in a browser view over the app, with the address at the top. All progress, coins and rewards are already there.
 3. A message says that MaxApki has a new address and asks to install it again.
 4. A new MaxApki icon appears. It opens with all the progress. The GitHub backup carries on by itself; nothing has to be entered.
-5. They remove the old icon: long press, then "Uninstall". The new icon is called "MaxApki.top", the old one just "MaxApki" ([Telling the two apps apart](#telling-the-two-apps-apart)). Until it is removed, it only says that the app has moved.
+5. They remove the old icon: long press, then "Uninstall". The new icon is deep blue and called "MaxApki.top"; the old one has the rainbow and is called just "MaxApki" ([Telling the two apps apart](#telling-the-two-apps-apart)). Until it is removed, it only says that the app has moved.
 
 Installing the new app and removing the old one are the two steps the user has to do. Chrome leaves both to the user. Chrome has a feature for moving an installed app to a new address ([PWA origin migration](https://developer.chrome.com/blog/seamless-pwa-origin-migration)), but it works only between addresses of the same site, such as `app.example.com` and `example.com`, and is announced for computers only.
 
@@ -43,9 +43,14 @@ The new app is at the root of its address (`/`), the old one at `/Anki/`. Every 
 
 ### Telling the two apps apart
 
-Both apps would be called "MaxApki" with the same icon, so it would be hard to tell which one to uninstall. So the app at the new address is called "MaxApki.top" (in `manifest.webmanifest`, and `apple-mobile-web-app-title` for an iPad), and the old one keeps the name "MaxApki". The message at the new address says to remove the icon called just "MaxApki", without ".top".
+Both apps would be called "MaxApki" with the same icon, so it would be hard to tell which one to uninstall. So the app at the new address has its own name and icon:
 
-It is the new app that changes, not the old one. The new one is installed fresh, so it has the new name at once. An installed app keeps the name and icon it was installed with, and Chrome updates them only when it next checks the manifest, at most once a day, and may ask to confirm. For the same reason, the commit with the new name stays out of `gchrupala/Anki`, like `CNAME`.
+- the name "MaxApki.top" (in `manifest.webmanifest`, and `apple-mobile-web-app-title` for an iPad). The old one keeps "MaxApki".
+- the same cards on a deep blue background instead of the rainbow (`icons/icon.svg` and the PNG icons made from it). A phone often shows no names under the icons, so the icon matters most.
+
+The message at the new address says to remove the rainbow icon called just "MaxApki".
+
+It is the new app that changes, not the old one. The new one is installed fresh, so it has the new name at once. An installed app keeps the name and icon it was installed with, and Chrome updates them only when it next checks the manifest, at most once a day, and may ask to confirm. For the same reason, the commits with the new name and the new icon stay out of `gchrupala/Anki`, like `CNAME`.
 
 ### Setting up `maxapki.top`
 
@@ -125,7 +130,7 @@ I found no other way to send it. The new address is a static site, so it receive
 1. Set up `gchrupala/maxapki` and `maxapki.top` ([Setting up `maxapki.top`](#setting-up-maxapkitop)).
 2. Publish the receiving version at the new address (push `main` to `gchrupala/maxapki`). Check that it opens over HTTPS and can be installed.
 3. Check on one Android tablet what the tests cannot ([To check on a tablet](#to-check-on-a-tablet)).
-4. Publish the sending version at the old address: cherry-pick the commits of the move onto `main` of `gchrupala/Anki`, without `CNAME` and the name "MaxApki.top", and push it. Each tablet moves on its next start with internet. Nothing can limit this to one tablet: every device that opens the old address moves.
+4. Publish the sending version at the old address: cherry-pick the commits of the move onto `main` of `gchrupala/Anki`, without `CNAME`, the name "MaxApki.top" and the blue icon, and push it. Each tablet moves on its next start with internet. Nothing can limit this to one tablet: every device that opens the old address moves.
 5. When all tablets have moved, `gchrupala/Anki` can be archived. Check that its Pages site still serves the sending version after that; if not, unarchive it. A tablet not opened before the old address stops working keeps its progress in the old storage.
 
 ## Tests
