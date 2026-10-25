@@ -39,8 +39,10 @@
     pl: [],
   };
 
-  // Lower case, single spaces, one kind of apostrophe, no full stop at the end.
-  const tidy = (text) => String(text).toLowerCase().replace(/[’`´]/g, "'").replace(/\s+/g, ' ').trim().replace(/[.!?]+$/, '').trim();
+  // Lower case, single spaces, one kind of apostrophe, œ as oe (a keyboard
+  // may lack it), no full stop at the end.
+  const tidy = (text) => String(text).toLowerCase().replace(/[’`´]/g, "'").replace(/œ/g, 'oe').replace(/\s+/g, ' ').trim()
+    .replace(/[.!?]+$/, '').trim();
   // The text without an article before it ("l'" joins the next word).
   function bare(text, articles) {
     for (const a of articles) {
@@ -77,14 +79,18 @@
     return false;
   }
 
+  // As VOICE.normalize, but an apostrophe parts words, so that an article
+  // joined to its word is a word of its own ("l’oiseau", "nell’acqua").
+  const spoken = (text) => VOICE.normalize(String(text).replace(/['’`´]/g, ' '));
+
   function said(heard, accept, rules = {}) {
-    const articles = (ARTICLES[rules.lang] || []).map(VOICE.normalize);
+    const articles = (ARTICLES[rules.lang] || []).map(spoken);
     const answers = accept.map((a) => {
-      const w = VOICE.normalize(a).split(' ');
+      const w = spoken(a).split(' ');
       return (w.length > 1 && articles.includes(w[0]) ? w.slice(1) : w).join(' ');
     }).filter(Boolean);
     return heard.some((text) => {
-      const words = VOICE.normalize(text).split(' ').filter(Boolean);
+      const words = spoken(text).split(' ').filter(Boolean);
       return answers.some((answer) => heardIn(words, answer));
     });
   }

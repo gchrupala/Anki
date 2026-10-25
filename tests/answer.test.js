@@ -60,3 +60,26 @@ test('another word said is no answer', () => {
   assert.ok(said(['thermometr'], ['de thermometer'], nl));
   assert.ok(!said(['bloed'], ['de bloem'], nl));
 });
+
+test('French and Italian articles joined to their word count as articles', () => {
+  const fr = { lang: 'fr', articles: true };
+  assert.equal(written('oeuf', ['l’œuf'], fr), 'right');
+  assert.equal(written("l'oeuf", ['l’œuf'], fr), 'right');
+  assert.equal(written('œuf', ['l’œuf'], fr), 'right');
+  assert.equal(written('arbre', ['l’arbre'], fr), 'right');
+  assert.equal(written('la clef', ['la clé', 'la clef'], fr), 'right');
+  assert.ok(said(["l'oiseau"], ['l’oiseau'], { lang: 'fr' }));
+  assert.ok(said(['oiseau'], ['l’oiseau'], { lang: 'fr' }));
+  assert.ok(said(["c'est l'œil"], ['l’œil'], { lang: 'fr' }));
+  assert.ok(said(["nell'acqua"], ['nell’acqua', 'acqua'], { lang: 'it' }));
+  assert.ok(said(['la mela'], ['la mela'], { lang: 'it' }));
+  assert.ok(!said(['la pera'], ['la mela'], { lang: 'it' }));
+});
+
+test('Polish answers have no articles, and their letters count as accents', () => {
+  const pl = { lang: 'pl', articles: true };
+  assert.equal(written('pies', ['pies'], pl), 'right');
+  assert.equal(written('jablko', ['jabłko'], pl), 'close');
+  assert.ok(said(['to jest pies'], ['pies'], { lang: 'pl' }));
+  assert.ok(!said(['kot'], ['pies'], { lang: 'pl' }));
+});

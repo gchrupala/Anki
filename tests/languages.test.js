@@ -154,59 +154,81 @@ test('every picture word comes back in at least two gaps or questions', () => {
   }
 });
 
-// ---------- the Dutch cards answered in the child's own words ----------
+// ---------- the cards answered in the child's own words ----------
 
-const NL = LANGUAGE_CARDS.nl;
-const recall = (kind) => NL.filter((c) => c.kind === kind);
+const recall = (lang, kind) => LANGUAGE_CARDS[lang].filter((c) => c.kind === kind);
+const ARTICLES = require('../answer.js').ARTICLES;
+// A text as words, without accents or punctuation, and a word without its
+// article: whether a definition holds its own answer.
+const words = (text) => ' ' + text.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim() + ' ';
+const bare = (lang, word) => ARTICLES[lang].reduce((w, a) => (w.startsWith(a.replace("'", '’')) && a.endsWith("'") ? w.slice(a.length)
+  : w.startsWith(a + ' ') ? w.slice(a.length + 1) : w), word);
 
-test('the Dutch cards answered in own words are built on cards of the language', () => {
-  for (const kind of 'sdfhla') assert.ok(recall(kind).length >= 30, kind);
-  for (const c of NL.filter((x) => 'sdlah'.includes(x.kind))) {
-    assert.ok(BY_ID[c.base], `${c.id} base`);
-    assert.equal(BY_ID[c.base].kind, c.kind === 'h' ? 'g' : 'p', c.id);
-    assert.equal(BY_ID[c.base].level, c.level, c.id);
-  }
-  // No other language has them yet.
-  for (const lang of LANGUAGE_TARGETS.filter((l) => l !== 'nl')) {
-    assert.ok(LANGUAGE_CARDS[lang].every((c) => 'pwgqo'.includes(c.kind)), lang);
+test('every language has the cards answered in own words, built on its own cards', () => {
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const kind of 'sdfhla') assert.ok(recall(lang, kind).length >= 30, `${lang} ${kind}`);
+    for (const c of LANGUAGE_CARDS[lang].filter((x) => 'sdlah'.includes(x.kind))) {
+      assert.ok(BY_ID[c.base], `${c.id} base`);
+      assert.equal(BY_ID[c.base].kind, c.kind === 'h' ? 'g' : 'p', c.id);
+      assert.equal(BY_ID[c.base].level, c.level, c.id);
+    }
   }
 });
 
 test('each answer in own words is short and counts as itself, written and said', () => {
-  for (const c of NL.filter((x) => 'sdfhl'.includes(x.kind))) {
-    assert.ok(c.accept.length >= 1 && c.accept[0] === c.answer, c.id);
-    assert.ok(c.answer.split(' ').length <= 3, `${c.id}: ${c.answer}`);
-    for (const a of c.accept) assert.ok(said([a], c.accept, { lang: 'nl' }), `${c.id} said ${a}`);
-    if ('dhl'.includes(c.kind)) {
-      const rules = c.kind === 'h' ? { lang: 'nl' } : { lang: 'nl', articles: true };
-      assert.equal(written(c.answer, c.accept, rules), 'right', c.id);
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const c of LANGUAGE_CARDS[lang].filter((x) => 'sdfhl'.includes(x.kind))) {
+      assert.ok(c.accept.length >= 1 && c.accept[0] === c.answer, c.id);
+      assert.ok(bare(lang, c.answer).split(' ').length <= 3, `${c.id}: ${c.answer}`);
+      for (const a of c.accept) assert.ok(said([a], c.accept, { lang }), `${c.id} said ${a}`);
+      if ('dhl'.includes(c.kind)) {
+        const rules = c.kind === 'h' ? { lang } : { lang, articles: true };
+        assert.equal(written(c.answer, c.accept, rules), 'right', c.id);
+        assert.equal(written(bare(lang, c.answer), c.accept, rules), 'right', c.id);
+      }
+    }
+  }
+});
+
+test('a definition does not hold its answer, nor any other word it accepts', () => {
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const c of recall(lang, 'd')) {
+      for (const a of c.accept) assert.ok(!words(c.show).includes(words(bare(lang, a))), `${c.id}: ${a} in ${c.show}`);
     }
   }
 });
 
 test('no two definitions or questions are the same, and each has its translations', () => {
-  for (const kind of 'df') {
-    const shown = recall(kind).map((c) => c.show);
-    assert.equal(new Set(shown).size, shown.length, kind);
-  }
-  for (const c of [...recall('d'), ...recall('f')]) {
-    for (const lang of I18N.LANGS.filter((l) => l !== 'nl')) assert.ok(c.meaning[lang].includes(' – '), `${c.id} ${lang}`);
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const kind of 'df') {
+      const shown = recall(lang, kind).map((c) => c.show);
+      assert.equal(new Set(shown).size, shown.length, `${lang} ${kind}`);
+    }
+    for (const c of [...recall(lang, 'd'), ...recall(lang, 'f')]) {
+      for (const ui of I18N.LANGS.filter((l) => l !== lang)) assert.ok(/\S – \S/.test(c.meaning[ui]), `${c.id} ${ui}`);
+    }
   }
 });
 
 test('a gap to write in has a hint and its sentence filled in has the answer', () => {
-  for (const c of recall('h')) {
-    assert.ok(c.hint && c.show.includes('___'), c.id);
-    assert.equal(c.answer, BY_ID[c.base].answer, c.id);
-    // The other forms that count are not the wrong answers of the gap.
-    for (const a of c.accept) assert.ok(!BY_ID[c.base].wrong.includes(a), `${c.id} ${a}`);
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const c of recall(lang, 'h')) {
+      assert.ok(c.hint && c.show.includes('___'), c.id);
+      assert.equal(c.answer, BY_ID[c.base].answer, c.id);
+      // The other forms that count are not the wrong answers of the gap.
+      for (const a of c.accept) assert.ok(!BY_ID[c.base].wrong.includes(a), `${c.id} ${a}`);
+    }
   }
 });
 
-test('an article card asks de or het of a noun in the singular', () => {
-  for (const c of recall('a')) {
-    assert.ok(['de', 'het'].includes(c.answer), c.id);
-    assert.deepEqual(c.wrong, [c.answer === 'de' ? 'het' : 'de'], c.id);
-    assert.equal(c.answer + ' ' + c.show.replace('___ ', ''), BY_ID[c.base].answer, c.id);
+test('an article card asks the article of a noun in the singular, or in Polish its gender', () => {
+  const choices = { fr: ['le', 'la'], es: ['el', 'la'], nl: ['de', 'het'], it: ['il', 'lo', 'la'], pl: ['ten', 'ta', 'to'] };
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const c of recall(lang, 'a')) {
+      assert.deepEqual(c.choices, choices[lang], c.id);
+      assert.deepEqual([c.answer, ...c.wrong].sort(), choices[lang].slice().sort(), c.id);
+      const noun = c.show.replace('___ ', '');
+      assert.equal(lang === 'pl' ? noun : c.answer + ' ' + noun, BY_ID[c.base].answer, c.id);
+    }
   }
 });
