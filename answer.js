@@ -12,11 +12,13 @@
  *     article of rules.lang before the answer does not count either way:
  *     'hond', 'de hond' and 'het hond' are all 'de hond'.
  *   said(heard, accept, rules): whether one of the texts the recognizer
- *     offers for what was said holds an answer that counts. Case, accents
- *     and punctuation do not count (VOICE.normalize), nor its article; a
- *     word may be heard as two ('politie agent'), and one not heard word
- *     for word counts if it is close enough (MIN_SAID; 1 is the same text).
- *     Digits count as the number ('4' for 'vier') where accept lists them.
+ *     offers for what was said holds an answer that counts. Texts are
+ *     compared as they sound in rules.lang (VOICE.sound), so case, accents,
+ *     punctuation and spellings that sound alike do not count, nor the
+ *     article of the answer; a word may be heard as two ('politie agent',
+ *     'a María' for 'amarilla'), and one not heard word for word counts if
+ *     it is close enough (MIN_SAID; 1 is the same text). Digits count as
+ *     the number ('4' for 'vier') where accept lists them.
  *
  * Works in the browser (window.ANSWER, after voice.js) and in Node
  * (require('./answer.js')).
@@ -66,24 +68,25 @@
   }
 
   // Whether the words heard hold the answer: some words in a row that are
-  // the answer, or the answer as one word, or nearly the answer.
+  // the answer, or the answer as one word, or nearly the answer, with or
+  // without the spaces between words.
   function heardIn(words, answer) {
     const joined = answer.replace(/ /g, '');
     const n = answer.split(' ').length;
     for (let k = 1; k <= Math.min(words.length, n + 1); k++) {
       for (let i = 0; i + k <= words.length; i++) {
         const part = words.slice(i, i + k);
-        if (part.join('') === joined || VOICE.likeness(part.join(' '), answer) >= MIN_SAID) return true;
+        if (part.join('') === joined || VOICE.likeness(part.join(' '), answer) >= MIN_SAID
+          || VOICE.likeness(part.join(''), joined) >= MIN_SAID) return true;
       }
     }
     return false;
   }
 
-  // As VOICE.normalize, but an apostrophe parts words, so that an article
-  // joined to its word is a word of its own ("l’oiseau", "nell’acqua").
-  const spoken = (text) => VOICE.normalize(String(text).replace(/['’`´]/g, ' '));
-
   function said(heard, accept, rules = {}) {
+    // As the words sound; an apostrophe parts words, so that an article
+    // joined to its word is a word of its own ("l’oiseau", "nell’acqua").
+    const spoken = (text) => VOICE.sound(String(text).replace(/['’`´]/g, ' '), rules.lang);
     const articles = (ARTICLES[rules.lang] || []).map(spoken);
     const answers = accept.map((a) => {
       const w = spoken(a).split(' ');

@@ -3183,14 +3183,17 @@
     listen();
   }
 
-  // Taps the answer heard. After a wrong answer, the right one moves on,
-  // and another shakes the card and it listens again.
+  // Taps the answer heard, as it sounds in the language learned, with the
+  // benefit of the doubt for the right answer (voice.js). After a wrong
+  // answer, the right one moves on, and another shakes the card and it
+  // listens again.
   function answerHeard(heard, at) {
     if (ownCard()) return ownHeard(ownCard(), heard, at);
     const was = mode;
     const buttons = [...$('choices').querySelectorAll('.choice')];
     const card = BY_LANG[currentId];
-    const i = VOICE.pick(heard, buttons.map((b) => b.textContent), card.kind === 'g' ? card.show.split('___') : null);
+    const i = VOICE.pick(heard, buttons.map((b) => b.textContent), card.kind === 'g' ? card.show.split('___') : null,
+      { lang: card.lang, right: options.indexOf(currentId) });
     if (i < 0) {
       voiceHeard = heard[0] || '';
       return renderVoice();

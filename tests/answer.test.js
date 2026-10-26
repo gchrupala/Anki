@@ -83,3 +83,12 @@ test('Polish answers have no articles, and their letters count as accents', () =
   assert.ok(said(['to jest pies'], ['pies'], { lang: 'pl' }));
   assert.ok(!said(['kot'], ['pies'], { lang: 'pl' }));
 });
+
+test('an answer said that the recognizer wrote as words that sound like it', () => {
+  assert.ok(said(['a María'], ['amarillo', 'amarilla'], { lang: 'es' }));
+  assert.ok(said(['cabayo'], ['el caballo'], { lang: 'es' }));
+  assert.ok(said(['ze dansten'], ['danste'], { lang: 'nl' }));
+  assert.ok(said(['le chat'], ['le chat'], { lang: 'fr' }));
+  assert.ok(!said(['le chien'], ['le chat'], { lang: 'fr' }));
+  assert.ok(!said(['a María'], ['azul'], { lang: 'es' }));
+});

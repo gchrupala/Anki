@@ -6,6 +6,7 @@ require('../languages-translations.js');
 require('../languages-recall.js');
 require('../languages.js');
 const { written, said } = require('../answer.js');
+const VOICE = require('../voice.js');
 
 const { LANGUAGE_CARDS, LANGUAGE_TARGETS, LANGUAGE_LEVELS, I18N } = globalThis;
 const all = Object.values(LANGUAGE_CARDS).flat();
@@ -229,6 +230,16 @@ test('an article card asks the article of a noun in the singular, or in Polish i
       assert.deepEqual([c.answer, ...c.wrong].sort(), choices[lang].slice().sort(), c.id);
       const noun = c.show.replace('___ ', '');
       assert.equal(lang === 'pl' ? noun : c.answer + ' ' + noun, BY_ID[c.base].answer, c.id);
+    }
+  }
+});
+
+test('the right answer of each card with answers to pick, said, is picked', () => {
+  for (const lang of LANGUAGE_TARGETS) {
+    for (const c of LANGUAGE_CARDS[lang].filter((x) => 'gqoa'.includes(x.kind) && x.wrong)) {
+      const options = [...c.wrong, c.answer];
+      const context = c.kind === 'g' ? c.show.split('___') : null;
+      assert.equal(VOICE.pick([c.answer], options, context, { lang, right: options.length - 1 }), options.length - 1, c.id);
     }
   }
 });

@@ -79,3 +79,50 @@ test('an answer that holds another', () => {
   assert.equal(VOICE.pick(['la'], ['de la', 'la', 'le', 'du']), 1);
   assert.equal(VOICE.pick(['le du'], ['de la', 'la', 'le', 'du']), -1);
 });
+
+test('spellings that sound alike sound the same', () => {
+  assert.equal(VOICE.sound('dansten', 'nl'), VOICE.sound('danste', 'nl'));
+  assert.equal(VOICE.sound('word', 'nl'), VOICE.sound('wordt', 'nl'));
+  assert.equal(VOICE.sound('rijden', 'nl'), VOICE.sound('reiden', 'nl'));
+  assert.equal(VOICE.sound('caballo', 'es'), VOICE.sound('cabayo', 'es'));
+  assert.equal(VOICE.sound('vaca', 'es'), VOICE.sound('baca', 'es'));
+  assert.equal(VOICE.sound('jouent', 'fr'), VOICE.sound('joue', 'fr'));
+  assert.equal(VOICE.sound('arrivées', 'fr'), VOICE.sound('arrivé', 'fr'));
+  assert.equal(VOICE.sound('pracuje', 'pl'), VOICE.sound('pracuję', 'pl'));
+  assert.equal(VOICE.sound('góra', 'pl'), VOICE.sound('gura', 'pl'));
+  assert.equal(VOICE.sound('chiamo', 'it'), VOICE.sound('kiamo', 'it'));
+  // Not those that sound different.
+  assert.notEqual(VOICE.sound('petit', 'fr'), VOICE.sound('petite', 'fr'));
+  assert.notEqual(VOICE.sound('un', 'fr'), VOICE.sound('une', 'fr'));
+  assert.notEqual(VOICE.sound('le', 'fr'), VOICE.sound('les', 'fr'));
+  assert.notEqual(VOICE.sound('joue', 'fr'), VOICE.sound('jouez', 'fr'));
+  assert.notEqual(VOICE.sound('moją', 'pl'), VOICE.sound('moja', 'pl'));
+  assert.notEqual(VOICE.sound('tennis', 'nl'), VOICE.sound('tennist', 'nl'));
+  assert.notEqual(VOICE.sound('dansen', 'nl'), VOICE.sound('danste', 'nl'));
+});
+
+test('the right answer gets the benefit of the doubt', () => {
+  const party = ['Op het feest van Noor ', ' we gisteren de hele avond.'];
+  const danced = ['dansten', 'dansen', 'danste', 'gedanst'];
+  // Heard as a wrong answer that sounds the same.
+  assert.equal(VOICE.pick(['danste'], danced, party, { lang: 'nl', right: 0 }), 0);
+  // Without knowing the right answer, the one heard.
+  assert.equal(VOICE.pick(['danste'], danced, party), 2);
+  // Heard as two words that sound nearly like it.
+  const yellow = ['amarilla', 'amarillo', 'amarillos', 'amarillas'];
+  assert.equal(VOICE.pick(['a María'], yellow, ['Mi hermana lleva una camiseta ', '.'], { lang: 'es', right: 0 }), 0);
+  // The right answer among the texts heard, though not the likeliest.
+  const tennis = ['tennist', 'getennist', 'tennissen', 'tennis'];
+  const tuesday = ['Ik ', ' elke dinsdag met mijn vriendin.'];
+  assert.equal(VOICE.pick(['tennis', 'tennist'], tennis, tuesday, { lang: 'nl', right: 0 }), 0);
+});
+
+test('a wrong answer heard word for word that sounds different stays wrong', () => {
+  const tennis = ['tennist', 'getennist', 'tennissen', 'tennis'];
+  const tuesday = ['Ik ', ' elke dinsdag met mijn vriendin.'];
+  assert.equal(VOICE.pick(['tennis'], tennis, tuesday, { lang: 'nl', right: 0 }), 3);
+  assert.equal(VOICE.pick(['de la'], ['la', 'de la', 'le', 'du'], null, { lang: 'fr', right: 0 }), 1);
+  assert.equal(VOICE.pick(['un'], ['une', 'un', 'des', 'le'], ['Ma mère achète ', ' baguette.'], { lang: 'fr', right: 0 }), 1);
+  assert.equal(VOICE.pick(['les'], ['le', 'la', 'les', 'du'], ['J’aime ', ' chocolat.'], { lang: 'fr', right: 0 }), 2);
+  assert.equal(VOICE.pick(['amarillo'], ['amarilla', 'amarillo', 'amarillos', 'amarillas'], null, { lang: 'es', right: 0 }), 1);
+});
